@@ -38,7 +38,6 @@ This was written for use with python2, it has not been tested with python3 but m
         x = [SomeModel(...), SomeModel(..)]
 
         SomeModel.reset(x)
-
 	You delete objects by
 
 	someObj.delete()
