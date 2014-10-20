@@ -2,7 +2,7 @@ import copy
 import redis
 import types
 
-INDEXED_REDIS_PREFIX = '_rr_|'
+INDEXED_REDIS_PREFIX = '_ir_|'
 
 try:
     classproperty
