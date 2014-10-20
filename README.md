@@ -7,7 +7,8 @@ It supports "equals" operator comparison. It also provides full atomic support f
 
 This was written for use with python2, it has not been tested with python3 but may work.
 
-*IndexedRedisModel*
+_IndexedRedisModel_
+
        This is the model you should extend.
 
 	Required fields:
@@ -48,9 +49,11 @@ This was written for use with python2, it has not been tested with python3 but m
 	someObj.save()
 		
 Example:
-from IndexedRedis import IndexedRedisModel
 
-class Song(IndexedRedisModel):
+
+	from IndexedRedis import IndexedRedisModel
+
+	class Song(IndexedRedisModel):
 	
 	FIELDS = [ \
 			'artist',
@@ -77,39 +80,39 @@ class Song(IndexedRedisModel):
 
 
 
-Song.reset([]) # Clear any existing
+	Song.reset([]) # Clear any existing
 
-songObj = Song(artist='The Merry Men',
-		title='Happy Go Lucky',
-		album='The Merry Men LP',
-		track_number=1,
-		duration='1:58',
-		description='A song about happy people',
-		copyright='Copyright 2012 (c) Media Mogul Incorporated')
-songObj.save()
+	songObj = Song(artist='The Merry Men',
+			title='Happy Go Lucky',
+			album='The Merry Men LP',
+			track_number=1,
+			duration='1:58',
+			description='A song about happy people',
+			copyright='Copyright 2012 (c) Media Mogul Incorporated')
+	songObj.save()
 
-songObj = Song(artist='The Merry Men',
-		title='Joy to Joy',
-		album='The Merry Men LP',
-		track_number=2,
-		duration='2:54',
-		description='A song about joy',
-		copyright='Copyright 2012 (c) Media Mogul Incorporated')
-songObj.save()
+	songObj = Song(artist='The Merry Men',
+			title='Joy to Joy',
+			album='The Merry Men LP',
+			track_number=2,
+			duration='2:54',
+			description='A song about joy',
+			copyright='Copyright 2012 (c) Media Mogul Incorporated')
+	songObj.save()
 
-songObj = Song(artist='The Unhappy Folk',
-		title='Sadly she waits',
-		album='Misery loses comfort',
-		track_number=1,
-		duration='15:44',
-		description='A sad song',
-		copyright='Copyright 2014 (c) Cheese Industries')
-songObj.save()
+	songObj = Song(artist='The Unhappy Folk',
+			title='Sadly she waits',
+			album='Misery loses comfort',
+			track_number=1,
+			duration='15:44',
+			description='A sad song',
+			copyright='Copyright 2014 (c) Cheese Industries')
+	songObj.save()
 
 
-merryMenSongs = Song.objects.filter(artist='The Merry Men').all()
-from pprint import pprint
+	merryMenSongs = Song.objects.filter(artist='The Merry Men').all()
+	from pprint import pprint
 
-for song in merryMenSongs:
-	pprint(song.__dict__)
+	for song in merryMenSongs:
+		pprint(song.__dict__)
 
