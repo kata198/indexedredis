@@ -1,3 +1,5 @@
+#Copyright (c) Timothy Savannah under LGPL, All Rights Reserved. See LICENSE for more information
+
 import copy
 import redis
 import types
