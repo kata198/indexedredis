@@ -122,7 +122,7 @@ Example:
 """
 
 setup(name='indexedredis',
-    version='1.1',
+    version='1.1.1',
     py_modules=['IndexedRedis'],
     install_requires=['redis'],
     requires=['redis'],
