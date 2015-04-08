@@ -1,8 +1,8 @@
 #Copyright (c) Timothy Savannah under LGPL, All Rights Reserved. See LICENSE for more information
 
 import copy
+import sys
 import redis
-import types
 
 INDEXED_REDIS_PREFIX = '_ir_|'
 
@@ -14,6 +14,29 @@ except NameError:
             self.getter = getter
         def __get__(self, instance, owner):
             return self.getter(owner)
+
+
+if bytes == str:
+	# Python 2, no additional decoding necessary.
+	tostr = str
+	decodeDict = lambda x : x
+else:
+	# Python 3, additional decoding necessary
+	try:
+		defaultEncoding = sys.getdefaultencoding()
+	except:
+		defaultEncoding = 'utf-8'
+	
+	def tostr(x):
+		if isinstance(x, bytes) is False:
+			return str(x)
+		return x.decode(defaultEncoding)
+	def decodeDict(theDict):
+		res2 = {}
+		for key, val in theDict.items():
+			res2[tostr(key)] = tostr(val)
+		return res2
+		
 
 class IndexedRedisModel(object):
 	'''
@@ -64,9 +87,9 @@ class IndexedRedisModel(object):
 
 	KEY_NAME = None
 
-        REDIS_CONNECTION_PARAMS = {}
+	REDIS_CONNECTION_PARAMS = {}
 
-        _connection = None
+	_connection = None
 
 	def __init__(self, *args, **kwargs):
 
@@ -78,7 +101,7 @@ class IndexedRedisModel(object):
 		self._origData = {}
 
 		for fieldName in self.FIELDS:
-			val = str(kwargs.get(fieldName, ''))
+			val = tostr(kwargs.get(fieldName, ''))
 			setattr(self, fieldName, val)
 			self._origData[fieldName] = val
 
@@ -88,7 +111,7 @@ class IndexedRedisModel(object):
 		ret = {}
 		for fieldName in self.FIELDS:
 			val = getattr(self, fieldName, '')
-			ret[fieldName] = str(val)
+			ret[fieldName] = tostr(val)
 
 		if includeMeta is True:
 			ret['_id'] = getattr(self, '_id', '')
@@ -100,7 +123,7 @@ class IndexedRedisModel(object):
 		'''
 		updatedFields = {}
 		for fieldName in self.FIELDS:
-			thisVal = str(getattr(self, fieldName))
+			thisVal = tostr(getattr(self, fieldName))
 			if self._origData[fieldName] != thisVal:
 				updatedFields[fieldName] = (self._origData[fieldName], thisVal)
 		return updatedFields
@@ -192,11 +215,11 @@ class IndexedRedisHelper(object):
 		conn.srem(self._get_key_for_index(indexedField, val), pk)
 		
 	def _get_key_for_index(self, indexedField, val):
-		return ''.join([INDEXED_REDIS_PREFIX, self.keyName, ':idx:', indexedField, ':', str(val)])
+		return ''.join([INDEXED_REDIS_PREFIX, self.keyName, ':idx:', indexedField, ':', tostr(val)])
 		
 
 	def _get_key_for_id(self, pk):
-		return ''.join([INDEXED_REDIS_PREFIX, self.keyName, ':data:', str(pk)])
+		return ''.join([INDEXED_REDIS_PREFIX, self.keyName, ':data:', tostr(pk)])
 
 	def _get_next_id_key(self):
 		return ''.join([INDEXED_REDIS_PREFIX, self.keyName, ':next'])
@@ -217,11 +240,11 @@ class IndexedRedisQuery(IndexedRedisHelper):
 		self.filters = [] # Filters are ordered for optimization
 
 	def _dictToObj(self, theDict):
-		return self.mdl(**theDict)
+		return self.mdl(**decodeDict(theDict))
 
 	def filter(self, **kwargs):
 		# Only support Equals for now
-		for key, value in kwargs.iteritems():
+		for key, value in kwargs.items():
 			if key not in self.indexedFields:
 				raise ValueError('Field "' + key + '" is not in INDEXED_FIELDS array. Filtering is only supported on indexed fields.')
 			self.filters.append( (key, value) )
@@ -293,14 +316,17 @@ class IndexedRedisQuery(IndexedRedisHelper):
 		res = pipeline.execute()
 		
 		ret = []
-
-		for i in xrange(len(pks)):
+		i = 0
+		pksLen = len(pks)
+		while i < pksLen:
 			if res[i] is None:
 				ret.append(None)
+				i += 1
 				continue
 			res[i]['_id'] = pks[i]
 			obj = self._dictToObj(res[i])
 			ret.append(obj)
+			i += 1
 			
 		return ret
 			
@@ -309,7 +335,7 @@ class IndexedRedisSave(IndexedRedisHelper):
 	def save(self, obj, useMulti=True, forceID=False, conn=None):
 		conn = self._get_connection(conn)
 
-		if type(obj) in (types.ListType, types.TupleType):
+		if isinstance(obj, list) or isinstance(obj, tuple):
 			objs = obj
 		else:
 			objs = [obj]
@@ -331,8 +357,9 @@ class IndexedRedisSave(IndexedRedisHelper):
 			pipeline = conn
 
 		ids = []
-
-		for i in xrange(len(objs)):
+		i = 0
+		objsLen = len(objs)
+		while i < objsLen:
 			obj = objs[i]
 			newDict = obj.toDict()
 			isInsert = isInserts[i]
@@ -347,7 +374,7 @@ class IndexedRedisSave(IndexedRedisHelper):
 					self._add_id_to_index(indexedField, obj._id, newDict[indexedField], pipeline)
 			else:
 				updatedFields = obj.getUpdatedFields()
-				for fieldName, fieldValue in updatedFields.iteritems():
+				for fieldName, fieldValue in updatedFields.items():
 					(oldValue, newValue) = fieldValue
 					conn.hset(key, fieldName, newValue)
 					if fieldName in self.indexedFields:
@@ -355,6 +382,7 @@ class IndexedRedisSave(IndexedRedisHelper):
 						self._add_id_to_index(indexedField, obj._id, newValue, pipeline)
 				obj._origData = copy.copy(newDict)
 			ids.append(obj._id)
+			i += 1
 
 		if useMulti is True:
 			pipeline.execute()
