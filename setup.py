@@ -4,7 +4,7 @@ from setuptools import setup
 description = """
 A redis-backed very very fast ORM-style framework that supports indexes (similar to SQL).
 
-Requires Redis 2.6.0 for all features, but can be used without
+Requires a Redis server of at least version 2.6.0, and python-redis [ available at https://pypi.python.org/pypi/redis ]
 
 It supports "equals" operator comparison. It also provides full atomic support for replacing entire datasets (based on model), which is useful for providing a fast frontend for SQL (by refreshing SQL objects into Redis on a fixed timing interval).
 
@@ -32,117 +32,118 @@ An alternative to supplying REDIS_CONNECTION_PARAMS is to supply a class-level v
 
     Usage is like normal ORM:
 
-			SomeModel.objects.filter(param1=val).filter(param2=val).all()
+            SomeModel.objects.filter(param1=val).filter(param2=val).all()
 
-			obj = SomeModel(...)
-			obj.save()
+            obj = SomeModel(...)
+            obj.save()
 
     There is also a powerful method called "reset" which will atomically and locked replace all elements belonging to a model. This is useful for cache-replacement, etc.
 
 
-			x = [SomeModel(...), SomeModel(..)]
+            x = [SomeModel(...), SomeModel(..)]
 
-			SomeModel.reset(x)
+            SomeModel.reset(x)
 
 You delete objects by:
 
-		someObj.delete()
+        someObj.delete()
 
 and save objects by:
 
-		someObj.save()
+        someObj.save()
 
 Example:
+|
+        from IndexedRedis import IndexedRedisModel
 
-		from IndexedRedis import IndexedRedisModel
+        class Song(IndexedRedisModel):
 
-		class Song(IndexedRedisModel):
+            FIELDS = [ \
+                    'artist',
+                    'title',
+                    'album',
+                    'track_number',
+                    'duration',
+                    'description',
+                    'copyright',
+            ]
 
-			FIELDS = [ \
-					'artist',
-					'title',
-					'album',
-					'track_number',
-					'duration',
-					'description',
-					'copyright',
-			]
+            INDEXED_FIELDS = [ \
+                        'artist',
+                        'title'
+            ]
 
-			INDEXED_FIELDS = [ \
-						'artist',
-						'title'
-			]
+            KEY_NAME = 'Songs'
 
-			KEY_NAME = 'Songs'
+            def __init__(self, *args, **kwargs):
+                IndexedRedisModel.__init__(self)
 
-			def __init__(self, *args, **kwargs):
-				IndexedRedisModel.__init__(self)
-
-				for key, value in kwargs.items():
-					setattr(self, key, value)
-
-
-
-		Song.reset([]) # Clear any existing
-
-		songObj = Song(artist='The Merry Men',
-				title='Happy Go Lucky',
-				album='The Merry Men LP',
-				track_number=1,
-				duration='1:58',
-				description='A song about happy people',
-				copyright='Copyright 2012 (c) Media Mogul Incorporated')
-		songObj.save()
-
-		songObj = Song(artist='The Merry Men',
-				title='Joy to Joy',
-				album='The Merry Men LP',
-				track_number=2,
-				duration='2:54',
-				description='A song about joy',
-				copyright='Copyright 2012 (c) Media Mogul Incorporated')
-		songObj.save()
-
-		songObj = Song(artist='The Unhappy Folk',
-				title='Sadly she waits',
-				album='Misery loses comfort',
-				track_number=1,
-				duration='15:44',
-				description='A sad song',
-				copyright='Copyright 2014 (c) Cheese Industries')
-		songObj.save()
+                for key, value in kwargs.items():
+                    setattr(self, key, value)
 
 
-		merryMenSongs = Song.objects.filter(artist='The Merry Men').all()
-		from pprint import pprint
 
-		for song in merryMenSongs:
-			pprint(song.__dict__)
+        Song.reset([]) # Clear any existing
 
-		"""
+        songObj = Song(artist='The Merry Men',
+                title='Happy Go Lucky',
+                album='The Merry Men LP',
+                track_number=1,
+                duration='1:58',
+                description='A song about happy people',
+                copyright='Copyright 2012 (c) Media Mogul Incorporated')
+        songObj.save()
+
+        songObj = Song(artist='The Merry Men',
+                title='Joy to Joy',
+                album='The Merry Men LP',
+                track_number=2,
+                duration='2:54',
+                description='A song about joy',
+                copyright='Copyright 2012 (c) Media Mogul Incorporated')
+        songObj.save()
+
+        songObj = Song(artist='The Unhappy Folk',
+                title='Sadly she waits',
+                album='Misery loses comfort',
+                track_number=1,
+                duration='15:44',
+                description='A sad song',
+                copyright='Copyright 2014 (c) Cheese Industries')
+        songObj.save()
+
+
+        merryMenSongs = Song.objects.filter(artist='The Merry Men').all()
+        from pprint import pprint
+
+        for song in merryMenSongs:
+            pprint(song.__dict__)
+
+"""
 
 setup(name='indexedredis',
-	version='1.1',
-	py_modules=['IndexedRedis'],
-	install_requires=['redis'],
-	provides=['indexedredis'],
-	keywords=['redis', 'IndexedRedis', 'SQL', 'nosql', 'orm', 'fast', 'python'],
-	long_description=description,
-	author='Tim Savannah',
-	author_email='kata198@gmail.com',
-	maintainer='Tim Savannah',
-	maintainer_email='kata198@gmail.com',
-	license='LGPLv2',
-	description='redis-backed very very fast ORM-style framework that supports indexes (similar to SQL), and complete atomic replacement of datasets',
-	classifiers=['Development Status :: 5 - Production/Stable',
-		'Programming Language :: Python',
-		'License :: OSI Approved :: GNU Lesser General Public License v2 (LGPLv2)',
-		'Programming Language :: Python :: 2',
-		'Programming Language :: Python :: 2.7',
-		'Programming Language :: Python :: 3',
-		'Programming Language :: Python :: 3.4',
-		'Topic :: Database :: Front-Ends',
-		'Topic :: Software Development :: Libraries :: Python Modules',
-	]
-	
+    version='1.1',
+    py_modules=['IndexedRedis'],
+    install_requires=['redis'],
+    requires=['redis'],
+    provides=['indexedredis'],
+    keywords=['redis', 'IndexedRedis', 'SQL', 'nosql', 'orm', 'fast', 'python'],
+    long_description=description,
+    author='Tim Savannah',
+    author_email='kata198@gmail.com',
+    maintainer='Tim Savannah',
+    maintainer_email='kata198@gmail.com',
+    license='LGPLv2',
+    description='redis-backed very very fast ORM-style framework that supports indexes (similar to SQL), and complete atomic replacement of datasets',
+    classifiers=['Development Status :: 5 - Production/Stable',
+        'Programming Language :: Python',
+        'License :: OSI Approved :: GNU Lesser General Public License v2 (LGPLv2)',
+        'Programming Language :: Python :: 2',
+        'Programming Language :: Python :: 2.7',
+        'Programming Language :: Python :: 3',
+        'Programming Language :: Python :: 3.4',
+        'Topic :: Database :: Front-Ends',
+        'Topic :: Software Development :: Libraries :: Python Modules',
+    ]
+    
 )
