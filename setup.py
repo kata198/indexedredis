@@ -121,7 +121,7 @@ Example:
  | from pprint import pprint
  |
  | for song in merryMenSongs:
- |     pprint(song.toDict)
+ |     pprint(song.toDict())
 
 
 Output:
