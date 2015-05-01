@@ -5,11 +5,11 @@ A redis-backed very very fast ORM-style framework that supports indexes (similar
 
 Requires a Redis server of at least version 2.6.0, and python-redis [ available at https://pypi.python.org/pypi/redis ]
 
-IndexedRedis supports both “equals” and "not-equals" operators for comparison. It also provides full atomic support for replacing entire datasets (based on model), which is useful for providing a fast frontend for SQL. In that usecase, a task that runs on an interval would fetch/calculate datasets from the SQL backend, and do an atomic replace on the datasets the front-end would query.
+IndexedRedis supports both “equals” and "not-equals" operators for comparison. It also provides full atomic support for replacing entire datasets (based on model), which is useful for providing a fast frontend for SQL. In that use-case, a task that runs on an interval would fetch/calculate datasets from the SQL backend, and do an atomic replace on the datasets the front-end would query.
 
-If you have ever used flask or django you will recognize strong similarities in the filtering interface. 
+If you have ever used Flask or Django you will recognize strong similarities in the filtering interface. 
 
-My tests have shown that for using equivlant models between flask/mysql and IndexedRedis, a 600% - 1200% performance increase occurs. For actually redesigning the system to prefetch and .reset (as mentioned above), response time went from ~3.5s per page load to ~20ms [ 17500% faster ].
+My tests have shown that for using equivalent models between flask/mysql and IndexedRedis, a 600% - 1200% performance increase occurs. For actually redesigning the system to prefetch and .reset (as mentioned above), response time went from ~3.5s per page load to ~20ms [ 17500% faster ].
 
 It is compatible with python 2.7 and python 3. It has been tested with python 2.7 and 3.4.
 
@@ -21,16 +21,13 @@ IndexedRedisModel
 
 	Required fields:
 
-	FIELDS is a list of strings, naming "fields" that will be stored
-	INDEXED_FIELDS is a list of strings containing the names of fields that should be indexed. Every field added here slows insert performance,
-		because redis is fast, consider not indexing every possible field but rather indexing the ones for best performance and filtering thereafter.
-	
-	NOTE: You may only query fields contained within the "INDEXED_FIELDS" array. It is certainly possible from within this lib to support non-indexed
-		searching, but I'd rather that be done in the client to make obvious where the power of this library is.
+	*FIELDS* is a list of strings, which name the fields that can be used for storage.
 
-	KEY_NAME is a field which contains the "base" keyname, unique to this object. (Like "Users" or "Drinks")
+	*INDEXED_FIELDS* is a list of strings containing the names of fields that should be indexed. Every field listed here adds insert performance. To filter on a field, it must be in the INDEXED_FIELDS list.
 
-		REDIS_CONNECTION_PARAMS provides the arguments to pass into "redis.Redis", to construct a redis object.
+	*KEY_NAME* is the name that represents this model. Think of it like a table name.
+
+	*REDIS_CONNECTION_PARAMS* provides the arguments to pass into "redis.Redis", to construct a redis object.
 
 	An alternative to supplying REDIS_CONNECTION_PARAMS is to supply a class-level variable `_connection`, which contains the redis instance you would like to use. This variable can be created as a class-level override, or set on the model during __init__. 
 
