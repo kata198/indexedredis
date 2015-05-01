@@ -1,0 +1,9 @@
+2.0.0 (May 1 2015):
+	- Add support for __ne (not equals) filtering
+	- Make filters default to be copies instead of operating on self, which allows them to be passed to functions but retain original value. Old behaviour can be retained doing .filterInline
+	- Enhance example with more features
+	- Add some docstrings
+	- Fix example where __init__ did not pass args and kwargs to parent and thus broke delete
+	- add asDict method for representation as a dictionary
+	- Change example to use asDict to not print original data
+	- Move module to a standard package setup 

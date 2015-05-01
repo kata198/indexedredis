@@ -146,8 +146,8 @@ Output:
 
 
 setup(name='indexedredis',
-    version='1.1.2',
-    py_modules=['IndexedRedis'],
+    version='2.0.0',
+    packages=['IndexedRedis'],
     install_requires=['redis'],
     requires=['redis'],
     provides=['indexedredis'],

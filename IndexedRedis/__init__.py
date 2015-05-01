@@ -2,18 +2,22 @@
 
 import copy
 import sys
+import uuid
 import redis
 
 INDEXED_REDIS_PREFIX = '_ir_|'
 
+INDEXED_REDIS_VERSION = (2, 0, 0)
+INDEXED_REDIS_VERSION_STR = '2.0.0'
+
 try:
-    classproperty
+	classproperty
 except NameError:
-    class classproperty(object):
-        def __init__(self, getter):
-            self.getter = getter
-        def __get__(self, instance, owner):
-            return self.getter(owner)
+	class classproperty(object):
+		def __init__(self, getter):
+			self.getter = getter
+		def __get__(self, instance, owner):
+			return self.getter(owner)
 
 
 if bytes == str:
@@ -40,7 +44,7 @@ else:
 
 class IndexedRedisModel(object):
 	'''
-       This is the model you should extend.
+	   This is the model you should extend.
 
 	Required fields:
 
@@ -53,23 +57,23 @@ class IndexedRedisModel(object):
 
 	KEY_NAME is a field which contains the "base" keyname, unique to this object. (Like "Users" or "Drinks")
 
-        REDIS_CONNECTION_PARAMS provides the arguments to pass into "redis.Redis", to construct a redis object.
+		REDIS_CONNECTION_PARAMS provides the arguments to pass into "redis.Redis", to construct a redis object.
 
 	An alternative to supplying REDIS_CONNECTION_PARAMS is to supply a class-level variable `_connection`, which contains the redis instance you would like to use. This variable can be created as a class-level override, or set on the model during __init__. 
 
-        Usage is like normal ORM
+		Usage is like normal ORM
 
-        SomeModel.objects.filter(param1=val).filter(param2=val).all()
+		SomeModel.objects.filter(param1=val).filter(param2=val).all()
 
-        obj = SomeModel(...)
-        obj.save()
+		obj = SomeModel(...)
+		obj.save()
 
-        There is also a powerful method called "reset" which will atomically and locked replace all elements belonging to a model. This is useful for cache-replacement, etc.
+		There is also a powerful method called "reset" which will atomically and locked replace all elements belonging to a model. This is useful for cache-replacement, etc.
 
 
-        x = [SomeModel(...), SomeModel(..)]
+		x = [SomeModel(...), SomeModel(..)]
 
-        SomeModel.reset(x)
+	   SomeModel.reset(x)
 
 
 	You delete objects by
@@ -92,6 +96,8 @@ class IndexedRedisModel(object):
 	_connection = None
 
 	def __init__(self, *args, **kwargs):
+		'''
+			__init__ - Set the values on this object. MAKE SURE YOU CALL THE SUPER HERE, or else things will not work.
 
 		if not self.KEY_NAME:
 			raise NotImplementedError('Indexed Redis Model %s must extend KEY_NAME' %(self.__class__.__name__, ))
@@ -116,6 +122,8 @@ class IndexedRedisModel(object):
 		if includeMeta is True:
 			ret['_id'] = getattr(self, '_id', '')
 		return ret
+
+	asDict = toDict
 	
 	def getUpdatedFields(self):
 		'''
@@ -147,6 +155,13 @@ class IndexedRedisModel(object):
 	def delete(self):
 		deleter = IndexedRedisDelete(self.__class__)
 		return deleter.deleteOne(self)
+
+	def getPk(self):
+		'''
+			getPk - Gets the internal primary key associated with this object
+		'''
+		return self._id
+		
 	
 	@classmethod
 	def reset(cls, newValues):
@@ -170,12 +185,10 @@ class IndexedRedisModel(object):
 
 
 		
-		
-class IndexedRedisException(Exception):
-	pass
-			
-
 class IndexedRedisHelper(object):
+	'''
+		IndexedRedisHelper - internal helper class
+	'''
 
 
 	def __init__(self, mdl):
@@ -232,65 +245,167 @@ class IndexedRedisHelper(object):
 		conn = self._get_connection()
 		return conn.incr(self._get_next_id_key())
 
+	def _getTempKey(self):
+		return self._get_ids_key() + '__' + uuid.uuid4().__str__()
+
 class IndexedRedisQuery(IndexedRedisHelper):
+	'''
+		IndexedRedisQuery - The query object. This is the return of "Model.objects.filter"
+	'''
 	
 	def __init__(self, *args, **kwargs):
 		IndexedRedisHelper.__init__(self, *args)
 
 		self.filters = [] # Filters are ordered for optimization
+		self.notFilters = []
+
 
 	def _dictToObj(self, theDict):
 		return self.mdl(**decodeDict(theDict))
 
-	def filter(self, **kwargs):
-		# Only support Equals for now
-		for key, value in kwargs.items():
-			if key not in self.indexedFields:
-				raise ValueError('Field "' + key + '" is not in INDEXED_FIELDS array. Filtering is only supported on indexed fields.')
-			self.filters.append( (key, value) )
 
-		return self #chaining
+
+	def filter(self, **kwargs):
+		'''
+			filter - Add filters based on INDEXED_FIELDS having or not having a value.
+			  Note, no objects are actually fetched until .all() is called
+
+				Use the field name [ model.objects.filter(some_field='value')] to filter on items containing that value.
+				Use the field name suffxed with '__ne' for a negation filter [ model.objects.filter(some_field__ne='value') ]
+
+			Example:
+				query = Model.objects.filter(field1='value', field2='othervalue')
+
+				objs1 = query.filter(something__ne='value').all()
+				objs2 = query.filter(something__ne=7).all()
+
+
+			@returns - A copy of this object, with the additional filters. If you want to work inline on this object instead, use the filterInline method.
+		'''
+		selfCopy = copy.deepcopy(self)
+		return IndexedRedisQuery._filter(selfCopy, **kwargs)
+
+	def filterInline(self, **kwargs):
+		'''
+			filterInline - @see IndexedRedisQuery.filter. This is the same as filter, but works inline on this object instead of creating a copy.
+				Use this is you do not need to retain the previous filter object.
+		'''
+		return IndexedRedisQuery._filter(self, **kwargs)
+
+	@staticmethod
+	def _filter(filterObj, **kwargs):
+		for key, value in kwargs.items():
+			if key.endswith('__ne'):
+				notFilter = True
+				key = key[:-4]
+			else:
+				notFilter = False
+			if key not in filterObj.indexedFields:
+				raise ValueError('Field "' + key + '" is not in INDEXED_FIELDS array. Filtering is only supported on indexed fields.')
+			if notFilter is False:
+				filterObj.filters.append( (key, value) )
+			else:
+				filterObj.notFilters.append( (key, value) )
+
+		return filterObj #chaining
+
 		
 
 	def count(self):
+		'''
+			count - gets the number of records matching the filter criteria
+
+			Example:
+				theCount = Model.objects.filter(field1='value').count()
+		'''
 		conn = self._get_connection()
-		# Apply filters, and return object
-		if len(self.filters) == 0:
+		
+		numFilters = len(self.filters)
+		numNotFilters = len(self.notFilters)
+		if numFilters + numNotFilters == 0:
 			return conn.scard(self._get_ids_key())
 
-		if len(self.filters) == 1:
-			(filterFieldName, filterValue) = self.filters[0]
-			return conn.scard(self._get_key_for_index(filterFieldName, filterValue))
+		if numNotFilters == 0:
+			if numFilters == 1:
+				(filterFieldName, filterValue) = self.filters[0]
+				return conn.scard(self._get_key_for_index(filterFieldName, filterValue))
+			indexKeys = [self._get_key_for_index(filterFieldName, filterValue) for filterFieldName, filterValue in self.filters]
+
+			return len(conn.sinter(indexKeys))
+
+		notIndexKeys = [self._get_key_for_index(filterFieldName, filterValue) for filterFieldName, filterValue in self.notFilters]
+		if numFilters == 0:
+			return len(conn.sdiff(self._get_ids_key(), *notIndexKeys))
 
 		indexKeys = [self._get_key_for_index(filterFieldName, filterValue) for filterFieldName, filterValue in self.filters]
-
-		pks = conn.sinter(indexKeys)
-		return len(pks)
 		
+		tempKey = self._getTempKey()
+		pipeline = conn.pipeline()
+		pipeline.sinterstore(tempKey, *indexKeys)
+		pipeline.sdiff(tempKey, *notIndexKeys)
+		pipeline.delete(tempKey)
+		pks = pipeline.execute()[1] # sdiff
+
+		return len(pks)
+			
 
 	def all(self):
+		'''
+			all - Get the underlying objects which match the filter criteria.
+
+			Example:   objs = Model.objects.filter(field1='value', field2='value2').all()
+
+			@return - Objects of the Model instance associated with this query.
+		'''
 		conn = self._get_connection()
 		# Apply filters, and return object
-		if len(self.filters) == 0:
+		numFilters = len(self.filters)
+		numNotFilters = len(self.notFilters)
+
+		if numFilters + numNotFilters == 0:
 			allKeys = conn.smembers(self._get_ids_key())
 			return self.getMultiple(allKeys)
 
-		if len(self.filters) == 1:
-			(filterFieldName, filterValue) = self.filters[0]
-			matchedKeys = conn.smembers(self._get_key_for_index(filterFieldName, filterValue))
+		if numNotFilters == 0:
+			if numFilters == 1:
+				(filterFieldName, filterValue) = self.filters[0]
+				matchedKeys = conn.smembers(self._get_key_for_index(filterFieldName, filterValue))
+				if len(matchedKeys) == 0:
+					return []
+				return self.getMultiple(matchedKeys)
+
+			indexKeys = [self._get_key_for_index(filterFieldName, filterValue) for filterFieldName, filterValue in self.filters]
+			matchedKeys = conn.sinter(indexKeys)
 			if len(matchedKeys) == 0:
 				return []
+
 			return self.getMultiple(matchedKeys)
 
-		indexKeys = [self._get_key_for_index(filterFieldName, filterValue) for filterFieldName, filterValue in self.filters]
+		notIndexKeys = [self._get_key_for_index(filterFieldName, filterValue) for filterFieldName, filterValue in self.notFilters]
+		if numFilters == 0:
+			matchedKeys = conn.sdiff(self._get_ids_key(), *notIndexKeys)
+		else:
+			indexKeys = [self._get_key_for_index(filterFieldName, filterValue) for filterFieldName, filterValue in self.filters]
+			
+			tempKey = self._getTempKey()
+			pipeline = conn.pipeline()
+			pipeline.sinterstore(tempKey, *indexKeys)
+			pipeline.sdiff(tempKey, *notIndexKeys)
+			pipeline.delete(tempKey)
+			matchedKeys = pipeline.execute()[1] # sdiff
 
-		matchedKeys = conn.sinter(indexKeys)
+
 		if len(matchedKeys) == 0:
 			return []
 		return self.getMultiple(matchedKeys)
 		
 
 	def get(self, pk, conn=None):
+		'''
+			get - Get a single value with the internal primary key.
+
+			@param pk - internal primary key (can be found via .getPk() on an item)
+		'''
 		conn = self._get_connection(conn)
 		key = self._get_key_for_id(pk)
 		res = conn.hgetall(key)
@@ -300,6 +415,11 @@ class IndexedRedisQuery(IndexedRedisHelper):
 		return self._dictToObj(res)
 	
 	def getMultiple(self, pks):
+		'''
+			getMultiple - Gets multiple objects with a single atomic operation
+
+			@param pks - list of internal keys
+		'''
 
 		if type(pks) == set:
 			pks = list(pks)
@@ -331,6 +451,9 @@ class IndexedRedisQuery(IndexedRedisHelper):
 		return ret
 			
 class IndexedRedisSave(IndexedRedisHelper):
+	'''
+		IndexedRedisClass - Class used to save objects. Used with Model.save is called.
+	'''
 
 	def save(self, obj, useMulti=True, forceID=False, conn=None):
 		conn = self._get_connection(conn)
@@ -391,6 +514,9 @@ class IndexedRedisSave(IndexedRedisHelper):
 
 
 class IndexedRedisDelete(IndexedRedisHelper):
+	'''
+		IndexedRedisDelete - Used for removing objects. Called when Model.delete is used
+	'''
 
 	def deleteOne(self, obj, conn=None):
 		conn = self._get_connection(conn)
