@@ -98,6 +98,7 @@ class IndexedRedisModel(object):
 	def __init__(self, *args, **kwargs):
 		'''
 			__init__ - Set the values on this object. MAKE SURE YOU CALL THE SUPER HERE, or else things will not work.
+		'''
 
 		if not self.KEY_NAME:
 			raise NotImplementedError('Indexed Redis Model %s must extend KEY_NAME' %(self.__class__.__name__, ))

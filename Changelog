@@ -1,3 +1,6 @@
+2.0.1 (May 5 2015):
+	- fix typo
+
 2.0.0 (May 1 2015):
 	- Add support for __ne (not equals) filtering
 	- Make filters default to be copies instead of operating on self, which allows them to be passed to functions but retain original value. Old behaviour can be retained doing .filterInline
