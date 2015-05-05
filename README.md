@@ -150,9 +150,9 @@ Example
 		sys.stdout.write('\n')
 
 	# Query some songs not by artist
-	sys.stdout.write('\n\nNot Mega Man Songs:\n')
-	notMegaManSongs = Song.objects.filterInline(artist__ne='Mega Man').all()
-	for song in notMegaManSongs:
+	sys.stdout.write('\n\nNot Mega Men Songs:\n')
+	notMegaMenSongs = Song.objects.filterInline(artist__ne='Mega Men').all()
+	for song in notMegaMenSongs:
 		pprint(song.asDict())
 		sys.stdout.write('\n')
 
