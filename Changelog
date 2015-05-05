@@ -1,5 +1,6 @@
-2.0.1 (May 5 2015):
-	- fix typo
+2.0.2 (May 5 2015):
+	- fix typos
+	- fix deleteMultiple
 
 2.0.0 (May 1 2015):
 	- Add support for __ne (not equals) filtering

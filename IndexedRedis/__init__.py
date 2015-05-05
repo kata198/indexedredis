@@ -540,6 +540,8 @@ class IndexedRedisDelete(IndexedRedisHelper):
 		for obj in objs:
 			numDeleted += self.deleteOne(obj, pipeline)
 
+		pipeline.execute()
+
 		return numDeleted
 	
 		
