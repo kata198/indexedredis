@@ -8,12 +8,13 @@ if __name__ == '__main__':
         long_description = f.read()
 
     setup(name='indexedredis',
-        version='2.0.4',
+        version='2.0.4.1',
         packages=['IndexedRedis'],
         install_requires=['redis'],
         requires=['redis'],
         provides=['indexedredis'],
         keywords=['redis', 'IndexedRedis', 'SQL', 'nosql', 'orm', 'fast', 'python'],
+	url='https://github.com/kata198/indexedredis',
         long_description=long_description,
         author='Tim Savannah',
         author_email='kata198@gmail.com',
