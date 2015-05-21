@@ -1,10 +1,10 @@
 from setuptools import setup
 
 with open('README.rst', 'r') as f:
-	long_description = f.read()
+    long_description = f.read()
 
 setup(name='indexedredis',
-    version='2.0.3',
+    version='2.0.4',
     packages=['IndexedRedis'],
     install_requires=['redis'],
     requires=['redis'],
