@@ -7,8 +7,9 @@ import redis
 
 INDEXED_REDIS_PREFIX = '_ir_|'
 
-INDEXED_REDIS_VERSION = (2, 0, 0)
-INDEXED_REDIS_VERSION_STR = '2.0.0'
+INDEXED_REDIS_VERSION = (2, 1, 0)
+INDEXED_REDIS_VERSION_STR = '2.1.0'
+__version__ = INDEXED_REDIS_VERSION_STR
 
 try:
 	classproperty
@@ -18,23 +19,43 @@ except NameError:
 			self.getter = getter
 		def __get__(self, instance, owner):
 			return self.getter(owner)
+try:
+	defaultEncoding = sys.getdefaultencoding()
+	if defaultEncoding == 'ascii':
+		defaultEncoding = 'utf-8'
+except:
+	defaultEncoding = 'utf-8'
 
+def setEncoding(encoding):
+	'''
+		Sets the encoding used by IndexedRedis
+	'''
+	global defaultEncoding
+	defaultEncoding = encoding
+
+def getEncoding(encoding):
+	global defaultEncoding
+	return defaultEncoding
 
 if bytes == str:
-	# Python 2, no additional decoding necessary.
-	tostr = str
-	decodeDict = lambda x : x
+	# Python 2
+	def tostr(x):
+		if isinstance(x, unicode):
+			return x.encode(defaultEncoding)
+		else:
+			return str(x)
 else:
-	# Python 3, additional decoding necessary
-	try:
-		defaultEncoding = sys.getdefaultencoding()
-	except:
-		defaultEncoding = 'utf-8'
+	# Python 3
 	
 	def tostr(x):
 		if isinstance(x, bytes) is False:
 			return str(x)
 		return x.decode(defaultEncoding)
+try:
+	# Changing redis encoding into requested encoding
+	{x : 1 for x in [1]}
+	decodeDict = lambda origDict : {tostr(key) : tostr(origDict[key]) for key in origDict}
+except SyntaxError:
 	def decodeDict(theDict):
 		res2 = {}
 		for key, val in theDict.items():

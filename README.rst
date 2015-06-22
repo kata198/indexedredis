@@ -49,10 +49,22 @@ IndexedRedisModel
 
         someObj.delete()
 
+    or
+    
+        someModel.deleter.deleteMultiple(lst)
+
     and save objects by
 
         someObj.save()
-        
+ 
+
+Encodings
+---------
+
+IndexedRedis will use by default your system default encoding (sys.getdefaultencoding), unless it is ascii (python2) in which case it will default to utf-8.
+
+You may change this via IndexedRedis.setEncoding
+
 Example
 -------
 

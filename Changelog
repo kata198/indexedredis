@@ -1,3 +1,8 @@
+2.1.0 (Jun 21 2015):
+	- Much better handle unicode in Python 2
+	- allow changing encoding via a setEncoding function at the global
+	IndexedRedis level
+
 2.0.2 (May 5 2015):
 	- fix typos
 	- fix deleteMultiple
