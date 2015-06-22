@@ -81,59 +81,69 @@ if '--keep-data' not in sys.argv:
 			copyright='Copyright 2014 (c) Cheese Industries')
 	songObj.save()
 
+if __name__ == '__main__':
 
-# Query some songs by artist
-merryMenSongs = Song.objects.filter(artist='The Merry Men').all()
-from pprint import pprint
+    # Query some songs by artist
+    merryMenSongs = Song.objects.filter(artist='The Merry Men').all()
+    from pprint import pprint
 
-sys.stdout.write("Merry Men Songs:\n")
-for song in merryMenSongs:
-	pprint(song.asDict())
-	sys.stdout.write('\n')
+    sys.stdout.write("Merry Men Songs:\n")
+    for song in merryMenSongs:
+            pprint(song.asDict())
+            sys.stdout.write('\n')
 
-# Query some songs not by artist
-sys.stdout.write('\n\nNot Mega Men Songs:\n')
-notMegaMenSongs = Song.objects.filterInline(artist__ne='Mega Men').all()
-for song in notMegaMenSongs:
-	pprint(song.asDict())
-	sys.stdout.write('\n')
-
-
-sys.stdout.write('\n\n')
-# Show passing filter objects around functions, and not actually fetching until .all is called.
-def getTracks(filterSet, trackNo):
-	return filterSet.filter(track_number=trackNo).all()
-
-sys.stdout.write('\nAll track one songs:\n')
-
-allTrackOneSongs = getTracks(Song.objects, 1)
-for song in allTrackOneSongs:
-	pprint(song.asDict())
-	sys.stdout.write('\n')
-
-sys.stdout.write('\nMega Men track ones:')
-megaMenTracks = Song.objects.filter(artist='Mega Men')
+    # Query some songs not by artist
+    sys.stdout.write('\n\nNot Mega Men Songs:\n')
+    notMegaMenSongs = Song.objects.filterInline(artist__ne='Mega Men').all()
+    for song in notMegaMenSongs:
+            pprint(song.asDict())
+            sys.stdout.write('\n')
 
 
-objs = getTracks(megaMenTracks, 1)
-for song in objs:
-	pprint(song.asDict())
-	sys.stdout.write('\n')
+    sys.stdout.write('\n\n')
+    # Show passing filter objects around functions, and not actually fetching until .all is called.
+    def getTracks(filterSet, trackNo):
+            return filterSet.filter(track_number=trackNo).all()
 
-sys.stdout.write('\nMega Men track twos:\n')
+    sys.stdout.write('\nAll track one songs:\n')
 
-objs = getTracks(megaMenTracks, 2)
-for song in objs:
-	pprint(song.asDict())
-	sys.stdout.write('\n')
+    allTrackOneSongs = getTracks(Song.objects, 1)
+    for song in allTrackOneSongs:
+            pprint(song.asDict())
+            sys.stdout.write('\n')
+
+    sys.stdout.write('\nMega Men track ones:')
+    megaMenTracks = Song.objects.filter(artist='Mega Men')
 
 
-sys.stdout.write('\nAfter Delete, Mega Men Track twos (should be blank):\n')
-song.delete()
-objs = getTracks(megaMenTracks, 2)
-for song in objs:
-	pprint(song.asDict())
-	sys.stdout.write('\n')
+    objs = getTracks(megaMenTracks, 1)
+    for song in objs:
+            pprint(song.asDict())
+            sys.stdout.write('\n')
+
+    sys.stdout.write('\nMega Men track twos:\n')
+
+    objs = getTracks(megaMenTracks, 2)
+    for song in objs:
+            pprint(song.asDict())
+            sys.stdout.write('\n')
+
+
+    sys.stdout.write('\nAfter Delete, Mega Men Track twos (should be blank):\n')
+    song.delete()
+    objs = getTracks(megaMenTracks, 2)
+    for song in objs:
+            pprint(song.asDict())
+            sys.stdout.write('\n')
+
+    # delete remaining Mega Men songs
+    numDeleted = Song.objects.filter(artist='Mega Men').delete()
+    sys.stdout.write('\nDeleting remaining Mega Men Tracks: %d deleted.\n' %(numDeleted,))
+
+    sys.stdout.write('\nRemaining Mega Men tracks (should be blank):\n')
+    songs = Song.objects.filter(artist='Mega Men').all()
+    sys.stdout.write(str(songs) + '\n')
+        
 
 
 # vim:set ts=8 shiftwidth=8 softtabstop=8 noexpandtab :

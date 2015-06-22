@@ -31,32 +31,42 @@ IndexedRedisModel
 
 	An alternative to supplying REDIS_CONNECTION_PARAMS is to supply a class-level variable `_connection`, which contains the redis instance you would like to use. This variable can be created as a class-level override, or set on the model during __init__. 
 
-		Usage is like normal ORM
 
-		SomeModel.objects.filter(param1=val).filter(param2=val).all()
+Usage is like normal ORM
 
-		obj = SomeModel(...)
-		obj.save()
+    SomeModel.objects.filter(param1=val).filter(param2=val).all()
 
-		There is also a powerful method called "reset" which will atomically and locked replace all elements belonging to a model. This is useful for cache-replacement, etc.
+    obj = SomeModel(...)
+    obj.save()
 
+There is also a powerful method called "reset" which will atomically and locked replace all elements belonging to a model. This is useful for cache-replacement, etc.
 
-		x = [SomeModel(...), SomeModel(..)]
+    x = [SomeModel(...), SomeModel(..)]
 
-		SomeModel.reset(x)
-
-	You delete objects by
-
-		someObj.delete()
-
-        or
-    
-        someModel.deleter.deleteMultiple(lst)
+    SomeModel.reset(x)
 
 
-	and save objects by
+Filter objects by SomeModel.objects.filter(key=val)...
 
-		someObj.save()
+No objects are fetched until .all() is called. Methods that act on a filter include:
+
+        all    - Return all objects matching this filter
+
+        delete - Delete objects matching this filter
+
+        count  - Get the count of objects matching this filter
+
+
+Actual objects contain methods including
+
+        save   - Save this object (create if not exist, otherwise update)
+
+        delete - Delete this object
+
+        getUpdatedFields - See changes since last fetch
+
+
+
 
 Encodings
 ---------

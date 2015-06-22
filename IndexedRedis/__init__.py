@@ -7,8 +7,8 @@ import redis
 
 INDEXED_REDIS_PREFIX = '_ir_|'
 
-INDEXED_REDIS_VERSION = (2, 1, 0)
-INDEXED_REDIS_VERSION_STR = '2.1.0'
+INDEXED_REDIS_VERSION = (2, 1, 1)
+INDEXED_REDIS_VERSION_STR = '2.1.1'
 __version__ = INDEXED_REDIS_VERSION_STR
 
 try:
@@ -51,17 +51,11 @@ else:
 		if isinstance(x, bytes) is False:
 			return str(x)
 		return x.decode(defaultEncoding)
-try:
-	# Changing redis encoding into requested encoding
-	{x : 1 for x in [1]}
-	decodeDict = lambda origDict : {tostr(key) : tostr(origDict[key]) for key in origDict}
-except SyntaxError:
-	def decodeDict(theDict):
-		res2 = {}
-		for key, val in theDict.items():
-			res2[tostr(key)] = tostr(val)
-		return res2
-		
+
+
+# Changing redis encoding into requested encoding
+decodeDict = lambda origDict : {tostr(key) : tostr(origDict[key]) for key in origDict}
+
 
 class IndexedRedisModel(object):
 	'''
@@ -420,7 +414,13 @@ class IndexedRedisQuery(IndexedRedisHelper):
 		if len(matchedKeys) == 0:
 			return []
 		return self.getMultiple(matchedKeys)
-		
+	
+	def delete(self):
+		'''
+			delete - Deletes all entries matching the filter criteria
+
+		'''
+		return self.mdl.deleter.deleteMultiple(self.all())
 
 	def get(self, pk, conn=None):
 		'''
