@@ -65,6 +65,8 @@ Actual objects contain methods including
         getUpdatedFields - See changes since last fetch
 
 
+Other methods and usages are not documented here, see source code or example file for some other usage.
+
 
 Encodings
 ---------
