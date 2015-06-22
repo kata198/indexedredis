@@ -68,4 +68,4 @@ You may change this via IndexedRedis.setEncoding
 Example
 -------
 
-See `This Example <https:////raw.githubusercontent.com/kata198/indexedredis/master/test.py>`_ for a working example
+See https://raw.githubusercontent.com/kata198/indexedredis/master/test.py
