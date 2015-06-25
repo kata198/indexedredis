@@ -1,3 +1,6 @@
+2.2.2 (Jun 26 2015)
+	- Fix invalid variable
+
 2.2.1 (Jun 25 2015)
 	- Implement getPrimaryKeys (get primary keys at current filter level).
 	Takes optional argument to sort by age

@@ -599,8 +599,8 @@ class IndexedRedisSave(IndexedRedisHelper):
 					(oldValue, newValue) = fieldValue
 					conn.hset(key, fieldName, newValue)
 					if fieldName in self.indexedFields:
-						self._rem_id_from_index(indexedField, obj._id, oldValue, pipeline)
-						self._add_id_to_index(indexedField, obj._id, newValue, pipeline)
+						self._rem_id_from_index(fieldName, obj._id, oldValue, pipeline)
+						self._add_id_to_index(fieldName, obj._id, newValue, pipeline)
 				obj._origData = copy.copy(newDict)
 			ids.append(obj._id)
 			i += 1
