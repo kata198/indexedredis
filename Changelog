@@ -1,7 +1,6 @@
-2.2.0 (Jun 25 2015)
+2.2.1 (Jun 25 2015)
 	- Implement getPrimaryKeys (get primary keys at current filter level).
 	Takes optional argument to sort by age
-	- Implement getAllPrimaryKeys (get all primary keys, ignoring filters)
 	- Implement first/last/random for getting oldest/newest/random record
 	- Update documentation a bit
 

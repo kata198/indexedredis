@@ -56,9 +56,9 @@ There is also a powerful method called "reset" which will atomically and locked 
 
 Filter objects by SomeModel.objects.filter(key=val, key2=val2) and get objects with .all
 
-or for all objects, use SomeModel.objects. (e.x: SomeModel.objects.all() or SomeModel.objects.first())
+Example: SomeModel.objects.filter(name='Tim', colour='purple').filter(number=5).all()
 
-No objects are fetched until .all() is called. Methods that you can call from a filter include:
+Calling .filter or .filterInline does not fetch anything from the server until one of the "get" methods described below are called. (e.x. "all" or "first")
 
 	all    - Return all objects matching this filter
 
