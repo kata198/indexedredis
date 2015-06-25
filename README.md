@@ -17,53 +17,84 @@ It is compatible with python 2.7 and python 3. It has been tested with python 2.
 IndexedRedisModel
 -----------------
 
-	   This is the model you should extend.
+	This is the model you should extend.
 
 	Required fields:
 
 	*FIELDS* is a list of strings, which name the fields that can be used for storage.
 
+		 Example: ['Name', 'Description', 'Model', 'Price']
+
 	*INDEXED_FIELDS* is a list of strings containing the names of fields that should be indexed. Every field listed here adds insert performance. To filter on a field, it must be in the INDEXED_FIELDS list.
+
+		 Example: ['Name', 'Price']
 
 	*KEY_NAME* is the name that represents this model. Think of it like a table name.
 
+		 Example 'Items'
+
 	*REDIS_CONNECTION_PARAMS* provides the arguments to pass into "redis.Redis", to construct a redis object.
+
+		 Example: {'host' : '192.168.1.1'}
 
 	An alternative to supplying REDIS_CONNECTION_PARAMS is to supply a class-level variable `_connection`, which contains the redis instance you would like to use. This variable can be created as a class-level override, or set on the model during __init__. 
 
 
 Usage is like normal ORM
 
-    SomeModel.objects.filter(param1=val).filter(param2=val).all()
+	SomeModel.objects.filter(param1=val).filter(param2=val).all()
 
-    obj = SomeModel(...)
-    obj.save()
+	obj = SomeModel(...)
+	obj.save()
 
 There is also a powerful method called "reset" which will atomically and locked replace all elements belonging to a model. This is useful for cache-replacement, etc.
 
-    x = [SomeModel(...), SomeModel(..)]
+	x = [SomeModel(...), SomeModel(..)]
 
-    SomeModel.reset(x)
+	SomeModel.reset(x)
 
 
-Filter objects by SomeModel.objects.filter(key=val)...
+Filter objects by SomeModel.objects.filter(key=val, key2=val2) and get objects with .all
 
-No objects are fetched until .all() is called. Methods that act on a filter include:
+or for all objects, use SomeModel.objects. (e.x: SomeModel.objects.all() or SomeModel.objects.first())
 
-        all    - Return all objects matching this filter
+No objects are fetched until .all() is called. Methods that you can call from a filter include:
 
-        delete - Delete objects matching this filter
+	all    - Return all objects matching this filter
 
-        count  - Get the count of objects matching this filter
+	delete - Delete objects matching this filter
+
+	count  - Get the count of objects matching this filter
+
+	first  - Get the oldest record with current filters
+
+	last   - Get the newest record with current filters
+
+	random - Get a random element with current filters
+
+	getPrimaryKeys - Gets primary keys associated with current filters
+
+	filter - Add additional filters, returning a copy of the filter object (moreFiltered = filtered.filter(key2=val2))
+
+	filterInline - Add additional filters to current filter object. 
+
+
+On SomeModel.objects you can additionally use the following methods:
+
+	get - Get a single object by pk
+
+	getMultiple - Get multiple objects by a list of pks
+
+	filter - Start filtering
 
 
 Actual objects contain methods including
 
-        save   - Save this object (create if not exist, otherwise update)
+	save   - Save this object (create if not exist, otherwise update)
 
-        delete - Delete this object
+	delete - Delete this object
 
-        getUpdatedFields - See changes since last fetch
+	getUpdatedFields - See changes since last fetch
 
 
 Other methods and usages are not documented here, see source code or example file for some other usage.
@@ -75,7 +106,12 @@ Encodings
 IndexedRedis will use by default your system default encoding (sys.getdefaultencoding), unless it is ascii (python2) in which case it will default to utf-8.
 
 You may change this via IndexedRedis.setEncoding
-		
+
+Changes
+-------
+
+See https://raw.githubusercontent.com/kata198/indexedredis/master/Changelog
+
 Example
 -------
 

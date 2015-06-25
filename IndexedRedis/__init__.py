@@ -7,8 +7,8 @@ import redis
 
 INDEXED_REDIS_PREFIX = '_ir_|'
 
-INDEXED_REDIS_VERSION = (2, 1, 1)
-INDEXED_REDIS_VERSION_STR = '2.1.1'
+INDEXED_REDIS_VERSION = (2, 2, 0)
+INDEXED_REDIS_VERSION_STR = '2.2.0'
 __version__ = INDEXED_REDIS_VERSION_STR
 
 try:
@@ -365,6 +365,54 @@ class IndexedRedisQuery(IndexedRedisHelper):
 		return len(pks)
 			
 
+	def getPrimaryKeys(self, sortByAge=False):
+		'''
+			getPrimaryKeys - Returns all primary keys matching current filterset.
+
+			@param sortByAge <bool> - If False, return will be a set and may not be ordered.
+				If True, return will be a list and is guarenteed to represent objects oldest->newest
+
+			@return <set> - A set of all primary keys associated with current filters.
+		'''
+		conn = self._get_connection()
+		# Apply filters, and return object
+		numFilters = len(self.filters)
+		numNotFilters = len(self.notFilters)
+
+		if numFilters + numNotFilters == 0:
+			conn = self._get_connection()
+			matchedKeys = conn.smembers(self._get_ids_key())
+
+		elif numNotFilters == 0:
+			if numFilters == 1:
+				(filterFieldName, filterValue) = self.filters[0]
+				matchedKeys = conn.smembers(self._get_key_for_index(filterFieldName, filterValue))
+			else:
+				indexKeys = [self._get_key_for_index(filterFieldName, filterValue) for filterFieldName, filterValue in self.filters]
+				matchedKeys = conn.sinter(indexKeys)
+
+		else:
+			notIndexKeys = [self._get_key_for_index(filterFieldName, filterValue) for filterFieldName, filterValue in self.notFilters]
+			if numFilters == 0:
+				matchedKeys = conn.sdiff(self._get_ids_key(), *notIndexKeys)
+			else:
+				indexKeys = [self._get_key_for_index(filterFieldName, filterValue) for filterFieldName, filterValue in self.filters]
+				
+				tempKey = self._getTempKey()
+				pipeline = conn.pipeline()
+				pipeline.sinterstore(tempKey, *indexKeys)
+				pipeline.sdiff(tempKey, *notIndexKeys)
+				pipeline.delete(tempKey)
+				matchedKeys = pipeline.execute()[1] # sdiff
+
+		if sortByAge is False:
+			return matchedKeys
+		else:
+			matchedKeys = list(matchedKeys)
+			matchedKeys.sort()
+
+			return matchedKeys
+
 	def all(self):
 		'''
 			all - Get the underlying objects which match the filter criteria.
@@ -373,47 +421,75 @@ class IndexedRedisQuery(IndexedRedisHelper):
 
 			@return - Objects of the Model instance associated with this query.
 		'''
-		conn = self._get_connection()
-		# Apply filters, and return object
-		numFilters = len(self.filters)
-		numNotFilters = len(self.notFilters)
-
-		if numFilters + numNotFilters == 0:
-			allKeys = conn.smembers(self._get_ids_key())
-			return self.getMultiple(allKeys)
-
-		if numNotFilters == 0:
-			if numFilters == 1:
-				(filterFieldName, filterValue) = self.filters[0]
-				matchedKeys = conn.smembers(self._get_key_for_index(filterFieldName, filterValue))
-				if len(matchedKeys) == 0:
-					return []
-				return self.getMultiple(matchedKeys)
-
-			indexKeys = [self._get_key_for_index(filterFieldName, filterValue) for filterFieldName, filterValue in self.filters]
-			matchedKeys = conn.sinter(indexKeys)
-			if len(matchedKeys) == 0:
-				return []
-
+		matchedKeys = self.getPrimaryKeys()
+		if matchedKeys:
 			return self.getMultiple(matchedKeys)
 
-		notIndexKeys = [self._get_key_for_index(filterFieldName, filterValue) for filterFieldName, filterValue in self.notFilters]
-		if numFilters == 0:
-			matchedKeys = conn.sdiff(self._get_ids_key(), *notIndexKeys)
-		else:
-			indexKeys = [self._get_key_for_index(filterFieldName, filterValue) for filterFieldName, filterValue in self.filters]
-			
-			tempKey = self._getTempKey()
-			pipeline = conn.pipeline()
-			pipeline.sinterstore(tempKey, *indexKeys)
-			pipeline.sdiff(tempKey, *notIndexKeys)
-			pipeline.delete(tempKey)
-			matchedKeys = pipeline.execute()[1] # sdiff
+		return []
 
+	def allByAge(self):
+		'''
+			allByAge - Get the underlying objects which match the filter criteria, ordered oldest -> newest
+				If you are doing a queue or just need the head/tail, consider .first() and .last() instead.
 
-		if len(matchedKeys) == 0:
-			return []
-		return self.getMultiple(matchedKeys)
+			@return - Objects of the Model instance associated with this query, sorted oldest->newest
+		'''
+		matchedKeys = self.getPrimaryKeys(sortByAge=True)
+		if matchedKeys:
+			return self.getMultiple(matchedKeys)
+
+		return []
+	
+	def first(self):
+		'''
+			First - Returns the oldest record (lowerst primary key) with current filters.
+				This makes an efficient queue, as it only fetches a single object.
+		
+			@return - Instance of Model object, or None if no items match current filters
+		'''
+		obj = None
+
+		matchedKeys = self.getPrimaryKeys(sortByAge=True)
+		if matchedKeys:
+			# Loop so we don't return None when there are items, if item is deleted between getting key and getting obj
+			while matchedKeys and obj is None:
+				obj = self.get(matchedKeys.pop(0))
+
+		return obj
+
+	def last(self):
+		'''
+			Last - Returns the newest record (highest primary key) with current filters.
+				This makes an efficient queue, as it only fetches a single object.
+		
+			@return - Instance of Model object, or None if no items match current filters
+		'''
+		obj = None
+
+		matchedKeys = self.getPrimaryKeys(sortByAge=True)
+		if matchedKeys:
+			# Loop so we don't return None when there are items, if item is deleted between getting key and getting obj
+			while matchedKeys and obj is None:
+				obj = self.get(matchedKeys.pop())
+
+		return obj
+
+	def random(self):
+		'''
+			Random - Returns a random record in current filterset.
+
+			@return - Instance of Model object, or None if no items math current filters
+		'''
+		import random
+		matchedKeys = list(self.getPrimaryKeys())
+		obj = None
+		# Loop so we don't return None when there are items, if item is deleted between getting key and getting obj
+		while matchedKeys and not obj:
+			key = matchedKeys.pop(random.randint(0, len(matchedKeys)-1))
+			obj = self.get(key)
+
+		return obj
+		
 	
 	def delete(self):
 		'''

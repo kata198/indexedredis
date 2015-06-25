@@ -26,62 +26,62 @@ class Song(IndexedRedisModel):
 	def __init__(self, *args, **kwargs):
 		IndexedRedisModel.__init__(self, *args, **kwargs)
 
-
-if '--keep-data' not in sys.argv:
-	newSongs = []
-
-	# Add data
-	songObj = Song(artist='The Merry Men',
-			title='Happy Go Lucky',
-			album='The Merry Men LP',
-			track_number=1,
-			duration='1:58',
-			description='A song about happy people',
-			copyright='Copyright 2012 (c) Media Mogul Incorporated')
-	newSongs.append(songObj)
-
-	songObj = Song(artist='The Merry Men',
-			title='Joy to Joy',
-			album='The Merry Men LP',
-			track_number=2,
-			duration='2:54',
-			description='A song about joy',
-			copyright='Copyright 2012 (c) Media Mogul Incorporated')
-
-	newSongs.append(songObj)
-
-	songObj = Song(artist='The Unhappy Folk',
-			title='Sadly she waits',
-			album='Misery loses comfort',
-			track_number=1,
-			duration='15:44',
-			description='A sad song',
-			copyright='Copyright 2014 (c) Cheese Industries')
-	newSongs.append(songObj)
-
-	# Atomically reset the Song dataset to just the songs in "newSongs" list
-	Song.reset(newSongs)
-
-	# Add some additional songs one-at-a-time
-	songObj = Song(artist='Mega Men',
-			title='Nintendo 1',
-			album='Super Tracks',
-			track_number=1,
-			duration='1:15',
-			description='Super Nintendo',
-			copyright='Copyright 2014 (c) Cheese Industries')
-	songObj.save()
-
-	songObj = Song(artist='Mega Men',
-			title='Nintendo 2',
-			album='Super Tracks',
-			track_number=2,
-			duration='1:55',
-			description='Super Nintendo',
-			copyright='Copyright 2014 (c) Cheese Industries')
-	songObj.save()
-
 if __name__ == '__main__':
+
+    if '--keep-data' not in sys.argv:
+            newSongs = []
+
+            # Add data
+            songObj = Song(artist='The Merry Men',
+                            title='Happy Go Lucky',
+                            album='The Merry Men LP',
+                            track_number=1,
+                            duration='1:58',
+                            description='A song about happy people',
+                            copyright='Copyright 2012 (c) Media Mogul Incorporated')
+            newSongs.append(songObj)
+
+            songObj = Song(artist='The Merry Men',
+                            title='Joy to Joy',
+                            album='The Merry Men LP',
+                            track_number=2,
+                            duration='2:54',
+                            description='A song about joy',
+                            copyright='Copyright 2012 (c) Media Mogul Incorporated')
+
+            newSongs.append(songObj)
+
+            songObj = Song(artist='The Unhappy Folk',
+                            title='Sadly she waits',
+                            album='Misery loses comfort',
+                            track_number=1,
+                            duration='15:44',
+                            description='A sad song',
+                            copyright='Copyright 2014 (c) Cheese Industries')
+            newSongs.append(songObj)
+
+            # Atomically reset the Song dataset to just the songs in "newSongs" list
+            Song.reset(newSongs)
+
+            # Add some additional songs one-at-a-time
+            songObj = Song(artist='Mega Men',
+                            title='Nintendo 1',
+                            album='Super Tracks',
+                            track_number=1,
+                            duration='1:15',
+                            description='Super Nintendo',
+                            copyright='Copyright 2014 (c) Cheese Industries')
+            songObj.save()
+
+            songObj = Song(artist='Mega Men',
+                            title='Nintendo 2',
+                            album='Super Tracks',
+                            track_number=2,
+                            duration='1:55',
+                            description='Super Nintendo',
+                            copyright='Copyright 2014 (c) Cheese Industries')
+            songObj.save()
+
 
     # Query some songs by artist
     merryMenSongs = Song.objects.filter(artist='The Merry Men').all()
@@ -135,7 +135,7 @@ if __name__ == '__main__':
     for song in objs:
             pprint(song.asDict())
             sys.stdout.write('\n')
-
+    
     # delete remaining Mega Men songs
     numDeleted = Song.objects.filter(artist='Mega Men').delete()
     sys.stdout.write('\nDeleting remaining Mega Men Tracks: %d deleted.\n' %(numDeleted,))
