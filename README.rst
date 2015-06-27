@@ -62,6 +62,8 @@ Calling .filter or .filterInline does not fetch anything from the server until o
 
 	all    - Return all objects matching this filter
 
+	allOnlyFields - Return all objects matching current filters, only fetching certain fields
+
 	delete - Delete objects matching this filter
 
 	count  - Get the count of objects matching this filter
@@ -97,7 +99,10 @@ Actual objects contain methods including
 	getUpdatedFields - See changes since last fetch
 
 
-Other methods and usages are not documented here, see source code or example file for some other usage.
+There are several methods not documented here. 
+
+See https://raw.githubusercontent.com/kata198/indexedredis/master/IndexedRedis.html#IndexedRedisQuery for full documentation
+
 
 
 Encodings

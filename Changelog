@@ -1,4 +1,15 @@
-2.2.2 (Jun 26 2015)
+2.3.0 (Jun 27 2015)
+	- Change Model.objects.filter(...).delete to fetch minimal data (only
+	indexed fields) instead of entire objects, so deleting is more
+	efficent.
+	- Add getOnlyFields, allOnlyFields, allOnlyIndexedFields, etc for
+	getting partial objects
+	- Increase efficency of getMultiple function
+	- Add more docstrings
+	- Distribute pydoc as /IndexedHtml.html 
+	- Allow deleter to delete by primary key only on (Model.deleter)
+
+2.2.2 (Jun 25 2015)
 	- Fix invalid variable
 
 2.2.1 (Jun 25 2015)

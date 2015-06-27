@@ -1,0 +1,462 @@
+
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html><head><title>Python: package IndexedRedis</title>
+<meta charset="utf-8">
+</head><body bgcolor="#f0f0f8">
+
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
+<tr bgcolor="#7799ee">
+<td valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong>IndexedRedis</strong></big></big> (version 2.2.1)</font></td
+><td align=right valign=bottom
+><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:/home/media/projects/indexedredis/IndexedRedis/__init__.py">/home/media/projects/indexedredis/IndexedRedis/__init__.py</a></font></td></tr></table>
+    <p><tt>#Copyright&nbsp;(c)&nbsp;Timothy&nbsp;Savannah&nbsp;under&nbsp;LGPL,&nbsp;All&nbsp;Rights&nbsp;Reserved.&nbsp;See&nbsp;LICENSE&nbsp;for&nbsp;more&nbsp;information</tt></p>
+<p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#aa55cc">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Package Contents</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#aa55cc"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><table width="100%" summary="list"><tr><td width="25%" valign=top></td><td width="25%" valign=top></td><td width="25%" valign=top></td><td width="25%" valign=top></td></tr></table></td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ee77aa">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Classes</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#ee77aa"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl>
+<dt><font face="helvetica, arial"><a href="__builtin__.html#object">__builtin__.object</a>
+</font></dt><dd>
+<dl>
+<dt><font face="helvetica, arial"><a href="IndexedRedis.html#IndexedRedisHelper">IndexedRedisHelper</a>
+</font></dt><dd>
+<dl>
+<dt><font face="helvetica, arial"><a href="IndexedRedis.html#IndexedRedisDelete">IndexedRedisDelete</a>
+</font></dt><dt><font face="helvetica, arial"><a href="IndexedRedis.html#IndexedRedisQuery">IndexedRedisQuery</a>
+</font></dt><dt><font face="helvetica, arial"><a href="IndexedRedis.html#IndexedRedisSave">IndexedRedisSave</a>
+</font></dt></dl>
+</dd>
+<dt><font face="helvetica, arial"><a href="IndexedRedis.html#IndexedRedisModel">IndexedRedisModel</a>
+</font></dt><dt><font face="helvetica, arial"><a href="IndexedRedis.html#classproperty">classproperty</a>
+</font></dt></dl>
+</dd>
+</dl>
+ <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="IndexedRedisDelete">class <strong>IndexedRedisDelete</strong></a>(<a href="IndexedRedis.html#IndexedRedisHelper">IndexedRedisHelper</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt><a href="#IndexedRedisDelete">IndexedRedisDelete</a>&nbsp;-&nbsp;Used&nbsp;for&nbsp;removing&nbsp;objects.&nbsp;Called&nbsp;when&nbsp;Model.delete&nbsp;is&nbsp;used.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Except&nbsp;for&nbsp;advanced&nbsp;usage,&nbsp;this&nbsp;is&nbsp;probably&nbsp;for&nbsp;internal&nbsp;only.<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%"><dl><dt>Method resolution order:</dt>
+<dd><a href="IndexedRedis.html#IndexedRedisDelete">IndexedRedisDelete</a></dd>
+<dd><a href="IndexedRedis.html#IndexedRedisHelper">IndexedRedisHelper</a></dd>
+<dd><a href="__builtin__.html#object">__builtin__.object</a></dd>
+</dl>
+<hr>
+Methods defined here:<br>
+<dl><dt><a name="IndexedRedisDelete-deleteByPk"><strong>deleteByPk</strong></a>(self, pk)</dt><dd><tt>deleteByPk&nbsp;-&nbsp;Delete&nbsp;<a href="__builtin__.html#object">object</a>&nbsp;associated&nbsp;with&nbsp;given&nbsp;primary&nbsp;key</tt></dd></dl>
+
+<dl><dt><a name="IndexedRedisDelete-deleteMultiple"><strong>deleteMultiple</strong></a>(self, objs)</dt><dd><tt>deleteMultiple&nbsp;-&nbsp;Delete&nbsp;multiple&nbsp;objects<br>
+&nbsp;<br>
+@param&nbsp;objs&nbsp;-&nbsp;List&nbsp;of&nbsp;objects<br>
+&nbsp;<br>
+@return&nbsp;-&nbsp;Number&nbsp;of&nbsp;objects&nbsp;deleted</tt></dd></dl>
+
+<dl><dt><a name="IndexedRedisDelete-deleteMultipleByPks"><strong>deleteMultipleByPks</strong></a>(self, pks)</dt><dd><tt>deleteMultipleByPks&nbsp;-&nbsp;Delete&nbsp;multiple&nbsp;objects&nbsp;given&nbsp;their&nbsp;primary&nbsp;keys<br>
+&nbsp;<br>
+@param&nbsp;pks&nbsp;-&nbsp;List&nbsp;of&nbsp;primary&nbsp;keys<br>
+&nbsp;<br>
+@return&nbsp;-&nbsp;Number&nbsp;of&nbsp;objects&nbsp;deleted</tt></dd></dl>
+
+<dl><dt><a name="IndexedRedisDelete-deleteOne"><strong>deleteOne</strong></a>(self, obj, conn<font color="#909090">=None</font>)</dt><dd><tt>deleteOne&nbsp;-&nbsp;Delete&nbsp;one&nbsp;<a href="__builtin__.html#object">object</a><br>
+&nbsp;<br>
+@param&nbsp;obj&nbsp;-&nbsp;<a href="__builtin__.html#object">object</a>&nbsp;to&nbsp;delete<br>
+@param&nbsp;conn&nbsp;-&nbsp;Connection&nbsp;to&nbsp;reuse,&nbsp;or&nbsp;None<br>
+&nbsp;<br>
+@return&nbsp;-&nbsp;number&nbsp;of&nbsp;items&nbsp;deleted&nbsp;(0&nbsp;or&nbsp;1)</tt></dd></dl>
+
+<hr>
+Methods inherited from <a href="IndexedRedis.html#IndexedRedisHelper">IndexedRedisHelper</a>:<br>
+<dl><dt><a name="IndexedRedisDelete-__init__"><strong>__init__</strong></a>(self, mdl)</dt></dl>
+
+<dl><dt><a name="IndexedRedisDelete-getNextID"><strong>getNextID</strong></a>(self)</dt><dd><tt>getNextID&nbsp;-&nbsp;Get&nbsp;(and&nbsp;increment)&nbsp;the&nbsp;next&nbsp;primary&nbsp;key&nbsp;for&nbsp;this&nbsp;model.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;If&nbsp;you&nbsp;don't&nbsp;want&nbsp;to&nbsp;increment,&nbsp;@see&nbsp;peekNextID&nbsp;.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Probably&nbsp;only&nbsp;useful&nbsp;as&nbsp;internal<br>
+&nbsp;<br>
+@return&nbsp;int&nbsp;-&nbsp;next&nbsp;pk</tt></dd></dl>
+
+<dl><dt><a name="IndexedRedisDelete-peekNextID"><strong>peekNextID</strong></a>(self)</dt><dd><tt>peekNextID&nbsp;-&nbsp;Look&nbsp;at,&nbsp;but&nbsp;don't&nbsp;increment&nbsp;the&nbsp;primary&nbsp;key&nbsp;for&nbsp;this&nbsp;model.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Probably&nbsp;only&nbsp;useful&nbsp;as&nbsp;internal<br>
+&nbsp;<br>
+@return&nbsp;int&nbsp;-&nbsp;next&nbsp;pk</tt></dd></dl>
+
+<hr>
+Data descriptors inherited from <a href="IndexedRedis.html#IndexedRedisHelper">IndexedRedisHelper</a>:<br>
+<dl><dt><strong>__dict__</strong></dt>
+<dd><tt>dictionary&nbsp;for&nbsp;instance&nbsp;variables&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="IndexedRedisHelper">class <strong>IndexedRedisHelper</strong></a>(<a href="__builtin__.html#object">__builtin__.object</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt><a href="#IndexedRedisHelper">IndexedRedisHelper</a>&nbsp;-&nbsp;internal&nbsp;helper&nbsp;class<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%">Methods defined here:<br>
+<dl><dt><a name="IndexedRedisHelper-__init__"><strong>__init__</strong></a>(self, mdl)</dt></dl>
+
+<dl><dt><a name="IndexedRedisHelper-getNextID"><strong>getNextID</strong></a>(self)</dt><dd><tt>getNextID&nbsp;-&nbsp;Get&nbsp;(and&nbsp;increment)&nbsp;the&nbsp;next&nbsp;primary&nbsp;key&nbsp;for&nbsp;this&nbsp;model.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;If&nbsp;you&nbsp;don't&nbsp;want&nbsp;to&nbsp;increment,&nbsp;@see&nbsp;peekNextID&nbsp;.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Probably&nbsp;only&nbsp;useful&nbsp;as&nbsp;internal<br>
+&nbsp;<br>
+@return&nbsp;int&nbsp;-&nbsp;next&nbsp;pk</tt></dd></dl>
+
+<dl><dt><a name="IndexedRedisHelper-peekNextID"><strong>peekNextID</strong></a>(self)</dt><dd><tt>peekNextID&nbsp;-&nbsp;Look&nbsp;at,&nbsp;but&nbsp;don't&nbsp;increment&nbsp;the&nbsp;primary&nbsp;key&nbsp;for&nbsp;this&nbsp;model.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Probably&nbsp;only&nbsp;useful&nbsp;as&nbsp;internal<br>
+&nbsp;<br>
+@return&nbsp;int&nbsp;-&nbsp;next&nbsp;pk</tt></dd></dl>
+
+<hr>
+Data descriptors defined here:<br>
+<dl><dt><strong>__dict__</strong></dt>
+<dd><tt>dictionary&nbsp;for&nbsp;instance&nbsp;variables&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="IndexedRedisModel">class <strong>IndexedRedisModel</strong></a>(<a href="__builtin__.html#object">__builtin__.object</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>&nbsp;&nbsp;&nbsp;This&nbsp;is&nbsp;the&nbsp;model&nbsp;you&nbsp;should&nbsp;extend.<br>
+&nbsp;<br>
+Required&nbsp;fields:<br>
+&nbsp;<br>
+FIELDS&nbsp;is&nbsp;a&nbsp;list&nbsp;of&nbsp;strings,&nbsp;naming&nbsp;"fields"&nbsp;that&nbsp;will&nbsp;be&nbsp;stored<br>
+INDEXED_FIELDS&nbsp;is&nbsp;a&nbsp;list&nbsp;of&nbsp;strings&nbsp;containing&nbsp;the&nbsp;names&nbsp;of&nbsp;fields&nbsp;that&nbsp;should&nbsp;be&nbsp;indexed.&nbsp;Every&nbsp;field&nbsp;added&nbsp;here&nbsp;slows&nbsp;insert&nbsp;performance,<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;because&nbsp;redis&nbsp;is&nbsp;fast,&nbsp;consider&nbsp;not&nbsp;indexing&nbsp;every&nbsp;possible&nbsp;field&nbsp;but&nbsp;rather&nbsp;indexing&nbsp;the&nbsp;ones&nbsp;for&nbsp;best&nbsp;performance&nbsp;and&nbsp;filtering&nbsp;thereafter.<br>
+&nbsp;<br>
+NOTE:&nbsp;You&nbsp;may&nbsp;only&nbsp;query&nbsp;fields&nbsp;contained&nbsp;within&nbsp;the&nbsp;"INDEXED_FIELDS"&nbsp;array.&nbsp;It&nbsp;is&nbsp;certainly&nbsp;possible&nbsp;from&nbsp;within&nbsp;this&nbsp;lib&nbsp;to&nbsp;support&nbsp;non-indexed<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;searching,&nbsp;but&nbsp;I'd&nbsp;rather&nbsp;that&nbsp;be&nbsp;done&nbsp;in&nbsp;the&nbsp;client&nbsp;to&nbsp;make&nbsp;obvious&nbsp;where&nbsp;the&nbsp;power&nbsp;of&nbsp;this&nbsp;library&nbsp;is.<br>
+&nbsp;<br>
+KEY_NAME&nbsp;is&nbsp;a&nbsp;field&nbsp;which&nbsp;contains&nbsp;the&nbsp;"base"&nbsp;keyname,&nbsp;unique&nbsp;to&nbsp;this&nbsp;<a href="__builtin__.html#object">object</a>.&nbsp;(Like&nbsp;"Users"&nbsp;or&nbsp;"Drinks")<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;REDIS_CONNECTION_PARAMS&nbsp;provides&nbsp;the&nbsp;arguments&nbsp;to&nbsp;pass&nbsp;into&nbsp;"redis.Redis",&nbsp;to&nbsp;construct&nbsp;a&nbsp;redis&nbsp;<a href="__builtin__.html#object">object</a>.<br>
+&nbsp;<br>
+An&nbsp;alternative&nbsp;to&nbsp;supplying&nbsp;REDIS_CONNECTION_PARAMS&nbsp;is&nbsp;to&nbsp;supply&nbsp;a&nbsp;class-level&nbsp;variable&nbsp;`_connection`,&nbsp;which&nbsp;contains&nbsp;the&nbsp;redis&nbsp;instance&nbsp;you&nbsp;would&nbsp;like&nbsp;to&nbsp;use.&nbsp;This&nbsp;variable&nbsp;can&nbsp;be&nbsp;created&nbsp;as&nbsp;a&nbsp;class-level&nbsp;override,&nbsp;or&nbsp;set&nbsp;on&nbsp;the&nbsp;model&nbsp;during&nbsp;__init__.&nbsp;<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Usage&nbsp;is&nbsp;like&nbsp;normal&nbsp;ORM<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;SomeModel.objects.filter(param1=val).filter(param2=val).all()<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;obj&nbsp;=&nbsp;SomeModel(...)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;obj.<a href="#IndexedRedisModel-save">save</a>()<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;There&nbsp;is&nbsp;also&nbsp;a&nbsp;powerful&nbsp;method&nbsp;called&nbsp;"reset"&nbsp;which&nbsp;will&nbsp;atomically&nbsp;and&nbsp;locked&nbsp;replace&nbsp;all&nbsp;elements&nbsp;belonging&nbsp;to&nbsp;a&nbsp;model.&nbsp;This&nbsp;is&nbsp;useful&nbsp;for&nbsp;cache-replacement,&nbsp;etc.<br>
+&nbsp;<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;x&nbsp;=&nbsp;[SomeModel(...),&nbsp;SomeModel(..)]<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;SomeModel.<a href="#IndexedRedisModel-reset">reset</a>(x)<br>
+&nbsp;<br>
+&nbsp;<br>
+You&nbsp;delete&nbsp;objects&nbsp;by<br>
+&nbsp;<br>
+someObj.<a href="#IndexedRedisModel-delete">delete</a>()<br>
+&nbsp;<br>
+and&nbsp;save&nbsp;objects&nbsp;by<br>
+&nbsp;<br>
+someObj.<a href="#IndexedRedisModel-save">save</a>()<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%">Methods defined here:<br>
+<dl><dt><a name="IndexedRedisModel-__init__"><strong>__init__</strong></a>(self, *args, **kwargs)</dt><dd><tt>__init__&nbsp;-&nbsp;Set&nbsp;the&nbsp;values&nbsp;on&nbsp;this&nbsp;<a href="__builtin__.html#object">object</a>.&nbsp;MAKE&nbsp;SURE&nbsp;YOU&nbsp;CALL&nbsp;THE&nbsp;SUPER&nbsp;HERE,&nbsp;or&nbsp;else&nbsp;things&nbsp;will&nbsp;not&nbsp;work.</tt></dd></dl>
+
+<dl><dt><a name="IndexedRedisModel-asDict"><strong>asDict</strong></a>(self, includeMeta<font color="#909090">=False</font>)</dt><dd><tt>toDict&nbsp;/&nbsp;asDict&nbsp;-&nbsp;Get&nbsp;a&nbsp;dictionary&nbsp;representation&nbsp;of&nbsp;this&nbsp;model.<br>
+&nbsp;<br>
+@param&nbsp;includeMeta&nbsp;-&nbsp;Include&nbsp;metadata&nbsp;in&nbsp;return.&nbsp;For&nbsp;now,&nbsp;this&nbsp;is&nbsp;only&nbsp;pk&nbsp;stored&nbsp;as&nbsp;"_id"<br>
+&nbsp;<br>
+@return&nbsp;-&nbsp;Dictionary&nbsp;reprensetation&nbsp;of&nbsp;this&nbsp;<a href="__builtin__.html#object">object</a>&nbsp;and&nbsp;all&nbsp;fields</tt></dd></dl>
+
+<dl><dt><a name="IndexedRedisModel-delete"><strong>delete</strong></a>(self)</dt><dd><tt>delete&nbsp;-&nbsp;Delete&nbsp;this&nbsp;<a href="__builtin__.html#object">object</a></tt></dd></dl>
+
+<strong>deleter</strong> = &lt;IndexedRedis.IndexedRedisDelete object&gt;
+<dl><dt><a name="IndexedRedisModel-getPk"><strong>getPk</strong></a>(self)</dt><dd><tt>getPk&nbsp;-&nbsp;Gets&nbsp;the&nbsp;internal&nbsp;primary&nbsp;key&nbsp;associated&nbsp;with&nbsp;this&nbsp;<a href="__builtin__.html#object">object</a></tt></dd></dl>
+
+<dl><dt><a name="IndexedRedisModel-getUpdatedFields"><strong>getUpdatedFields</strong></a>(self)</dt><dd><tt>getUpdatedFields&nbsp;-&nbsp;See&nbsp;changed&nbsp;fields.<br>
+&nbsp;<br>
+@return&nbsp;-&nbsp;a&nbsp;dictionary&nbsp;of&nbsp;fieldName&nbsp;:&nbsp;tuple(old,&nbsp;new)</tt></dd></dl>
+
+<strong>objects</strong> = &lt;IndexedRedis.IndexedRedisQuery object&gt;
+<dl><dt><a name="IndexedRedisModel-save"><strong>save</strong></a>(self)</dt><dd><tt>save&nbsp;-&nbsp;Save&nbsp;this&nbsp;<a href="__builtin__.html#object">object</a></tt></dd></dl>
+
+<strong>saver</strong> = &lt;IndexedRedis.IndexedRedisSave object&gt;
+<dl><dt><a name="IndexedRedisModel-toDict"><strong>toDict</strong></a> = <a href="#IndexedRedisModel-asDict">asDict</a>(self, includeMeta<font color="#909090">=False</font>)</dt></dl>
+
+<hr>
+Class methods defined here:<br>
+<dl><dt><a name="IndexedRedisModel-reset"><strong>reset</strong></a>(cls, newValues)<font color="#909090"><font face="helvetica, arial"> from <a href="__builtin__.html#type">__builtin__.type</a></font></font></dt></dl>
+
+<hr>
+Data descriptors defined here:<br>
+<dl><dt><strong>__dict__</strong></dt>
+<dd><tt>dictionary&nbsp;for&nbsp;instance&nbsp;variables&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<hr>
+Data and other attributes defined here:<br>
+<dl><dt><strong>FIELDS</strong> = []</dl>
+
+<dl><dt><strong>INDEXED_FIELDS</strong> = []</dl>
+
+<dl><dt><strong>KEY_NAME</strong> = None</dl>
+
+<dl><dt><strong>REDIS_CONNECTION_PARAMS</strong> = {}</dl>
+
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="IndexedRedisQuery">class <strong>IndexedRedisQuery</strong></a>(<a href="IndexedRedis.html#IndexedRedisHelper">IndexedRedisHelper</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt><a href="#IndexedRedisQuery">IndexedRedisQuery</a>&nbsp;-&nbsp;The&nbsp;query&nbsp;<a href="__builtin__.html#object">object</a>.&nbsp;This&nbsp;is&nbsp;the&nbsp;return&nbsp;of&nbsp;"Model.objects"&nbsp;and&nbsp;"Model.objects.filter"<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%"><dl><dt>Method resolution order:</dt>
+<dd><a href="IndexedRedis.html#IndexedRedisQuery">IndexedRedisQuery</a></dd>
+<dd><a href="IndexedRedis.html#IndexedRedisHelper">IndexedRedisHelper</a></dd>
+<dd><a href="__builtin__.html#object">__builtin__.object</a></dd>
+</dl>
+<hr>
+Methods defined here:<br>
+<dl><dt><a name="IndexedRedisQuery-__init__"><strong>__init__</strong></a>(self, *args, **kwargs)</dt></dl>
+
+<dl><dt><a name="IndexedRedisQuery-all"><strong>all</strong></a>(self)</dt><dd><tt>all&nbsp;-&nbsp;Get&nbsp;the&nbsp;underlying&nbsp;objects&nbsp;which&nbsp;match&nbsp;the&nbsp;filter&nbsp;criteria.<br>
+&nbsp;<br>
+Example:&nbsp;&nbsp;&nbsp;objs&nbsp;=&nbsp;Model.objects.<a href="#IndexedRedisQuery-filter">filter</a>(field1='value',&nbsp;field2='value2').<a href="#IndexedRedisQuery-all">all</a>()<br>
+&nbsp;<br>
+@return&nbsp;-&nbsp;Objects&nbsp;of&nbsp;the&nbsp;Model&nbsp;instance&nbsp;associated&nbsp;with&nbsp;this&nbsp;query.</tt></dd></dl>
+
+<dl><dt><a name="IndexedRedisQuery-allByAge"><strong>allByAge</strong></a>(self)</dt><dd><tt>allByAge&nbsp;-&nbsp;Get&nbsp;the&nbsp;underlying&nbsp;objects&nbsp;which&nbsp;match&nbsp;the&nbsp;filter&nbsp;criteria,&nbsp;ordered&nbsp;oldest&nbsp;-&gt;&nbsp;newest<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;If&nbsp;you&nbsp;are&nbsp;doing&nbsp;a&nbsp;queue&nbsp;or&nbsp;just&nbsp;need&nbsp;the&nbsp;head/tail,&nbsp;consider&nbsp;.<a href="#IndexedRedisQuery-first">first</a>()&nbsp;and&nbsp;.<a href="#IndexedRedisQuery-last">last</a>()&nbsp;instead.<br>
+&nbsp;<br>
+@return&nbsp;-&nbsp;Objects&nbsp;of&nbsp;the&nbsp;Model&nbsp;instance&nbsp;associated&nbsp;with&nbsp;this&nbsp;query,&nbsp;sorted&nbsp;oldest-&gt;newest</tt></dd></dl>
+
+<dl><dt><a name="IndexedRedisQuery-allOnlyFields"><strong>allOnlyFields</strong></a>(self, fields)</dt><dd><tt>allOnlyFields&nbsp;-&nbsp;Get&nbsp;the&nbsp;objects&nbsp;which&nbsp;match&nbsp;the&nbsp;filter&nbsp;criteria,&nbsp;only&nbsp;fetching&nbsp;given&nbsp;fields.<br>
+&nbsp;<br>
+@param&nbsp;fields&nbsp;-&nbsp;List&nbsp;of&nbsp;fields&nbsp;to&nbsp;fetch<br>
+&nbsp;<br>
+@return&nbsp;-&nbsp;Partial&nbsp;objects&nbsp;with&nbsp;only&nbsp;the&nbsp;given&nbsp;fields&nbsp;fetched</tt></dd></dl>
+
+<dl><dt><a name="IndexedRedisQuery-allOnlyIndexedFields"><strong>allOnlyIndexedFields</strong></a>(self)</dt><dd><tt>allOnlyIndexedFields&nbsp;-&nbsp;Get&nbsp;the&nbsp;objects&nbsp;which&nbsp;match&nbsp;the&nbsp;filter&nbsp;criteria,&nbsp;only&nbsp;fetching&nbsp;indexed&nbsp;fields.<br>
+&nbsp;<br>
+@return&nbsp;-&nbsp;Partial&nbsp;objects&nbsp;with&nbsp;only&nbsp;the&nbsp;indexed&nbsp;fields&nbsp;fetched</tt></dd></dl>
+
+<dl><dt><a name="IndexedRedisQuery-count"><strong>count</strong></a>(self)</dt><dd><tt>count&nbsp;-&nbsp;gets&nbsp;the&nbsp;number&nbsp;of&nbsp;records&nbsp;matching&nbsp;the&nbsp;filter&nbsp;criteria<br>
+&nbsp;<br>
+Example:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;theCount&nbsp;=&nbsp;Model.objects.<a href="#IndexedRedisQuery-filter">filter</a>(field1='value').<a href="#IndexedRedisQuery-count">count</a>()</tt></dd></dl>
+
+<dl><dt><a name="IndexedRedisQuery-delete"><strong>delete</strong></a>(self)</dt><dd><tt>delete&nbsp;-&nbsp;Deletes&nbsp;all&nbsp;entries&nbsp;matching&nbsp;the&nbsp;filter&nbsp;criteria</tt></dd></dl>
+
+<dl><dt><a name="IndexedRedisQuery-filter"><strong>filter</strong></a>(self, **kwargs)</dt><dd><tt>filter&nbsp;-&nbsp;Add&nbsp;filters&nbsp;based&nbsp;on&nbsp;INDEXED_FIELDS&nbsp;having&nbsp;or&nbsp;not&nbsp;having&nbsp;a&nbsp;value.<br>
+&nbsp;&nbsp;Note,&nbsp;no&nbsp;objects&nbsp;are&nbsp;actually&nbsp;fetched&nbsp;until&nbsp;.<a href="#IndexedRedisQuery-all">all</a>()&nbsp;is&nbsp;called<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Use&nbsp;the&nbsp;field&nbsp;name&nbsp;[&nbsp;model.objects.<a href="#IndexedRedisQuery-filter">filter</a>(some_field='value')]&nbsp;to&nbsp;filter&nbsp;on&nbsp;items&nbsp;containing&nbsp;that&nbsp;value.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Use&nbsp;the&nbsp;field&nbsp;name&nbsp;suffxed&nbsp;with&nbsp;'__ne'&nbsp;for&nbsp;a&nbsp;negation&nbsp;filter&nbsp;[&nbsp;model.objects.<a href="#IndexedRedisQuery-filter">filter</a>(some_field__ne='value')&nbsp;]<br>
+&nbsp;<br>
+Example:<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;query&nbsp;=&nbsp;Model.objects.<a href="#IndexedRedisQuery-filter">filter</a>(field1='value',&nbsp;field2='othervalue')<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;objs1&nbsp;=&nbsp;query.<a href="#IndexedRedisQuery-filter">filter</a>(something__ne='value').<a href="#IndexedRedisQuery-all">all</a>()<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;objs2&nbsp;=&nbsp;query.<a href="#IndexedRedisQuery-filter">filter</a>(something__ne=7).<a href="#IndexedRedisQuery-all">all</a>()<br>
+&nbsp;<br>
+&nbsp;<br>
+@returns&nbsp;-&nbsp;A&nbsp;copy&nbsp;of&nbsp;this&nbsp;<a href="__builtin__.html#object">object</a>,&nbsp;with&nbsp;the&nbsp;additional&nbsp;filters.&nbsp;If&nbsp;you&nbsp;want&nbsp;to&nbsp;work&nbsp;inline&nbsp;on&nbsp;this&nbsp;<a href="__builtin__.html#object">object</a>&nbsp;instead,&nbsp;use&nbsp;the&nbsp;filterInline&nbsp;method.</tt></dd></dl>
+
+<dl><dt><a name="IndexedRedisQuery-filterInline"><strong>filterInline</strong></a>(self, **kwargs)</dt><dd><tt>filterInline&nbsp;-&nbsp;@see&nbsp;<a href="#IndexedRedisQuery">IndexedRedisQuery</a>.filter.&nbsp;This&nbsp;is&nbsp;the&nbsp;same&nbsp;as&nbsp;filter,&nbsp;but&nbsp;works&nbsp;inline&nbsp;on&nbsp;this&nbsp;<a href="__builtin__.html#object">object</a>&nbsp;instead&nbsp;of&nbsp;creating&nbsp;a&nbsp;copy.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Use&nbsp;this&nbsp;is&nbsp;you&nbsp;do&nbsp;not&nbsp;need&nbsp;to&nbsp;retain&nbsp;the&nbsp;previous&nbsp;filter&nbsp;<a href="__builtin__.html#object">object</a>.</tt></dd></dl>
+
+<dl><dt><a name="IndexedRedisQuery-first"><strong>first</strong></a>(self)</dt><dd><tt>First&nbsp;-&nbsp;Returns&nbsp;the&nbsp;oldest&nbsp;record&nbsp;(lowerst&nbsp;primary&nbsp;key)&nbsp;with&nbsp;current&nbsp;filters.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;This&nbsp;makes&nbsp;an&nbsp;efficient&nbsp;queue,&nbsp;as&nbsp;it&nbsp;only&nbsp;fetches&nbsp;a&nbsp;single&nbsp;<a href="__builtin__.html#object">object</a>.<br>
+&nbsp;<br>
+@return&nbsp;-&nbsp;Instance&nbsp;of&nbsp;Model&nbsp;<a href="__builtin__.html#object">object</a>,&nbsp;or&nbsp;None&nbsp;if&nbsp;no&nbsp;items&nbsp;match&nbsp;current&nbsp;filters</tt></dd></dl>
+
+<dl><dt><a name="IndexedRedisQuery-get"><strong>get</strong></a>(self, pk)</dt><dd><tt>get&nbsp;-&nbsp;Get&nbsp;a&nbsp;single&nbsp;value&nbsp;with&nbsp;the&nbsp;internal&nbsp;primary&nbsp;key.<br>
+&nbsp;<br>
+@param&nbsp;pk&nbsp;-&nbsp;internal&nbsp;primary&nbsp;key&nbsp;(can&nbsp;be&nbsp;found&nbsp;via&nbsp;.getPk()&nbsp;on&nbsp;an&nbsp;item)</tt></dd></dl>
+
+<dl><dt><a name="IndexedRedisQuery-getMultiple"><strong>getMultiple</strong></a>(self, pks)</dt><dd><tt>getMultiple&nbsp;-&nbsp;Gets&nbsp;multiple&nbsp;objects&nbsp;with&nbsp;a&nbsp;single&nbsp;atomic&nbsp;operation<br>
+&nbsp;<br>
+@param&nbsp;pks&nbsp;-&nbsp;list&nbsp;of&nbsp;internal&nbsp;keys</tt></dd></dl>
+
+<dl><dt><a name="IndexedRedisQuery-getMultipleOnlyFields"><strong>getMultipleOnlyFields</strong></a>(self, pks, fields)</dt><dd><tt>getMultipleOnlyFields&nbsp;-&nbsp;Gets&nbsp;only&nbsp;certain&nbsp;fields&nbsp;from&nbsp;a&nbsp;list&nbsp;of&nbsp;&nbsp;primary&nbsp;keys.&nbsp;For&nbsp;working&nbsp;on&nbsp;entire&nbsp;filter&nbsp;set,&nbsp;see&nbsp;allOnlyFields<br>
+&nbsp;<br>
+pks&nbsp;list&lt;str&gt;&nbsp;-&nbsp;Primary&nbsp;Keys<br>
+fields&nbsp;list&lt;str&gt;&nbsp;-&nbsp;List&nbsp;of&nbsp;fields<br>
+&nbsp;<br>
+return&nbsp;-&nbsp;List&nbsp;of&nbsp;partial&nbsp;objects&nbsp;with&nbsp;only&nbsp;fields&nbsp;applied</tt></dd></dl>
+
+<dl><dt><a name="IndexedRedisQuery-getMultipleOnlyIndexedFields"><strong>getMultipleOnlyIndexedFields</strong></a>(self, pks)</dt><dd><tt>getMultipleOnlyIndexedFields&nbsp;-&nbsp;Get&nbsp;only&nbsp;the&nbsp;indexed&nbsp;fields&nbsp;on&nbsp;an&nbsp;<a href="__builtin__.html#object">object</a>.&nbsp;This&nbsp;is&nbsp;the&nbsp;minimum&nbsp;to&nbsp;delete.<br>
+&nbsp;<br>
+@param&nbsp;pks&nbsp;-&nbsp;List&nbsp;of&nbsp;primary&nbsp;keys<br>
+&nbsp;<br>
+@return&nbsp;-&nbsp;List&nbsp;of&nbsp;objects&nbsp;with&nbsp;only&nbsp;indexed&nbsp;fields&nbsp;fetched</tt></dd></dl>
+
+<dl><dt><a name="IndexedRedisQuery-getOnlyFields"><strong>getOnlyFields</strong></a>(self, pk, fields)</dt><dd><tt>getOnlyFields&nbsp;-&nbsp;Gets&nbsp;only&nbsp;certain&nbsp;fields&nbsp;from&nbsp;a&nbsp;paticular&nbsp;primary&nbsp;key.&nbsp;For&nbsp;working&nbsp;on&nbsp;entire&nbsp;filter&nbsp;set,&nbsp;see&nbsp;allOnlyFields<br>
+&nbsp;<br>
+pk&nbsp;-&nbsp;Primary&nbsp;Key<br>
+fields&nbsp;list&lt;str&gt;&nbsp;-&nbsp;List&nbsp;of&nbsp;fields<br>
+&nbsp;<br>
+return&nbsp;-&nbsp;Partial&nbsp;objects&nbsp;with&nbsp;only&nbsp;fields&nbsp;applied</tt></dd></dl>
+
+<dl><dt><a name="IndexedRedisQuery-getOnlyIndexedFields"><strong>getOnlyIndexedFields</strong></a>(self, pk)</dt><dd><tt>getOnlyIndexedFields&nbsp;-&nbsp;Get&nbsp;only&nbsp;the&nbsp;indexed&nbsp;fields&nbsp;on&nbsp;an&nbsp;<a href="__builtin__.html#object">object</a>.&nbsp;This&nbsp;is&nbsp;the&nbsp;minimum&nbsp;to&nbsp;delete.<br>
+&nbsp;<br>
+@param&nbsp;pk&nbsp;-&nbsp;Primary&nbsp;key<br>
+&nbsp;<br>
+@return&nbsp;-&nbsp;Object&nbsp;with&nbsp;only&nbsp;indexed&nbsp;fields&nbsp;fetched.</tt></dd></dl>
+
+<dl><dt><a name="IndexedRedisQuery-getPrimaryKeys"><strong>getPrimaryKeys</strong></a>(self, sortByAge<font color="#909090">=False</font>)</dt><dd><tt>getPrimaryKeys&nbsp;-&nbsp;Returns&nbsp;all&nbsp;primary&nbsp;keys&nbsp;matching&nbsp;current&nbsp;filterset.<br>
+&nbsp;<br>
+@param&nbsp;sortByAge&nbsp;&lt;bool&gt;&nbsp;-&nbsp;If&nbsp;False,&nbsp;return&nbsp;will&nbsp;be&nbsp;a&nbsp;set&nbsp;and&nbsp;may&nbsp;not&nbsp;be&nbsp;ordered.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;If&nbsp;True,&nbsp;return&nbsp;will&nbsp;be&nbsp;a&nbsp;list&nbsp;and&nbsp;is&nbsp;guarenteed&nbsp;to&nbsp;represent&nbsp;objects&nbsp;oldest-&gt;newest<br>
+&nbsp;<br>
+@return&nbsp;&lt;set&gt;&nbsp;-&nbsp;A&nbsp;set&nbsp;of&nbsp;all&nbsp;primary&nbsp;keys&nbsp;associated&nbsp;with&nbsp;current&nbsp;filters.</tt></dd></dl>
+
+<dl><dt><a name="IndexedRedisQuery-last"><strong>last</strong></a>(self)</dt><dd><tt>Last&nbsp;-&nbsp;Returns&nbsp;the&nbsp;newest&nbsp;record&nbsp;(highest&nbsp;primary&nbsp;key)&nbsp;with&nbsp;current&nbsp;filters.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;This&nbsp;makes&nbsp;an&nbsp;efficient&nbsp;queue,&nbsp;as&nbsp;it&nbsp;only&nbsp;fetches&nbsp;a&nbsp;single&nbsp;<a href="__builtin__.html#object">object</a>.<br>
+&nbsp;<br>
+@return&nbsp;-&nbsp;Instance&nbsp;of&nbsp;Model&nbsp;<a href="__builtin__.html#object">object</a>,&nbsp;or&nbsp;None&nbsp;if&nbsp;no&nbsp;items&nbsp;match&nbsp;current&nbsp;filters</tt></dd></dl>
+
+<dl><dt><a name="IndexedRedisQuery-random"><strong>random</strong></a>(self)</dt><dd><tt>Random&nbsp;-&nbsp;Returns&nbsp;a&nbsp;random&nbsp;record&nbsp;in&nbsp;current&nbsp;filterset.<br>
+&nbsp;<br>
+@return&nbsp;-&nbsp;Instance&nbsp;of&nbsp;Model&nbsp;<a href="__builtin__.html#object">object</a>,&nbsp;or&nbsp;None&nbsp;if&nbsp;no&nbsp;items&nbsp;math&nbsp;current&nbsp;filters</tt></dd></dl>
+
+<hr>
+Methods inherited from <a href="IndexedRedis.html#IndexedRedisHelper">IndexedRedisHelper</a>:<br>
+<dl><dt><a name="IndexedRedisQuery-getNextID"><strong>getNextID</strong></a>(self)</dt><dd><tt>getNextID&nbsp;-&nbsp;Get&nbsp;(and&nbsp;increment)&nbsp;the&nbsp;next&nbsp;primary&nbsp;key&nbsp;for&nbsp;this&nbsp;model.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;If&nbsp;you&nbsp;don't&nbsp;want&nbsp;to&nbsp;increment,&nbsp;@see&nbsp;peekNextID&nbsp;.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Probably&nbsp;only&nbsp;useful&nbsp;as&nbsp;internal<br>
+&nbsp;<br>
+@return&nbsp;int&nbsp;-&nbsp;next&nbsp;pk</tt></dd></dl>
+
+<dl><dt><a name="IndexedRedisQuery-peekNextID"><strong>peekNextID</strong></a>(self)</dt><dd><tt>peekNextID&nbsp;-&nbsp;Look&nbsp;at,&nbsp;but&nbsp;don't&nbsp;increment&nbsp;the&nbsp;primary&nbsp;key&nbsp;for&nbsp;this&nbsp;model.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Probably&nbsp;only&nbsp;useful&nbsp;as&nbsp;internal<br>
+&nbsp;<br>
+@return&nbsp;int&nbsp;-&nbsp;next&nbsp;pk</tt></dd></dl>
+
+<hr>
+Data descriptors inherited from <a href="IndexedRedis.html#IndexedRedisHelper">IndexedRedisHelper</a>:<br>
+<dl><dt><strong>__dict__</strong></dt>
+<dd><tt>dictionary&nbsp;for&nbsp;instance&nbsp;variables&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="IndexedRedisSave">class <strong>IndexedRedisSave</strong></a>(<a href="IndexedRedis.html#IndexedRedisHelper">IndexedRedisHelper</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan=2><tt>IndexedRedisClass&nbsp;-&nbsp;Class&nbsp;used&nbsp;to&nbsp;save&nbsp;objects.&nbsp;Used&nbsp;with&nbsp;Model.save&nbsp;is&nbsp;called.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Except&nbsp;for&nbsp;advanced&nbsp;usage,&nbsp;this&nbsp;is&nbsp;probably&nbsp;for&nbsp;internal&nbsp;only.<br>&nbsp;</tt></td></tr>
+<tr><td>&nbsp;</td>
+<td width="100%"><dl><dt>Method resolution order:</dt>
+<dd><a href="IndexedRedis.html#IndexedRedisSave">IndexedRedisSave</a></dd>
+<dd><a href="IndexedRedis.html#IndexedRedisHelper">IndexedRedisHelper</a></dd>
+<dd><a href="__builtin__.html#object">__builtin__.object</a></dd>
+</dl>
+<hr>
+Methods defined here:<br>
+<dl><dt><a name="IndexedRedisSave-save"><strong>save</strong></a>(self, obj, useMulti<font color="#909090">=True</font>, forceID<font color="#909090">=False</font>, conn<font color="#909090">=None</font>)</dt><dd><tt>save&nbsp;-&nbsp;Save&nbsp;an&nbsp;<a href="__builtin__.html#object">object</a>&nbsp;associated&nbsp;with&nbsp;this&nbsp;model.&nbsp;You&nbsp;probably&nbsp;will&nbsp;just&nbsp;do&nbsp;<a href="__builtin__.html#object">object</a>.<a href="#IndexedRedisSave-save">save</a>()&nbsp;instead&nbsp;of&nbsp;this.<br>
+&nbsp;<br>
+@param&nbsp;obj&nbsp;-&nbsp;The&nbsp;<a href="__builtin__.html#object">object</a>&nbsp;to&nbsp;save<br>
+@param&nbsp;useMulti&nbsp;-&nbsp;Do&nbsp;multiple&nbsp;at&nbsp;once<br>
+@param&nbsp;forceID&nbsp;-&nbsp;if&nbsp;not&nbsp;False,&nbsp;force&nbsp;ID&nbsp;to&nbsp;this.<br>
+@param&nbsp;conn&nbsp;-&nbsp;A&nbsp;connection&nbsp;or&nbsp;None<br>
+&nbsp;<br>
+@return&nbsp;-&nbsp;List&nbsp;of&nbsp;pks</tt></dd></dl>
+
+<hr>
+Methods inherited from <a href="IndexedRedis.html#IndexedRedisHelper">IndexedRedisHelper</a>:<br>
+<dl><dt><a name="IndexedRedisSave-__init__"><strong>__init__</strong></a>(self, mdl)</dt></dl>
+
+<dl><dt><a name="IndexedRedisSave-getNextID"><strong>getNextID</strong></a>(self)</dt><dd><tt>getNextID&nbsp;-&nbsp;Get&nbsp;(and&nbsp;increment)&nbsp;the&nbsp;next&nbsp;primary&nbsp;key&nbsp;for&nbsp;this&nbsp;model.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;If&nbsp;you&nbsp;don't&nbsp;want&nbsp;to&nbsp;increment,&nbsp;@see&nbsp;peekNextID&nbsp;.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Probably&nbsp;only&nbsp;useful&nbsp;as&nbsp;internal<br>
+&nbsp;<br>
+@return&nbsp;int&nbsp;-&nbsp;next&nbsp;pk</tt></dd></dl>
+
+<dl><dt><a name="IndexedRedisSave-peekNextID"><strong>peekNextID</strong></a>(self)</dt><dd><tt>peekNextID&nbsp;-&nbsp;Look&nbsp;at,&nbsp;but&nbsp;don't&nbsp;increment&nbsp;the&nbsp;primary&nbsp;key&nbsp;for&nbsp;this&nbsp;model.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Probably&nbsp;only&nbsp;useful&nbsp;as&nbsp;internal<br>
+&nbsp;<br>
+@return&nbsp;int&nbsp;-&nbsp;next&nbsp;pk</tt></dd></dl>
+
+<hr>
+Data descriptors inherited from <a href="IndexedRedis.html#IndexedRedisHelper">IndexedRedisHelper</a>:<br>
+<dl><dt><strong>__dict__</strong></dt>
+<dd><tt>dictionary&nbsp;for&nbsp;instance&nbsp;variables&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+</td></tr></table> <p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#ffc8d8">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#000000" face="helvetica, arial"><a name="classproperty">class <strong>classproperty</strong></a>(<a href="__builtin__.html#object">__builtin__.object</a>)</font></td></tr>
+    
+<tr><td bgcolor="#ffc8d8"><tt>&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%">Methods defined here:<br>
+<dl><dt><a name="classproperty-__get__"><strong>__get__</strong></a>(self, instance, owner)</dt></dl>
+
+<dl><dt><a name="classproperty-__init__"><strong>__init__</strong></a>(self, getter)</dt></dl>
+
+<hr>
+Data descriptors defined here:<br>
+<dl><dt><strong>__dict__</strong></dt>
+<dd><tt>dictionary&nbsp;for&nbsp;instance&nbsp;variables&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<dl><dt><strong>__weakref__</strong></dt>
+<dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+</td></tr></table></td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#eeaa77">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Functions</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#eeaa77"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl><dt><strong>decodeDict</strong> <em>lambda</em> origDict</dt><dd><tt>#&nbsp;Changing&nbsp;redis&nbsp;encoding&nbsp;into&nbsp;requested&nbsp;encoding</tt></dd></dl>
+ <dl><dt><a name="-getEncoding"><strong>getEncoding</strong></a>(encoding)</dt></dl>
+ <dl><dt><a name="-setEncoding"><strong>setEncoding</strong></a>(encoding)</dt><dd><tt>Sets&nbsp;the&nbsp;encoding&nbsp;used&nbsp;by&nbsp;IndexedRedis</tt></dd></dl>
+ <dl><dt><a name="-tostr"><strong>tostr</strong></a>(x)</dt><dd><tt>#&nbsp;Python&nbsp;2</tt></dd></dl>
+</td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#55aa55">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Data</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#55aa55"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><strong>INDEXED_REDIS_PREFIX</strong> = '_ir_|'<br>
+<strong>INDEXED_REDIS_VERSION</strong> = (2, 2, 1)<br>
+<strong>INDEXED_REDIS_VERSION_STR</strong> = '2.2.1'<br>
+<strong>__version__</strong> = '2.2.1'<br>
+<strong>defaultEncoding</strong> = 'utf-8'</td></tr></table>
+</body></html>

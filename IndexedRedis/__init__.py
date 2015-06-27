@@ -1,4 +1,5 @@
-#Copyright (c) Timothy Savannah under LGPL, All Rights Reserved. See LICENSE for more information
+# Copyright (c) 2014 Timothy Savannah under LGPL. See LICENSE for more information.
+# 
 
 import copy
 import sys
@@ -7,8 +8,8 @@ import redis
 
 INDEXED_REDIS_PREFIX = '_ir_|'
 
-INDEXED_REDIS_VERSION = (2, 2, 1)
-INDEXED_REDIS_VERSION_STR = '2.2.1'
+INDEXED_REDIS_VERSION = (2, 3, 0)
+INDEXED_REDIS_VERSION_STR = '2.3.0'
 __version__ = INDEXED_REDIS_VERSION_STR
 
 try:
@@ -129,7 +130,14 @@ class IndexedRedisModel(object):
 
 		self._id = kwargs.get('_id', None)
 	
-	def toDict(self, includeMeta=False):
+	def asDict(self, includeMeta=False):
+		'''
+			toDict / asDict - Get a dictionary representation of this model.
+
+			@param includeMeta - Include metadata in return. For now, this is only pk stored as "_id"
+
+			@return - Dictionary reprensetation of this object and all fields
+		'''
 		ret = {}
 		for fieldName in self.FIELDS:
 			val = getattr(self, fieldName, '')
@@ -139,11 +147,13 @@ class IndexedRedisModel(object):
 			ret['_id'] = getattr(self, '_id', '')
 		return ret
 
-	asDict = toDict
+	toDict = asDict
 	
 	def getUpdatedFields(self):
 		'''
-			Returns dictionary of fieldName : tuple(old, new)
+			getUpdatedFields - See changed fields.
+			
+			@return - a dictionary of fieldName : tuple(old, new)
 		'''
 		updatedFields = {}
 		for fieldName in self.FIELDS:
@@ -154,6 +164,9 @@ class IndexedRedisModel(object):
 
 	@classproperty
 	def objects(cls):
+		'''
+			objects - Start filtering
+		'''
 		return IndexedRedisQuery(cls)
 
 	@classproperty
@@ -162,13 +175,24 @@ class IndexedRedisModel(object):
 
 	@classproperty
 	def deleter(cls):
+		'''
+			deleter - Get access to IndexedRedisDelete for this model.
+			@see IndexedRedisDelete.
+			Usually you'll probably just do Model.objects.filter(...).delete()
+		'''
 		return IndexedRedisDelete(cls)
 
 	def save(self):
+		'''
+			save - Save this object
+		'''
 		saver = IndexedRedisSave(self.__class__)
 		return saver.save(self)
 	
 	def delete(self):
+		'''
+			delete - Delete this object
+		'''
 		deleter = IndexedRedisDelete(self.__class__)
 		return deleter.deleteOne(self)
 
@@ -254,10 +278,23 @@ class IndexedRedisHelper(object):
 		return ''.join([INDEXED_REDIS_PREFIX, self.keyName, ':next'])
 
 	def peekNextID(self):
+		'''
+			peekNextID - Look at, but don't increment the primary key for this model.
+				Probably only useful as internal
+
+			@return int - next pk
+		'''
 		conn = self._get_connection()
 		return int(conn.get(self._get_next_id_key()) or 0)
 
 	def getNextID(self):
+		'''
+			getNextID - Get (and increment) the next primary key for this model.
+				If you don't want to increment, @see peekNextID .
+				Probably only useful as internal
+
+			@return int - next pk
+		'''
 		conn = self._get_connection()
 		return conn.incr(self._get_next_id_key())
 
@@ -266,7 +303,7 @@ class IndexedRedisHelper(object):
 
 class IndexedRedisQuery(IndexedRedisHelper):
 	'''
-		IndexedRedisQuery - The query object. This is the return of "Model.objects.filter"
+		IndexedRedisQuery - The query object. This is the return of "Model.objects" and "Model.objects.filter"
 	'''
 	
 	def __init__(self, *args, **kwargs):
@@ -439,6 +476,33 @@ class IndexedRedisQuery(IndexedRedisHelper):
 			return self.getMultiple(matchedKeys)
 
 		return []
+
+	def allOnlyFields(self, fields):
+		'''
+			allOnlyFields - Get the objects which match the filter criteria, only fetching given fields.
+
+			@param fields - List of fields to fetch
+
+			@return - Partial objects with only the given fields fetched
+		'''
+		matchedKeys = self.getPrimaryKeys()
+		if matchedKeys:
+			return self.getMultipleOnlyFields(matchedKeys, fields)
+
+		return []
+
+	def allOnlyIndexedFields(self):
+		'''
+			allOnlyIndexedFields - Get the objects which match the filter criteria, only fetching indexed fields.
+
+			@return - Partial objects with only the indexed fields fetched
+		'''
+		matchedKeys = self.getPrimaryKeys()
+		if matchedKeys:
+			return self.getMultipleOnlyIndexedFields(matchedKeys)
+
+		return []
+		
 	
 	def first(self):
 		'''
@@ -496,15 +560,15 @@ class IndexedRedisQuery(IndexedRedisHelper):
 			delete - Deletes all entries matching the filter criteria
 
 		'''
-		return self.mdl.deleter.deleteMultiple(self.all())
+		return self.mdl.deleter.deleteMultiple(self.allOnlyIndexedFields())
 
-	def get(self, pk, conn=None):
+	def get(self, pk):
 		'''
 			get - Get a single value with the internal primary key.
 
 			@param pk - internal primary key (can be found via .getPk() on an item)
 		'''
-		conn = self._get_connection(conn)
+		conn = self._get_connection()
 		key = self._get_key_for_id(pk)
 		res = conn.hgetall(key)
 		if type(res) != dict or not len(res.keys()):
@@ -529,7 +593,8 @@ class IndexedRedisQuery(IndexedRedisHelper):
 		conn = self._get_connection()
 		pipeline = conn.pipeline()
 		for pk in pks:
-			self.get(pk, pipeline)
+			key = self._get_key_for_id(pk)
+			pipeline.hgetall(key)
 
 		res = pipeline.execute()
 		
@@ -547,13 +612,131 @@ class IndexedRedisQuery(IndexedRedisHelper):
 			i += 1
 			
 		return ret
+
+	def getOnlyFields(self, pk, fields):
+		'''
+			getOnlyFields - Gets only certain fields from a paticular primary key. For working on entire filter set, see allOnlyFields
+
+			pk - Primary Key
+			fields list<str> - List of fields
+
+			return - Partial objects with only fields applied
+		'''
+		conn = self._get_connection()
+		key = self._get_key_for_id(pk)
+
+		res = conn.hmget(key, fields)
+		if type(res) != list or not len(res):
+			return None
+
+		objDict = {}
+		numFields = len(fields)
+		i = 0
+		anyNotNone = False
+		while i < numFields:
+			objDict[fields[i]] = res[i]
+			if res[i] != None:
+				anyNotNone = True
+			i += 1
+
+		if anyNotNone is False:
+			return None
+			
+		objDict['_id'] = pk
+		return self._dictToObj(objDict)
+
+	def getMultipleOnlyFields(self, pks, fields):
+		'''
+			getMultipleOnlyFields - Gets only certain fields from a list of  primary keys. For working on entire filter set, see allOnlyFields
+
+			pks list<str> - Primary Keys
+			fields list<str> - List of fields
+
+			return - List of partial objects with only fields applied
+		'''
+		if type(pks) == set:
+			pks = list(pks)
+
+		if len(pks) == 1:
+			return [self.getOnlyFields(pks[0], fields)]
+		conn = self._get_connection()
+		pipeline = conn.pipeline()
+
+		for pk in pks:
+			key = self._get_key_for_id(pk)
+			pipeline.hmget(key, fields)
+
+		res = pipeline.execute()
+		ret = []
+		pksLen = len(pks)
+		i = 0
+		numFields = len(fields)
+		while i < pksLen:
+			objDict = {}
+			anyNotNone = False
+			thisRes = res[i]
+			if thisRes is None or type(thisRes) != list:
+				ret.append(None)
+				i += 1
+				continue
+
+			j = 0
+			while j < numFields:
+				objDict[fields[j]] = thisRes[j]
+				if thisRes[j] != None:
+					anyNotNone = True
+				j += 1
+
+			if anyNotNone is False:
+				ret.append(None)
+				i += 1
+				continue
+
+			objDict['_id'] = pks[i]
+			obj = self._dictToObj(objDict)
+			ret.append(obj)
+			i += 1
+			
+		return ret
+
+	def getOnlyIndexedFields(self, pk):
+		'''
+			getOnlyIndexedFields - Get only the indexed fields on an object. This is the minimum to delete.
+
+			@param pk - Primary key
+
+			@return - Object with only indexed fields fetched.
+		'''
+		return self.getOnlyFields(pk, self.indexedFields)
+	
+	def getMultipleOnlyIndexedFields(self, pks):
+		'''
+			getMultipleOnlyIndexedFields - Get only the indexed fields on an object. This is the minimum to delete.
+
+			@param pks - List of primary keys
+
+			@return - List of objects with only indexed fields fetched
+		'''
+		return self.getMultipleOnlyFields(pks, self.indexedFields)
+
 			
 class IndexedRedisSave(IndexedRedisHelper):
 	'''
 		IndexedRedisClass - Class used to save objects. Used with Model.save is called.
+			Except for advanced usage, this is probably for internal only.
 	'''
 
 	def save(self, obj, useMulti=True, forceID=False, conn=None):
+		'''
+			save - Save an object associated with this model. You probably will just do object.save() instead of this.
+
+			@param obj - The object to save
+			@param useMulti - Do multiple at once
+			@param forceID - if not False, force ID to this.
+			@param conn - A connection or None
+
+			@return - List of pks
+		'''
 		conn = self._get_connection(conn)
 
 		if isinstance(obj, list) or isinstance(obj, tuple):
@@ -613,10 +796,19 @@ class IndexedRedisSave(IndexedRedisHelper):
 
 class IndexedRedisDelete(IndexedRedisHelper):
 	'''
-		IndexedRedisDelete - Used for removing objects. Called when Model.delete is used
+		IndexedRedisDelete - Used for removing objects. Called when Model.delete is used.
+			Except for advanced usage, this is probably for internal only.
 	'''
 
 	def deleteOne(self, obj, conn=None):
+		'''
+			deleteOne - Delete one object
+
+			@param obj - object to delete
+			@param conn - Connection to reuse, or None
+
+			@return - number of items deleted (0 or 1)
+		'''
 		conn = self._get_connection(conn)
 		if not getattr(obj, '_id', None):
 			return 0
@@ -627,8 +819,24 @@ class IndexedRedisDelete(IndexedRedisHelper):
 			self._rem_id_from_index(fieldName, obj._id, obj._origData[fieldName])
 		obj._id = None
 		return 1
-	
+
+	def deleteByPk(self, pk):
+		'''
+			deleteByPk - Delete object associated with given primary key
+		'''
+		obj = self.mdl.objects.getOnlyIndexedFields(pk)
+		if not obj:
+			return 0
+		return self.deleteOne(obj)
+
 	def deleteMultiple(self, objs):
+		'''
+			deleteMultiple - Delete multiple objects
+
+			@param objs - List of objects
+
+			@return - Number of objects deleted
+		'''
 		conn = self._get_connection()
 		pipeline = conn.pipeline()
 
@@ -640,6 +848,24 @@ class IndexedRedisDelete(IndexedRedisHelper):
 		pipeline.execute()
 
 		return numDeleted
+
+	def deleteMultipleByPks(self, pks):
+		'''
+			deleteMultipleByPks - Delete multiple objects given their primary keys
+
+			@param pks - List of primary keys
+
+			@return - Number of objects deleted
+		'''
+		if type(pks) == set:
+			pks = list(pks)
+
+		if len(pks) == 1:
+			return self.deleteByPk(pks[0])
+
+		objs = self.mdl.objects.getMultipleOnlyIndexedFields(pks)
+		return self.deleteMultiple(objs)
+		
 	
 		
 # vim:set ts=8 shiftwidth=8 softtabstop=8 noexpandtab :
