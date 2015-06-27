@@ -99,6 +99,9 @@ Actual objects contain methods including
 	getUpdatedFields - See changes since last fetch
 
 
+Full Public API
+---------------
+
 There are several methods not documented here. 
 
 See http://htmlpreview.github.io/?https://github.com/kata198/indexedredis/blob/master/IndexedRedis.html#IndexedRedisQuery for full documentation
