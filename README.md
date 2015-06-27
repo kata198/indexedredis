@@ -101,7 +101,7 @@ Actual objects contain methods including
 
 There are several methods not documented here. 
 
-See https://raw.githubusercontent.com/kata198/indexedredis/master/IndexedRedis.html#IndexedRedisQuery for full documentation
+See http://htmlpreview.github.io/?https://github.com/kata198/indexedredis/blob/master/IndexedRedis.html#IndexedRedisQuery for full documentation
 
 
 Encodings
