@@ -34,20 +34,31 @@ This is the model you should extend.
 
 	class Song(IndexedRedisModel):
 	    
-		FIELDS = [ \
+		FIELDS = [ \\
 				'artist',
+
 				'title',
+
 				'album',
+
 				'track_number',
+
 				'duration',
+
 				'description',
+
 				'copyright',
+
 		]
 
-		INDEXED_FIELDS = [ \
+
+		INDEXED_FIELDS = [ \\
 					'artist',
+
 					'title',
+
 					'track_number',
+
 		]
 
 		KEY_NAME = 'Songs'
