@@ -7,10 +7,11 @@
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
 <tr bgcolor="#7799ee">
 <td valign=bottom>&nbsp;<br>
-<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong>IndexedRedis</strong></big></big> (version 2.2.1)</font></td
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong>IndexedRedis</strong></big></big> (version 2.3.0)</font></td
 ><td align=right valign=bottom
 ><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br><a href="file:/home/media/projects/indexedredis/IndexedRedis/__init__.py">/home/media/projects/indexedredis/IndexedRedis/__init__.py</a></font></td></tr></table>
-    <p><tt>#Copyright&nbsp;(c)&nbsp;Timothy&nbsp;Savannah&nbsp;under&nbsp;LGPL,&nbsp;All&nbsp;Rights&nbsp;Reserved.&nbsp;See&nbsp;LICENSE&nbsp;for&nbsp;more&nbsp;information</tt></p>
+    <p><tt>#&nbsp;Copyright&nbsp;(c)&nbsp;2014&nbsp;Timothy&nbsp;Savannah&nbsp;under&nbsp;LGPL.&nbsp;See&nbsp;LICENSE&nbsp;for&nbsp;more&nbsp;information.<br>
+#</tt></p>
 <p>
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
 <tr bgcolor="#aa55cc">
@@ -82,18 +83,9 @@ Methods defined here:<br>
 
 <hr>
 Methods inherited from <a href="IndexedRedis.html#IndexedRedisHelper">IndexedRedisHelper</a>:<br>
-<dl><dt><a name="IndexedRedisDelete-__init__"><strong>__init__</strong></a>(self, mdl)</dt></dl>
-
-<dl><dt><a name="IndexedRedisDelete-getNextID"><strong>getNextID</strong></a>(self)</dt><dd><tt>getNextID&nbsp;-&nbsp;Get&nbsp;(and&nbsp;increment)&nbsp;the&nbsp;next&nbsp;primary&nbsp;key&nbsp;for&nbsp;this&nbsp;model.<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;If&nbsp;you&nbsp;don't&nbsp;want&nbsp;to&nbsp;increment,&nbsp;@see&nbsp;peekNextID&nbsp;.<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Probably&nbsp;only&nbsp;useful&nbsp;as&nbsp;internal<br>
+<dl><dt><a name="IndexedRedisDelete-__init__"><strong>__init__</strong></a>(self, mdl)</dt><dd><tt>Internal&nbsp;constructor<br>
 &nbsp;<br>
-@return&nbsp;int&nbsp;-&nbsp;next&nbsp;pk</tt></dd></dl>
-
-<dl><dt><a name="IndexedRedisDelete-peekNextID"><strong>peekNextID</strong></a>(self)</dt><dd><tt>peekNextID&nbsp;-&nbsp;Look&nbsp;at,&nbsp;but&nbsp;don't&nbsp;increment&nbsp;the&nbsp;primary&nbsp;key&nbsp;for&nbsp;this&nbsp;model.<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Probably&nbsp;only&nbsp;useful&nbsp;as&nbsp;internal<br>
-&nbsp;<br>
-@return&nbsp;int&nbsp;-&nbsp;next&nbsp;pk</tt></dd></dl>
+@param&nbsp;mdl&nbsp;-&nbsp;<a href="#IndexedRedisModel">IndexedRedisModel</a>&nbsp;implementer</tt></dd></dl>
 
 <hr>
 Data descriptors inherited from <a href="IndexedRedis.html#IndexedRedisHelper">IndexedRedisHelper</a>:<br>
@@ -110,21 +102,12 @@ Data descriptors inherited from <a href="IndexedRedis.html#IndexedRedisHelper">I
 <font color="#000000" face="helvetica, arial"><a name="IndexedRedisHelper">class <strong>IndexedRedisHelper</strong></a>(<a href="__builtin__.html#object">__builtin__.object</a>)</font></td></tr>
     
 <tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
-<td colspan=2><tt><a href="#IndexedRedisHelper">IndexedRedisHelper</a>&nbsp;-&nbsp;internal&nbsp;helper&nbsp;class<br>&nbsp;</tt></td></tr>
+<td colspan=2><tt><a href="#IndexedRedisHelper">IndexedRedisHelper</a>&nbsp;-&nbsp;internal&nbsp;helper&nbsp;class&nbsp;which&nbsp;ties&nbsp;together&nbsp;all&nbsp;the&nbsp;actions<br>&nbsp;</tt></td></tr>
 <tr><td>&nbsp;</td>
 <td width="100%">Methods defined here:<br>
-<dl><dt><a name="IndexedRedisHelper-__init__"><strong>__init__</strong></a>(self, mdl)</dt></dl>
-
-<dl><dt><a name="IndexedRedisHelper-getNextID"><strong>getNextID</strong></a>(self)</dt><dd><tt>getNextID&nbsp;-&nbsp;Get&nbsp;(and&nbsp;increment)&nbsp;the&nbsp;next&nbsp;primary&nbsp;key&nbsp;for&nbsp;this&nbsp;model.<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;If&nbsp;you&nbsp;don't&nbsp;want&nbsp;to&nbsp;increment,&nbsp;@see&nbsp;peekNextID&nbsp;.<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Probably&nbsp;only&nbsp;useful&nbsp;as&nbsp;internal<br>
+<dl><dt><a name="IndexedRedisHelper-__init__"><strong>__init__</strong></a>(self, mdl)</dt><dd><tt>Internal&nbsp;constructor<br>
 &nbsp;<br>
-@return&nbsp;int&nbsp;-&nbsp;next&nbsp;pk</tt></dd></dl>
-
-<dl><dt><a name="IndexedRedisHelper-peekNextID"><strong>peekNextID</strong></a>(self)</dt><dd><tt>peekNextID&nbsp;-&nbsp;Look&nbsp;at,&nbsp;but&nbsp;don't&nbsp;increment&nbsp;the&nbsp;primary&nbsp;key&nbsp;for&nbsp;this&nbsp;model.<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Probably&nbsp;only&nbsp;useful&nbsp;as&nbsp;internal<br>
-&nbsp;<br>
-@return&nbsp;int&nbsp;-&nbsp;next&nbsp;pk</tt></dd></dl>
+@param&nbsp;mdl&nbsp;-&nbsp;<a href="#IndexedRedisModel">IndexedRedisModel</a>&nbsp;implementer</tt></dd></dl>
 
 <hr>
 Data descriptors defined here:<br>
@@ -347,19 +330,6 @@ return&nbsp;-&nbsp;Partial&nbsp;objects&nbsp;with&nbsp;only&nbsp;fields&nbsp;app
 @return&nbsp;-&nbsp;Instance&nbsp;of&nbsp;Model&nbsp;<a href="__builtin__.html#object">object</a>,&nbsp;or&nbsp;None&nbsp;if&nbsp;no&nbsp;items&nbsp;math&nbsp;current&nbsp;filters</tt></dd></dl>
 
 <hr>
-Methods inherited from <a href="IndexedRedis.html#IndexedRedisHelper">IndexedRedisHelper</a>:<br>
-<dl><dt><a name="IndexedRedisQuery-getNextID"><strong>getNextID</strong></a>(self)</dt><dd><tt>getNextID&nbsp;-&nbsp;Get&nbsp;(and&nbsp;increment)&nbsp;the&nbsp;next&nbsp;primary&nbsp;key&nbsp;for&nbsp;this&nbsp;model.<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;If&nbsp;you&nbsp;don't&nbsp;want&nbsp;to&nbsp;increment,&nbsp;@see&nbsp;peekNextID&nbsp;.<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Probably&nbsp;only&nbsp;useful&nbsp;as&nbsp;internal<br>
-&nbsp;<br>
-@return&nbsp;int&nbsp;-&nbsp;next&nbsp;pk</tt></dd></dl>
-
-<dl><dt><a name="IndexedRedisQuery-peekNextID"><strong>peekNextID</strong></a>(self)</dt><dd><tt>peekNextID&nbsp;-&nbsp;Look&nbsp;at,&nbsp;but&nbsp;don't&nbsp;increment&nbsp;the&nbsp;primary&nbsp;key&nbsp;for&nbsp;this&nbsp;model.<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Probably&nbsp;only&nbsp;useful&nbsp;as&nbsp;internal<br>
-&nbsp;<br>
-@return&nbsp;int&nbsp;-&nbsp;next&nbsp;pk</tt></dd></dl>
-
-<hr>
 Data descriptors inherited from <a href="IndexedRedis.html#IndexedRedisHelper">IndexedRedisHelper</a>:<br>
 <dl><dt><strong>__dict__</strong></dt>
 <dd><tt>dictionary&nbsp;for&nbsp;instance&nbsp;variables&nbsp;(if&nbsp;defined)</tt></dd>
@@ -395,18 +365,9 @@ Methods defined here:<br>
 
 <hr>
 Methods inherited from <a href="IndexedRedis.html#IndexedRedisHelper">IndexedRedisHelper</a>:<br>
-<dl><dt><a name="IndexedRedisSave-__init__"><strong>__init__</strong></a>(self, mdl)</dt></dl>
-
-<dl><dt><a name="IndexedRedisSave-getNextID"><strong>getNextID</strong></a>(self)</dt><dd><tt>getNextID&nbsp;-&nbsp;Get&nbsp;(and&nbsp;increment)&nbsp;the&nbsp;next&nbsp;primary&nbsp;key&nbsp;for&nbsp;this&nbsp;model.<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;If&nbsp;you&nbsp;don't&nbsp;want&nbsp;to&nbsp;increment,&nbsp;@see&nbsp;peekNextID&nbsp;.<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Probably&nbsp;only&nbsp;useful&nbsp;as&nbsp;internal<br>
+<dl><dt><a name="IndexedRedisSave-__init__"><strong>__init__</strong></a>(self, mdl)</dt><dd><tt>Internal&nbsp;constructor<br>
 &nbsp;<br>
-@return&nbsp;int&nbsp;-&nbsp;next&nbsp;pk</tt></dd></dl>
-
-<dl><dt><a name="IndexedRedisSave-peekNextID"><strong>peekNextID</strong></a>(self)</dt><dd><tt>peekNextID&nbsp;-&nbsp;Look&nbsp;at,&nbsp;but&nbsp;don't&nbsp;increment&nbsp;the&nbsp;primary&nbsp;key&nbsp;for&nbsp;this&nbsp;model.<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Probably&nbsp;only&nbsp;useful&nbsp;as&nbsp;internal<br>
-&nbsp;<br>
-@return&nbsp;int&nbsp;-&nbsp;next&nbsp;pk</tt></dd></dl>
+@param&nbsp;mdl&nbsp;-&nbsp;<a href="#IndexedRedisModel">IndexedRedisModel</a>&nbsp;implementer</tt></dd></dl>
 
 <hr>
 Data descriptors inherited from <a href="IndexedRedis.html#IndexedRedisHelper">IndexedRedisHelper</a>:<br>
@@ -444,8 +405,10 @@ Data descriptors defined here:<br>
     
 <tr><td bgcolor="#eeaa77"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
 <td width="100%"><dl><dt><strong>decodeDict</strong> <em>lambda</em> origDict</dt><dd><tt>#&nbsp;Changing&nbsp;redis&nbsp;encoding&nbsp;into&nbsp;requested&nbsp;encoding</tt></dd></dl>
- <dl><dt><a name="-getEncoding"><strong>getEncoding</strong></a>(encoding)</dt></dl>
- <dl><dt><a name="-setEncoding"><strong>setEncoding</strong></a>(encoding)</dt><dd><tt>Sets&nbsp;the&nbsp;encoding&nbsp;used&nbsp;by&nbsp;IndexedRedis</tt></dd></dl>
+ <dl><dt><a name="-getEncoding"><strong>getEncoding</strong></a>()</dt><dd><tt>getEncoding&nbsp;-&nbsp;Get&nbsp;the&nbsp;encoding&nbsp;that&nbsp;IndexedRedis&nbsp;will&nbsp;use</tt></dd></dl>
+ <dl><dt><a name="-setEncoding"><strong>setEncoding</strong></a>(encoding)</dt><dd><tt>setEncoding&nbsp;-&nbsp;Sets&nbsp;the&nbsp;encoding&nbsp;used&nbsp;by&nbsp;IndexedRedis<br>
+&nbsp;<br>
+@param&nbsp;encoding&nbsp;-&nbsp;An&nbsp;encoding&nbsp;(like&nbsp;utf-8)</tt></dd></dl>
  <dl><dt><a name="-tostr"><strong>tostr</strong></a>(x)</dt><dd><tt>#&nbsp;Python&nbsp;2</tt></dd></dl>
 </td></tr></table><p>
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
@@ -455,8 +418,8 @@ Data descriptors defined here:<br>
     
 <tr><td bgcolor="#55aa55"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
 <td width="100%"><strong>INDEXED_REDIS_PREFIX</strong> = '_ir_|'<br>
-<strong>INDEXED_REDIS_VERSION</strong> = (2, 2, 1)<br>
-<strong>INDEXED_REDIS_VERSION_STR</strong> = '2.2.1'<br>
-<strong>__version__</strong> = '2.2.1'<br>
+<strong>INDEXED_REDIS_VERSION</strong> = (2, 3, 0)<br>
+<strong>INDEXED_REDIS_VERSION_STR</strong> = '2.3.0'<br>
+<strong>__version__</strong> = '2.3.0'<br>
 <strong>defaultEncoding</strong> = 'utf-8'</td></tr></table>
 </body></html>

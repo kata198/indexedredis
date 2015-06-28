@@ -14,6 +14,16 @@ My tests have shown that for using equivalent models between flask/mysql and Ind
 It is compatible with python 2.7 and python 3. It has been tested with python 2.7 and 3.4.
 
 
+Full Public API
+---------------
+
+There are several methods not documented here. 
+
+See `This Page <http://htmlpreview.github.io/?https://github.com/kata198/indexedredis/blob/master/IndexedRedis.html#IndexedRedisQuery>`_ for full documentation
+
+*Below is a quick highlight/overview*
+
+
 IndexedRedisModel
 -----------------
 
@@ -98,13 +108,6 @@ Actual objects contain methods including
 
 	getUpdatedFields - See changes since last fetch
 
-
-Full Public API
----------------
-
-There are several methods not documented here. 
-
-See `This Page <http://htmlpreview.github.io/?https://github.com/kata198/indexedredis/blob/master/IndexedRedis.html#IndexedRedisQuery>`_ for full documentation
 
 
 

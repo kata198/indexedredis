@@ -1,3 +1,9 @@
+2.3.1 (Jun 27 2015)
+	- Add some more docstring
+	- make getNextID and peekNextID private methods. They should only be
+	used internal.
+	- Regenerate docs
+
 2.3.0 (Jun 27 2015)
 	- Change Model.objects.filter(...).delete to fetch minimal data (only
 	indexed fields) instead of entire objects, so deleting is more

@@ -6,10 +6,15 @@ import sys
 import uuid
 import redis
 
+# Prefix that all IndexedRedis keys will contain, as to not conflict with other stuff.
 INDEXED_REDIS_PREFIX = '_ir_|'
 
-INDEXED_REDIS_VERSION = (2, 3, 0)
-INDEXED_REDIS_VERSION_STR = '2.3.0'
+# Version as a tuple (major, minor, patchlevel)
+INDEXED_REDIS_VERSION = (2, 3, 1)
+
+# Version as a string
+INDEXED_REDIS_VERSION_STR = '2.3.1'
+
 __version__ = INDEXED_REDIS_VERSION_STR
 
 try:
@@ -29,12 +34,17 @@ except:
 
 def setEncoding(encoding):
 	'''
-		Sets the encoding used by IndexedRedis
+		setEncoding - Sets the encoding used by IndexedRedis
+
+		@param encoding - An encoding (like utf-8)
 	'''
 	global defaultEncoding
 	defaultEncoding = encoding
 
-def getEncoding(encoding):
+def getEncoding():
+	'''
+		getEncoding - Get the encoding that IndexedRedis will use
+	'''
 	global defaultEncoding
 	return defaultEncoding
 
@@ -102,11 +112,17 @@ class IndexedRedisModel(object):
 
 	'''
 	
+	# FIELDS - A list of field names, as strings.
 	FIELDS = []
+
+	# INDEXED_FIELDS - A list of field names that will be indexed, as strings. Must also be present in FIELDS.
+	#  You can only search on indexed fields, but they add time to insertion/deletion
 	INDEXED_FIELDS = []
 
+	# KEY_NAME - A string of a unique name which corrosponds to objects of this type.
 	KEY_NAME = None
 
+	# REDIS_CONNECTION_PARAMS - A dictionary of parameters to redis.Redis such as host or port. Will be used on all connections.
 	REDIS_CONNECTION_PARAMS = {}
 
 	_connection = None
@@ -227,11 +243,16 @@ class IndexedRedisModel(object):
 		
 class IndexedRedisHelper(object):
 	'''
-		IndexedRedisHelper - internal helper class
+		IndexedRedisHelper - internal helper class which ties together all the actions
 	'''
 
 
 	def __init__(self, mdl):
+		'''
+			Internal constructor
+
+			@param mdl - IndexedRedisModel implementer
+		'''
 		self.mdl = mdl
 		self.keyName = self.mdl.KEY_NAME
 		self.fieldNames = self.mdl.FIELDS
@@ -239,9 +260,18 @@ class IndexedRedisHelper(object):
 		self._connection = getattr(mdl, '_connection', None)
 
 	def _get_new_connection(self):
+		'''
+			_get_new_connection - Get a new connection
+			internal
+		'''
 		return redis.Redis(**self.mdl.REDIS_CONNECTION_PARAMS)
 
 	def _get_connection(self, existingConn=None):
+		'''
+			_get_connection - Maybe get a new connection, or reuse if passed in.
+				Will share a connection with a model
+			internal
+		'''
 		if existingConn is not None: # Allows one-liners
 			return existingConn
 		if self._connection is None:
@@ -249,49 +279,93 @@ class IndexedRedisHelper(object):
 		return self._connection
 
 	def _get_ids_key(self):
+		'''
+			_get_ids_key - Gets the key holding primary keys
+			internal
+		'''
 		return ''.join([INDEXED_REDIS_PREFIX, self.keyName + ':keys'])
 
 	def _add_id_to_keys(self, pk, conn=None):
+		'''
+			_add_id_to_keys - Adds primary key to table
+			internal
+		'''
 		conn = self._get_connection(conn)
 		conn.sadd(self._get_ids_key(), pk)
 	
 	def _rem_id_from_keys(self, pk, conn=None):
+		'''
+			_rem_id_from_keys - Remove primary key from table
+			internal
+		'''
 		conn = self._get_connection(conn)
 		conn.srem(self._get_ids_key(), pk)
 
 	def _add_id_to_index(self, indexedField, pk, val, conn=None):
+		'''
+			_add_id_to_index - Adds an id to an index
+			internal
+		'''
 		conn = self._get_connection(conn)
 		conn.sadd(self._get_key_for_index(indexedField, val), pk)
 
 	def _rem_id_from_index(self, indexedField, pk, val, conn=None):
+		'''
+			_rem_id_from_index - Removes an id from an index
+			internal
+		'''
 		conn = self._get_connection(conn)
 		conn.srem(self._get_key_for_index(indexedField, val), pk)
 		
 	def _get_key_for_index(self, indexedField, val):
+		'''
+			_get_key_for_index - Returns the key name that would hold the indexes on a value
+			Internal - does not validate that indexedFields is actually indexed. Trusts you. Don't let it down.
+
+			@param indexedField - string of field name
+			@param val - Value of field
+
+			@return - Key name string
+		'''
 		return ''.join([INDEXED_REDIS_PREFIX, self.keyName, ':idx:', indexedField, ':', tostr(val)])
 		
 
 	def _get_key_for_id(self, pk):
+		'''
+			_get_key_for_id - Returns the key name that holds all the data for an object
+			Internal
+
+			@param pk - primary key
+
+			@return - Key name string
+		'''
 		return ''.join([INDEXED_REDIS_PREFIX, self.keyName, ':data:', tostr(pk)])
 
 	def _get_next_id_key(self):
+		'''
+			_get_next_id_key - Returns the key name that holds the generator for primary key values
+			Internal
+
+			@return - Key name string
+		'''
 		return ''.join([INDEXED_REDIS_PREFIX, self.keyName, ':next'])
 
-	def peekNextID(self):
+	def _peekNextID(self):
 		'''
-			peekNextID - Look at, but don't increment the primary key for this model.
-				Probably only useful as internal
+			_peekNextID - Look at, but don't increment the primary key for this model.
+				Internal.
 
 			@return int - next pk
 		'''
 		conn = self._get_connection()
 		return int(conn.get(self._get_next_id_key()) or 0)
 
-	def getNextID(self):
+	def _getNextID(self):
 		'''
-			getNextID - Get (and increment) the next primary key for this model.
-				If you don't want to increment, @see peekNextID .
-				Probably only useful as internal
+			_getNextID - Get (and increment) the next primary key for this model.
+				If you don't want to increment, @see _peekNextID .
+				Internal.
+				This is done automatically on save. No need to call it.
 
 			@return int - next pk
 		'''
@@ -299,6 +373,9 @@ class IndexedRedisHelper(object):
 		return conn.incr(self._get_next_id_key())
 
 	def _getTempKey(self):
+		'''
+			_getTempKey - Generates a temporary key for intermediate storage
+		'''
 		return self._get_ids_key() + '__' + uuid.uuid4().__str__()
 
 class IndexedRedisQuery(IndexedRedisHelper):
@@ -347,6 +424,9 @@ class IndexedRedisQuery(IndexedRedisHelper):
 
 	@staticmethod
 	def _filter(filterObj, **kwargs):
+		'''
+			Internal for handling filters; the guts of .filter and .filterInline
+		'''
 		for key, value in kwargs.items():
 			if key.endswith('__ne'):
 				notFilter = True
@@ -752,7 +832,7 @@ class IndexedRedisSave(IndexedRedisHelper):
 			else:
 				isInsert = not bool(getattr(obj, '_id', None))
 				if isInsert:
-					obj._id = self.getNextID()
+					obj._id = self._getNextID()
 			isInserts.append(isInsert)
 
 		if useMulti is True:
