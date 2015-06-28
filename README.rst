@@ -9,7 +9,9 @@ IndexedRedis supports both “equals” and "not-equals" operators for compariso
 
 If you have ever used Flask or Django you will recognize strong similarities in the filtering interface. 
 
-My tests have shown that for using equivalent models between flask/mysql and IndexedRedis, a 600% - 1200% performance increase occurs. For actually redesigning the system to prefetch and .reset (as mentioned above), response time went from ~3.5s per page load to ~20ms [ 17500% faster ].
+My tests have shown that for using equivalent models between flask/mysql and IndexedRedis, a 600% - 1200% performance increase occurs. 
+
+For actually redesigning the system to prefetch and .reset (as mentioned above), response time went from ~3.5s per page load to ~20ms [ 17500% faster ].
 
 It is compatible with python 2.7 and python 3. It has been tested with python 2.7 and 3.4.
 
@@ -70,7 +72,7 @@ This is the model you should extend.
 
 	 Example: ['Name', 'Description', 'Model', 'Price']
 
-*INDEXED_FIELDS* -  a list of strings containing the names of fields that should be indexed. Every field listed here adds insert performance. To filter on a field, it must be in the INDEXED\_FIELDS list.
+*INDEXED_FIELDS* -  a list of strings containing the names of fields that will be indexed. Can only filter on indexed fields. Adds insert/delete time.
 
 	 Example: ['Name', 'Price']
 
@@ -94,11 +96,15 @@ Calling .filter or .filterInline builds a query/filter set. Use one of the *Fetc
 	objects = SomeModel.objects.filter(param1=val).filter(param2=val).all()
 
 **Save:**
+
 	obj = SomeModel(field1='value', field2='value')
 	obj.save()
 
+
 **Delete Using Filters:**
+
 	SomeModel.objects.filter(name='Bad Man').delete()
+
 
 **Delete Individual Objects:**
 

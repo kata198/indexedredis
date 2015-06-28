@@ -63,7 +63,7 @@ This is the model you should extend.
 
 	 Example: ['Name', 'Description', 'Model', 'Price']
 
-*INDEXED_FIELDS* -  a list of strings containing the names of fields that should be indexed. Every field listed here adds insert performance. To filter on a field, it must be in the INDEXED\_FIELDS list.
+*INDEXED_FIELDS* -  a list of strings containing the names of fields that will be indexed. Can only filter on indexed fields. Adds insert/delete time.
 
 	 Example: ['Name', 'Price']
 
