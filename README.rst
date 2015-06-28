@@ -74,11 +74,11 @@ This is the model you should extend.
 
 *INDEXED_FIELDS* -  a list of strings containing the names of fields that will be indexed. Can only filter on indexed fields. Adds insert/delete time.
 
-	 Example: ['Name', 'Price']
+	 Example: ['Name', 'Model']
 
 *KEY_NAME* - A unique name name that represents this model. Think of it like a table name.
 
-	 Example 'Items'
+	 Example: 'Items'
 
 *REDIS_CONNECTION_PARAMS* - provides the arguments to pass into "redis.Redis", to construct a redis object.
 
