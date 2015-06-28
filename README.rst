@@ -21,31 +21,14 @@ There are several methods not documented here.
 
 See `This Page <http://htmlpreview.github.io/?https://github.com/kata198/indexedredis/blob/master/IndexedRedis.html#IndexedRedisQuery>`_ for pydoc of public API.
 
+
 **Below is a quick highlight/overview**
 
 
 IndexedRedisModel
 -----------------
 
-	This is the model you should extend.
-
-	Required fields:
-
-	*FIELDS* is a list of strings, which name the fields that can be used for storage.
-
-		 Example: ['Name', 'Description', 'Model', 'Price']
-
-	*INDEXED_FIELDS* is a list of strings containing the names of fields that should be indexed. Every field listed here adds insert performance. To filter on a field, it must be in the INDEXED_FIELDS list.
-
-		 Example: ['Name', 'Price']
-
-	*KEY_NAME* is the name that represents this model. Think of it like a table name.
-
-		 Example 'Items'
-
-	*REDIS_CONNECTION_PARAMS* provides the arguments to pass into "redis.Redis", to construct a redis object.
-
-		 Example: {'host' : '192.168.1.1'}
+This is the model you should extend.
 
 **Example Model:**
 
@@ -70,11 +53,32 @@ IndexedRedisModel
 		KEY_NAME = 'Songs'
 
 
+**Required Fields:**
+
+*FIELDS* - a list of strings which name the fields that can be used for storage.
+
+	 Example: ['Name', 'Description', 'Model', 'Price']
+
+*INDEXED_FIELDS* -  a list of strings containing the names of fields that should be indexed. Every field listed here adds insert performance. To filter on a field, it must be in the INDEXED\_FIELDS list.
+
+	 Example: ['Name', 'Price']
+
+*KEY_NAME* - A unique name name that represents this model. Think of it like a table name.
+
+	 Example 'Items'
+
+*REDIS_CONNECTION_PARAMS* provides the arguments to pass into "redis.Redis", to construct a redis object.
+
+	 Example: {'host' : '192.168.1.1'}
+
+Usage
+-----
+
 Usage is very similar to Django or Flask
 
 **Query:**
 
-Calling .filter or .filterInline builds a query, and .all (or one of the other "fetch" methods described below) executes the query.
+Calling .filter or .filterInline builds a query/filter set. Use one of the *Fetch* methods described below to execute a query.
 
 	objects = SomeModel.objects.filter(param1=val).filter(param2=val).all()
 
@@ -88,6 +92,7 @@ Calling .filter or .filterInline builds a query, and .all (or one of the other "
 **Delete Individual Objects:**
 
 	obj.delete()
+
 
 **Atomic Dataset Replacement:**
 
@@ -103,7 +108,12 @@ Filter objects by SomeModel.objects.filter(key=val, key2=val2) and get objects w
 
 Example: SomeModel.objects.filter(name='Tim', colour='purple').filter(number=5).all()
 
-Calling .filter or .filterInline does not fetch anything from the server until one of the "get" methods described below are called. (e.x. "all" or "first")
+
+**Fetch Functions**:
+
+Building filtersets do not actually fetch any data until one of these are called (see API for a complete list). All of these functions act on current filterset.
+
+Example: matchingObjects = SomeModel.objects.filter(...).all()
 
 	all    - Return all objects matching this filter
 
@@ -121,19 +131,26 @@ Calling .filter or .filterInline does not fetch anything from the server until o
 
 	getPrimaryKeys - Gets primary keys associated with current filters
 
+
+**Filter Functions**
+
+These functions add filters to the current set. "filter" returns a copy, "filterInline" acts on that object.
+
 	filter - Add additional filters, returning a copy of the filter object (moreFiltered = filtered.filter(key2=val2))
 
 	filterInline - Add additional filters to current filter object. 
 
 
-On SomeModel.objects you can additionally use the following methods:
+**Global Fetch functions**
+
+These functions are available on SomeModel.objects and don't use any filters (they get specific objects)
 
 	get - Get a single object by pk
 
 	getMultiple - Get multiple objects by a list of pks
 
-	filter - Start filtering
 
+**Model Functions**
 
 Actual objects contain methods including
 
