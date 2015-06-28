@@ -17,9 +17,9 @@ It is compatible with python 2.7 and python 3. It has been tested with python 2.
 API Reference
 -------------
 
-There are several methods not documented here. 
+Most, but not all methods are documented here.
 
-See `This Page <http://htmlpreview.github.io/?https://github.com/kata198/indexedredis/blob/master/IndexedRedis.html#IndexedRedisQuery>`_ for pydoc of public API.
+See: `This Page <http://htmlpreview.github.io/?https://github.com/kata198/indexedredis/blob/master/IndexedRedis.html#IndexedRedisQuery>`_ for full documentation as a pydoc document.
 
 
 **Below is a quick highlight/overview**
@@ -67,7 +67,7 @@ This is the model you should extend.
 
 	 Example 'Items'
 
-*REDIS_CONNECTION_PARAMS* provides the arguments to pass into "redis.Redis", to construct a redis object.
+*REDIS_CONNECTION_PARAMS* - provides the arguments to pass into "redis.Redis", to construct a redis object.
 
 	 Example: {'host' : '192.168.1.1'}
 
@@ -143,7 +143,7 @@ These functions add filters to the current set. "filter" returns a copy, "filter
 
 **Global Fetch functions**
 
-These functions are available on SomeModel.objects and don't use any filters (they get specific objects)
+These functions are available on SomeModel.objects and don't use any filters (they get specific objects):
 
 	get - Get a single object by pk
 
@@ -152,7 +152,7 @@ These functions are available on SomeModel.objects and don't use any filters (th
 
 **Model Functions**
 
-Actual objects contain methods including
+Actual objects contain methods including:
 
 	save   - Save this object (create if not exist, otherwise update)
 
@@ -179,3 +179,9 @@ Example
 -------
 
 See `This Example <https:////raw.githubusercontent.com/kata198/indexedredis/master/test.py>`_ for a working example.
+
+
+Contact Me
+----------
+
+Please e-mail me with any questions, bugs, or even just to tell me that you're using it! kata198@gmail.com
