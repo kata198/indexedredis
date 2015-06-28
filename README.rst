@@ -47,10 +47,30 @@ IndexedRedisModel
 
 		 Example: {'host' : '192.168.1.1'}
 
-	An alternative to supplying REDIS_CONNECTION_PARAMS is to supply a class-level variable `_connection`, which contains the redis instance you would like to use. This variable can be created as a class-level override, or set on the model during __init__. 
+**Example Model:**
+
+	class Song(IndexedRedisModel):
+	    
+		FIELDS = [ \
+				'artist',
+				'title',
+				'album',
+				'track_number',
+				'duration',
+				'description',
+				'copyright',
+		]
+
+		INDEXED_FIELDS = [ \
+					'artist',
+					'title',
+					'track_number',
+		]
+
+		KEY_NAME = 'Songs'
 
 
-Usage is like normal ORM
+Usage is very similar to Django or Flask
 
 	SomeModel.objects.filter(param1=val).filter(param2=val).all()
 
