@@ -73,29 +73,47 @@ IndexedRedisModel
 
 		KEY_NAME = 'Songs'
 
-Usage is very similar to Django or Flask
+Usage is very similar to Django or Flask.
 
-	SomeModel.objects.filter(param1=val).filter(param2=val).all()
+**Query:**
 
-	obj = SomeModel(...)
+Calling .filter or .filterInline builds a query, and .all (or one of the other "fetch" methods described below) executes the query.
+
+	objects = SomeModel.objects.filter(param1=val).filter(param2=val).all()
+
+**Save:**
+
+	obj = SomeModel(field1='value', field2='value')
 	obj.save()
 
-There is also a powerful method called "reset" which will atomically and locked replace all elements belonging to a model. This is useful for cache-replacement, etc.
+**Delete Using Filters:**
 
-	x = [SomeModel(...), SomeModel(..)]
+	SomeModel.objects.filter(name='Bad Man').delete()
 
-	SomeModel.reset(x)
+**Delete Individual Objects:**
+
+	obj.delete()
+
+**Atomic Dataset Replacement:**
+
+There is also a powerful method called "reset" which will **atomically** replace all elements belonging to a model. This is useful for cache-replacement, etc.
+
+	lst = [SomeModel(...), SomeModel(..)]
+
+	SomeModel.reset(lst)
+
+For example, you could have a SQL backend and a cron job that does complex queries (or just fetches the same models) and does an atomic replace every 5 minutes to get massive performance boosts in your application.
 
 
 Filter objects by SomeModel.objects.filter(key=val, key2=val2) and get objects with .all
 
 Example: SomeModel.objects.filter(name='Tim', colour='purple').filter(number=5).all()
 
-Calling .filter or .filterInline does not fetch anything from the server until one of the "get" methods described below are called. (e.x. "all" or "first")
+Calling .filter or .filterInline does not fetch anything from the server until one of the "fetch" methods described below are called. (e.x. "all" or "first")
 
 	all    - Return all objects matching this filter
 
-	allOnlyFields - Return all objects matching current filters, only fetching certain fields
+	allOnlyFields - Takes a list of fields and only fetches those fields, using current filterset
 
 	delete - Delete objects matching this filter
 
