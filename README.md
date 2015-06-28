@@ -14,13 +14,14 @@ My tests have shown that for using equivalent models between flask/mysql and Ind
 It is compatible with python 2.7 and python 3. It has been tested with python 2.7 and 3.4.
 
 
-Full Public API
----------------
+API Reference
+-------------
 
 There are several methods not documented here. 
 
-See http://htmlpreview.github.io/?https://github.com/kata198/indexedredis/blob/master/IndexedRedis.html#IndexedRedisQuery for full documentation
-
+See 
+http://htmlpreview.github.io/?https://github.com/kata198/indexedredis/blob/master/IndexedRedis.html#IndexedRedisQuery 
+for pydoc of public API.
 
 **Below is a quick highlight/overview:**
 
