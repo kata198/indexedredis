@@ -20,7 +20,9 @@ API Reference
 There are several methods not documented here. 
 
 See 
+
 http://htmlpreview.github.io/?https://github.com/kata198/indexedredis/blob/master/IndexedRedis.html#IndexedRedisQuery 
+
 for pydoc of public API.
 
 **Below is a quick highlight/overview:**
