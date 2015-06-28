@@ -3,6 +3,7 @@
 	- make getNextID and peekNextID private methods. They should only be
 	used internal.
 	- Regenerate docs
+	- Remove argument on getEncoding -- didn't do anything
 
 2.3.0 (Jun 27 2015)
 	- Change Model.objects.filter(...).delete to fetch minimal data (only
