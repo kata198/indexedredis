@@ -1,3 +1,41 @@
+2.4.0 - (Jul 7 2015)
+	- Add some more documentation
+	- Cleanup connection handling
+	- Remove undocumented _connection override on IndexedRedisModel
+	
+
+2.4.0 beta (unreleased to public) - (Jul 2 2015)
+	- Add method, isIndexedRedisModel to see if a model extends
+	IndexedRedisModel
+	- Add method, hasUnsavedChanges which returns bool of if there are
+	unsaved changes. Remember, you can see all (local) changes with
+	getUpdatedFields
+	- Implement __str__ and __repr__
+	  Examples of __str__: 
+	                         (Pdb) str(z)
+	                         '<Song obj _id=24 at 0x7f3c6a3a4490>'
+	                         (Pdb) z.artist = 'New Artist'
+	                         (Pdb) str(z)
+	                         '<Song obj _id=24 (Unsaved Changes) at 0x7f3c6a3a4490>'
+	- Examples of __repr__ - This will build a constructor.
+	eval(repr(obj)) should build the same object.
+		(Pdb) print repr(song)
+		Song(_id="6", album='Super Tracks', description='Super
+		Nintendo', copyright='Copyright 2014 (c) Cheese Industries',
+		title='Nintendo 2', artist='Mega Men', track_number='2',
+		duration='1:55')
+	- Implement a .copy function for copying models. Takes a single
+	argument, copyPrimaryKey. If True, any saves on the copy will change
+	the original model. Keep in mind this may cause sync issues. If  False
+	(default) only the data is copied.
+	- Implement __setstate__ and __getstate__ to make objects support
+	being pickled and loaded from pickle strings efficiently.
+	- Implement "reload" function on a model. This fetches any updates
+	from Redis, if available, and returns a list of field names that were
+	updated.
+
+
+
 2.3.1 (Jun 27 2015)
 	- Add some more docstring
 	- make getNextID and peekNextID private methods. They should only be

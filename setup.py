@@ -8,7 +8,7 @@ if __name__ == '__main__':
         long_description = f.read()
 
     setup(name='indexedredis',
-        version='2.3.1.1',
+        version='2.4.0',
         packages=['IndexedRedis'],
         install_requires=['redis'],
         requires=['redis'],
@@ -21,7 +21,7 @@ if __name__ == '__main__':
         maintainer='Tim Savannah',
         maintainer_email='kata198@gmail.com',
         license='LGPLv2',
-        description='redis-backed very very fast ORM-style framework that supports indexes (similar to SQL), and complete atomic replacement of datasets',
+        description='redis-backed very very fast [O(1) efficency searches) ORM-style framework that supports indexes, and complete atomic replacement of datasets',
         classifiers=['Development Status :: 5 - Production/Stable',
             'Programming Language :: Python',
             'License :: OSI Approved :: GNU Lesser General Public License v2 (LGPLv2)',

@@ -23,9 +23,6 @@ class Song(IndexedRedisModel):
 
 	KEY_NAME = 'Songs'
 
-	def __init__(self, *args, **kwargs):
-		IndexedRedisModel.__init__(self, *args, **kwargs)
-
 if __name__ == '__main__':
 
     if '--keep-data' not in sys.argv:

@@ -1,7 +1,7 @@
 IndexedRedis
 ============
 
-A redis-backed very very fast ORM-style framework that supports indexes (similar to SQL).
+A redis-backed very very fast ORM-style framework that supports indexes. It performs searches with O(1) efficency!
 
 Requires a Redis server of at least version 2.6.0, and python-redis [ available at https://pypi.python.org/pypi/redis ]
 
