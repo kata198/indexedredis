@@ -117,6 +117,7 @@ Example: SomeModel.objects.filter(name='Tim', colour='purple').filter(number=5).
 **Get Primary Key:**
 
 Sometimes you may want to reference an individual object, via a foreign-key relationship or just to retrieve faster / unique rather than filtering. 
+
 Every object saved has a unique primary key (unique per the model) which can be retrieved by the "getPk" method. You can then use this value on exists, get, getMultiple, etc methods.
 
 
