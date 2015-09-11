@@ -155,6 +155,8 @@ These functions are available on SomeModel.objects and don't use any filters (th
 
 	getMultiple - Get multiple objects by a list of pks
 
+	exists - Tests the existance of an object under a given pk
+
 
 **Model Functions**
 

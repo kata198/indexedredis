@@ -1,27 +1,28 @@
 import sys
 from IndexedRedis import IndexedRedisModel
 
+# vim: ts=4 sw=4 expandtab
 
 # Define the model
 class Song(IndexedRedisModel):
-	
-	FIELDS = [ \
-			'artist',
-			'title',
-			'album',
-			'track_number',
-			'duration',
-			'description',
-			'copyright',
-	]
+    
+    FIELDS = [ \
+            'artist',
+            'title',
+            'album',
+            'track_number',
+            'duration',
+            'description',
+            'copyright',
+    ]
 
-	INDEXED_FIELDS = [ \
-				'artist',
-				'title',
-				'track_number',
-	]
+    INDEXED_FIELDS = [ \
+                'artist',
+                'title',
+                'track_number',
+    ]
 
-	KEY_NAME = 'Songs'
+    KEY_NAME = 'Songs'
 
 if __name__ == '__main__':
 
@@ -97,6 +98,7 @@ if __name__ == '__main__':
             sys.stdout.write('\n')
 
 
+
     sys.stdout.write('\n\n')
     # Show passing filter objects around functions, and not actually fetching until .all is called.
     def getTracks(filterSet, trackNo):
@@ -118,13 +120,17 @@ if __name__ == '__main__':
             pprint(song.asDict())
             sys.stdout.write('\n')
 
-    sys.stdout.write('\nMega Men track twos:\n')
+    sys.stdout.write('\nMega Men track twos (should be just one entry):\n')
 
     objs = getTracks(megaMenTracks, 2)
     for song in objs:
             pprint(song.asDict())
             sys.stdout.write('\n')
 
+    pk = song.getPk()
+    sys.stdout.write('\nPrimary key of previous song: %s\n' %(pk,))
+
+    sys.stdout.write('\nSong pk=%s exists? (should be True) %s\n' %(pk, str(Song.objects.exists(pk)) ) )
 
     sys.stdout.write('\nAfter Delete, Mega Men Track twos (should be blank):\n')
     song.delete()
@@ -132,6 +138,8 @@ if __name__ == '__main__':
     for song in objs:
             pprint(song.asDict())
             sys.stdout.write('\n')
+
+    sys.stdout.write('\nSong pk=%s exists? (should now be False) %s\n' %(pk, str(Song.objects.exists(pk)) ) )
     
     # delete remaining Mega Men songs
     numDeleted = Song.objects.filter(artist='Mega Men').delete()

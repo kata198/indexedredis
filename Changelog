@@ -1,3 +1,9 @@
+2.5.0 - (Sep 11 2015)
+	- Add "exists" method for testing the existance of a primary key
+	- Add MANIFEST.in file
+	- regen docs
+	- Replace example.py with a copy of test.py... not sure why there were two
+
 2.4.0 - (Jul 7 2015)
 	- Add some more documentation
 	- Cleanup connection handling

@@ -1,4 +1,4 @@
-# Copyright (c) 2014 Timothy Savannah under LGPL. See LICENSE for more information.
+# Copyright (c) 2014, 2015 Timothy Savannah under LGPL version 2.1. See LICENSE for more information.
 #  IndexedRedis A redis-backed very very fast ORM-style framework that supports indexes, and searches with O(1) efficency.
 #    It has syntax similar to Django and Flask and other ORMs, but is itself unique in many ways.
 
@@ -15,10 +15,10 @@ import redis
 INDEXED_REDIS_PREFIX = '_ir_|'
 
 # Version as a tuple (major, minor, patchlevel)
-INDEXED_REDIS_VERSION = (2, 4, 0)
+INDEXED_REDIS_VERSION = (2, 5, 0)
 
 # Version as a string
-INDEXED_REDIS_VERSION_STR = '2.4.0'
+INDEXED_REDIS_VERSION_STR = '2.5.0'
 
 __version__ = INDEXED_REDIS_VERSION_STR
 
@@ -682,6 +682,22 @@ class IndexedRedisQuery(IndexedRedisHelper):
 		pks = pipeline.execute()[1] # sdiff
 
 		return len(pks)
+
+	def exists(self, pk):
+		'''
+			exists - Tests whether a record holding the given primary key exists.
+
+			@param pk - Primary key (see getPk method)
+
+			Example usage: Waiting for an object to be deleted without fetching the object or running a filter. 
+
+			This is a very cheap operation.
+
+			@return <bool> - True if object with given pk exists, otherwise False
+		'''
+		conn = self._get_connection()
+		key = self._get_key_for_id(pk)
+		return conn.exists(key)
 			
 
 	def getPrimaryKeys(self, sortByAge=False):
