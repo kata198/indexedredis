@@ -1,6 +1,6 @@
-2.5.0 - (Sep 11 2015)
+2.5.1 - (Sep 11 2015)
 	- Add "exists" method for testing the existance of a primary key
-	- Add MANIFEST.in file
+	- Add MANIFEST.in file (missed in 2.5.0 -- this is only difference)
 	- regen docs
 	- Replace example.py with a copy of test.py... not sure why there were two
 

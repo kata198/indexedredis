@@ -1,0 +1,11 @@
+include Changelog
+include IndexedRedis.html
+include LICENSE
+include MANIFEST.in
+include README.md
+include README.rst
+include example.py
+include test.py
+include setup.py
+include requirements.txt
+recursive-include IndexedRedis *.py
