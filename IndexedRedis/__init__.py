@@ -15,10 +15,10 @@ import redis
 INDEXED_REDIS_PREFIX = '_ir_|'
 
 # Version as a tuple (major, minor, patchlevel)
-INDEXED_REDIS_VERSION = (2, 5, 0)
+INDEXED_REDIS_VERSION = (2, 5, 1)
 
 # Version as a string
-INDEXED_REDIS_VERSION_STR = '2.5.0'
+INDEXED_REDIS_VERSION_STR = '2.5.1'
 
 __version__ = INDEXED_REDIS_VERSION_STR
 
