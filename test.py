@@ -20,7 +20,10 @@ class Song(IndexedRedisModel):
                 'artist',
                 'title',
                 'track_number',
+                'album',
     ]
+
+    REDIS_CONNECTION_PARAMS = { 'db' : 1 }
 
     KEY_NAME = 'Songs'
 

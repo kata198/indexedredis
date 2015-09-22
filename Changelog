@@ -1,3 +1,15 @@
+2.6.0 - (Sep 22 2015)
+	- Add copyToExternal which allows copying a model to a redis instance
+	other than the one specified for that model
+	- Add copyAllToExternal which allows copying the results of a filterset to
+	a redis instance other than that specified for the given model
+	- Fix inconsistant returns, pk should always be a string
+	- Rewrote internal save function to make more sense and allow forcing
+	multiple IDs
+	- Add reindex method which will rerun the indexes on a list of models. Use
+	this as MyModel.objects.reindex() if you add a field to INDEXED_FIELDS
+	array which is already existing field to add it to indexes.
+
 2.5.1 - (Sep 11 2015)
 	- Add "exists" method for testing the existance of a primary key
 	- Add MANIFEST.in file (missed in 2.5.0 -- this is only difference)

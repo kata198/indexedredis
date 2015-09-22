@@ -187,6 +187,12 @@ Actual objects contain methods including:
 	getUpdatedFields - See changes since last fetch
 
 
+**Update Index**
+
+As your model changes, you may need to add a field to the INDEXED\_FIELDS array. If this was an already existing field, you can reindex the models by doing:
+
+	MyModel.objects.reindex()
+
 
 
 Encodings

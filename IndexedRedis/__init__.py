@@ -11,17 +11,26 @@ import sys
 import uuid
 import redis
 
+# * imports
+__all__ = ('INDEXED_REDIS_PREFIX', 'INDEXED_REDIS_VERSION', 'INDEXED_REDIS_VERSION_STR', 
+	'IndexedRedisDelete', 'IndexedRedisHelper', 'IndexedRedisModel', 'IndexedRedisQuery', 'IndexedRedisSave',
+	'isIndexedRedisModel', 'setIndexedRedisEncoding', 'getIndexedRedisEncoding',
+	 )
+
 # Prefix that all IndexedRedis keys will contain, as to not conflict with other stuff.
 INDEXED_REDIS_PREFIX = '_ir_|'
 
 # Version as a tuple (major, minor, patchlevel)
-INDEXED_REDIS_VERSION = (2, 5, 1)
+INDEXED_REDIS_VERSION = (2, 6, 0)
 
 # Version as a string
-INDEXED_REDIS_VERSION_STR = '2.5.1'
+INDEXED_REDIS_VERSION_STR = '2.6.0'
 
+# Package version
 __version__ = INDEXED_REDIS_VERSION_STR
 
+
+# COMPAT STUFF
 try:
 	classproperty
 except NameError:
@@ -37,24 +46,8 @@ try:
 except:
 	defaultEncoding = 'utf-8'
 
-def isIndexedRedisModel(model):
-	return hasattr(model, '_is_ir_model')
 
-def setEncoding(encoding):
-	'''
-		setEncoding - Sets the encoding used by IndexedRedis
-
-		@param encoding - An encoding (like utf-8)
-	'''
-	global defaultEncoding
-	defaultEncoding = encoding
-
-def getEncoding():
-	'''
-		getEncoding - Get the encoding that IndexedRedis will use
-	'''
-	global defaultEncoding
-	return defaultEncoding
+# String Assurance
 
 if bytes == str:
 	# Python 2
@@ -71,10 +64,38 @@ else:
 			return str(x)
 		return x.decode(defaultEncoding)
 
+# Encoding stuff
+
+def setEncoding(encoding):
+	'''
+		setEncoding - Sets the encoding used by IndexedRedis. 
+
+		@note Aliased as "setIndexedRedisEncoding" so import * has a namespaced name.
+
+		@param encoding - An encoding (like utf-8)
+	'''
+	global defaultEncoding
+	defaultEncoding = encoding
+
+setIndexedRedisEncoding = setEncoding
+
+def getEncoding():
+	'''
+		getEncoding - Get the encoding that IndexedRedis will use
+
+	@note Aliased as "setIndexedRedisEncoding" so import * has a namespaced name.
+
+	'''
+	global defaultEncoding
+	return defaultEncoding
+
+getIndexedRedisEncoding = getEncoding
 
 # Changing redis encoding into requested encoding
 decodeDict = lambda origDict : {tostr(key) : tostr(origDict[key]) for key in origDict}
 
+def isIndexedRedisModel(model):
+	return hasattr(model, '_is_ir_model')
 
 class IndexedRedisModel(object):
 	'''
@@ -400,6 +421,33 @@ class IndexedRedisModel(object):
 		'''
 		return self.__class__(**self.asDict(copyPrimaryKey))
 
+	def saveToExternal(self, redisCon):
+		'''
+			saveToExternal - Saves this object to a different Redis than that specified by REDIS_CONNECTION_PARAMS on this model.
+
+			@param redisCon <dict/redis.Redis> - Either a dict of connection params, a la REDIS_CONNECTION_PARAMS, or an existing Redis connection.
+				If you are doing a lot of bulk copies, it is recommended that you create a Redis connection and pass it in rather than establish a new
+				connection with each call.
+
+			@note - You will generate a new primary key relative to the external Redis environment. If you need to reference a "shared" primary key, it is better
+					to use an indexed field than the internal pk.
+
+		'''
+		if type(redisCon) == dict:
+			conn = redis.Redis(**redisCon)
+		elif hasattr(conn, '__class__') and issubclass(conn.__class__, redis.Redis):
+			conn = redisCon
+		else:
+			raise ValueError('saveToExternal "redisCon" param must either be a dictionary of connection parameters, or redis.Redis, or extension thereof')
+
+		saver = self.saver
+
+		# Fetch next PK from external
+		forceID = saver._getNextID(conn) # Redundant because of changes in save method
+		myCopy = self.copy(False)
+
+		return saver.save(myCopy, usePipeline=True, forceID=forceID, conn=conn)
+
 	def reload(self):
 		'''
                 reload - Reload this object from the database.
@@ -552,17 +600,18 @@ class IndexedRedisHelper(object):
 		'''
 		return ''.join([INDEXED_REDIS_PREFIX, self.keyName, ':next'])
 
-	def _peekNextID(self):
+	def _peekNextID(self, conn=None):
 		'''
 			_peekNextID - Look at, but don't increment the primary key for this model.
 				Internal.
 
 			@return int - next pk
 		'''
-		conn = self._get_connection()
-		return int(conn.get(self._get_next_id_key()) or 0)
+		if conn is None:
+			conn = self._get_connection()
+		return tostr(conn.get(self._get_next_id_key()) or 0)
 
-	def _getNextID(self):
+	def _getNextID(self, conn=None):
 		'''
 			_getNextID - Get (and increment) the next primary key for this model.
 				If you don't want to increment, @see _peekNextID .
@@ -571,8 +620,9 @@ class IndexedRedisHelper(object):
 
 			@return int - next pk
 		'''
-		conn = self._get_connection()
-		return conn.incr(self._get_next_id_key())
+		if conn is None:
+			conn = self._get_connection()
+		return tostr(conn.incr(self._get_next_id_key()))
 
 	def _getTempKey(self):
 		'''
@@ -1024,80 +1074,141 @@ class IndexedRedisQuery(IndexedRedisHelper):
 		'''
 		return self.getMultipleOnlyFields(pks, self.indexedFields)
 
-			
+
+	def reindex(self):
+		'''
+			reindex - Reindexes the objects matching current filterset. Use this if you add/remove a field to INDEXED_FIELDS
+		'''
+		objs = self.all()
+		saver = IndexedRedisSave(self.mdl)
+		saver.reindex(objs)
+
+
 class IndexedRedisSave(IndexedRedisHelper):
 	'''
 		IndexedRedisClass - Class used to save objects. Used with Model.save is called.
 			Except for advanced usage, this is probably for internal only.
 	'''
 
-	def save(self, obj, useMulti=True, forceID=False, conn=None):
+	def save(self, obj, usePipeline=True, forceID=False, conn=None):
 		'''
-			save - Save an object associated with this model. You probably will just do object.save() instead of this.
+			save - Save an object associated with this model. **Interal Function!!** You probably want to just do object.save() instead of this.
 
 			@param obj - The object to save
-			@param useMulti - Do multiple at once
-			@param forceID - if not False, force ID to this.
+			@param usePipeline - Use a pipeline for saving. You should always want this, unless you are calling this function from within an existing pipeline.
+			@param forceID - if not False, force ID to this. If obj is list, this is also list. Forcing IDs also forces insert. Up to you to ensure ID will not clash.
 			@param conn - A connection or None
+
+			@note - if no ID is specified
 
 			@return - List of pks
 		'''
 		if conn is None:
 			conn = self._get_connection()
 
+		# If we are in a pipeline, we need an external connection to fetch any potential IDs for inserts.
+		if usePipeline is True:
+			idConn = conn
+		else:
+			idConn = self._get_new_connection()
+
 		if isinstance(obj, list) or isinstance(obj, tuple):
 			objs = obj
 		else:
 			objs = [obj]
 
-		isInserts = []
-		for obj in objs:
-			if forceID is not False:
-				isInsert = True
-				obj._id = forceID
-			else:
-				isInsert = not bool(getattr(obj, '_id', None))
-				if isInsert:
-					obj._id = self._getNextID()
-			isInserts.append(isInsert)
+		objsLen = len(objs)
 
-		if useMulti is True:
+		if forceID is not False:
+			# Compat with old poor design.. :(
+			if isinstance(forceID, tuple) or isinstance(forceID, list):
+				forceIDs = forceID
+			else:
+				forceIDs = [forceID]
+			isInserts = [] 
+			i = 0
+			while i < objsLen:
+				if forceIDs[i] is not False:
+					objs[i]._id = forceIDs[i]
+					isInserts.append(True)
+				else:
+					isInsert = not bool(getattr(obj, '_id', None))
+					if isInsert is True:
+						objs[i]._id = self._getNextID(idConn)
+					isInserts.append(isInsert)
+				i += 1
+		else:
+			isInserts = []
+			for obj in objs:
+				isInsert = not bool(getattr(obj, '_id', None))
+				if isInsert is True:
+					obj._id = self._getNextID(idConn)
+				isInserts.append(isInsert)
+				
+
+		if usePipeline is True:
 			pipeline = conn.pipeline()
 		else:
 			pipeline = conn
 
-		ids = []
+		ids = [] # Note ids can be derived with all information above..
 		i = 0
-		objsLen = len(objs)
 		while i < objsLen:
-			obj = objs[i]
-			newDict = obj.toDict()
-			isInsert = isInserts[i]
-
-			key = self._get_key_for_id(obj._id)
-
-			if isInsert is True:
-				for fieldName in self.fieldNames:
-					conn.hset(key, fieldName, newDict.get(fieldName, ''))
-				self._add_id_to_keys(obj._id, pipeline)
-				for indexedField in self.indexedFields:
-					self._add_id_to_index(indexedField, obj._id, newDict[indexedField], pipeline)
-			else:
-				updatedFields = obj.getUpdatedFields()
-				for fieldName, fieldValue in updatedFields.items():
-					(oldValue, newValue) = fieldValue
-					conn.hset(key, fieldName, newValue)
-					if fieldName in self.indexedFields:
-						self._rem_id_from_index(fieldName, obj._id, oldValue, pipeline)
-						self._add_id_to_index(fieldName, obj._id, newValue, pipeline)
-				obj._origData = copy.copy(newDict)
-			ids.append(obj._id)
+			self._doSave(objs[i], isInserts[i], conn, pipeline)
+			ids.append(objs[i]._id)
 			i += 1
 
-		if useMulti is True:
+		if usePipeline is True:
 			pipeline.execute()
 
 		return ids
+
+
+	def _doSave(self, obj, isInsert, conn, pipeline=None):
+		if pipeline is None:
+			pipeline = conn
+
+		newDict = obj.toDict()
+		key = self._get_key_for_id(obj._id)
+
+		if isInsert is True:
+			for fieldName in self.fieldNames:
+				conn.hset(key, fieldName, newDict.get(fieldName, ''))
+			self._add_id_to_keys(obj._id, pipeline)
+			for indexedField in self.indexedFields:
+				self._add_id_to_index(indexedField, obj._id, newDict[indexedField], pipeline)
+		else:
+			updatedFields = obj.getUpdatedFields()
+			for fieldName, fieldValue in updatedFields.items():
+				(oldValue, newValue) = fieldValue
+				conn.hset(key, fieldName, newValue)
+				if fieldName in self.indexedFields:
+					self._rem_id_from_index(fieldName, obj._id, oldValue, pipeline)
+					self._add_id_to_index(fieldName, obj._id, newValue, pipeline)
+			obj._origData = copy.copy(newDict)
+
+	def reindex(self, objs, conn=None):
+		'''
+			reindex - Reindexes a given list of objects. Probably you want to do Model.objects.reindex() instead of this directly.
+
+			@param objs list<IndexedRedisModel> - List of objects to reindex
+			@param conn <redis.Redis or None> - Specific Redis connection or None to reuse
+		'''
+		if conn is None:
+			conn = self._get_connection()
+
+		pipeline = conn.pipeline()
+
+		objDicts = [obj.toDict(True) for obj in objs]
+
+		for fieldName in self.indexedFields:
+			for objDict in objDicts:
+				self._rem_id_from_index(fieldName, objDict['_id'], objDict[fieldName], pipeline)
+				self._add_id_to_index(fieldName, objDict['_id'], objDict[fieldName], pipeline)
+
+		pipeline.execute()
+
+
 
 
 class IndexedRedisDelete(IndexedRedisHelper):
