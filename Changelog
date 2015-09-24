@@ -1,3 +1,6 @@
+2.7.1 - (Sep 23 2015)
+	- Updates to documentation and examples
+
 2.7.0 - (Sep 23 2015)
 	- Change very basic existing model validation to a one-time call, and
 	validate on more things.

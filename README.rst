@@ -51,6 +51,9 @@ This is the model you should extend.
 
 				'copyright',
 
+				'mp3_data',
+
+
 		]
 
 
@@ -63,20 +66,28 @@ This is the model you should extend.
 
 		]
 
+
+		BASE64_FIELDS = [ 'mp3_data', ]
+
+
 		KEY_NAME = 'Songs'
 
 
-**Required Fields:**
+**Model Fields:**
 
-*FIELDS* - a list of strings which name the fields that can be used for storage.
+*FIELDS* - REQUIRED. A list of strings which name the fields that can be used for storage.
 
 	 Example: ['Name', 'Description', 'Model', 'Price']
 
-*INDEXED_FIELDS* -  a list of strings containing the names of fields that will be indexed. Can only filter on indexed fields. Adds insert/delete time. Entries must also be present in FIELDS.
+*INDEXED_FIELDS* -  A list of strings containing the names of fields that will be indexed. Can only filter on indexed fields. Adds insert/delete time. Entries must also be present in FIELDS.
 
 	 Example: ['Name', 'Model']
 
-*KEY_NAME* - A unique name name that represents this model. Think of it like a table name.
+*BASE64_FIELDS* - A lsit of strings containing the names of fields which will be automatically converted to/from base64 for storage. This allows you to store binary data, e.x. audio or pictures.
+
+	Example: ['picture', 'mp3_data']
+
+*KEY_NAME* - REQUIRED. A unique name name that represents this model. Think of it like a table name.
 
 	 Example: 'Items'
 
