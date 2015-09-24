@@ -6,7 +6,7 @@
 	before storage and decoded upon retrieval. This makes it possible and
 	very simple to use "bytes" or other binary data. You may need this,
 	for example, to store files or other blobs.
-	'
+	
 2.6.0 - (Sep 22 2015)
 	- Add copyToExternal which allows copying a model to a redis instance
 	other than the one specified for that model
