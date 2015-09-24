@@ -54,6 +54,8 @@ This is the model you should extend.
 					'track_number',
 		]
 
+		BASE64_FIELDS = []
+
 		KEY_NAME = 'Songs'
 
 
@@ -63,7 +65,7 @@ This is the model you should extend.
 
 	 Example: ['Name', 'Description', 'Model', 'Price']
 
-*INDEXED_FIELDS* -  a list of strings containing the names of fields that will be indexed. Can only filter on indexed fields. Adds insert/delete time.
+*INDEXED_FIELDS* -  a list of strings containing the names of fields that will be indexed. Can only filter on indexed fields. Adds insert/delete time. Entries must also be present in FIELDS.
 
 	 Example: ['Name', 'Model']
 
@@ -74,6 +76,14 @@ This is the model you should extend.
 *REDIS_CONNECTION_PARAMS* - provides the arguments to pass into "redis.Redis", to construct a redis object.
 
 	 Example: {'host' : '192.168.1.1'}
+
+
+
+Model Validation
+----------------
+
+The model will be validated the first time an object of that type is instantiated. If there is something invalid in how it is defined, an "InvalidModelException" will be raised.
+
 
 Usage
 -----
@@ -180,6 +190,27 @@ Actual objects contain methods including:
 As your model changes, you may need to add a field to the INDEXED\_FIELDS array. If this was an already existing field, you can reindex the models by doing:
 
 	MyModel.objects.reindex()
+
+
+Binary/Bytes Data Support
+-------------------------
+
+IndexedRedis, as of version 2.7.0, has the ability to store and retrieve unencoded (binary) data, e.x. image files, executables, raw device data, etc.
+
+Simply by adding a field to the "BASE64\_FIELDS" array, IndexedRedis will transparently handle base64-encoding before store, and decoding after retrieval. 
+
+So you may have a model like this:
+
+	class FileObj(IndexedRedis.IndexedRedisModel):
+
+		FIELDS = [ 'filename', 'data', 'description' ]
+
+		INDEXED_FIELDS = [ 'filename' ]
+
+		BASE64_FIELDS  = ['data']
+
+
+In the "data" field you can dump file contents, like an mp3 or a jpeg, and IndexedRedis will handle all the encoding for you. You will just provide "bytes" data to that field.
 
 
 Encodings

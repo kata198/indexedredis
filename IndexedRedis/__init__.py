@@ -7,24 +7,28 @@
 # vim:set ts=8 shiftwidth=8 softtabstop=8 noexpandtab :
 
 import copy
+import codecs
+import random
 import sys
 import uuid
 import redis
 
+from base64 import b64encode, b64decode
+
 # * imports
 __all__ = ('INDEXED_REDIS_PREFIX', 'INDEXED_REDIS_VERSION', 'INDEXED_REDIS_VERSION_STR', 
 	'IndexedRedisDelete', 'IndexedRedisHelper', 'IndexedRedisModel', 'IndexedRedisQuery', 'IndexedRedisSave',
-	'isIndexedRedisModel', 'setIndexedRedisEncoding', 'getIndexedRedisEncoding',
+	'isIndexedRedisModel', 'setIndexedRedisEncoding', 'getIndexedRedisEncoding', 'InvalidModelException',
 	 )
 
 # Prefix that all IndexedRedis keys will contain, as to not conflict with other stuff.
 INDEXED_REDIS_PREFIX = '_ir_|'
 
 # Version as a tuple (major, minor, patchlevel)
-INDEXED_REDIS_VERSION = (2, 6, 0)
+INDEXED_REDIS_VERSION = (2, 7, 0)
 
 # Version as a string
-INDEXED_REDIS_VERSION_STR = '2.6.0'
+INDEXED_REDIS_VERSION_STR = '2.7.0'
 
 # Package version
 __version__ = INDEXED_REDIS_VERSION_STR
@@ -56,6 +60,8 @@ if bytes == str:
 			return x.encode(defaultEncoding)
 		else:
 			return str(x)
+
+	tobytes = lambda x : x
 else:
 	# Python 3
 	
@@ -63,6 +69,11 @@ else:
 		if isinstance(x, bytes) is False:
 			return str(x)
 		return x.decode(defaultEncoding)
+
+	def tobytes(x):
+		if isinstance(x, bytes) is True:
+			return x
+		return x.encode(defaultEncoding)
 
 # Encoding stuff
 
@@ -94,8 +105,16 @@ getIndexedRedisEncoding = getEncoding
 # Changing redis encoding into requested encoding
 decodeDict = lambda origDict : {tostr(key) : tostr(origDict[key]) for key in origDict}
 
+validatedModels = set()
+
 def isIndexedRedisModel(model):
 	return hasattr(model, '_is_ir_model')
+
+class InvalidModelException(Exception):
+	'''
+		InvalidModelException - Raised if a model fails validation (not valid)
+	'''
+	pass
 
 class IndexedRedisModel(object):
 	'''
@@ -104,17 +123,23 @@ class IndexedRedisModel(object):
 
             **Required Fields:**
 
-            *FIELDS* - a list of strings which name the fields that can be used for storage.
+            *FIELDS* - REQUIRED. a list of strings which name the fields that can be used for storage.
 
-		     Example: ['Name', 'Description', 'Model', 'Price']
+                    Example: ['Name', 'Description', 'Model', 'Price']
 
-            *INDEXED_FIELDS* -  a list of strings containing the names of fields that will be indexed. Can only filter on indexed fields. Adds insert/delete time.
 
-		     Example: ['Name', 'Model']
+            *INDEXED_FIELDS* -  a list of strings containing the names of fields that will be indexed. Can only filter on indexed fields. Adds insert/delete time. Contents must also be in FIELDS.
 
-            *KEY_NAME* - A unique name name that represents this model. Think of it like a table name.
+                    Example: ['Name', 'Model']
 
-		     Example: 'Items'
+            *BASE64_FIELDS* - A list of strings which name the fields that will be stored as base64-encoded strings. All entries must also be present in FIELDS.
+
+                    Example: ['data', 'blob']
+
+
+            *KEY_NAME* - REQUIRED. A unique name name that represents this model. Think of it like a table name. 
+
+                    Example: 'Items'
 
             *REDIS_CONNECTION_PARAMS* - provides the arguments to pass into "redis.Redis", to construct a redis object.
 
@@ -127,28 +152,28 @@ class IndexedRedisModel(object):
 
             Calling .filter or .filterInline builds a query/filter set. Use one of the *Fetch* methods described below to execute a query.
 
-		    objects = SomeModel.objects.filter(param1=val).filter(param2=val).all()
+                   objects = SomeModel.objects.filter(param1=val).filter(param2=val).all()
 
             **Save:**
 
-		    obj = SomeModel(field1='value', field2='value')
-		    obj.save()
+                   obj = SomeModel(field1='value', field2='value')
+                   obj.save()
 
             **Delete Using Filters:**
 
-		    SomeModel.objects.filter(name='Bad Man').delete()
+                   SomeModel.objects.filter(name='Bad Man').delete()
 
             **Delete Individual Objects:**
 
-		    obj.delete()
+                   obj.delete()
 
             **Atomic Dataset Replacement:**
 
             There is also a powerful method called "reset" which will **atomically** replace all elements belonging to a model. This is useful for cache-replacement, etc.
 
-		    lst = [SomeModel(...), SomeModel(..)]
+                   lst = [SomeModel(...), SomeModel(..)]
 
-		    SomeModel.reset(lst)
+                   SomeModel.reset(lst)
 
             For example, you could have a SQL backend and a cron job that does complex queries (or just fetches the same models) and does an atomic replace every 5 minutes to get massive performance boosts in your application.
 
@@ -164,50 +189,50 @@ class IndexedRedisModel(object):
 
             Example: matchingObjects = SomeModel.objects.filter(...).all()
 
-		    all    - Return all objects matching this filter
+                   all    - Return all objects matching this filter
 
-		    allOnlyFields - Takes a list of fields and only fetches those fields, using current filterset
+                   allOnlyFields - Takes a list of fields and only fetches those fields, using current filterset
 
-		    delete - Delete objects matching this filter
+                   delete - Delete objects matching this filter
 
-		    count  - Get the count of objects matching this filter
+                   count  - Get the count of objects matching this filter
 
-		    first  - Get the oldest record with current filters
+                   first  - Get the oldest record with current filters
 
-		    last   - Get the newest record with current filters
+                   last   - Get the newest record with current filters
 
-		    random - Get a random element with current filters
+                   random - Get a random element with current filters
 
-		    getPrimaryKeys - Gets primary keys associated with current filters
+                   getPrimaryKeys - Gets primary keys associated with current filters
 
 
             **Filter Functions**
 
             These functions add filters to the current set. "filter" returns a copy, "filterInline" acts on that object.
 
-		    filter - Add additional filters, returning a copy of the filter object (moreFiltered = filtered.filter(key2=val2))
+                   filter - Add additional filters, returning a copy of the filter object (moreFiltered = filtered.filter(key2=val2))
 
-		    filterInline - Add additional filters to current filter object. 
+                   filterInline - Add additional filters to current filter object. 
 
 
             **Global Fetch functions**
 
             These functions are available on SomeModel.objects and don't use any filters (they get specific objects):
 
-		    get - Get a single object by pk
+                   get - Get a single object by pk
 
-		    getMultiple - Get multiple objects by a list of pks
+                   getMultiple - Get multiple objects by a list of pks
 
 
             **Model Functions**
 
             Actual objects contain methods including:
 
-		    save   - Save this object (create if not exist, otherwise update)
+                   save   - Save this object (create if not exist, otherwise update)
 
-		    delete - Delete this object
+                   delete - Delete this object
 
-		    getUpdatedFields - See changes since last fetch
+                   getUpdatedFields - See changes since last fetch
 
 
             Encodings
@@ -226,6 +251,8 @@ class IndexedRedisModel(object):
 	#  You can only search on indexed fields, but they add time to insertion/deletion
 	INDEXED_FIELDS = []
 
+	BASE64_FIELDS = []
+
 	# KEY_NAME - A string of a unique name which corrosponds to objects of this type.
 	KEY_NAME = None
 
@@ -239,16 +266,15 @@ class IndexedRedisModel(object):
 		'''
 			__init__ - Set the values on this object. MAKE SURE YOU CALL THE SUPER HERE, or else things will not work.
 		'''
-
-		if not self.KEY_NAME:
-			raise NotImplementedError('Indexed Redis Model %s must extend KEY_NAME' %(self.__class__.__name__, ))
-		if not self.FIELDS:
-			raise NotImplementedError('Indexed Redis Model %s must have fields' %(self.__class__.__name__, ))
+		self.validateModel()
 
 		self._origData = {}
 
 		for fieldName in self.FIELDS:
-			val = tostr(kwargs.get(fieldName, ''))
+			if fieldName in self.BASE64_FIELDS:
+				val = tobytes(kwargs.get(fieldName, b''))
+			else:
+				val = tostr(kwargs.get(fieldName, ''))
 			setattr(self, fieldName, val)
 			self._origData[fieldName] = val
 
@@ -265,7 +291,10 @@ class IndexedRedisModel(object):
 		ret = {}
 		for fieldName in self.FIELDS:
 			val = getattr(self, fieldName, '')
-			ret[fieldName] = tostr(val)
+			if fieldName in self.BASE64_FIELDS:
+				ret[fieldName] = tobytes(val)
+			else:
+				ret[fieldName] = tostr(val)
 
 		if includeMeta is True:
 			ret['_id'] = getattr(self, '_id', '')
@@ -283,7 +312,11 @@ class IndexedRedisModel(object):
 			return True
 
 		for fieldName in self.FIELDS:
-			if self._origData.get(fieldName, '') != tostr(getattr(self, fieldName)):
+			if fieldName in self.BASE64_FIELDS:
+				currentVal = tobytes(getattr(self, fieldName))
+			else:
+				currentVal = tostr(getattr(self, fieldName))
+			if self._origData.get(fieldName, '') != currentVal:
 				return True
 		return False
 	
@@ -295,7 +328,10 @@ class IndexedRedisModel(object):
 		'''
 		updatedFields = {}
 		for fieldName in self.FIELDS:
-			thisVal = tostr(getattr(self, fieldName))
+			if fieldName in self.BASE64_FIELDS:
+				thisVal = tobytes(getattr(self, fieldName))
+			else:
+				thisVal = tostr(getattr(self, fieldName))
 			if self._origData[fieldName] != thisVal:
 				updatedFields[fieldName] = (self._origData[fieldName], thisVal)
 		return updatedFields
@@ -320,19 +356,19 @@ class IndexedRedisModel(object):
 		'''
 		return IndexedRedisDelete(cls)
 
-	def save(self):
+	def save(self, redisCon=None):
 		'''
 			save - Save this object
 		'''
 		saver = IndexedRedisSave(self.__class__)
-		return saver.save(self)
+		return saver.save(self, redisCon)
 	
-	def delete(self):
+	def delete(self, redisCon=None):
 		'''
 			delete - Delete this object
 		'''
 		deleter = IndexedRedisDelete(self.__class__)
-		return deleter.deleteOne(self)
+		return deleter.deleteOne(self, redisCon)
 
 	def getPk(self):
 		'''
@@ -488,6 +524,63 @@ class IndexedRedisModel(object):
 		for key, value in stateDict.items():
 			setattr(self, key, value)
 
+
+	def _decodeBase64Fields(self):
+		'''
+			_decodeBase64Fields - private method, do not call . Used for decoding base64 fields after fetch
+		'''
+		for fieldName in self.__class__.BASE64_FIELDS:
+			fieldValue = b64decode(getattr(self, fieldName))
+			setattr(self, fieldName, fieldValue)
+
+	@classmethod
+	def validateModel(model):
+		'''
+			validateModel - Class method that validates a given model is implemented correctly. Will only be validated once, on first model instantiation.
+
+			@param model - Implicit of own class
+
+			@return - True
+
+			@raises - InvalidModelException if there is a problem with the model, and the message contains relevant information.
+		'''
+		global validatedModels
+		keyName = model.KEY_NAME
+		if not keyName:
+			raise InvalidModelException('"%s" has no KEY_NAME defined.' %(str(model.__name__), ) )
+		if keyName in validatedModels:
+			return True
+
+		failedValidationStr = '"%s" Failed Model Validation:' %(str(model.__name__), ) 
+		
+		fieldSet = set(model.FIELDS)
+		indexedFieldSet = set(model.INDEXED_FIELDS)
+		base64FieldSet = set(model.BASE64_FIELDS)
+
+		if not fieldSet:
+			raise InvalidModelException('%s No fields defined. Please populate the FIELDS array with a list of field names' %(failedValidationStr,))
+
+		for fieldName in fieldSet:
+			if fieldName == '_id':
+				raise InvalidModelException('%s You cannot have a field named _id, it is reserved for the primary key.' %(failedValidationStr,))
+			try:
+				codecs.ascii_encode(fieldName)
+			except UnicodeDecodeError as e:
+				raise InvalidModelException('%s All field names must be ascii-encodable. "%s" was not. Error was: %s' %(failedValidationStr, tostr(fieldName), str(e)))
+				
+
+		if bool(indexedFieldSet - fieldSet):
+			raise InvalidModelException('%s All INDEXED_FIELDS must also be present in FIELDS. %s exist only in INDEXED_FIELDS' %(failedValidationStr, str(list(indexedFieldSet - fieldSet)), ) )
+		
+		if bool(base64FieldSet - fieldSet):
+			raise InvalidModelException('%s All BASE64_FIELDS must also be present in FIELDS. %s exist only in BASE64_FIELDS' %(failedValidationStr, str(list(base64FieldSet - fieldSet)), ) )
+		if bool(base64FieldSet.intersection(indexedFieldSet)):
+			raise InvalidModelException('%s You cannot index on a base64-encoded field.' %(failedValidationStr,))
+
+		validatedModels.add(keyName)
+		return True
+
+
 		
 class IndexedRedisHelper(object):
 	'''
@@ -505,6 +598,8 @@ class IndexedRedisHelper(object):
 		self.keyName = self.mdl.KEY_NAME
 		self.fieldNames = self.mdl.FIELDS
 		self.indexedFields = self.mdl.INDEXED_FIELDS
+		self.base64Fields = set(self.mdl.BASE64_FIELDS)
+
 		self._connection = None
 
 	def _get_new_connection(self):
@@ -643,7 +738,9 @@ class IndexedRedisQuery(IndexedRedisHelper):
 
 
 	def _dictToObj(self, theDict):
-		return self.mdl(**decodeDict(theDict))
+		obj = self.mdl(**decodeDict(theDict))
+		obj._decodeBase64Fields()
+		return obj
 
 
 
@@ -899,7 +996,6 @@ class IndexedRedisQuery(IndexedRedisHelper):
 
 			@return - Instance of Model object, or None if no items math current filters
 		'''
-		import random
 		matchedKeys = list(self.getPrimaryKeys())
 		obj = None
 		# Loop so we don't return None when there are items, if item is deleted between getting key and getting obj
@@ -1173,18 +1269,30 @@ class IndexedRedisSave(IndexedRedisHelper):
 
 		if isInsert is True:
 			for fieldName in self.fieldNames:
-				conn.hset(key, fieldName, newDict.get(fieldName, ''))
+				fieldValue = newDict.get(fieldName, '')
+				if fieldName in self.base64Fields:
+					fieldValue = b64encode(tobytes(fieldValue))
+
+				conn.hset(key, fieldName, fieldValue)
+
 			self._add_id_to_keys(obj._id, pipeline)
+
 			for indexedField in self.indexedFields:
 				self._add_id_to_index(indexedField, obj._id, newDict[indexedField], pipeline)
 		else:
 			updatedFields = obj.getUpdatedFields()
 			for fieldName, fieldValue in updatedFields.items():
 				(oldValue, newValue) = fieldValue
+
+				if fieldName in self.base64Fields:
+					newValue = b64encode(tobytes(newValue))
+
 				conn.hset(key, fieldName, newValue)
+
 				if fieldName in self.indexedFields:
 					self._rem_id_from_index(fieldName, obj._id, oldValue, pipeline)
 					self._add_id_to_index(fieldName, obj._id, newValue, pipeline)
+
 			obj._origData = copy.copy(newDict)
 
 	def reindex(self, objs, conn=None):
