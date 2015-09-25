@@ -6,7 +6,7 @@
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
 <tr bgcolor="#7799ee">
 <td valign=bottom>&nbsp;<br>
-<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong>IndexedRedis</strong></big></big> (version 2.7.0)</font></td
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong>IndexedRedis</strong></big></big> (version 2.8.0)</font></td
 ><td align=right valign=bottom
 ><font color="#ffffff" face="helvetica, arial"></font></td></tr></table>
     <p><tt>#&nbsp;Copyright&nbsp;(c)&nbsp;2014,&nbsp;2015&nbsp;Timothy&nbsp;Savannah&nbsp;under&nbsp;LGPL&nbsp;version&nbsp;2.1.&nbsp;See&nbsp;LICENSE&nbsp;for&nbsp;more&nbsp;information.<br>
@@ -287,7 +287,7 @@ Data descriptors defined here:<br>
 @param&nbsp;copyPrimaryKey&nbsp;&lt;bool&gt;&nbsp;default&nbsp;False&nbsp;-&nbsp;If&nbsp;True,&nbsp;any&nbsp;changes&nbsp;to&nbsp;the&nbsp;copy&nbsp;will&nbsp;save&nbsp;over-top&nbsp;the&nbsp;existing&nbsp;entry&nbsp;in&nbsp;Redis.<br>
 &nbsp;&nbsp;&nbsp;&nbsp;If&nbsp;False,&nbsp;only&nbsp;the&nbsp;data&nbsp;is&nbsp;copied,&nbsp;and&nbsp;nothing&nbsp;is&nbsp;saved.</tt></dd></dl>
 
-<dl><dt><a name="IndexedRedisModel-delete"><strong>delete</strong></a>(self, redisCon=None)</dt><dd><tt>delete&nbsp;-&nbsp;Delete&nbsp;this&nbsp;<a href="builtins.html#object">object</a></tt></dd></dl>
+<dl><dt><a name="IndexedRedisModel-delete"><strong>delete</strong></a>(self)</dt><dd><tt>delete&nbsp;-&nbsp;Delete&nbsp;this&nbsp;<a href="builtins.html#object">object</a></tt></dd></dl>
 
 <dl><dt><a name="IndexedRedisModel-getPk"><strong>getPk</strong></a>(self)</dt><dd><tt>getPk&nbsp;-&nbsp;Gets&nbsp;the&nbsp;internal&nbsp;primary&nbsp;key&nbsp;associated&nbsp;with&nbsp;this&nbsp;<a href="builtins.html#object">object</a></tt></dd></dl>
 
@@ -299,13 +299,24 @@ Data descriptors defined here:<br>
 &nbsp;<br>
 @return&nbsp;&lt;bool&gt;&nbsp;-&nbsp;True&nbsp;if&nbsp;any&nbsp;fields&nbsp;have&nbsp;changed&nbsp;since&nbsp;last&nbsp;fetch,&nbsp;or&nbsp;if&nbsp;never&nbsp;saved.&nbsp;Otherwise,&nbsp;False</tt></dd></dl>
 
+<dl><dt><a name="IndexedRedisModel-preSaveHook"><strong>preSaveHook</strong></a>(self, isInsert)</dt><dd><tt>preSaveHook&nbsp;-&nbsp;Oppertunity&nbsp;to&nbsp;hook&nbsp;just&nbsp;prior&nbsp;to&nbsp;saving.&nbsp;Implement&nbsp;this&nbsp;to&nbsp;do&nbsp;any&nbsp;pre-save&nbsp;processing.<br>
+&nbsp;<br>
+@param&nbsp;isInsert&nbsp;&lt;bool&gt;&nbsp;-&nbsp;True&nbsp;if&nbsp;is&nbsp;insert,&nbsp;False&nbsp;if&nbsp;is&nbsp;update.<br>
+&nbsp;<br>
+@note&nbsp;-&nbsp;This&nbsp;is&nbsp;called&nbsp;prior&nbsp;to&nbsp;any&nbsp;base64&nbsp;encoding&nbsp;for&nbsp;BASE64_FIELDS<br>
+@note&nbsp;-&nbsp;If&nbsp;an&nbsp;insert,&nbsp;the&nbsp;primary&nbsp;key&nbsp;has&nbsp;already&nbsp;been&nbsp;assigned&nbsp;by&nbsp;this&nbsp;point.<br>
+&nbsp;<br>
+Keep&nbsp;in&nbsp;mind&nbsp;any&nbsp;exceptions&nbsp;raised&nbsp;here&nbsp;can&nbsp;really&nbsp;mess&nbsp;stuff&nbsp;up,&nbsp;so&nbsp;consider&nbsp;wrapping&nbsp;the&nbsp;entire&nbsp;contents&nbsp;in&nbsp;try/except.<br>
+Also,&nbsp;if&nbsp;there&nbsp;is&nbsp;a&nbsp;lot&nbsp;of&nbsp;processing&nbsp;going&nbsp;on&nbsp;here&nbsp;it&nbsp;can&nbsp;really&nbsp;slow&nbsp;things&nbsp;down,&nbsp;consider&nbsp;only&nbsp;putting&nbsp;in&nbsp;this&nbsp;that&nbsp;are<br>
+necessary&nbsp;to&nbsp;be&nbsp;a&nbsp;pre-save&nbsp;hook,&nbsp;e.x.&nbsp;encrypted&nbsp;data&nbsp;or&nbsp;checksum&nbsp;calculation,&nbsp;or&nbsp;things&nbsp;of&nbsp;that&nbsp;nature.</tt></dd></dl>
+
 <dl><dt><a name="IndexedRedisModel-reload"><strong>reload</strong></a>(self)</dt><dd><tt>reload&nbsp;-&nbsp;Reload&nbsp;this&nbsp;<a href="builtins.html#object">object</a>&nbsp;from&nbsp;the&nbsp;database.<br>
 &nbsp;<br>
 &nbsp;&nbsp;&nbsp;&nbsp;@raises&nbsp;KeyError&nbsp;-&nbsp;if&nbsp;this&nbsp;<a href="builtins.html#object">object</a>&nbsp;has&nbsp;not&nbsp;been&nbsp;saved&nbsp;(no&nbsp;primary&nbsp;key)<br>
 &nbsp;<br>
 &nbsp;&nbsp;&nbsp;&nbsp;@return&nbsp;-&nbsp;True&nbsp;if&nbsp;any&nbsp;updates&nbsp;occured,&nbsp;False&nbsp;if&nbsp;data&nbsp;remained&nbsp;the&nbsp;same.</tt></dd></dl>
 
-<dl><dt><a name="IndexedRedisModel-save"><strong>save</strong></a>(self, redisCon=None)</dt><dd><tt>save&nbsp;-&nbsp;Save&nbsp;this&nbsp;<a href="builtins.html#object">object</a></tt></dd></dl>
+<dl><dt><a name="IndexedRedisModel-save"><strong>save</strong></a>(self)</dt><dd><tt>save&nbsp;-&nbsp;Save&nbsp;this&nbsp;<a href="builtins.html#object">object</a></tt></dd></dl>
 
 <dl><dt><a name="IndexedRedisModel-saveToExternal"><strong>saveToExternal</strong></a>(self, redisCon)</dt><dd><tt>saveToExternal&nbsp;-&nbsp;Saves&nbsp;this&nbsp;<a href="builtins.html#object">object</a>&nbsp;to&nbsp;a&nbsp;different&nbsp;Redis&nbsp;than&nbsp;that&nbsp;specified&nbsp;by&nbsp;REDIS_CONNECTION_PARAMS&nbsp;on&nbsp;this&nbsp;model.<br>
 &nbsp;<br>
@@ -627,7 +638,7 @@ Data descriptors inherited from <a href="builtins.html#BaseException">builtins.B
     
 <tr><td bgcolor="#55aa55"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
 <td width="100%"><strong>INDEXED_REDIS_PREFIX</strong> = '_ir_|'<br>
-<strong>INDEXED_REDIS_VERSION</strong> = (2, 7, 0)<br>
-<strong>INDEXED_REDIS_VERSION_STR</strong> = '2.7.0'<br>
+<strong>INDEXED_REDIS_VERSION</strong> = (2, 8, 0)<br>
+<strong>INDEXED_REDIS_VERSION_STR</strong> = '2.8.0'<br>
 <strong>__all__</strong> = ('INDEXED_REDIS_PREFIX', 'INDEXED_REDIS_VERSION', 'INDEXED_REDIS_VERSION_STR', 'IndexedRedisDelete', 'IndexedRedisHelper', 'IndexedRedisModel', 'IndexedRedisQuery', 'IndexedRedisSave', 'isIndexedRedisModel', 'setIndexedRedisEncoding', 'getIndexedRedisEncoding', 'InvalidModelException')</td></tr></table>
 </body></html>
