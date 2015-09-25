@@ -197,11 +197,6 @@ As your model changes, you may need to add a field to the INDEXED\_FIELDS array.
 	MyModel.objects.reindex()
 
 
-**Hooks**
-
-You may need to perform some sort of processing just prior to saving, for example some sort of encryption etc. You may extend *preSaveHook*, which is passed a boolean "isInsert", that is called just before inserting/updating any object. Consider wrapping this entire function in a try/except as it can mess things up bad if exceptions are raised here, and keep processing to a minimum.
-
-
 Binary/Bytes Data Support
 -------------------------
 

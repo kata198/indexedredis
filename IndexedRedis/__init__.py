@@ -25,10 +25,10 @@ __all__ = ('INDEXED_REDIS_PREFIX', 'INDEXED_REDIS_VERSION', 'INDEXED_REDIS_VERSI
 INDEXED_REDIS_PREFIX = '_ir_|'
 
 # Version as a tuple (major, minor, patchlevel)
-INDEXED_REDIS_VERSION = (2, 8, 0)
+INDEXED_REDIS_VERSION = (2, 7, 2)
 
 # Version as a string
-INDEXED_REDIS_VERSION_STR = '2.8.0'
+INDEXED_REDIS_VERSION_STR = '2.7.2'
 
 # Package version
 __version__ = INDEXED_REDIS_VERSION_STR
@@ -280,22 +280,6 @@ class IndexedRedisModel(object):
 			self._origData[fieldName] = val
 
 		self._id = kwargs.get('_id', None)
-
-
-	def preSaveHook(self, isInsert):
-		'''
-			preSaveHook - Oppertunity to hook just prior to saving. Implement this to do any pre-save processing.
-
-			@param isInsert <bool> - True if is insert, False if is update.
-
-			@note - This is called prior to any base64 encoding for BASE64_FIELDS
-			@note - If an insert, the primary key has already been assigned by this point.
-
-			Keep in mind any exceptions raised here can really mess stuff up, so consider wrapping the entire contents in try/except.
-			Also, if there is a lot of processing going on here it can really slow things down, consider only putting in this that are
-			necessary to be a pre-save hook, e.x. encrypted data or checksum calculation, or things of that nature.
-		'''
-		pass
 	
 	def asDict(self, includeMeta=False):
 		'''
@@ -1280,8 +1264,6 @@ class IndexedRedisSave(IndexedRedisHelper):
 	def _doSave(self, obj, isInsert, conn, pipeline=None):
 		if pipeline is None:
 			pipeline = conn
-
-		obj.preSaveHook(isInsert)
 
 		newDict = obj.toDict()
 		key = self._get_key_for_id(obj._id)
