@@ -25,10 +25,10 @@ __all__ = ('INDEXED_REDIS_PREFIX', 'INDEXED_REDIS_VERSION', 'INDEXED_REDIS_VERSI
 INDEXED_REDIS_PREFIX = '_ir_|'
 
 # Version as a tuple (major, minor, patchlevel)
-INDEXED_REDIS_VERSION = (2, 7, 1)
+INDEXED_REDIS_VERSION = (2, 7, 2)
 
 # Version as a string
-INDEXED_REDIS_VERSION_STR = '2.7.1'
+INDEXED_REDIS_VERSION_STR = '2.7.2'
 
 # Package version
 __version__ = INDEXED_REDIS_VERSION_STR
@@ -109,6 +109,7 @@ validatedModels = set()
 
 def isIndexedRedisModel(model):
 	return hasattr(model, '_is_ir_model')
+
 
 class InvalidModelException(Exception):
 	'''
@@ -356,19 +357,19 @@ class IndexedRedisModel(object):
 		'''
 		return IndexedRedisDelete(cls)
 
-	def save(self, redisCon=None):
+	def save(self):
 		'''
 			save - Save this object
 		'''
 		saver = IndexedRedisSave(self.__class__)
-		return saver.save(self, redisCon)
+		return saver.save(self)
 	
-	def delete(self, redisCon=None):
+	def delete(self):
 		'''
 			delete - Delete this object
 		'''
 		deleter = IndexedRedisDelete(self.__class__)
-		return deleter.deleteOne(self, redisCon)
+		return deleter.deleteOne(self)
 
 	def getPk(self):
 		'''
