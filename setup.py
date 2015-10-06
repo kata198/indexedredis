@@ -8,7 +8,7 @@ if __name__ == '__main__':
         long_description = f.read()
 
     setup(name='indexedredis',
-        version='2.8.0',
+        version='2.8.0.0',
         packages=['IndexedRedis'],
         install_requires=['redis'],
         requires=['redis'],
