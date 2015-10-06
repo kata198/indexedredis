@@ -211,6 +211,14 @@ As your model changes, you may need to add a field to the INDEXED\_FIELDS array.
 
 	MyModel.objects.reindex()
 
+**Connecting to other Redis instances**
+
+You may want to use the same model on multiple Redis instances. To do so, use the .connect method on IndexedRedisModel.
+
+	AltConnectionMyModel = MyModel.connect({'host' : 'althost', 'db' : 4})
+
+Then, use AltConnectionMyModel just as you would use MyModel.
+
 
 
 Encodings

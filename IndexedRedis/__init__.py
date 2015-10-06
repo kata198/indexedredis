@@ -25,10 +25,10 @@ __all__ = ('INDEXED_REDIS_PREFIX', 'INDEXED_REDIS_VERSION', 'INDEXED_REDIS_VERSI
 INDEXED_REDIS_PREFIX = '_ir_|'
 
 # Version as a tuple (major, minor, patchlevel)
-INDEXED_REDIS_VERSION = (2, 7, 2)
+INDEXED_REDIS_VERSION = (2, 8, 0)
 
 # Version as a string
-INDEXED_REDIS_VERSION_STR = '2.7.2'
+INDEXED_REDIS_VERSION_STR = '2.8.0'
 
 # Package version
 __version__ = INDEXED_REDIS_VERSION_STR
@@ -580,6 +580,22 @@ class IndexedRedisModel(object):
 
 		validatedModels.add(keyName)
 		return True
+
+	@classmethod
+	def connect(cls, redisConnectionParams):
+		'''
+			connect - Create a class of this model which will use an alternate connection than the one specified by REDIS_CONNECTION_PARAMS on this model.
+
+			@param redisConnectionParams <dict> - Dictionary of arguments to redis.Redis, same as REDIS_CONNECTION_PARAMS.
+
+			@return - A class that can be used in all the same ways as the existing IndexedRedisModel, but that connects to a different instance.
+		'''
+		if not isinstance(redisConnectionParams, dict):
+			raise ValueError('redisConnectionParams must be a dictionary!')
+
+		class ConnectedIndexedRedisModel(cls):
+			REDIS_CONNECTION_PARAMS = redisConnectionParams
+		return ConnectedIndexedRedisModel
 
 
 		

@@ -320,6 +320,13 @@ Data descriptors defined here:<br>
 
 <hr>
 Class methods defined here:<br>
+
+<dl><dt><a name="IndexedRedisModel-connect"><strong>connect</strong></a>(redisConnectionParams)<font color="#909090"><font face="helvetica, arial"> from <a href="builtins.html#type">builtins.type</a></font></font></dt><dd><tt>connect&nbsp;-&nbsp;Create&nbsp;a&nbsp;class&nbsp;of&nbsp;this&nbsp;model&nbsp;which&nbsp;will&nbsp;use&nbsp;an&nbsp;alternate&nbsp;connection&nbsp;than&nbsp;the&nbsp;one&nbsp;specified&nbsp;by&nbsp;REDIS_CONNECTION_PARAMS&nbsp;on&nbsp;this&nbsp;model.<br>
+&nbsp;<br>
+@param&nbsp;redisConnectionParams&nbsp;&lt;dict&gt;&nbsp;-&nbsp;Dictionary&nbsp;of&nbsp;arguments&nbsp;to&nbsp;redis.Redis,&nbsp;same&nbsp;as&nbsp;REDIS_CONNECTION_PARAMS.<br>
+&nbsp;<br>
+@return&nbsp;-&nbsp;A&nbsp;class&nbsp;that&nbsp;can&nbsp;be&nbsp;used&nbsp;in&nbsp;all&nbsp;the&nbsp;same&nbsp;ways&nbsp;as&nbsp;the&nbsp;existing&nbsp;<a href="#IndexedRedisModel">IndexedRedisModel</a>,&nbsp;but&nbsp;that&nbsp;connects&nbsp;to&nbsp;a&nbsp;different&nbsp;instance.</tt></dd></dl>
+
 <dl><dt><a name="IndexedRedisModel-reset"><strong>reset</strong></a>(newValues)<font color="#909090"><font face="helvetica, arial"> from <a href="builtins.html#type">builtins.type</a></font></font></dt></dl>
 
 <dl><dt><a name="IndexedRedisModel-validateModel"><strong>validateModel</strong></a>()<font color="#909090"><font face="helvetica, arial"> from <a href="builtins.html#type">builtins.type</a></font></font></dt><dd><tt>validateModel&nbsp;-&nbsp;Class&nbsp;method&nbsp;that&nbsp;validates&nbsp;a&nbsp;given&nbsp;model&nbsp;is&nbsp;implemented&nbsp;correctly.&nbsp;Will&nbsp;only&nbsp;be&nbsp;validated&nbsp;once,&nbsp;on&nbsp;first&nbsp;model&nbsp;instantiation.<br>
