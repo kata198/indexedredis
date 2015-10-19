@@ -1,3 +1,6 @@
+2.8.1 - (Oct 06 2015)
+ - Fix py3 install
+
 2.8.0 - (Oct 06 2015)
 	- Add "connect" method to IndexedRedisModel, which allows using models
 	with an alternate redis instance than that on the parent model. It returns
