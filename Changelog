@@ -1,3 +1,9 @@
+2.9.0 - Dec 28 2015
+	- Add support for BINARY_FIELDS -- directly storing data as binary.
+	This is a better option in most cases than BASE64_FIELDS, takes much
+	less time, and is more space efficient
+	- Implicitly make the FIELDS defined on models to be sets in __init__
+
 2.8.1 - (Oct 06 2015)
  - Fix py3 install
 

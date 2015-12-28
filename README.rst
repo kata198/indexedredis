@@ -67,7 +67,7 @@ This is the model you should extend.
 		]
 
 
-		BASE64_FIELDS = [ 'mp3_data', ]
+		BINARY_FIELDS = [ 'mp3_data', ]
 
 
 		KEY_NAME = 'Songs'
@@ -82,6 +82,12 @@ This is the model you should extend.
 *INDEXED_FIELDS* -  A list of strings containing the names of fields that will be indexed. Can only filter on indexed fields. Adds insert/delete time. Entries must also be present in FIELDS.
 
 	 Example: ['Name', 'Model']
+
+
+*BINARY_FIELDS* - A list of strings containing the names of fields which will be stored directly as unencoded bytes. This is generally faster and more space-efficient than using BASE64\_FIELDS, and should be used for purely binary data.
+
+	Example: ['picture', 'mp3_data']
+
 
 *BASE64_FIELDS* - A lsit of strings containing the names of fields which will be automatically converted to/from base64 for storage. This allows you to store binary data, e.x. audio or pictures.
 
@@ -232,9 +238,33 @@ You may change this via IndexedRedis.setEncoding
 Binary/Bytes Data Support
 -------------------------
 
-IndexedRedis, as of version 2.7.0, has the ability to store and retrieve unencoded (binary) data, e.x. image files, executables, raw device data, etc.
+IndexedRedis, as of version 2.9.0, has the ability to store and retrieve unencoded (binary) data, e.x. image files, executables, raw device data, etc.
 
-Simply by adding a field to the "BASE64\_FIELDS" array, IndexedRedis will transparently handle base64-encoding before store, and decoding after retrieval. 
+
+Add the field name to the BINARY_FIELDS array, and IndexedRedis will retrieve and store directly as binary unencoded data. This data will be stripped from __repr__ view, and replaced with a string indicating the length in bytes of the data.
+
+So you may have a model like this:
+
+
+	class FileObj(IndexedRedis.IndexedRedisModel):
+
+
+		FIELDS = [ 'filename', 'data', 'description' ]
+
+
+		INDEXED_FIELDS = [ 'filename' ]
+
+
+		BINARY_FIELDS  = ['data']
+
+
+
+Base64 Encoding Data Support
+----------------------------
+
+Since version 2.7.0, IndexedRedis has support for base64 encoding data, by adding the field name to the "BASE64_FIELDS" array. Use this if you want to keep your data purely text-friendly, but for most cases you should probably use BINARY_FIELDS.
+
+Simply by adding a field to the "BASE64_FIELDS" array, IndexedRedis will transparently handle base64-encoding before store, and decoding after retrieval. 
 
 So you may have a model like this:
 
@@ -251,6 +281,7 @@ So you may have a model like this:
 
 
 In the "data" field you can dump file contents, like an mp3 or a jpeg, and IndexedRedis will handle all the encoding for you. You will just provide "bytes" data to that field.
+
 
 Changes
 -------
