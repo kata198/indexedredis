@@ -1,4 +1,5 @@
 import sys
+import IndexedRedis
 from IndexedRedis import IndexedRedisModel
 
 # vim: ts=4 sw=4 expandtab
@@ -23,13 +24,15 @@ class Song(IndexedRedisModel):
                 'track_number',
     ]
 
-    BASE64_FIELDS = [ 'mp3_data', ]
+    BINARY_FIELDS = [ 'mp3_data', ]
+#    BASE64_FIELDS = [ 'mp3_data', ]
 
     KEY_NAME = 'Songs'
 
 if __name__ == '__main__':
 
     fakeData = b"\x99\x12\x14"
+    sys.stdout.write('Testing IndexedRedis version %s\n' %(IndexedRedis.__version__,))
 
     if '--keep-data' not in sys.argv:
             newSongs = []
@@ -167,6 +170,100 @@ if __name__ == '__main__':
 ###############################
 ##         OUTPUT:            #
 ###############################
+
+#Merry Men Songs:
+#{'album': 'The Merry Men LP',
+# 'artist': 'The Merry Men',
+# 'copyright': 'Copyright 2012 (c) Media Mogul Incorporated',
+# 'description': 'A song about happy people',
+# 'duration': '1:58',
+# 'title': 'Happy Go Lucky',
+# 'track_number': '1'}
+#
+#{'album': 'The Merry Men LP',
+# 'artist': 'The Merry Men',
+# 'copyright': 'Copyright 2012 (c) Media Mogul Incorporated',
+# 'description': 'A song about joy',
+# 'duration': '2:54',
+# 'title': 'Joy to Joy',
+# 'track_number': '2'}
+#
+#
+#
+#Not Mega Men Songs:
+#{'album': 'The Merry Men LP',
+# 'artist': 'The Merry Men',
+# 'copyright': 'Copyright 2012 (c) Media Mogul Incorporated',
+# 'description': 'A song about happy people',
+# 'duration': '1:58',
+# 'title': 'Happy Go Lucky',
+# 'track_number': '1'}
+#
+#{'album': 'Misery loses comfort',
+# 'artist': 'The Unhappy Folk',
+# 'copyright': 'Copyright 2014 (c) Cheese Industries',
+# 'description': 'A sad song',
+# 'duration': '15:44',
+# 'title': 'Sadly she waits',
+# 'track_number': '1'}
+#
+#{'album': 'The Merry Men LP',
+# 'artist': 'The Merry Men',
+# 'copyright': 'Copyright 2012 (c) Media Mogul Incorporated',
+# 'description': 'A song about joy',
+# 'duration': '2:54',
+# 'title': 'Joy to Joy',
+# 'track_number': '2'}
+#
+#
+#
+#
+#All track one songs:
+#{'album': 'The Merry Men LP',
+# 'artist': 'The Merry Men',
+# 'copyright': 'Copyright 2012 (c) Media Mogul Incorporated',
+# 'description': 'A song about happy people',
+# 'duration': '1:58',
+# 'title': 'Happy Go Lucky',
+# 'track_number': '1'}
+#
+#{'album': 'Misery loses comfort',
+# 'artist': 'The Unhappy Folk',
+# 'copyright': 'Copyright 2014 (c) Cheese Industries',
+# 'description': 'A sad song',
+# 'duration': '15:44',
+# 'title': 'Sadly she waits',
+# 'track_number': '1'}
+#
+#{'album': 'Super Tracks',
+# 'artist': 'Mega Men',
+# 'copyright': 'Copyright 2014 (c) Cheese Industries',
+# 'description': 'Super Nintendo',
+# 'duration': '1:15',
+# 'title': 'Nintendo 1',
+# 'track_number': '1'}
+#
+#
+#Mega Men track ones:{'album': 'Super Tracks',
+# 'artist': 'Mega Men',
+# 'copyright': 'Copyright 2014 (c) Cheese Industries',
+# 'description': 'Super Nintendo',
+# 'duration': '1:15',
+# 'title': 'Nintendo 1',
+# 'track_number': '1'}
+#
+#
+#Mega Men track twos:
+#{'album': 'Super Tracks',
+# 'artist': 'Mega Men',
+# 'copyright': 'Copyright 2014 (c) Cheese Industries',
+# 'description': 'Super Nintendo',
+# 'duration': '1:55',
+# 'title': 'Nintendo 2',
+# 'track_number': '2'}
+#
+#
+####After Delete, Mega Men Track twos (should be blank):
 
 # Merry Men Songs:
 # {'album': 'The Merry Men LP',

@@ -1,4 +1,5 @@
 import sys
+import IndexedRedis
 from IndexedRedis import IndexedRedisModel
 
 # vim: ts=4 sw=4 expandtab
@@ -23,13 +24,15 @@ class Song(IndexedRedisModel):
                 'track_number',
     ]
 
-    BASE64_FIELDS = [ 'mp3_data', ]
+    BINARY_FIELDS = [ 'mp3_data', ]
+#    BASE64_FIELDS = [ 'mp3_data', ]
 
     KEY_NAME = 'Songs'
 
 if __name__ == '__main__':
 
     fakeData = b"\x99\x12\x14"
+    sys.stdout.write('Testing IndexedRedis version %s\n' %(IndexedRedis.__version__,))
 
     if '--keep-data' not in sys.argv:
             newSongs = []

@@ -137,6 +137,8 @@ class IndexedRedisModel(object):
 
                     Example: ['data', 'blob']
 
+	    *BINARY_FIELDS* - A list of strings which name the fields that will be stored as unencoded binary data. All entries must also be present in FIELDS. Entries here will be omitted from __repr__ view and replaced with "_BINARY FIELD OF LENGTH N_" where N is the length, in bytes, of the string.
+
 
             *KEY_NAME* - REQUIRED. A unique name name that represents this model. Think of it like a table name. 
 
@@ -252,7 +254,11 @@ class IndexedRedisModel(object):
 	#  You can only search on indexed fields, but they add time to insertion/deletion
 	INDEXED_FIELDS = []
 
+	# BASE64 FIELDS - Fields in this list (must also be present in FIELDS) are encoded into base64 before sending and decoded upon retriving.
 	BASE64_FIELDS = []
+
+	# BINARY_FIELDS - Fields that are not encoded in any way
+	BINARY_FIELDS = []
 
 	# KEY_NAME - A string of a unique name which corrosponds to objects of this type.
 	KEY_NAME = None
@@ -271,8 +277,13 @@ class IndexedRedisModel(object):
 
 		self._origData = {}
 
+		# Convert all field arrays to sets
+		self.FIELDS = set(self.FIELDS)
+		self.BASE64_FIELDS = set(self.BASE64_FIELDS)
+		self.BINARY_FIELDS = set(self.BINARY_FIELDS)
+
 		for fieldName in self.FIELDS:
-			if fieldName in self.BASE64_FIELDS:
+			if fieldName in self.BASE64_FIELDS or fieldName in self.BINARY_FIELDS:
 				val = tobytes(kwargs.get(fieldName, b''))
 			else:
 				val = tostr(kwargs.get(fieldName, ''))
@@ -292,7 +303,7 @@ class IndexedRedisModel(object):
 		ret = {}
 		for fieldName in self.FIELDS:
 			val = getattr(self, fieldName, '')
-			if fieldName in self.BASE64_FIELDS:
+			if fieldName in self.BASE64_FIELDS or fieldName in self.BINARY_FIELDS:
 				ret[fieldName] = tobytes(val)
 			else:
 				ret[fieldName] = tostr(val)
@@ -313,7 +324,7 @@ class IndexedRedisModel(object):
 			return True
 
 		for fieldName in self.FIELDS:
-			if fieldName in self.BASE64_FIELDS:
+			if fieldName in self.BASE64_FIELDS or fieldName in self.BINARY_FIELDS:
 				currentVal = tobytes(getattr(self, fieldName))
 			else:
 				currentVal = tostr(getattr(self, fieldName))
@@ -329,7 +340,7 @@ class IndexedRedisModel(object):
 		'''
 		updatedFields = {}
 		for fieldName in self.FIELDS:
-			if fieldName in self.BASE64_FIELDS:
+			if fieldName in self.BASE64_FIELDS or fieldName in self.BINARY_FIELDS:
 				thisVal = tobytes(getattr(self, fieldName))
 			else:
 				thisVal = tostr(getattr(self, fieldName))
@@ -440,7 +451,10 @@ class IndexedRedisModel(object):
 
 		key = None
 		for key, value in myDict.items():
-			ret += [key, '=', "'", tostr(value or ''), "'", ', ']
+			if key not in self.BINARY_FIELDS:
+				ret += [key, '=', "'", tostr(value or ''), "'", ', ']
+			else:
+				ret += [key, '=', "_BINARY DATA OF LENGTH ", str(len(value)), "_, "]
 		if key is not None or not _id:
 			# At least one iteration, so strip trailing comma
 			ret.pop()
@@ -557,6 +571,7 @@ class IndexedRedisModel(object):
 		fieldSet = set(model.FIELDS)
 		indexedFieldSet = set(model.INDEXED_FIELDS)
 		base64FieldSet = set(model.BASE64_FIELDS)
+		binaryFieldSet = set(model.BINARY_FIELDS)
 
 		if not fieldSet:
 			raise InvalidModelException('%s No fields defined. Please populate the FIELDS array with a list of field names' %(failedValidationStr,))
@@ -577,6 +592,10 @@ class IndexedRedisModel(object):
 			raise InvalidModelException('%s All BASE64_FIELDS must also be present in FIELDS. %s exist only in BASE64_FIELDS' %(failedValidationStr, str(list(base64FieldSet - fieldSet)), ) )
 		if bool(base64FieldSet.intersection(indexedFieldSet)):
 			raise InvalidModelException('%s You cannot index on a base64-encoded field.' %(failedValidationStr,))
+		if bool(binaryFieldSet - fieldSet):
+			raise InvalidModelException('%s All BINARY_FIELDS must also be present in FIELDS. %s exist only in BINARY_FIELDS' %(failedValidationStr, str(list(binaryFieldSet - fieldSet)), ) )
+		if bool(binaryFieldSet.intersection(indexedFieldSet)):
+			raise InvalidModelException('%s You cannot index on a binary field.' %(failedValidationStr,))
 
 		validatedModels.add(keyName)
 		return True
@@ -615,7 +634,8 @@ class IndexedRedisHelper(object):
 		self.keyName = self.mdl.KEY_NAME
 		self.fieldNames = self.mdl.FIELDS
 		self.indexedFields = self.mdl.INDEXED_FIELDS
-		self.base64Fields = set(self.mdl.BASE64_FIELDS)
+		self.base64Fields = self.mdl.BASE64_FIELDS
+		self.binaryFields = self.mdl.BINARY_FIELDS
 
 		self._connection = None
 
@@ -755,7 +775,21 @@ class IndexedRedisQuery(IndexedRedisHelper):
 
 
 	def _dictToObj(self, theDict):
-		obj = self.mdl(**decodeDict(theDict))
+		binaryFields = self.mdl.BINARY_FIELDS
+		if not binaryFields:
+			obj = self.mdl(**decodeDict(theDict))
+		else:
+			binaryItems = {}
+			nonBinaryItems = {}
+			for key, value in theDict.items():
+				key = tostr(key)
+				if key in binaryFields:
+					binaryItems[key] = value
+				else:
+					nonBinaryItems[key] = value
+			obj = self.mdl(**decodeDict(nonBinaryItems))
+			for key, value in binaryItems.items():
+				setattr(obj, key, value)
 		obj._decodeBase64Fields()
 		return obj
 
