@@ -15,6 +15,8 @@ import redis
 
 from base64 import b64encode, b64decode
 
+from QueryableList import QueryableListObjs
+
 # * imports
 __all__ = ('INDEXED_REDIS_PREFIX', 'INDEXED_REDIS_VERSION', 'INDEXED_REDIS_VERSION_STR', 
 	'IndexedRedisDelete', 'IndexedRedisHelper', 'IndexedRedisModel', 'IndexedRedisQuery', 'IndexedRedisSave',
@@ -965,7 +967,7 @@ class IndexedRedisQuery(IndexedRedisHelper):
 		if matchedKeys:
 			return self.getMultiple(matchedKeys)
 
-		return []
+		return QueryableListObjs([])
 
 	def allByAge(self):
 		'''
@@ -978,7 +980,7 @@ class IndexedRedisQuery(IndexedRedisHelper):
 		if matchedKeys:
 			return self.getMultiple(matchedKeys)
 
-		return []
+		return QueryableListObjs([])
 
 	def allOnlyFields(self, fields):
 		'''
@@ -992,7 +994,7 @@ class IndexedRedisQuery(IndexedRedisHelper):
 		if matchedKeys:
 			return self.getMultipleOnlyFields(matchedKeys, fields)
 
-		return []
+		return QueryableListObjs([])
 
 	def allOnlyIndexedFields(self):
 		'''
@@ -1004,7 +1006,7 @@ class IndexedRedisQuery(IndexedRedisHelper):
 		if matchedKeys:
 			return self.getMultipleOnlyIndexedFields(matchedKeys)
 
-		return []
+		return QueryableListObjs([])
 		
 	
 	def first(self):
@@ -1090,7 +1092,7 @@ class IndexedRedisQuery(IndexedRedisHelper):
 
 		if len(pks) == 1:
 			# Optimization to not pipeline on 1 id
-			return [self.get(pks[0])]
+			return QueryableListObjs([self.get(pks[0])])
 
 		conn = self._get_connection()
 		pipeline = conn.pipeline()
@@ -1100,7 +1102,7 @@ class IndexedRedisQuery(IndexedRedisHelper):
 
 		res = pipeline.execute()
 		
-		ret = []
+		ret = QueryableListObjs()
 		i = 0
 		pksLen = len(pks)
 		while i < pksLen:
@@ -1160,7 +1162,7 @@ class IndexedRedisQuery(IndexedRedisHelper):
 			pks = list(pks)
 
 		if len(pks) == 1:
-			return [self.getOnlyFields(pks[0], fields)]
+			return QueryableListObjs([self.getOnlyFields(pks[0], fields)])
 		conn = self._get_connection()
 		pipeline = conn.pipeline()
 
@@ -1169,7 +1171,7 @@ class IndexedRedisQuery(IndexedRedisHelper):
 			pipeline.hmget(key, fields)
 
 		res = pipeline.execute()
-		ret = []
+		ret = QueryableListObjs()
 		pksLen = len(pks)
 		i = 0
 		numFields = len(fields)

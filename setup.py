@@ -15,12 +15,12 @@ if __name__ == '__main__':
         long_description = summary
 
     setup(name='indexedredis',
-        version='2.9.0',
+        version='3.0.0',
         packages=['IndexedRedis'],
-        install_requires=['redis'],
-        requires=['redis'],
+        install_requires=['redis', 'QueryableList'],
+        requires=['redis', 'QueryableList'],
         provides=['indexedredis'],
-        keywords=['redis', 'IndexedRedis', 'SQL', 'nosql', 'orm', 'fast', 'python'],
+        keywords=['redis', 'IndexedRedis', 'SQL', 'nosql', 'orm', 'fast', 'python', 'filter', 'index', 'model'],
         url='https://github.com/kata198/indexedredis',
         long_description=long_description,
         author='Tim Savannah',
