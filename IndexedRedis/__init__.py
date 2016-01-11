@@ -139,7 +139,7 @@ class IndexedRedisModel(object):
 
                     Example: ['data', 'blob']
 
-	    *BINARY_FIELDS* - A list of strings which name the fields that will be stored as unencoded binary data. All entries must also be present in FIELDS. Entries here will be omitted from __repr__ view and replaced with "_BINARY FIELD OF LENGTH N_" where N is the length, in bytes, of the string.
+	    *BINARY_FIELDS* - A list of strings which name the fields that will be stored as unencoded binary data. All entries must also be present in FIELDS. 
 
 
             *KEY_NAME* - REQUIRED. A unique name name that represents this model. Think of it like a table name. 
@@ -456,7 +456,7 @@ class IndexedRedisModel(object):
 			if key not in self.BINARY_FIELDS:
 				ret += [key, '=', "'", tostr(value or ''), "'", ', ']
 			else:
-				ret += [key, '=', "_BINARY DATA OF LENGTH ", str(len(value)), "_, "]
+				ret += [key, '=', repr(value), ', ']
 		if key is not None or not _id:
 			# At least one iteration, so strip trailing comma
 			ret.pop()
