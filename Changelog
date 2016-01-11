@@ -1,3 +1,6 @@
+3.0.0 - ??? ?? 2016
+    - Change return type of functions that used to be a list of instantiated model objects to a QueryableList ( https://github.com/kata198/QueryableList ) which allows easilly chaining complex client-side filtering (beyond just equals and not-equals as the DB-side exists).
+
 2.9.0 - Dec 28 2015
 	- Add support for BINARY_FIELDS -- directly storing data as binary.
 	This is a better option in most cases than BASE64_FIELDS, takes much

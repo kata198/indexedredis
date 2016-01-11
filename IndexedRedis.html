@@ -1,12 +1,13 @@
+
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
 <html><head><title>Python: package IndexedRedis</title>
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+<meta charset="utf-8">
 </head><body bgcolor="#f0f0f8">
 
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
 <tr bgcolor="#7799ee">
 <td valign=bottom>&nbsp;<br>
-<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong>IndexedRedis</strong></big></big> (version 2.9.0)</font></td
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong>IndexedRedis</strong></big></big> (version 3.0.0)</font></td
 ><td align=right valign=bottom
 ><font color="#ffffff" face="helvetica, arial"><a href="IndexedRedis.html">index</a><br></font></td></tr></table>
     <p><tt>#&nbsp;Copyright&nbsp;(c)&nbsp;2014,&nbsp;2015&nbsp;Timothy&nbsp;Savannah&nbsp;under&nbsp;LGPL&nbsp;version&nbsp;2.1.&nbsp;See&nbsp;LICENSE&nbsp;for&nbsp;more&nbsp;information.<br>
@@ -27,13 +28,7 @@
     
 <tr><td bgcolor="#ee77aa"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
 <td width="100%"><dl>
-<dt><font face="helvetica, arial"><a href="builtins.html#Exception">builtins.Exception</a>(<a href="builtins.html#BaseException">builtins.BaseException</a>)
-</font></dt><dd>
-<dl>
-<dt><font face="helvetica, arial"><a href="IndexedRedis.html#InvalidModelException">InvalidModelException</a>
-</font></dt></dl>
-</dd>
-<dt><font face="helvetica, arial"><a href="builtins.html#object">builtins.object</a>
+<dt><font face="helvetica, arial"><a href="__builtin__.html#object">__builtin__.object</a>
 </font></dt><dd>
 <dl>
 <dt><font face="helvetica, arial"><a href="IndexedRedis.html#IndexedRedisHelper">IndexedRedisHelper</a>
@@ -45,6 +40,12 @@
 </font></dt></dl>
 </dd>
 <dt><font face="helvetica, arial"><a href="IndexedRedis.html#IndexedRedisModel">IndexedRedisModel</a>
+</font></dt></dl>
+</dd>
+<dt><font face="helvetica, arial"><a href="exceptions.html#Exception">exceptions.Exception</a>(<a href="exceptions.html#BaseException">exceptions.BaseException</a>)
+</font></dt><dd>
+<dl>
+<dt><font face="helvetica, arial"><a href="IndexedRedis.html#InvalidModelException">InvalidModelException</a>
 </font></dt></dl>
 </dd>
 </dl>
@@ -61,11 +62,11 @@
 <td width="100%"><dl><dt>Method resolution order:</dt>
 <dd><a href="IndexedRedis.html#IndexedRedisDelete">IndexedRedisDelete</a></dd>
 <dd><a href="IndexedRedis.html#IndexedRedisHelper">IndexedRedisHelper</a></dd>
-<dd><a href="builtins.html#object">builtins.object</a></dd>
+<dd><a href="__builtin__.html#object">__builtin__.object</a></dd>
 </dl>
 <hr>
 Methods defined here:<br>
-<dl><dt><a name="IndexedRedisDelete-deleteByPk"><strong>deleteByPk</strong></a>(self, pk)</dt><dd><tt>deleteByPk&nbsp;-&nbsp;Delete&nbsp;<a href="builtins.html#object">object</a>&nbsp;associated&nbsp;with&nbsp;given&nbsp;primary&nbsp;key</tt></dd></dl>
+<dl><dt><a name="IndexedRedisDelete-deleteByPk"><strong>deleteByPk</strong></a>(self, pk)</dt><dd><tt>deleteByPk&nbsp;-&nbsp;Delete&nbsp;<a href="__builtin__.html#object">object</a>&nbsp;associated&nbsp;with&nbsp;given&nbsp;primary&nbsp;key</tt></dd></dl>
 
 <dl><dt><a name="IndexedRedisDelete-deleteMultiple"><strong>deleteMultiple</strong></a>(self, objs)</dt><dd><tt>deleteMultiple&nbsp;-&nbsp;Delete&nbsp;multiple&nbsp;objects<br>
 &nbsp;<br>
@@ -79,9 +80,9 @@ Methods defined here:<br>
 &nbsp;<br>
 @return&nbsp;-&nbsp;Number&nbsp;of&nbsp;objects&nbsp;deleted</tt></dd></dl>
 
-<dl><dt><a name="IndexedRedisDelete-deleteOne"><strong>deleteOne</strong></a>(self, obj, conn=None)</dt><dd><tt>deleteOne&nbsp;-&nbsp;Delete&nbsp;one&nbsp;<a href="builtins.html#object">object</a><br>
+<dl><dt><a name="IndexedRedisDelete-deleteOne"><strong>deleteOne</strong></a>(self, obj, conn<font color="#909090">=None</font>)</dt><dd><tt>deleteOne&nbsp;-&nbsp;Delete&nbsp;one&nbsp;<a href="__builtin__.html#object">object</a><br>
 &nbsp;<br>
-@param&nbsp;obj&nbsp;-&nbsp;<a href="builtins.html#object">object</a>&nbsp;to&nbsp;delete<br>
+@param&nbsp;obj&nbsp;-&nbsp;<a href="__builtin__.html#object">object</a>&nbsp;to&nbsp;delete<br>
 @param&nbsp;conn&nbsp;-&nbsp;Connection&nbsp;to&nbsp;reuse,&nbsp;or&nbsp;None<br>
 &nbsp;<br>
 @return&nbsp;-&nbsp;number&nbsp;of&nbsp;items&nbsp;deleted&nbsp;(0&nbsp;or&nbsp;1)</tt></dd></dl>
@@ -104,7 +105,7 @@ Data descriptors inherited from <a href="IndexedRedis.html#IndexedRedisHelper">I
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
 <tr bgcolor="#ffc8d8">
 <td colspan=3 valign=bottom>&nbsp;<br>
-<font color="#000000" face="helvetica, arial"><a name="IndexedRedisHelper">class <strong>IndexedRedisHelper</strong></a>(<a href="builtins.html#object">builtins.object</a>)</font></td></tr>
+<font color="#000000" face="helvetica, arial"><a name="IndexedRedisHelper">class <strong>IndexedRedisHelper</strong></a>(<a href="__builtin__.html#object">__builtin__.object</a>)</font></td></tr>
     
 <tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
 <td colspan=2><tt><a href="#IndexedRedisHelper">IndexedRedisHelper</a>&nbsp;-&nbsp;internal&nbsp;helper&nbsp;class&nbsp;which&nbsp;ties&nbsp;together&nbsp;all&nbsp;the&nbsp;actions<br>&nbsp;</tt></td></tr>
@@ -126,7 +127,7 @@ Data descriptors defined here:<br>
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
 <tr bgcolor="#ffc8d8">
 <td colspan=3 valign=bottom>&nbsp;<br>
-<font color="#000000" face="helvetica, arial"><a name="IndexedRedisModel">class <strong>IndexedRedisModel</strong></a>(<a href="builtins.html#object">builtins.object</a>)</font></td></tr>
+<font color="#000000" face="helvetica, arial"><a name="IndexedRedisModel">class <strong>IndexedRedisModel</strong></a>(<a href="__builtin__.html#object">__builtin__.object</a>)</font></td></tr>
     
 <tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
 <td colspan=2><tt><a href="#IndexedRedisModel">IndexedRedisModel</a>&nbsp;-&nbsp;This&nbsp;is&nbsp;the&nbsp;model&nbsp;you&nbsp;should&nbsp;extend.<br>
@@ -154,7 +155,7 @@ Data descriptors defined here:<br>
 &nbsp;<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Example:&nbsp;'Items'<br>
 &nbsp;<br>
-&nbsp;*REDIS_CONNECTION_PARAMS*&nbsp;-&nbsp;provides&nbsp;the&nbsp;arguments&nbsp;to&nbsp;pass&nbsp;into&nbsp;"redis.Redis",&nbsp;to&nbsp;construct&nbsp;a&nbsp;redis&nbsp;<a href="builtins.html#object">object</a>.<br>
+&nbsp;*REDIS_CONNECTION_PARAMS*&nbsp;-&nbsp;provides&nbsp;the&nbsp;arguments&nbsp;to&nbsp;pass&nbsp;into&nbsp;"redis.Redis",&nbsp;to&nbsp;construct&nbsp;a&nbsp;redis&nbsp;<a href="__builtin__.html#object">object</a>.<br>
 &nbsp;<br>
 &nbsp;Usage<br>
 &nbsp;-----<br>
@@ -221,18 +222,18 @@ Data descriptors defined here:<br>
 &nbsp;<br>
 &nbsp;**Filter&nbsp;Functions**<br>
 &nbsp;<br>
-&nbsp;These&nbsp;functions&nbsp;add&nbsp;filters&nbsp;to&nbsp;the&nbsp;current&nbsp;set.&nbsp;"filter"&nbsp;returns&nbsp;a&nbsp;copy,&nbsp;"filterInline"&nbsp;acts&nbsp;on&nbsp;that&nbsp;<a href="builtins.html#object">object</a>.<br>
+&nbsp;These&nbsp;functions&nbsp;add&nbsp;filters&nbsp;to&nbsp;the&nbsp;current&nbsp;set.&nbsp;"filter"&nbsp;returns&nbsp;a&nbsp;copy,&nbsp;"filterInline"&nbsp;acts&nbsp;on&nbsp;that&nbsp;<a href="__builtin__.html#object">object</a>.<br>
 &nbsp;<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;filter&nbsp;-&nbsp;Add&nbsp;additional&nbsp;filters,&nbsp;returning&nbsp;a&nbsp;copy&nbsp;of&nbsp;the&nbsp;filter&nbsp;<a href="builtins.html#object">object</a>&nbsp;(moreFiltered&nbsp;=&nbsp;filtered.filter(key2=val2))<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;filter&nbsp;-&nbsp;Add&nbsp;additional&nbsp;filters,&nbsp;returning&nbsp;a&nbsp;copy&nbsp;of&nbsp;the&nbsp;filter&nbsp;<a href="__builtin__.html#object">object</a>&nbsp;(moreFiltered&nbsp;=&nbsp;filtered.filter(key2=val2))<br>
 &nbsp;<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;filterInline&nbsp;-&nbsp;Add&nbsp;additional&nbsp;filters&nbsp;to&nbsp;current&nbsp;filter&nbsp;<a href="builtins.html#object">object</a>.&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;filterInline&nbsp;-&nbsp;Add&nbsp;additional&nbsp;filters&nbsp;to&nbsp;current&nbsp;filter&nbsp;<a href="__builtin__.html#object">object</a>.&nbsp;<br>
 &nbsp;<br>
 &nbsp;<br>
 &nbsp;**Global&nbsp;Fetch&nbsp;functions**<br>
 &nbsp;<br>
 &nbsp;These&nbsp;functions&nbsp;are&nbsp;available&nbsp;on&nbsp;SomeModel.objects&nbsp;and&nbsp;don't&nbsp;use&nbsp;any&nbsp;filters&nbsp;(they&nbsp;get&nbsp;specific&nbsp;objects):<br>
 &nbsp;<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;get&nbsp;-&nbsp;Get&nbsp;a&nbsp;single&nbsp;<a href="builtins.html#object">object</a>&nbsp;by&nbsp;pk<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;get&nbsp;-&nbsp;Get&nbsp;a&nbsp;single&nbsp;<a href="__builtin__.html#object">object</a>&nbsp;by&nbsp;pk<br>
 &nbsp;<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;getMultiple&nbsp;-&nbsp;Get&nbsp;multiple&nbsp;objects&nbsp;by&nbsp;a&nbsp;list&nbsp;of&nbsp;pks<br>
 &nbsp;<br>
@@ -241,9 +242,9 @@ Data descriptors defined here:<br>
 &nbsp;<br>
 &nbsp;Actual&nbsp;objects&nbsp;contain&nbsp;methods&nbsp;including:<br>
 &nbsp;<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;save&nbsp;&nbsp;&nbsp;-&nbsp;Save&nbsp;this&nbsp;<a href="builtins.html#object">object</a>&nbsp;(create&nbsp;if&nbsp;not&nbsp;exist,&nbsp;otherwise&nbsp;update)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;save&nbsp;&nbsp;&nbsp;-&nbsp;Save&nbsp;this&nbsp;<a href="__builtin__.html#object">object</a>&nbsp;(create&nbsp;if&nbsp;not&nbsp;exist,&nbsp;otherwise&nbsp;update)<br>
 &nbsp;<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;delete&nbsp;-&nbsp;Delete&nbsp;this&nbsp;<a href="builtins.html#object">object</a><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;delete&nbsp;-&nbsp;Delete&nbsp;this&nbsp;<a href="__builtin__.html#object">object</a><br>
 &nbsp;<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;getUpdatedFields&nbsp;-&nbsp;See&nbsp;changes&nbsp;since&nbsp;last&nbsp;fetch<br>
 &nbsp;<br>
@@ -258,16 +259,16 @@ Data descriptors defined here:<br>
 <td width="100%">Methods defined here:<br>
 <dl><dt><a name="IndexedRedisModel-__getstate__"><strong>__getstate__</strong></a>(self)</dt><dd><tt>pickle&nbsp;uses&nbsp;this</tt></dd></dl>
 
-<dl><dt><a name="IndexedRedisModel-__init__"><strong>__init__</strong></a>(self, *args, **kwargs)</dt><dd><tt>__init__&nbsp;-&nbsp;Set&nbsp;the&nbsp;values&nbsp;on&nbsp;this&nbsp;<a href="builtins.html#object">object</a>.&nbsp;MAKE&nbsp;SURE&nbsp;YOU&nbsp;CALL&nbsp;THE&nbsp;SUPER&nbsp;HERE,&nbsp;or&nbsp;else&nbsp;things&nbsp;will&nbsp;not&nbsp;work.</tt></dd></dl>
+<dl><dt><a name="IndexedRedisModel-__init__"><strong>__init__</strong></a>(self, *args, **kwargs)</dt><dd><tt>__init__&nbsp;-&nbsp;Set&nbsp;the&nbsp;values&nbsp;on&nbsp;this&nbsp;<a href="__builtin__.html#object">object</a>.&nbsp;MAKE&nbsp;SURE&nbsp;YOU&nbsp;CALL&nbsp;THE&nbsp;SUPER&nbsp;HERE,&nbsp;or&nbsp;else&nbsp;things&nbsp;will&nbsp;not&nbsp;work.</tt></dd></dl>
 
-<dl><dt><a name="IndexedRedisModel-__repr__"><strong>__repr__</strong></a>(self)</dt><dd><tt>__repr__&nbsp;-&nbsp;Returns&nbsp;a&nbsp;string&nbsp;of&nbsp;the&nbsp;constructor/params&nbsp;to&nbsp;recreate&nbsp;this&nbsp;<a href="builtins.html#object">object</a>.<br>
+<dl><dt><a name="IndexedRedisModel-__repr__"><strong>__repr__</strong></a>(self)</dt><dd><tt>__repr__&nbsp;-&nbsp;Returns&nbsp;a&nbsp;string&nbsp;of&nbsp;the&nbsp;constructor/params&nbsp;to&nbsp;recreate&nbsp;this&nbsp;<a href="__builtin__.html#object">object</a>.<br>
 &nbsp;&nbsp;&nbsp;&nbsp;Example:&nbsp;objCopy&nbsp;=&nbsp;eval(repr(obj))<br>
 &nbsp;<br>
-&nbsp;&nbsp;&nbsp;&nbsp;@return&nbsp;-&nbsp;String&nbsp;of&nbsp;python&nbsp;init&nbsp;call&nbsp;to&nbsp;recreate&nbsp;this&nbsp;<a href="builtins.html#object">object</a></tt></dd></dl>
+&nbsp;&nbsp;&nbsp;&nbsp;@return&nbsp;-&nbsp;String&nbsp;of&nbsp;python&nbsp;init&nbsp;call&nbsp;to&nbsp;recreate&nbsp;this&nbsp;<a href="__builtin__.html#object">object</a></tt></dd></dl>
 
 <dl><dt><a name="IndexedRedisModel-__setstate__"><strong>__setstate__</strong></a>(self, stateDict)</dt><dd><tt>pickle&nbsp;uses&nbsp;this</tt></dd></dl>
 
-<dl><dt><a name="IndexedRedisModel-__str__"><strong>__str__</strong></a>(self)</dt><dd><tt>__str__&nbsp;-&nbsp;Returns&nbsp;a&nbsp;string&nbsp;representation&nbsp;of&nbsp;this&nbsp;<a href="builtins.html#object">object</a>'s&nbsp;state.<br>
+<dl><dt><a name="IndexedRedisModel-__str__"><strong>__str__</strong></a>(self)</dt><dd><tt>__str__&nbsp;-&nbsp;Returns&nbsp;a&nbsp;string&nbsp;representation&nbsp;of&nbsp;this&nbsp;<a href="__builtin__.html#object">object</a>'s&nbsp;state.<br>
 &nbsp;&nbsp;&nbsp;&nbsp;See&nbsp;implementation.<br>
 &nbsp;<br>
 @return&nbsp;&lt;str&gt;-&nbsp;<br>
@@ -278,20 +279,21 @@ Data descriptors defined here:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;(Pdb)&nbsp;str(z)<br>
 &nbsp;&nbsp;&nbsp;&nbsp;'&lt;Song&nbsp;obj&nbsp;_id=24&nbsp;(Unsaved&nbsp;Changes)&nbsp;at&nbsp;0x7f3c6a3a4490&gt;'</tt></dd></dl>
 
-<dl><dt><a name="IndexedRedisModel-asDict"><strong>asDict</strong></a>(self, includeMeta=False)</dt><dd><tt>toDict&nbsp;/&nbsp;asDict&nbsp;-&nbsp;Get&nbsp;a&nbsp;dictionary&nbsp;representation&nbsp;of&nbsp;this&nbsp;model.<br>
+<dl><dt><a name="IndexedRedisModel-asDict"><strong>asDict</strong></a>(self, includeMeta<font color="#909090">=False</font>)</dt><dd><tt>toDict&nbsp;/&nbsp;asDict&nbsp;-&nbsp;Get&nbsp;a&nbsp;dictionary&nbsp;representation&nbsp;of&nbsp;this&nbsp;model.<br>
 &nbsp;<br>
 @param&nbsp;includeMeta&nbsp;-&nbsp;Include&nbsp;metadata&nbsp;in&nbsp;return.&nbsp;For&nbsp;now,&nbsp;this&nbsp;is&nbsp;only&nbsp;pk&nbsp;stored&nbsp;as&nbsp;"_id"<br>
 &nbsp;<br>
-@return&nbsp;-&nbsp;Dictionary&nbsp;reprensetation&nbsp;of&nbsp;this&nbsp;<a href="builtins.html#object">object</a>&nbsp;and&nbsp;all&nbsp;fields</tt></dd></dl>
+@return&nbsp;-&nbsp;Dictionary&nbsp;reprensetation&nbsp;of&nbsp;this&nbsp;<a href="__builtin__.html#object">object</a>&nbsp;and&nbsp;all&nbsp;fields</tt></dd></dl>
 
-<dl><dt><a name="IndexedRedisModel-copy"><strong>copy</strong></a>(self, copyPrimaryKey=False)</dt><dd><tt>copy&nbsp;-&nbsp;Copies&nbsp;this&nbsp;<a href="builtins.html#object">object</a>.<br>
+<dl><dt><a name="IndexedRedisModel-copy"><strong>copy</strong></a>(self, copyPrimaryKey<font color="#909090">=False</font>)</dt><dd><tt>copy&nbsp;-&nbsp;Copies&nbsp;this&nbsp;<a href="__builtin__.html#object">object</a>.<br>
 &nbsp;<br>
 @param&nbsp;copyPrimaryKey&nbsp;&lt;bool&gt;&nbsp;default&nbsp;False&nbsp;-&nbsp;If&nbsp;True,&nbsp;any&nbsp;changes&nbsp;to&nbsp;the&nbsp;copy&nbsp;will&nbsp;save&nbsp;over-top&nbsp;the&nbsp;existing&nbsp;entry&nbsp;in&nbsp;Redis.<br>
 &nbsp;&nbsp;&nbsp;&nbsp;If&nbsp;False,&nbsp;only&nbsp;the&nbsp;data&nbsp;is&nbsp;copied,&nbsp;and&nbsp;nothing&nbsp;is&nbsp;saved.</tt></dd></dl>
 
-<dl><dt><a name="IndexedRedisModel-delete"><strong>delete</strong></a>(self)</dt><dd><tt>delete&nbsp;-&nbsp;Delete&nbsp;this&nbsp;<a href="builtins.html#object">object</a></tt></dd></dl>
+<dl><dt><a name="IndexedRedisModel-delete"><strong>delete</strong></a>(self)</dt><dd><tt>delete&nbsp;-&nbsp;Delete&nbsp;this&nbsp;<a href="__builtin__.html#object">object</a></tt></dd></dl>
 
-<dl><dt><a name="IndexedRedisModel-getPk"><strong>getPk</strong></a>(self)</dt><dd><tt>getPk&nbsp;-&nbsp;Gets&nbsp;the&nbsp;internal&nbsp;primary&nbsp;key&nbsp;associated&nbsp;with&nbsp;this&nbsp;<a href="builtins.html#object">object</a></tt></dd></dl>
+<strong>deleter</strong> = &lt;IndexedRedis.IndexedRedisDelete object&gt;
+<dl><dt><a name="IndexedRedisModel-getPk"><strong>getPk</strong></a>(self)</dt><dd><tt>getPk&nbsp;-&nbsp;Gets&nbsp;the&nbsp;internal&nbsp;primary&nbsp;key&nbsp;associated&nbsp;with&nbsp;this&nbsp;<a href="__builtin__.html#object">object</a></tt></dd></dl>
 
 <dl><dt><a name="IndexedRedisModel-getUpdatedFields"><strong>getUpdatedFields</strong></a>(self)</dt><dd><tt>getUpdatedFields&nbsp;-&nbsp;See&nbsp;changed&nbsp;fields.<br>
 &nbsp;<br>
@@ -301,15 +303,16 @@ Data descriptors defined here:<br>
 &nbsp;<br>
 @return&nbsp;&lt;bool&gt;&nbsp;-&nbsp;True&nbsp;if&nbsp;any&nbsp;fields&nbsp;have&nbsp;changed&nbsp;since&nbsp;last&nbsp;fetch,&nbsp;or&nbsp;if&nbsp;never&nbsp;saved.&nbsp;Otherwise,&nbsp;False</tt></dd></dl>
 
-<dl><dt><a name="IndexedRedisModel-reload"><strong>reload</strong></a>(self)</dt><dd><tt>reload&nbsp;-&nbsp;Reload&nbsp;this&nbsp;<a href="builtins.html#object">object</a>&nbsp;from&nbsp;the&nbsp;database.<br>
+<strong>objects</strong> = &lt;IndexedRedis.IndexedRedisQuery object&gt;
+<dl><dt><a name="IndexedRedisModel-reload"><strong>reload</strong></a>(self)</dt><dd><tt>reload&nbsp;-&nbsp;Reload&nbsp;this&nbsp;<a href="__builtin__.html#object">object</a>&nbsp;from&nbsp;the&nbsp;database.<br>
 &nbsp;<br>
-&nbsp;&nbsp;&nbsp;&nbsp;@raises&nbsp;KeyError&nbsp;-&nbsp;if&nbsp;this&nbsp;<a href="builtins.html#object">object</a>&nbsp;has&nbsp;not&nbsp;been&nbsp;saved&nbsp;(no&nbsp;primary&nbsp;key)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;@raises&nbsp;KeyError&nbsp;-&nbsp;if&nbsp;this&nbsp;<a href="__builtin__.html#object">object</a>&nbsp;has&nbsp;not&nbsp;been&nbsp;saved&nbsp;(no&nbsp;primary&nbsp;key)<br>
 &nbsp;<br>
 &nbsp;&nbsp;&nbsp;&nbsp;@return&nbsp;-&nbsp;True&nbsp;if&nbsp;any&nbsp;updates&nbsp;occured,&nbsp;False&nbsp;if&nbsp;data&nbsp;remained&nbsp;the&nbsp;same.</tt></dd></dl>
 
-<dl><dt><a name="IndexedRedisModel-save"><strong>save</strong></a>(self)</dt><dd><tt>save&nbsp;-&nbsp;Save&nbsp;this&nbsp;<a href="builtins.html#object">object</a></tt></dd></dl>
+<dl><dt><a name="IndexedRedisModel-save"><strong>save</strong></a>(self)</dt><dd><tt>save&nbsp;-&nbsp;Save&nbsp;this&nbsp;<a href="__builtin__.html#object">object</a></tt></dd></dl>
 
-<dl><dt><a name="IndexedRedisModel-saveToExternal"><strong>saveToExternal</strong></a>(self, redisCon)</dt><dd><tt>saveToExternal&nbsp;-&nbsp;Saves&nbsp;this&nbsp;<a href="builtins.html#object">object</a>&nbsp;to&nbsp;a&nbsp;different&nbsp;Redis&nbsp;than&nbsp;that&nbsp;specified&nbsp;by&nbsp;REDIS_CONNECTION_PARAMS&nbsp;on&nbsp;this&nbsp;model.<br>
+<dl><dt><a name="IndexedRedisModel-saveToExternal"><strong>saveToExternal</strong></a>(self, redisCon)</dt><dd><tt>saveToExternal&nbsp;-&nbsp;Saves&nbsp;this&nbsp;<a href="__builtin__.html#object">object</a>&nbsp;to&nbsp;a&nbsp;different&nbsp;Redis&nbsp;than&nbsp;that&nbsp;specified&nbsp;by&nbsp;REDIS_CONNECTION_PARAMS&nbsp;on&nbsp;this&nbsp;model.<br>
 &nbsp;<br>
 @param&nbsp;redisCon&nbsp;&lt;dict/redis.Redis&gt;&nbsp;-&nbsp;Either&nbsp;a&nbsp;dict&nbsp;of&nbsp;connection&nbsp;params,&nbsp;a&nbsp;la&nbsp;REDIS_CONNECTION_PARAMS,&nbsp;or&nbsp;an&nbsp;existing&nbsp;Redis&nbsp;connection.<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;If&nbsp;you&nbsp;are&nbsp;doing&nbsp;a&nbsp;lot&nbsp;of&nbsp;bulk&nbsp;copies,&nbsp;it&nbsp;is&nbsp;recommended&nbsp;that&nbsp;you&nbsp;create&nbsp;a&nbsp;Redis&nbsp;connection&nbsp;and&nbsp;pass&nbsp;it&nbsp;in&nbsp;rather&nbsp;than&nbsp;establish&nbsp;a&nbsp;new<br>
@@ -318,19 +321,20 @@ Data descriptors defined here:<br>
 @note&nbsp;-&nbsp;You&nbsp;will&nbsp;generate&nbsp;a&nbsp;new&nbsp;primary&nbsp;key&nbsp;relative&nbsp;to&nbsp;the&nbsp;external&nbsp;Redis&nbsp;environment.&nbsp;If&nbsp;you&nbsp;need&nbsp;to&nbsp;reference&nbsp;a&nbsp;"shared"&nbsp;primary&nbsp;key,&nbsp;it&nbsp;is&nbsp;better<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;to&nbsp;use&nbsp;an&nbsp;indexed&nbsp;field&nbsp;than&nbsp;the&nbsp;internal&nbsp;pk.</tt></dd></dl>
 
-<dl><dt><a name="IndexedRedisModel-toDict"><strong>toDict</strong></a> = <a href="#IndexedRedisModel-asDict">asDict</a>(self, includeMeta=False)</dt></dl>
+<strong>saver</strong> = &lt;IndexedRedis.IndexedRedisSave object&gt;
+<dl><dt><a name="IndexedRedisModel-toDict"><strong>toDict</strong></a> = <a href="#IndexedRedisModel-asDict">asDict</a>(self, includeMeta<font color="#909090">=False</font>)</dt></dl>
 
 <hr>
 Class methods defined here:<br>
-<dl><dt><a name="IndexedRedisModel-connect"><strong>connect</strong></a>(redisConnectionParams)<font color="#909090"><font face="helvetica, arial"> from <a href="builtins.html#type">builtins.type</a></font></font></dt><dd><tt>connect&nbsp;-&nbsp;Create&nbsp;a&nbsp;class&nbsp;of&nbsp;this&nbsp;model&nbsp;which&nbsp;will&nbsp;use&nbsp;an&nbsp;alternate&nbsp;connection&nbsp;than&nbsp;the&nbsp;one&nbsp;specified&nbsp;by&nbsp;REDIS_CONNECTION_PARAMS&nbsp;on&nbsp;this&nbsp;model.<br>
+<dl><dt><a name="IndexedRedisModel-connect"><strong>connect</strong></a>(cls, redisConnectionParams)<font color="#909090"><font face="helvetica, arial"> from <a href="__builtin__.html#type">__builtin__.type</a></font></font></dt><dd><tt>connect&nbsp;-&nbsp;Create&nbsp;a&nbsp;class&nbsp;of&nbsp;this&nbsp;model&nbsp;which&nbsp;will&nbsp;use&nbsp;an&nbsp;alternate&nbsp;connection&nbsp;than&nbsp;the&nbsp;one&nbsp;specified&nbsp;by&nbsp;REDIS_CONNECTION_PARAMS&nbsp;on&nbsp;this&nbsp;model.<br>
 &nbsp;<br>
 @param&nbsp;redisConnectionParams&nbsp;&lt;dict&gt;&nbsp;-&nbsp;Dictionary&nbsp;of&nbsp;arguments&nbsp;to&nbsp;redis.Redis,&nbsp;same&nbsp;as&nbsp;REDIS_CONNECTION_PARAMS.<br>
 &nbsp;<br>
 @return&nbsp;-&nbsp;A&nbsp;class&nbsp;that&nbsp;can&nbsp;be&nbsp;used&nbsp;in&nbsp;all&nbsp;the&nbsp;same&nbsp;ways&nbsp;as&nbsp;the&nbsp;existing&nbsp;<a href="#IndexedRedisModel">IndexedRedisModel</a>,&nbsp;but&nbsp;that&nbsp;connects&nbsp;to&nbsp;a&nbsp;different&nbsp;instance.</tt></dd></dl>
 
-<dl><dt><a name="IndexedRedisModel-reset"><strong>reset</strong></a>(newValues)<font color="#909090"><font face="helvetica, arial"> from <a href="builtins.html#type">builtins.type</a></font></font></dt></dl>
+<dl><dt><a name="IndexedRedisModel-reset"><strong>reset</strong></a>(cls, newValues)<font color="#909090"><font face="helvetica, arial"> from <a href="__builtin__.html#type">__builtin__.type</a></font></font></dt></dl>
 
-<dl><dt><a name="IndexedRedisModel-validateModel"><strong>validateModel</strong></a>()<font color="#909090"><font face="helvetica, arial"> from <a href="builtins.html#type">builtins.type</a></font></font></dt><dd><tt>validateModel&nbsp;-&nbsp;Class&nbsp;method&nbsp;that&nbsp;validates&nbsp;a&nbsp;given&nbsp;model&nbsp;is&nbsp;implemented&nbsp;correctly.&nbsp;Will&nbsp;only&nbsp;be&nbsp;validated&nbsp;once,&nbsp;on&nbsp;first&nbsp;model&nbsp;instantiation.<br>
+<dl><dt><a name="IndexedRedisModel-validateModel"><strong>validateModel</strong></a>(model)<font color="#909090"><font face="helvetica, arial"> from <a href="__builtin__.html#type">__builtin__.type</a></font></font></dt><dd><tt>validateModel&nbsp;-&nbsp;Class&nbsp;method&nbsp;that&nbsp;validates&nbsp;a&nbsp;given&nbsp;model&nbsp;is&nbsp;implemented&nbsp;correctly.&nbsp;Will&nbsp;only&nbsp;be&nbsp;validated&nbsp;once,&nbsp;on&nbsp;first&nbsp;model&nbsp;instantiation.<br>
 &nbsp;<br>
 @param&nbsp;model&nbsp;-&nbsp;Implicit&nbsp;of&nbsp;own&nbsp;class<br>
 &nbsp;<br>
@@ -360,12 +364,6 @@ Data and other attributes defined here:<br>
 
 <dl><dt><strong>REDIS_CONNECTION_PARAMS</strong> = {}</dl>
 
-<dl><dt><strong>deleter</strong> = &lt;IndexedRedis.IndexedRedisDelete object&gt;</dl>
-
-<dl><dt><strong>objects</strong> = &lt;IndexedRedis.IndexedRedisQuery object&gt;</dl>
-
-<dl><dt><strong>saver</strong> = &lt;IndexedRedis.IndexedRedisSave object&gt;</dl>
-
 </td></tr></table> <p>
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
 <tr bgcolor="#ffc8d8">
@@ -373,12 +371,12 @@ Data and other attributes defined here:<br>
 <font color="#000000" face="helvetica, arial"><a name="IndexedRedisQuery">class <strong>IndexedRedisQuery</strong></a>(<a href="IndexedRedis.html#IndexedRedisHelper">IndexedRedisHelper</a>)</font></td></tr>
     
 <tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
-<td colspan=2><tt><a href="#IndexedRedisQuery">IndexedRedisQuery</a>&nbsp;-&nbsp;The&nbsp;query&nbsp;<a href="builtins.html#object">object</a>.&nbsp;This&nbsp;is&nbsp;the&nbsp;return&nbsp;of&nbsp;"Model.objects"&nbsp;and&nbsp;"Model.objects.filter"<br>&nbsp;</tt></td></tr>
+<td colspan=2><tt><a href="#IndexedRedisQuery">IndexedRedisQuery</a>&nbsp;-&nbsp;The&nbsp;query&nbsp;<a href="__builtin__.html#object">object</a>.&nbsp;This&nbsp;is&nbsp;the&nbsp;return&nbsp;of&nbsp;"Model.objects"&nbsp;and&nbsp;"Model.objects.filter"<br>&nbsp;</tt></td></tr>
 <tr><td>&nbsp;</td>
 <td width="100%"><dl><dt>Method resolution order:</dt>
 <dd><a href="IndexedRedis.html#IndexedRedisQuery">IndexedRedisQuery</a></dd>
 <dd><a href="IndexedRedis.html#IndexedRedisHelper">IndexedRedisHelper</a></dd>
-<dd><a href="builtins.html#object">builtins.object</a></dd>
+<dd><a href="__builtin__.html#object">__builtin__.object</a></dd>
 </dl>
 <hr>
 Methods defined here:<br>
@@ -416,11 +414,11 @@ Example:<br>
 &nbsp;<br>
 @param&nbsp;pk&nbsp;-&nbsp;Primary&nbsp;key&nbsp;(see&nbsp;getPk&nbsp;method)<br>
 &nbsp;<br>
-Example&nbsp;usage:&nbsp;Waiting&nbsp;for&nbsp;an&nbsp;<a href="builtins.html#object">object</a>&nbsp;to&nbsp;be&nbsp;deleted&nbsp;without&nbsp;fetching&nbsp;the&nbsp;<a href="builtins.html#object">object</a>&nbsp;or&nbsp;running&nbsp;a&nbsp;filter.&nbsp;<br>
+Example&nbsp;usage:&nbsp;Waiting&nbsp;for&nbsp;an&nbsp;<a href="__builtin__.html#object">object</a>&nbsp;to&nbsp;be&nbsp;deleted&nbsp;without&nbsp;fetching&nbsp;the&nbsp;<a href="__builtin__.html#object">object</a>&nbsp;or&nbsp;running&nbsp;a&nbsp;filter.&nbsp;<br>
 &nbsp;<br>
 This&nbsp;is&nbsp;a&nbsp;very&nbsp;cheap&nbsp;operation.<br>
 &nbsp;<br>
-@return&nbsp;&lt;bool&gt;&nbsp;-&nbsp;True&nbsp;if&nbsp;<a href="builtins.html#object">object</a>&nbsp;with&nbsp;given&nbsp;pk&nbsp;exists,&nbsp;otherwise&nbsp;False</tt></dd></dl>
+@return&nbsp;&lt;bool&gt;&nbsp;-&nbsp;True&nbsp;if&nbsp;<a href="__builtin__.html#object">object</a>&nbsp;with&nbsp;given&nbsp;pk&nbsp;exists,&nbsp;otherwise&nbsp;False</tt></dd></dl>
 
 <dl><dt><a name="IndexedRedisQuery-filter"><strong>filter</strong></a>(self, **kwargs)</dt><dd><tt>filter&nbsp;-&nbsp;Add&nbsp;filters&nbsp;based&nbsp;on&nbsp;INDEXED_FIELDS&nbsp;having&nbsp;or&nbsp;not&nbsp;having&nbsp;a&nbsp;value.<br>
 &nbsp;&nbsp;Note,&nbsp;no&nbsp;objects&nbsp;are&nbsp;actually&nbsp;fetched&nbsp;until&nbsp;.<a href="#IndexedRedisQuery-all">all</a>()&nbsp;is&nbsp;called<br>
@@ -435,15 +433,15 @@ Example:<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;objs2&nbsp;=&nbsp;query.<a href="#IndexedRedisQuery-filter">filter</a>(something__ne=7).<a href="#IndexedRedisQuery-all">all</a>()<br>
 &nbsp;<br>
 &nbsp;<br>
-@returns&nbsp;-&nbsp;A&nbsp;copy&nbsp;of&nbsp;this&nbsp;<a href="builtins.html#object">object</a>,&nbsp;with&nbsp;the&nbsp;additional&nbsp;filters.&nbsp;If&nbsp;you&nbsp;want&nbsp;to&nbsp;work&nbsp;inline&nbsp;on&nbsp;this&nbsp;<a href="builtins.html#object">object</a>&nbsp;instead,&nbsp;use&nbsp;the&nbsp;filterInline&nbsp;method.</tt></dd></dl>
+@returns&nbsp;-&nbsp;A&nbsp;copy&nbsp;of&nbsp;this&nbsp;<a href="__builtin__.html#object">object</a>,&nbsp;with&nbsp;the&nbsp;additional&nbsp;filters.&nbsp;If&nbsp;you&nbsp;want&nbsp;to&nbsp;work&nbsp;inline&nbsp;on&nbsp;this&nbsp;<a href="__builtin__.html#object">object</a>&nbsp;instead,&nbsp;use&nbsp;the&nbsp;filterInline&nbsp;method.</tt></dd></dl>
 
-<dl><dt><a name="IndexedRedisQuery-filterInline"><strong>filterInline</strong></a>(self, **kwargs)</dt><dd><tt>filterInline&nbsp;-&nbsp;@see&nbsp;<a href="#IndexedRedisQuery">IndexedRedisQuery</a>.filter.&nbsp;This&nbsp;is&nbsp;the&nbsp;same&nbsp;as&nbsp;filter,&nbsp;but&nbsp;works&nbsp;inline&nbsp;on&nbsp;this&nbsp;<a href="builtins.html#object">object</a>&nbsp;instead&nbsp;of&nbsp;creating&nbsp;a&nbsp;copy.<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Use&nbsp;this&nbsp;is&nbsp;you&nbsp;do&nbsp;not&nbsp;need&nbsp;to&nbsp;retain&nbsp;the&nbsp;previous&nbsp;filter&nbsp;<a href="builtins.html#object">object</a>.</tt></dd></dl>
+<dl><dt><a name="IndexedRedisQuery-filterInline"><strong>filterInline</strong></a>(self, **kwargs)</dt><dd><tt>filterInline&nbsp;-&nbsp;@see&nbsp;<a href="#IndexedRedisQuery">IndexedRedisQuery</a>.filter.&nbsp;This&nbsp;is&nbsp;the&nbsp;same&nbsp;as&nbsp;filter,&nbsp;but&nbsp;works&nbsp;inline&nbsp;on&nbsp;this&nbsp;<a href="__builtin__.html#object">object</a>&nbsp;instead&nbsp;of&nbsp;creating&nbsp;a&nbsp;copy.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Use&nbsp;this&nbsp;is&nbsp;you&nbsp;do&nbsp;not&nbsp;need&nbsp;to&nbsp;retain&nbsp;the&nbsp;previous&nbsp;filter&nbsp;<a href="__builtin__.html#object">object</a>.</tt></dd></dl>
 
 <dl><dt><a name="IndexedRedisQuery-first"><strong>first</strong></a>(self)</dt><dd><tt>First&nbsp;-&nbsp;Returns&nbsp;the&nbsp;oldest&nbsp;record&nbsp;(lowerst&nbsp;primary&nbsp;key)&nbsp;with&nbsp;current&nbsp;filters.<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;This&nbsp;makes&nbsp;an&nbsp;efficient&nbsp;queue,&nbsp;as&nbsp;it&nbsp;only&nbsp;fetches&nbsp;a&nbsp;single&nbsp;<a href="builtins.html#object">object</a>.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;This&nbsp;makes&nbsp;an&nbsp;efficient&nbsp;queue,&nbsp;as&nbsp;it&nbsp;only&nbsp;fetches&nbsp;a&nbsp;single&nbsp;<a href="__builtin__.html#object">object</a>.<br>
 &nbsp;<br>
-@return&nbsp;-&nbsp;Instance&nbsp;of&nbsp;Model&nbsp;<a href="builtins.html#object">object</a>,&nbsp;or&nbsp;None&nbsp;if&nbsp;no&nbsp;items&nbsp;match&nbsp;current&nbsp;filters</tt></dd></dl>
+@return&nbsp;-&nbsp;Instance&nbsp;of&nbsp;Model&nbsp;<a href="__builtin__.html#object">object</a>,&nbsp;or&nbsp;None&nbsp;if&nbsp;no&nbsp;items&nbsp;match&nbsp;current&nbsp;filters</tt></dd></dl>
 
 <dl><dt><a name="IndexedRedisQuery-get"><strong>get</strong></a>(self, pk)</dt><dd><tt>get&nbsp;-&nbsp;Get&nbsp;a&nbsp;single&nbsp;value&nbsp;with&nbsp;the&nbsp;internal&nbsp;primary&nbsp;key.<br>
 &nbsp;<br>
@@ -460,7 +458,7 @@ fields&nbsp;list&lt;str&gt;&nbsp;-&nbsp;List&nbsp;of&nbsp;fields<br>
 &nbsp;<br>
 return&nbsp;-&nbsp;List&nbsp;of&nbsp;partial&nbsp;objects&nbsp;with&nbsp;only&nbsp;fields&nbsp;applied</tt></dd></dl>
 
-<dl><dt><a name="IndexedRedisQuery-getMultipleOnlyIndexedFields"><strong>getMultipleOnlyIndexedFields</strong></a>(self, pks)</dt><dd><tt>getMultipleOnlyIndexedFields&nbsp;-&nbsp;Get&nbsp;only&nbsp;the&nbsp;indexed&nbsp;fields&nbsp;on&nbsp;an&nbsp;<a href="builtins.html#object">object</a>.&nbsp;This&nbsp;is&nbsp;the&nbsp;minimum&nbsp;to&nbsp;delete.<br>
+<dl><dt><a name="IndexedRedisQuery-getMultipleOnlyIndexedFields"><strong>getMultipleOnlyIndexedFields</strong></a>(self, pks)</dt><dd><tt>getMultipleOnlyIndexedFields&nbsp;-&nbsp;Get&nbsp;only&nbsp;the&nbsp;indexed&nbsp;fields&nbsp;on&nbsp;an&nbsp;<a href="__builtin__.html#object">object</a>.&nbsp;This&nbsp;is&nbsp;the&nbsp;minimum&nbsp;to&nbsp;delete.<br>
 &nbsp;<br>
 @param&nbsp;pks&nbsp;-&nbsp;List&nbsp;of&nbsp;primary&nbsp;keys<br>
 &nbsp;<br>
@@ -473,13 +471,13 @@ fields&nbsp;list&lt;str&gt;&nbsp;-&nbsp;List&nbsp;of&nbsp;fields<br>
 &nbsp;<br>
 return&nbsp;-&nbsp;Partial&nbsp;objects&nbsp;with&nbsp;only&nbsp;fields&nbsp;applied</tt></dd></dl>
 
-<dl><dt><a name="IndexedRedisQuery-getOnlyIndexedFields"><strong>getOnlyIndexedFields</strong></a>(self, pk)</dt><dd><tt>getOnlyIndexedFields&nbsp;-&nbsp;Get&nbsp;only&nbsp;the&nbsp;indexed&nbsp;fields&nbsp;on&nbsp;an&nbsp;<a href="builtins.html#object">object</a>.&nbsp;This&nbsp;is&nbsp;the&nbsp;minimum&nbsp;to&nbsp;delete.<br>
+<dl><dt><a name="IndexedRedisQuery-getOnlyIndexedFields"><strong>getOnlyIndexedFields</strong></a>(self, pk)</dt><dd><tt>getOnlyIndexedFields&nbsp;-&nbsp;Get&nbsp;only&nbsp;the&nbsp;indexed&nbsp;fields&nbsp;on&nbsp;an&nbsp;<a href="__builtin__.html#object">object</a>.&nbsp;This&nbsp;is&nbsp;the&nbsp;minimum&nbsp;to&nbsp;delete.<br>
 &nbsp;<br>
 @param&nbsp;pk&nbsp;-&nbsp;Primary&nbsp;key<br>
 &nbsp;<br>
 @return&nbsp;-&nbsp;Object&nbsp;with&nbsp;only&nbsp;indexed&nbsp;fields&nbsp;fetched.</tt></dd></dl>
 
-<dl><dt><a name="IndexedRedisQuery-getPrimaryKeys"><strong>getPrimaryKeys</strong></a>(self, sortByAge=False)</dt><dd><tt>getPrimaryKeys&nbsp;-&nbsp;Returns&nbsp;all&nbsp;primary&nbsp;keys&nbsp;matching&nbsp;current&nbsp;filterset.<br>
+<dl><dt><a name="IndexedRedisQuery-getPrimaryKeys"><strong>getPrimaryKeys</strong></a>(self, sortByAge<font color="#909090">=False</font>)</dt><dd><tt>getPrimaryKeys&nbsp;-&nbsp;Returns&nbsp;all&nbsp;primary&nbsp;keys&nbsp;matching&nbsp;current&nbsp;filterset.<br>
 &nbsp;<br>
 @param&nbsp;sortByAge&nbsp;&lt;bool&gt;&nbsp;-&nbsp;If&nbsp;False,&nbsp;return&nbsp;will&nbsp;be&nbsp;a&nbsp;set&nbsp;and&nbsp;may&nbsp;not&nbsp;be&nbsp;ordered.<br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;If&nbsp;True,&nbsp;return&nbsp;will&nbsp;be&nbsp;a&nbsp;list&nbsp;and&nbsp;is&nbsp;guarenteed&nbsp;to&nbsp;represent&nbsp;objects&nbsp;oldest-&gt;newest<br>
@@ -487,13 +485,13 @@ return&nbsp;-&nbsp;Partial&nbsp;objects&nbsp;with&nbsp;only&nbsp;fields&nbsp;app
 @return&nbsp;&lt;set&gt;&nbsp;-&nbsp;A&nbsp;set&nbsp;of&nbsp;all&nbsp;primary&nbsp;keys&nbsp;associated&nbsp;with&nbsp;current&nbsp;filters.</tt></dd></dl>
 
 <dl><dt><a name="IndexedRedisQuery-last"><strong>last</strong></a>(self)</dt><dd><tt>Last&nbsp;-&nbsp;Returns&nbsp;the&nbsp;newest&nbsp;record&nbsp;(highest&nbsp;primary&nbsp;key)&nbsp;with&nbsp;current&nbsp;filters.<br>
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;This&nbsp;makes&nbsp;an&nbsp;efficient&nbsp;queue,&nbsp;as&nbsp;it&nbsp;only&nbsp;fetches&nbsp;a&nbsp;single&nbsp;<a href="builtins.html#object">object</a>.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;This&nbsp;makes&nbsp;an&nbsp;efficient&nbsp;queue,&nbsp;as&nbsp;it&nbsp;only&nbsp;fetches&nbsp;a&nbsp;single&nbsp;<a href="__builtin__.html#object">object</a>.<br>
 &nbsp;<br>
-@return&nbsp;-&nbsp;Instance&nbsp;of&nbsp;Model&nbsp;<a href="builtins.html#object">object</a>,&nbsp;or&nbsp;None&nbsp;if&nbsp;no&nbsp;items&nbsp;match&nbsp;current&nbsp;filters</tt></dd></dl>
+@return&nbsp;-&nbsp;Instance&nbsp;of&nbsp;Model&nbsp;<a href="__builtin__.html#object">object</a>,&nbsp;or&nbsp;None&nbsp;if&nbsp;no&nbsp;items&nbsp;match&nbsp;current&nbsp;filters</tt></dd></dl>
 
 <dl><dt><a name="IndexedRedisQuery-random"><strong>random</strong></a>(self)</dt><dd><tt>Random&nbsp;-&nbsp;Returns&nbsp;a&nbsp;random&nbsp;record&nbsp;in&nbsp;current&nbsp;filterset.<br>
 &nbsp;<br>
-@return&nbsp;-&nbsp;Instance&nbsp;of&nbsp;Model&nbsp;<a href="builtins.html#object">object</a>,&nbsp;or&nbsp;None&nbsp;if&nbsp;no&nbsp;items&nbsp;math&nbsp;current&nbsp;filters</tt></dd></dl>
+@return&nbsp;-&nbsp;Instance&nbsp;of&nbsp;Model&nbsp;<a href="__builtin__.html#object">object</a>,&nbsp;or&nbsp;None&nbsp;if&nbsp;no&nbsp;items&nbsp;math&nbsp;current&nbsp;filters</tt></dd></dl>
 
 <dl><dt><a name="IndexedRedisQuery-reindex"><strong>reindex</strong></a>(self)</dt><dd><tt>reindex&nbsp;-&nbsp;Reindexes&nbsp;the&nbsp;objects&nbsp;matching&nbsp;current&nbsp;filterset.&nbsp;Use&nbsp;this&nbsp;if&nbsp;you&nbsp;add/remove&nbsp;a&nbsp;field&nbsp;to&nbsp;INDEXED_FIELDS</tt></dd></dl>
 
@@ -518,18 +516,18 @@ Data descriptors inherited from <a href="IndexedRedis.html#IndexedRedisHelper">I
 <td width="100%"><dl><dt>Method resolution order:</dt>
 <dd><a href="IndexedRedis.html#IndexedRedisSave">IndexedRedisSave</a></dd>
 <dd><a href="IndexedRedis.html#IndexedRedisHelper">IndexedRedisHelper</a></dd>
-<dd><a href="builtins.html#object">builtins.object</a></dd>
+<dd><a href="__builtin__.html#object">__builtin__.object</a></dd>
 </dl>
 <hr>
 Methods defined here:<br>
-<dl><dt><a name="IndexedRedisSave-reindex"><strong>reindex</strong></a>(self, objs, conn=None)</dt><dd><tt>reindex&nbsp;-&nbsp;Reindexes&nbsp;a&nbsp;given&nbsp;list&nbsp;of&nbsp;objects.&nbsp;Probably&nbsp;you&nbsp;want&nbsp;to&nbsp;do&nbsp;Model.objects.<a href="#IndexedRedisSave-reindex">reindex</a>()&nbsp;instead&nbsp;of&nbsp;this&nbsp;directly.<br>
+<dl><dt><a name="IndexedRedisSave-reindex"><strong>reindex</strong></a>(self, objs, conn<font color="#909090">=None</font>)</dt><dd><tt>reindex&nbsp;-&nbsp;Reindexes&nbsp;a&nbsp;given&nbsp;list&nbsp;of&nbsp;objects.&nbsp;Probably&nbsp;you&nbsp;want&nbsp;to&nbsp;do&nbsp;Model.objects.<a href="#IndexedRedisSave-reindex">reindex</a>()&nbsp;instead&nbsp;of&nbsp;this&nbsp;directly.<br>
 &nbsp;<br>
 @param&nbsp;objs&nbsp;list&lt;<a href="#IndexedRedisModel">IndexedRedisModel</a>&gt;&nbsp;-&nbsp;List&nbsp;of&nbsp;objects&nbsp;to&nbsp;reindex<br>
 @param&nbsp;conn&nbsp;&lt;redis.Redis&nbsp;or&nbsp;None&gt;&nbsp;-&nbsp;Specific&nbsp;Redis&nbsp;connection&nbsp;or&nbsp;None&nbsp;to&nbsp;reuse</tt></dd></dl>
 
-<dl><dt><a name="IndexedRedisSave-save"><strong>save</strong></a>(self, obj, usePipeline=True, forceID=False, conn=None)</dt><dd><tt>save&nbsp;-&nbsp;Save&nbsp;an&nbsp;<a href="builtins.html#object">object</a>&nbsp;associated&nbsp;with&nbsp;this&nbsp;model.&nbsp;**Interal&nbsp;Function!!**&nbsp;You&nbsp;probably&nbsp;want&nbsp;to&nbsp;just&nbsp;do&nbsp;<a href="builtins.html#object">object</a>.<a href="#IndexedRedisSave-save">save</a>()&nbsp;instead&nbsp;of&nbsp;this.<br>
+<dl><dt><a name="IndexedRedisSave-save"><strong>save</strong></a>(self, obj, usePipeline<font color="#909090">=True</font>, forceID<font color="#909090">=False</font>, conn<font color="#909090">=None</font>)</dt><dd><tt>save&nbsp;-&nbsp;Save&nbsp;an&nbsp;<a href="__builtin__.html#object">object</a>&nbsp;associated&nbsp;with&nbsp;this&nbsp;model.&nbsp;**Interal&nbsp;Function!!**&nbsp;You&nbsp;probably&nbsp;want&nbsp;to&nbsp;just&nbsp;do&nbsp;<a href="__builtin__.html#object">object</a>.<a href="#IndexedRedisSave-save">save</a>()&nbsp;instead&nbsp;of&nbsp;this.<br>
 &nbsp;<br>
-@param&nbsp;obj&nbsp;-&nbsp;The&nbsp;<a href="builtins.html#object">object</a>&nbsp;to&nbsp;save<br>
+@param&nbsp;obj&nbsp;-&nbsp;The&nbsp;<a href="__builtin__.html#object">object</a>&nbsp;to&nbsp;save<br>
 @param&nbsp;usePipeline&nbsp;-&nbsp;Use&nbsp;a&nbsp;pipeline&nbsp;for&nbsp;saving.&nbsp;You&nbsp;should&nbsp;always&nbsp;want&nbsp;this,&nbsp;unless&nbsp;you&nbsp;are&nbsp;calling&nbsp;this&nbsp;function&nbsp;from&nbsp;within&nbsp;an&nbsp;existing&nbsp;pipeline.<br>
 @param&nbsp;forceID&nbsp;-&nbsp;if&nbsp;not&nbsp;False,&nbsp;force&nbsp;ID&nbsp;to&nbsp;this.&nbsp;If&nbsp;obj&nbsp;is&nbsp;list,&nbsp;this&nbsp;is&nbsp;also&nbsp;list.&nbsp;Forcing&nbsp;IDs&nbsp;also&nbsp;forces&nbsp;insert.&nbsp;Up&nbsp;to&nbsp;you&nbsp;to&nbsp;ensure&nbsp;ID&nbsp;will&nbsp;not&nbsp;clash.<br>
 @param&nbsp;conn&nbsp;-&nbsp;A&nbsp;connection&nbsp;or&nbsp;None<br>
@@ -556,16 +554,16 @@ Data descriptors inherited from <a href="IndexedRedis.html#IndexedRedisHelper">I
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
 <tr bgcolor="#ffc8d8">
 <td colspan=3 valign=bottom>&nbsp;<br>
-<font color="#000000" face="helvetica, arial"><a name="InvalidModelException">class <strong>InvalidModelException</strong></a>(<a href="builtins.html#Exception">builtins.Exception</a>)</font></td></tr>
+<font color="#000000" face="helvetica, arial"><a name="InvalidModelException">class <strong>InvalidModelException</strong></a>(<a href="exceptions.html#Exception">exceptions.Exception</a>)</font></td></tr>
     
 <tr bgcolor="#ffc8d8"><td rowspan=2><tt>&nbsp;&nbsp;&nbsp;</tt></td>
 <td colspan=2><tt><a href="#InvalidModelException">InvalidModelException</a>&nbsp;-&nbsp;Raised&nbsp;if&nbsp;a&nbsp;model&nbsp;fails&nbsp;validation&nbsp;(not&nbsp;valid)<br>&nbsp;</tt></td></tr>
 <tr><td>&nbsp;</td>
 <td width="100%"><dl><dt>Method resolution order:</dt>
 <dd><a href="IndexedRedis.html#InvalidModelException">InvalidModelException</a></dd>
-<dd><a href="builtins.html#Exception">builtins.Exception</a></dd>
-<dd><a href="builtins.html#BaseException">builtins.BaseException</a></dd>
-<dd><a href="builtins.html#object">builtins.object</a></dd>
+<dd><a href="exceptions.html#Exception">exceptions.Exception</a></dd>
+<dd><a href="exceptions.html#BaseException">exceptions.BaseException</a></dd>
+<dd><a href="__builtin__.html#object">__builtin__.object</a></dd>
 </dl>
 <hr>
 Data descriptors defined here:<br>
@@ -573,45 +571,44 @@ Data descriptors defined here:<br>
 <dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
 </dl>
 <hr>
-Methods inherited from <a href="builtins.html#Exception">builtins.Exception</a>:<br>
-<dl><dt><a name="InvalidModelException-__init__"><strong>__init__</strong></a>(self, /, *args, **kwargs)</dt><dd><tt>Initialize&nbsp;self.&nbsp;&nbsp;See&nbsp;help(type(self))&nbsp;for&nbsp;accurate&nbsp;signature.</tt></dd></dl>
-
-<dl><dt><a name="InvalidModelException-__new__"><strong>__new__</strong></a>(*args, **kwargs)<font color="#909090"><font face="helvetica, arial"> from <a href="builtins.html#type">builtins.type</a></font></font></dt><dd><tt>Create&nbsp;and&nbsp;return&nbsp;a&nbsp;new&nbsp;<a href="builtins.html#object">object</a>.&nbsp;&nbsp;See&nbsp;help(type)&nbsp;for&nbsp;accurate&nbsp;signature.</tt></dd></dl>
+Methods inherited from <a href="exceptions.html#Exception">exceptions.Exception</a>:<br>
+<dl><dt><a name="InvalidModelException-__init__"><strong>__init__</strong></a>(...)</dt><dd><tt>x.<a href="#InvalidModelException-__init__">__init__</a>(...)&nbsp;initializes&nbsp;x;&nbsp;see&nbsp;help(type(x))&nbsp;for&nbsp;signature</tt></dd></dl>
 
 <hr>
-Methods inherited from <a href="builtins.html#BaseException">builtins.BaseException</a>:<br>
-<dl><dt><a name="InvalidModelException-__delattr__"><strong>__delattr__</strong></a>(self, name, /)</dt><dd><tt>Implement&nbsp;delattr(self,&nbsp;name).</tt></dd></dl>
+Data and other attributes inherited from <a href="exceptions.html#Exception">exceptions.Exception</a>:<br>
+<dl><dt><strong>__new__</strong> = &lt;built-in method __new__ of type object&gt;<dd><tt>T.<a href="#InvalidModelException-__new__">__new__</a>(S,&nbsp;...)&nbsp;-&gt;&nbsp;a&nbsp;new&nbsp;<a href="__builtin__.html#object">object</a>&nbsp;with&nbsp;type&nbsp;S,&nbsp;a&nbsp;subtype&nbsp;of&nbsp;T</tt></dl>
 
-<dl><dt><a name="InvalidModelException-__getattribute__"><strong>__getattribute__</strong></a>(self, name, /)</dt><dd><tt>Return&nbsp;getattr(self,&nbsp;name).</tt></dd></dl>
+<hr>
+Methods inherited from <a href="exceptions.html#BaseException">exceptions.BaseException</a>:<br>
+<dl><dt><a name="InvalidModelException-__delattr__"><strong>__delattr__</strong></a>(...)</dt><dd><tt>x.<a href="#InvalidModelException-__delattr__">__delattr__</a>('name')&nbsp;&lt;==&gt;&nbsp;del&nbsp;x.name</tt></dd></dl>
+
+<dl><dt><a name="InvalidModelException-__getattribute__"><strong>__getattribute__</strong></a>(...)</dt><dd><tt>x.<a href="#InvalidModelException-__getattribute__">__getattribute__</a>('name')&nbsp;&lt;==&gt;&nbsp;x.name</tt></dd></dl>
+
+<dl><dt><a name="InvalidModelException-__getitem__"><strong>__getitem__</strong></a>(...)</dt><dd><tt>x.<a href="#InvalidModelException-__getitem__">__getitem__</a>(y)&nbsp;&lt;==&gt;&nbsp;x[y]</tt></dd></dl>
+
+<dl><dt><a name="InvalidModelException-__getslice__"><strong>__getslice__</strong></a>(...)</dt><dd><tt>x.<a href="#InvalidModelException-__getslice__">__getslice__</a>(i,&nbsp;j)&nbsp;&lt;==&gt;&nbsp;x[i:j]<br>
+&nbsp;<br>
+Use&nbsp;of&nbsp;negative&nbsp;indices&nbsp;is&nbsp;not&nbsp;supported.</tt></dd></dl>
 
 <dl><dt><a name="InvalidModelException-__reduce__"><strong>__reduce__</strong></a>(...)</dt></dl>
 
-<dl><dt><a name="InvalidModelException-__repr__"><strong>__repr__</strong></a>(self, /)</dt><dd><tt>Return&nbsp;repr(self).</tt></dd></dl>
+<dl><dt><a name="InvalidModelException-__repr__"><strong>__repr__</strong></a>(...)</dt><dd><tt>x.<a href="#InvalidModelException-__repr__">__repr__</a>()&nbsp;&lt;==&gt;&nbsp;repr(x)</tt></dd></dl>
 
-<dl><dt><a name="InvalidModelException-__setattr__"><strong>__setattr__</strong></a>(self, name, value, /)</dt><dd><tt>Implement&nbsp;setattr(self,&nbsp;name,&nbsp;value).</tt></dd></dl>
+<dl><dt><a name="InvalidModelException-__setattr__"><strong>__setattr__</strong></a>(...)</dt><dd><tt>x.<a href="#InvalidModelException-__setattr__">__setattr__</a>('name',&nbsp;value)&nbsp;&lt;==&gt;&nbsp;x.name&nbsp;=&nbsp;value</tt></dd></dl>
 
 <dl><dt><a name="InvalidModelException-__setstate__"><strong>__setstate__</strong></a>(...)</dt></dl>
 
-<dl><dt><a name="InvalidModelException-__str__"><strong>__str__</strong></a>(self, /)</dt><dd><tt>Return&nbsp;str(self).</tt></dd></dl>
+<dl><dt><a name="InvalidModelException-__str__"><strong>__str__</strong></a>(...)</dt><dd><tt>x.<a href="#InvalidModelException-__str__">__str__</a>()&nbsp;&lt;==&gt;&nbsp;str(x)</tt></dd></dl>
 
-<dl><dt><a name="InvalidModelException-with_traceback"><strong>with_traceback</strong></a>(...)</dt><dd><tt><a href="builtins.html#Exception">Exception</a>.<a href="#InvalidModelException-with_traceback">with_traceback</a>(tb)&nbsp;--<br>
-set&nbsp;self.<strong>__traceback__</strong>&nbsp;to&nbsp;tb&nbsp;and&nbsp;return&nbsp;self.</tt></dd></dl>
+<dl><dt><a name="InvalidModelException-__unicode__"><strong>__unicode__</strong></a>(...)</dt></dl>
 
 <hr>
-Data descriptors inherited from <a href="builtins.html#BaseException">builtins.BaseException</a>:<br>
-<dl><dt><strong>__cause__</strong></dt>
-<dd><tt>exception&nbsp;cause</tt></dd>
-</dl>
-<dl><dt><strong>__context__</strong></dt>
-<dd><tt>exception&nbsp;context</tt></dd>
-</dl>
+Data descriptors inherited from <a href="exceptions.html#BaseException">exceptions.BaseException</a>:<br>
 <dl><dt><strong>__dict__</strong></dt>
 </dl>
-<dl><dt><strong>__suppress_context__</strong></dt>
-</dl>
-<dl><dt><strong>__traceback__</strong></dt>
-</dl>
 <dl><dt><strong>args</strong></dt>
+</dl>
+<dl><dt><strong>message</strong></dt>
 </dl>
 </td></tr></table></td></tr></table><p>
 <table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
@@ -637,7 +634,8 @@ Data descriptors inherited from <a href="builtins.html#BaseException">builtins.B
     
 <tr><td bgcolor="#55aa55"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
 <td width="100%"><strong>INDEXED_REDIS_PREFIX</strong> = '_ir_|'<br>
-<strong>INDEXED_REDIS_VERSION</strong> = (2, 9, 0)<br>
-<strong>INDEXED_REDIS_VERSION_STR</strong> = '2.9.0'<br>
-<strong>__all__</strong> = ('INDEXED_REDIS_PREFIX', 'INDEXED_REDIS_VERSION', 'INDEXED_REDIS_VERSION_STR', 'IndexedRedisDelete', 'IndexedRedisHelper', 'IndexedRedisModel', 'IndexedRedisQuery', 'IndexedRedisSave', 'isIndexedRedisModel', 'setIndexedRedisEncoding', 'getIndexedRedisEncoding', 'InvalidModelException')</td></tr></table>
+<strong>INDEXED_REDIS_VERSION</strong> = (3, 0, 0)<br>
+<strong>INDEXED_REDIS_VERSION_STR</strong> = '3.0.0'<br>
+<strong>__all__</strong> = ('INDEXED_REDIS_PREFIX', 'INDEXED_REDIS_VERSION', 'INDEXED_REDIS_VERSION_STR', 'IndexedRedisDelete', 'IndexedRedisHelper', 'IndexedRedisModel', 'IndexedRedisQuery', 'IndexedRedisSave', 'isIndexedRedisModel', 'setIndexedRedisEncoding', 'getIndexedRedisEncoding', 'InvalidModelException')<br>
+<strong>__version__</strong> = '3.0.0'</td></tr></table>
 </body></html>
