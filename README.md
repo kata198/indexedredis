@@ -3,13 +3,11 @@ IndexedRedis
 
 A redis-backed very very fast ORM-style framework that supports indexes. It performs searches with O(1) efficency!
 
-Requires a Redis server of at least version 2.6.0, and python-redis [ available at https://pypi.python.org/pypi/redis ]
-
 IndexedRedis supports both "equals" and "not-equals" operators for comparison. It also provides full atomic support for replacing entire datasets (based on model), which is useful for providing a fast frontend for SQL. In that use-case, a task that runs on an interval would fetch/calculate datasets from the SQL backend, and do an atomic replace on the datasets the front-end would query.
 
-If you have ever used Flask or Django you will recognize strong similarities in the filtering interface. 
+Further client-side filtering (like greater-than, contains, etc) is available after the data has been fetched (see "Filter Results" below)
 
-My tests have shown that for using equivalent models between flask/mysql and IndexedRedis, a 600% - 1200% performance increase occurs. For actually redesigning the system to prefetch and .reset (as mentioned above), response time went from ~3.5s per page load to ~20ms [ 17500% faster ].
+My tests have shown that for using equivalent models between flask/mysql and IndexedRedis, a 600% - 1200% performance increase occurs, yet if you design your storage directly as IndexedRedis models, you are able to achieve much higher gains.
 
 It is compatible with python 2.7 and python 3. It has been tested with python 2.7 and 3.4.
 
@@ -243,7 +241,7 @@ Binary/Bytes Data Support
 IndexedRedis, as of version 2.9.0, has the ability to store and retrieve unencoded (binary) data, e.x. image files, executables, raw device data, etc.
 
 
-Add the field name to the BINARY\_FIELDS array, and IndexedRedis will retrieve and store directly as binary unencoded data. This data will be stripped from \_\_repr\_\_ view, and replaced with a string indicating the length in bytes of the data.
+Add the field name to the BINARY\_FIELDS array, and IndexedRedis will retrieve and store directly as binary unencoded data. 
 
 So you may have a model like this:
 
