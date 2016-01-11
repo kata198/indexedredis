@@ -105,6 +105,33 @@ Calling .filter or .filterInline builds a query/filter set. Use one of the *Fetc
 
 	objects = SomeModel.objects.filter(param1=val).filter(param2=val).all()
 
+Supported fetch types from the database are equals and not-equals. To use a not-equals expression, append "\_\_ne" to the end of the field name.
+
+	objects = SomeModel.objects.filter(param1=val, param2\_\_ne=val2).all()
+
+All filters are applied on the redis server using hash lookups. All filters of the same type (equals or not equals) are applied in one command to Redis. So applying filters, **no matter how many filters**, is one to two commands total.
+
+
+**Filter Results / client-side filtering:**
+
+The results from the .all operation is a [QueryableList](https://pypi.python.org/pypi/QueryableList) of all matched objects. The type of each object is the same as the model.
+
+Once you have fetched the results from Redis, the QueryableList allows you to perform further client-side filtering using any means that QueryableList supports (e.x. gt, contains, in). 
+
+
+Example:
+
+	mathTeachers = People.objects.filter(job='Math Teacher').all()
+
+	experiencedMathTeachers = mathTeachers.filter(experienceYears__gte=10) # Get math teachers with greater than or equal to 10 years experience
+
+	cheeseLovingMathTeachers = matchTeachers.filter(likes__splitcontains=(' ', 'cheese')) # Check a space-separated list field, 'likes', and see if it contains 'cheese'
+
+
+See https://github.com/kata198/QueryableList for more information.
+
+
+
 **Save:**
 
 	obj = SomeModel(field1='value', field2='value')
