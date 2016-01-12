@@ -1,5 +1,5 @@
-3.0.0 - ??? ?? 2016
-    - Change return type of functions that used to be a list of instantiated model objects to a QueryableList ( https://github.com/kata198/QueryableList ) which allows easilly chaining complex client-side filtering (beyond just equals and not-equals as the DB-side exists).
+3.0.0 - Jan 12 2016
+    - Change return type of functions that used to be a list of instantiated model objects to a QueryableList ( https://github.com/kata198/QueryableList ) which allows easilly chaining complex client-side filtering (beyond just equals and not-equals as the DB-side exists). This is not a backwards-incompatible change, but is forwards-incompatible (i.e. your code may require IndexedRedis>=3.0.0 if you choose to use the client-side filtering)
     - Restore the repr-view of bytes in __repr__ instead of the "_BINARY DATA OF LENGTH N_" format.
 
 2.9.0 - Dec 28 2015
