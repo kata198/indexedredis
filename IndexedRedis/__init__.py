@@ -1,4 +1,4 @@
-# Copyright (c) 2014, 2015 Timothy Savannah under LGPL version 2.1. See LICENSE for more information.
+# Copyright (c) 2014, 2015, 2016 Timothy Savannah under LGPL version 2.1. See LICENSE for more information.
 #  IndexedRedis A redis-backed very very fast ORM-style framework that supports indexes, and searches with O(1) efficency.
 #    It has syntax similar to Django and Flask and other ORMs, but is itself unique in many ways.
 
