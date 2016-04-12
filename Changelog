@@ -1,3 +1,13 @@
+4.0.0 - ??? ?? ????
+	- Introduce "IRField" as a type, wherein you can define field properties
+	within the field itself. See examples.py track_number as example.
+	- Implement basic client-side type conversion after fetching. The IRField
+	has a valueType, which, when provided with a type, will convert the value
+	to that type. When "bool" is provided, it will accept "1", "True" (case
+	insensitive) as true, 
+	and "0", "False" (case insensitive) as false, and raise exception for
+	other values.
+
 3.0.1 - Apr 11 2016
 	- Fix issue with binary fields, they were always seen as "changed" even
 	when no update was made, which could have caused unnecessary updates and

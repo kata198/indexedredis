@@ -122,7 +122,7 @@ class IRField(str, object):
 			if valueType == bool:
 				self.convert = self._convertBool
 		else:
-			self.convert = _noConvert
+			self.convert = self._noConvert
 		self.valueType = valueType
 
 
