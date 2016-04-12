@@ -27,10 +27,10 @@ __all__ = ('INDEXED_REDIS_PREFIX', 'INDEXED_REDIS_VERSION', 'INDEXED_REDIS_VERSI
 INDEXED_REDIS_PREFIX = '_ir_|'
 
 # Version as a tuple (major, minor, patchlevel)
-INDEXED_REDIS_VERSION = (3, 0, 0)
+INDEXED_REDIS_VERSION = (3, 0, 1)
 
 # Version as a string
-INDEXED_REDIS_VERSION_STR = '3.0.0'
+INDEXED_REDIS_VERSION_STR = '3.0.1'
 
 # Package version
 __version__ = INDEXED_REDIS_VERSION_STR
@@ -792,6 +792,7 @@ class IndexedRedisQuery(IndexedRedisHelper):
 			obj = self.mdl(**decodeDict(nonBinaryItems))
 			for key, value in binaryItems.items():
 				setattr(obj, key, value)
+				obj._origData[key] = value
 		obj._decodeBase64Fields()
 		return obj
 
