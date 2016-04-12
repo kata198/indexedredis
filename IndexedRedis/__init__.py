@@ -113,6 +113,43 @@ def isIndexedRedisModel(model):
 	return hasattr(model, '_is_ir_model')
 
 
+class IRField(str, object):
+
+	def __init__(self, val='', valueType=None):
+		if valueType != None:
+			if not isinstance(valueType, type):
+				raise ValueError('valueType %s is not a type. Use int, str, etc' %(repr(valueType,)))
+			if valueType == bool:
+				self.convert = self._convertBool
+		else:
+			self.convert = _noConvert
+		self.valueType = valueType
+
+
+	def convert(self, value):
+		if value == '':
+			return self.valueType()
+		return self.valueType(value)
+
+	def _noConvert(self, value):
+		return value
+
+	def _convertBool(self, value):
+		if value == '':
+			return None
+		xvalue = value.lower()
+		if xvalue in ('true', '1'):
+			return True
+		elif xvalue in ('false', '0'):
+			return False
+
+		# I'm not sure what to do here... Should we raise an exception because the data is invalid? Should just return True?
+		raise ValueError('Unexpected value for bool type: %s' %(value,))
+
+
+	def __new__(cls, val='', valueType=str):
+		return str.__new__(cls, val)
+
 class InvalidModelException(Exception):
 	'''
 		InvalidModelException - Raised if a model fails validation (not valid)
@@ -261,7 +298,7 @@ class IndexedRedisModel(object):
 
 	# BINARY_FIELDS - Fields that are not encoded in any way
 	BINARY_FIELDS = []
-
+	
 	# KEY_NAME - A string of a unique name which corrosponds to objects of this type.
 	KEY_NAME = None
 
@@ -330,6 +367,7 @@ class IndexedRedisModel(object):
 				currentVal = tobytes(getattr(self, fieldName))
 			else:
 				currentVal = tostr(getattr(self, fieldName))
+
 			if self._origData.get(fieldName, '') != currentVal:
 				return True
 		return False
@@ -549,6 +587,13 @@ class IndexedRedisModel(object):
 		for fieldName in self.__class__.BASE64_FIELDS:
 			fieldValue = b64decode(getattr(self, fieldName))
 			setattr(self, fieldName, fieldValue)
+
+
+	def _convertFieldValues(self):
+		for field in self.FIELDS:
+			if isinstance(field, IRField):
+				setattr(self, field, field.convert(getattr(self, field)))
+
 
 	@classmethod
 	def validateModel(model):
@@ -793,6 +838,7 @@ class IndexedRedisQuery(IndexedRedisHelper):
 			for key, value in binaryItems.items():
 				setattr(obj, key, value)
 		obj._decodeBase64Fields()
+		self.mdl._convertFieldValues(obj)
 		return obj
 
 
@@ -954,6 +1000,7 @@ class IndexedRedisQuery(IndexedRedisHelper):
 			matchedKeys.sort()
 
 			return matchedKeys
+
 
 	def all(self):
 		'''

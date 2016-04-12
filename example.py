@@ -1,6 +1,6 @@
 import sys
 import IndexedRedis
-from IndexedRedis import IndexedRedisModel
+from IndexedRedis import IndexedRedisModel, IRField
 
 # vim: ts=4 sw=4 expandtab
 
@@ -11,7 +11,7 @@ class Song(IndexedRedisModel):
             'artist',
             'title',
             'album',
-            'track_number',
+            IRField('track_number', valueType=int),
             'duration',
             'description',
             'copyright',
