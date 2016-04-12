@@ -1444,12 +1444,13 @@ class IndexedRedisDelete(IndexedRedisHelper):
 			pipeline = conn.pipeline()
 			executeAfter = True
 		else:
+			pipeline = conn # In this case, we are inheriting a pipeline
 			executeAfter = False
 		
-		conn.delete(self._get_key_for_id(obj._id))
-		self._rem_id_from_keys(obj._id, conn)
+		pipeline.delete(self._get_key_for_id(obj._id))
+		self._rem_id_from_keys(obj._id, pipeline)
 		for fieldName in self.indexedFields:
-			self._rem_id_from_index(fieldName, obj._id, obj._origData[fieldName])
+			self._rem_id_from_index(fieldName, obj._id, obj._origData[fieldName], pipeline)
 		obj._id = None
 
 		if executeAfter is True:
