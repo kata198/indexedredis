@@ -113,7 +113,7 @@ def isIndexedRedisModel(model):
 	return hasattr(model, '_is_ir_model')
 
 
-class IRField(str, object):
+class IRField(str):
 
 	def __init__(self, val='', valueType=None):
 		if valueType != None:
