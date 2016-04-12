@@ -1436,16 +1436,25 @@ class IndexedRedisDelete(IndexedRedisHelper):
 
 			@return - number of items deleted (0 or 1)
 		'''
-		if conn is None:
-			conn = self._get_connection()
 		if not getattr(obj, '_id', None):
 			return 0
+
+		if conn is None:
+			conn = self._get_connection()
+			pipeline = conn.pipeline()
+			executeAfter = True
+		else:
+			executeAfter = False
 		
 		conn.delete(self._get_key_for_id(obj._id))
 		self._rem_id_from_keys(obj._id, conn)
 		for fieldName in self.indexedFields:
 			self._rem_id_from_index(fieldName, obj._id, obj._origData[fieldName])
 		obj._id = None
+
+		if executeAfter is True:
+			pipeline.execute()
+
 		return 1
 
 	def deleteByPk(self, pk):
