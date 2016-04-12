@@ -341,13 +341,17 @@ class IndexedRedisModel(object):
 			setattr(self, fieldName, val)
 			self._origData[fieldName] = val
 
+		self._convertFieldValues()
+
 		self._id = kwargs.get('_id', None)
 	
-	def asDict(self, includeMeta=False):
+	def asDict(self, includeMeta=False, convertValueTypes=True):
 		'''
 			toDict / asDict - Get a dictionary representation of this model.
 
 			@param includeMeta - Include metadata in return. For now, this is only pk stored as "_id"
+			@param convertValueTypes <bool> - default True. If False, fields with fieldValue defined will be converted to that type.
+				Use True when saving, etc, as native type is always either str or bytes.
 
 			@return - Dictionary reprensetation of this object and all fields
 		'''
@@ -358,6 +362,8 @@ class IndexedRedisModel(object):
 				ret[fieldName] = tobytes(val)
 			else:
 				ret[fieldName] = tostr(val)
+			if convertValueTypes is True and issubclass(fieldName.__class__, IRField) and fieldName.valueType:
+				ret[fieldName] = type(val)(fieldName.convert(ret[fieldName]))
 
 		if includeMeta is True:
 			ret['_id'] = getattr(self, '_id', '')
@@ -531,7 +537,7 @@ class IndexedRedisModel(object):
                     @param copyPrimaryKey <bool> default False - If True, any changes to the copy will save over-top the existing entry in Redis.
                         If False, only the data is copied, and nothing is saved.
 		'''
-		return self.__class__(**self.asDict(copyPrimaryKey))
+		return self.__class__(**self.asDict(copyPrimaryKey, convertValueTypes=False))
 
 	def saveToExternal(self, redisCon):
 		'''
@@ -572,7 +578,7 @@ class IndexedRedisModel(object):
 		if not _id:
 			raise KeyError('Object has never been saved! Cannot reload.')
 
-		currentData = self.asDict(False)
+		currentData = self.asDict(False, convertValueTypes=False)
 		newData = self.objects.get(_id)
 		newData.pop('_id', '')
 		if currentData == newData:
@@ -591,7 +597,7 @@ class IndexedRedisModel(object):
 		'''
                 pickle uses this
 		'''
-		return self.asDict(True)
+		return self.asDict(True, convertValueTypes=False)
 
 	def __setstate__(self, stateDict):
 		'''
@@ -860,7 +866,7 @@ class IndexedRedisQuery(IndexedRedisHelper):
 				setattr(obj, key, value)
 				obj._origData[key] = value
 		obj._decodeBase64Fields()
-		self.mdl._convertFieldValues(obj)
+#		self.mdl._convertFieldValues(obj) # Trying this in __init__ see how that goes
 		return obj
 
 
@@ -1386,7 +1392,7 @@ class IndexedRedisSave(IndexedRedisHelper):
 		if pipeline is None:
 			pipeline = conn
 
-		newDict = obj.toDict()
+		newDict = obj.asDict(convertValueTypes=False)
 		key = self._get_key_for_id(obj._id)
 
 		if isInsert is True:
@@ -1429,7 +1435,7 @@ class IndexedRedisSave(IndexedRedisHelper):
 
 		pipeline = conn.pipeline()
 
-		objDicts = [obj.toDict(True) for obj in objs]
+		objDicts = [obj.asDict(True, convertValueTypes=False) for obj in objs]
 
 		for fieldName in self.indexedFields:
 			for objDict in objDicts:
