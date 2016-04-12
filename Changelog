@@ -1,5 +1,5 @@
 
-3.0.2 - Apr 11 2016
+3.0.3 - Apr 11 2016
 	- Fix issue with binary fields, they were always seen as "changed" even
 	when no update was made, which could have caused unnecessary updates and
 	saves
