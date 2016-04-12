@@ -837,6 +837,7 @@ class IndexedRedisQuery(IndexedRedisHelper):
 			obj = self.mdl(**decodeDict(nonBinaryItems))
 			for key, value in binaryItems.items():
 				setattr(obj, key, value)
+				obj._origData[key] = value
 		obj._decodeBase64Fields()
 		self.mdl._convertFieldValues(obj)
 		return obj
