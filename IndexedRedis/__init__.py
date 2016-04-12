@@ -78,6 +78,13 @@ else:
 			return x
 		return x.encode(defaultEncoding)
 
+
+# TODO: make this better
+try:
+	unicode
+except NameError:
+	unicode = str
+
 # Encoding stuff
 
 def setEncoding(encoding):
@@ -115,6 +122,10 @@ def isIndexedRedisModel(model):
 
 
 class IRField(str):
+	# TODO: Design decision. Null values in string are same as empty string, but as other types may be different,.
+	#   I think an integer of 0 when it has not filled in is bad, especially if you have a list of averages ro something where it may be used in calculation
+	#   Somehow need to have a good way to have these fields get set to "None" when no value assigned, or maybe stay as empty string, or something.
+
 
 	def __init__(self, val='', valueType=None):
 		if valueType != None:
@@ -137,7 +148,7 @@ class IRField(str):
 
 	def _convertBool(self, value):
 		if value == '':
-			return None
+			return None 
 		xvalue = value.lower()
 		if xvalue in ('true', '1'):
 			return True
@@ -490,10 +501,19 @@ class IndexedRedisModel(object):
 		if _id:
 			ret += ['_id="', tostr(_id), '", ']
 
+		# TODO: Note, trying to fit the type in here, but it's not perfect and may need to change when nullables are figured out
+		convertMethods = { fieldName : (hasattr(fieldName, 'convert') and fieldName.convert or (lambda x : x)) for fieldName in self.FIELDS}
+
 		key = None
 		for key, value in myDict.items():
 			if key not in self.BINARY_FIELDS:
-				ret += [key, '=', "'", tostr(value or ''), "'", ', ']
+				if value != None:
+					val = convertMethods[key](value)
+				if isinstance(val, (str, bytes, unicode)):
+					val = "'%s'" %(tostr(val),)
+				else:
+					val = tostr(val)
+				ret += [key, '=', val, ', ']
 			else:
 				ret += [key, '=', repr(value), ', ']
 		if key is not None or not _id:
