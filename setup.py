@@ -15,7 +15,7 @@ if __name__ == '__main__':
         long_description = summary
 
     setup(name='indexedredis',
-        version='3.0.0',
+        version='4.0.0',
         packages=['IndexedRedis'],
         install_requires=['redis', 'QueryableList'],
         requires=['redis', 'QueryableList'],
