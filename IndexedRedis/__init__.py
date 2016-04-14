@@ -23,7 +23,7 @@ from QueryableList import QueryableListObjs
 __all__ = ('INDEXED_REDIS_PREFIX', 'INDEXED_REDIS_VERSION', 'INDEXED_REDIS_VERSION_STR', 
 	'IndexedRedisDelete', 'IndexedRedisHelper', 'IndexedRedisModel', 'IndexedRedisQuery', 'IndexedRedisSave',
 	'isIndexedRedisModel', 'setIndexedRedisEncoding', 'getIndexedRedisEncoding', 'InvalidModelException',
-	'IRField',
+	'IRField', 'IRNullType', 'irNull'
 	 )
 
 # Prefix that all IndexedRedis keys will contain, as to not conflict with other stuff.
