@@ -6,7 +6,16 @@
 
 # vim:set ts=8 shiftwidth=8 softtabstop=8 noexpandtab :
 
-__all__ = ('IRField', 'IRNullType', 'irNull')
+__all__ = ('IRField', 'IRNullType', 'irNull', 'IRPickleField')
+
+from .compat_str import tostr
+
+try:
+	import cPickle as pickle
+except ImportError:
+	import pickle
+
+from base64 import b64encode, b64decode
 
 try:
 	unicode
@@ -30,6 +39,8 @@ class IRField(str):
 			self.convert = lambda x : x
 		self.valueType = valueType
 
+	def toStorage(self, value):
+		return tostr(value)
 
 	def convert(self, value):
 		if value in ('', irNull):
@@ -55,6 +66,28 @@ class IRField(str):
 
 	def __new__(cls, val='', valueType=None):
 		return str.__new__(cls, val)
+
+
+
+class IRPickleField(IRField):
+	'''
+		IRPickleField - A field which pickles its data before storage and loads after retrieval
+	'''
+
+	def __init__(self, val, valueType=None):
+		if valueType is not None:
+			raise ValueError('IRPickleField with any valueType other than None is invalid.')
+		self.valueType = None
+
+	def toStorage(self, value):
+		if type(value) == str:
+			return value
+		return b64encode(pickle.dumps(value)).decode('ascii')
+
+	def convert(self, value):
+		if hasattr(value, 'encode'):
+			value = value.encode('ascii')
+		return pickle.loads(b64decode(value))
 
 
 class IRNullType(str):

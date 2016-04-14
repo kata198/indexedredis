@@ -15,7 +15,8 @@ import redis
 
 from base64 import b64encode, b64decode
 
-from .fields import IRField, IRNullType, irNull
+from .fields import IRField, IRNullType, irNull, IRPickleField
+from .compat_str import tostr, tobytes, defaultEncoding
 
 from QueryableList import QueryableListObjs
 
@@ -23,7 +24,7 @@ from QueryableList import QueryableListObjs
 __all__ = ('INDEXED_REDIS_PREFIX', 'INDEXED_REDIS_VERSION', 'INDEXED_REDIS_VERSION_STR', 
 	'IndexedRedisDelete', 'IndexedRedisHelper', 'IndexedRedisModel', 'IndexedRedisQuery', 'IndexedRedisSave',
 	'isIndexedRedisModel', 'setIndexedRedisEncoding', 'getIndexedRedisEncoding', 'InvalidModelException',
-	'IRField', 'IRNullType', 'irNull'
+	'IRField', 'IRPickleField', 'IRNullType', 'irNull'
 	 )
 
 # Prefix that all IndexedRedis keys will contain, as to not conflict with other stuff.
@@ -48,37 +49,7 @@ except NameError:
 			self.getter = getter
 		def __get__(self, instance, owner):
 			return self.getter(owner)
-try:
-	defaultEncoding = sys.getdefaultencoding()
-	if defaultEncoding == 'ascii':
-		defaultEncoding = 'utf-8'
-except:
-	defaultEncoding = 'utf-8'
 
-
-# String Assurance
-
-if bytes == str:
-	# Python 2
-	def tostr(x):
-		if isinstance(x, unicode):
-			return x.encode(defaultEncoding)
-		else:
-			return str(x)
-
-	tobytes = lambda x : x
-else:
-	# Python 3
-	
-	def tostr(x):
-		if isinstance(x, bytes) is False:
-			return str(x)
-		return x.decode(defaultEncoding)
-
-	def tobytes(x):
-		if isinstance(x, bytes) is True:
-			return x
-		return x.encode(defaultEncoding)
 
 
 # TODO: make this better
@@ -87,32 +58,6 @@ try:
 except NameError:
 	unicode = str
 
-# Encoding stuff
-
-def setEncoding(encoding):
-	'''
-		setEncoding - Sets the encoding used by IndexedRedis. 
-
-		@note Aliased as "setIndexedRedisEncoding" so import * has a namespaced name.
-
-		@param encoding - An encoding (like utf-8)
-	'''
-	global defaultEncoding
-	defaultEncoding = encoding
-
-setIndexedRedisEncoding = setEncoding
-
-def getEncoding():
-	'''
-		getEncoding - Get the encoding that IndexedRedis will use
-
-	@note Aliased as "setIndexedRedisEncoding" so import * has a namespaced name.
-
-	'''
-	global defaultEncoding
-	return defaultEncoding
-
-getIndexedRedisEncoding = getEncoding
 
 # Changing redis encoding into requested encoding
 decodeDict = lambda origDict : {tostr(key) : tostr(origDict[key]) for key in origDict}
@@ -343,7 +288,7 @@ class IndexedRedisModel(object):
 			if fieldName in self.BASE64_FIELDS or fieldName in self.BINARY_FIELDS:
 				val = tobytes(kwargs.get(fieldName, b''))
 			else:
-				val = tostr(kwargs.get(fieldName, ''))
+				val = getattr(fieldName, 'toStorage', tostr)(kwargs.get(fieldName, ''))
 			setattr(self, fieldName, val)
 			self._origData[fieldName] = val
 
@@ -367,7 +312,7 @@ class IndexedRedisModel(object):
 			if fieldName in self.BASE64_FIELDS or fieldName in self.BINARY_FIELDS:
 				ret[fieldName] = tobytes(val)
 			else:
-				ret[fieldName] = tostr(val)
+				ret[fieldName] = getattr(fieldName, 'toStorage', tostr)(val)
 			if convertValueTypes is True and issubclass(fieldName.__class__, IRField) and fieldName.valueType:
 				ret[fieldName] = type(val)(fieldName.convert(ret[fieldName]))
 
@@ -390,7 +335,7 @@ class IndexedRedisModel(object):
 			if fieldName in self.BASE64_FIELDS or fieldName in self.BINARY_FIELDS:
 				currentVal = tobytes(getattr(self, fieldName))
 			else:
-				currentVal = tostr(getattr(self, fieldName))
+				currentVal = getattr(fieldName, 'toStorage', tostr)(getattr(self, fieldName))
 
 			if self._origData.get(fieldName, '') != currentVal:
 				return True
@@ -407,7 +352,7 @@ class IndexedRedisModel(object):
 			if fieldName in self.BASE64_FIELDS or fieldName in self.BINARY_FIELDS:
 				thisVal = tobytes(getattr(self, fieldName))
 			else:
-				thisVal = tostr(getattr(self, fieldName))
+				thisVal = getattr(fieldName, 'toStorage', tostr)(getattr(self, fieldName))
 			if self._origData[fieldName] != thisVal:
 				updatedFields[fieldName] = (self._origData[fieldName], thisVal)
 		return updatedFields
@@ -626,7 +571,7 @@ class IndexedRedisModel(object):
 
 	def _convertFieldValues(self):
 		for field in self.FIELDS:
-			if isinstance(field, IRField):
+			if issubclass(field.__class__, IRField):
 				setattr(self, field, field.convert(getattr(self, field)))
 
 
@@ -665,6 +610,9 @@ class IndexedRedisModel(object):
 				codecs.ascii_encode(fieldName)
 			except UnicodeDecodeError as e:
 				raise InvalidModelException('%s All field names must be ascii-encodable. "%s" was not. Error was: %s' %(failedValidationStr, tostr(fieldName), str(e)))
+
+			if isinstance(fieldName, IRPickleField) and fieldName in indexedFieldSet:
+				raise InvalidModelException('%s A pickled field (%s) cannot be indexed.' %(failedValidationStr, tostr(fieldName)))
 				
 
 		if bool(indexedFieldSet - fieldSet):
@@ -791,7 +739,7 @@ class IndexedRedisHelper(object):
 
 			@return - Key name string
 		'''
-		return ''.join([INDEXED_REDIS_PREFIX, self.keyName, ':idx:', indexedField, ':', tostr(val)])
+		return ''.join([INDEXED_REDIS_PREFIX, self.keyName, ':idx:', indexedField, ':', getattr(indexedField, 'toStorage', tostr)(val)])
 		
 
 	def _get_key_for_id(self, pk):
