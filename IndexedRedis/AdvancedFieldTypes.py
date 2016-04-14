@@ -1,11 +1,11 @@
 
 from datetime import datetime
 
-__all__ = ('IRDatetimeType',)
+__all__ = ('IRDatetimeFieldType',)
 
-class IRDatetimeType(datetime):
+class IRDatetimeFieldType(datetime):
     '''
-        IRDatetimeType - A field type that is a datetime. Pass this as "valueType" to an IRField to use a datetime
+        IRDatetimeFieldType - A field type that is a datetime. Pass this as "valueType" to an IRField to use a datetime
     '''
 
     def __new__(self, *args, **kwargs):
