@@ -15,7 +15,7 @@ import redis
 
 from base64 import b64encode, b64decode
 
-from .fields import IRField, IRNullType, irNull, IRPickleField
+from .fields import IRField, IRNullType, irNull, IRPickleField, IRCompressedField
 from .compat_str import tostr, tobytes, defaultEncoding
 
 from QueryableList import QueryableListObjs
@@ -24,7 +24,7 @@ from QueryableList import QueryableListObjs
 __all__ = ('INDEXED_REDIS_PREFIX', 'INDEXED_REDIS_VERSION', 'INDEXED_REDIS_VERSION_STR', 
 	'IndexedRedisDelete', 'IndexedRedisHelper', 'IndexedRedisModel', 'IndexedRedisQuery', 'IndexedRedisSave',
 	'isIndexedRedisModel', 'setIndexedRedisEncoding', 'getIndexedRedisEncoding', 'InvalidModelException',
-	'IRField', 'IRPickleField', 'IRNullType', 'irNull'
+	'IRField', 'IRPickleField', 'IRCompressedField', 'IRNullType', 'irNull'
 	 )
 
 # Prefix that all IndexedRedis keys will contain, as to not conflict with other stuff.
@@ -611,8 +611,8 @@ class IndexedRedisModel(object):
 			except UnicodeDecodeError as e:
 				raise InvalidModelException('%s All field names must be ascii-encodable. "%s" was not. Error was: %s' %(failedValidationStr, tostr(fieldName), str(e)))
 
-			if isinstance(fieldName, IRPickleField) and fieldName in indexedFieldSet:
-				raise InvalidModelException('%s A pickled field (%s) cannot be indexed.' %(failedValidationStr, tostr(fieldName)))
+			if isinstance(fieldName, (IRPickleField, IRCompressedField)) and fieldName in indexedFieldSet:
+				raise InvalidModelException('%s Field Type %s - (%s) cannot be indexed.' %(failedValidationStr, str(fieldName.__class__.__name__), tostr(fieldName)))
 				
 
 		if bool(indexedFieldSet - fieldSet):

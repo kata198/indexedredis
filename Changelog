@@ -31,6 +31,7 @@
 	Redis, and automatically unpickle it upon retrieval. I highly recommend
 	not using this unless you absolutely have to, you are better off designing
 	native models than trying to stuff in objects.
+	- Add compression via compressed fields, using zlib or bz2
 
 	
 

@@ -16,7 +16,7 @@ if __name__ == '__main__':
 
     setup(name='indexedredis',
         version='4.0.0',
-        packages=['IndexedRedis'],
+        packages=['IndexedRedis', 'IndexedRedis.fields'],
         install_requires=['redis', 'QueryableList'],
         requires=['redis', 'QueryableList'],
         provides=['indexedredis'],
