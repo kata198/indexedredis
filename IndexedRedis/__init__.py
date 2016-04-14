@@ -287,8 +287,10 @@ class IndexedRedisModel(object):
 		for fieldName in self.FIELDS:
 			if fieldName in self.BASE64_FIELDS or fieldName in self.BINARY_FIELDS:
 				val = tobytes(kwargs.get(fieldName, b''))
+			elif not issubclass(fieldName.__class__, IRField):
+				val = tostr(kwargs.get(fieldName, ''))
 			else:
-				val = getattr(fieldName, 'toStorage', tostr)(kwargs.get(fieldName, ''))
+				val = fieldName.convert(kwargs.get(fieldName, ''))
 			setattr(self, fieldName, val)
 			self._origData[fieldName] = val
 

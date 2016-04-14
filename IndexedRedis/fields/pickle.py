@@ -35,8 +35,10 @@ class IRPickleField(IRField):
 	def convert(self, value):
 		if not value:
 			return value
+		origData = value
 		if hasattr(value, 'encode'):
 			value = value.encode('ascii')
-		return pickle.loads(b64decode(value))
+			return pickle.loads(b64decode(value))
+		return origData
 
 # vim:set ts=8 shiftwidth=8 softtabstop=8 noexpandtab :
