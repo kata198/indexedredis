@@ -156,6 +156,67 @@ e.x.
 	notDangerFive = myResults.filter(dangerLevel__ne=irNull).filter(dangerLevel__ne=5)
 
 
+**Complex Types**
+
+Please note that not all types are suitable for being stored in an IndexedRedisModel. If you are trying to store a dict, for example, consider just making those items natural fields, or store a foreign key to another object (using _id), and consider that your model may need to be refactored from relational to soething more flat.
+
+
+Redis can only store strings, integers, and floats, and everything IndexedRedis stores is a string. 
+
+Consider that these advanced conversions can happen within your model class, as many complex types can be represented by a simple type.
+
+You can technically store any field as a pickle string, and use a getter/setter to do the pickling and unpickling, though I would consider that poor design.
+
+Here is an example of having a datetime object as a member of a model, whilst natively storing a simple type:
+
+
+	class MyModel(IndexedRedisModel):
+
+
+	FIELDS = [ 'name', IRField('_timestamp', valueType=int) ]
+
+
+	def __init__(self, \*args, \*\*kwargs):
+
+		if 'timestamp' in kwargs:
+
+			if isinstance(kwargs['timestamp'], datetime):
+
+				kwargs['_timestamp'] = int(kwargs['timestamp'].strftime('%s'))
+
+			else:
+
+				kwargs['_timestamp'] = kwargs['timestamp']
+
+
+			del kwargs['timestamp']
+
+
+		IndexedRedis.__init__(self, \*args, \*\*kwargs)
+
+
+	@property
+
+	def timestamp(self):
+
+		if not self._timestamp:
+
+			return None
+
+		return datetime.datetime.fromtimestamp(self._timestamp)
+
+
+So you can create it like:
+
+	x = MyModel(name='Something', timestamp=datetime.now())
+
+	x.save()
+
+And access the native _timestamp field as a complex datetime object just by doing:
+
+	x.timestamp
+
+
 
 Model Validation
 ----------------
