@@ -53,7 +53,7 @@ class IRField(str):
 		raise ValueError('Unexpected value for bool type: %s' %(value,))
 
 
-	def __new__(cls, val='', valueType=str):
+	def __new__(cls, val='', valueType=None):
 		return str.__new__(cls, val)
 
 
