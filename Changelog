@@ -7,6 +7,18 @@
 	insensitive) as true, 
 	and "0", "False" (case insensitive) as false, and raise exception for
 	other values.
+	- Add IRNullType which will be used for non-string null values (like if a
+	valueType=int field has never been set, it will be returned as irNull.
+	irNull only equals other IRNullTypes, so it can be filtered out and is
+	different from int(0) for int fields. IRNull != '' or any other False
+	type, except another IRNull.
+
+	
+	So like:
+	from IndexedRedis import irNull
+	...
+
+	reallyZero = myObjs.filter(age__ne=irNull).filter(age__eq=0)
 
 3.0.2 - Apr 11 2016
 	- Fix issue with binary fields, they were always seen as "changed" even

@@ -8,7 +8,7 @@ from IndexedRedis import IndexedRedisModel, IRField
 class Song(IndexedRedisModel):
     
     FIELDS = [ \
-            'artist',
+            IRField('artist'),
             'title',
             'album',
             IRField('track_number', valueType=int),

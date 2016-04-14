@@ -15,6 +15,8 @@ import redis
 
 from base64 import b64encode, b64decode
 
+from .fields import IRField, IRNullType, irNull
+
 from QueryableList import QueryableListObjs
 
 # * imports
@@ -120,47 +122,6 @@ validatedModels = set()
 def isIndexedRedisModel(model):
 	return hasattr(model, '_is_ir_model')
 
-
-class IRField(str):
-	# TODO: Design decision. Null values in string are same as empty string, but as other types may be different,.
-	#   I think an integer of 0 when it has not filled in is bad, especially if you have a list of averages ro something where it may be used in calculation
-	#   Somehow need to have a good way to have these fields get set to "None" when no value assigned, or maybe stay as empty string, or something.
-
-
-	def __init__(self, val='', valueType=None):
-		if valueType != None:
-			if not isinstance(valueType, type):
-				raise ValueError('valueType %s is not a type. Use int, str, etc' %(repr(valueType,)))
-			if valueType == bool:
-				self.convert = self._convertBool
-		else:
-			self.convert = self._noConvert
-		self.valueType = valueType
-
-
-	def convert(self, value):
-		if value == '':
-			return self.valueType()
-		return self.valueType(value)
-
-	def _noConvert(self, value):
-		return value
-
-	def _convertBool(self, value):
-		if value == '':
-			return None 
-		xvalue = value.lower()
-		if xvalue in ('true', '1'):
-			return True
-		elif xvalue in ('false', '0'):
-			return False
-
-		# I'm not sure what to do here... Should we raise an exception because the data is invalid? Should just return True?
-		raise ValueError('Unexpected value for bool type: %s' %(value,))
-
-
-	def __new__(cls, val='', valueType=str):
-		return str.__new__(cls, val)
 
 class InvalidModelException(Exception):
 	'''
@@ -287,6 +248,51 @@ class IndexedRedisModel(object):
                    delete - Delete this object
 
                    getUpdatedFields - See changes since last fetch
+
+
+            Advanced Fields
+	    ---------------
+
+	    IndexedRedis since version 4.0 allows you to pass elements of type IRField (extends str) in the FIELDS element.
+
+	    Doing so allows you to specify certain properties about the field.
+
+
+	    Example:
+
+		FIELDS = [ 'name', IRField('age', valueType=int), 'birthday' ]
+
+	   **Field Name**
+
+	   The first argument is the string of the field name.
+
+	    **Type**
+
+	    You can have a value automatically cast to a certain type (which saves a step if you need to filter further through the QueryableList results, like age__gt=15)
+
+	    by passing that type as "valueType". (e.x.  IRField('age', valueType=int))
+
+	    If you use "bool", the values 0 and case insensitive string 'false' will result in False, and 1 or 'true' will result in True.
+
+	    Be careful using floats, different hosts will have different floating point representations for the same value. Don't expect
+
+	    floats to work cross-platform. Use a fixed point number as the string type ( like myFixedPoint = '%2.5f' %( 10.12345 ) )
+
+	    ** Null Values **
+
+            For any type except strings (including the default type, string), a null value is assigned irNull (of type IRNullType).
+
+	    irNull does not equal empty string, or anything except another irNull. This is to destinguish say, no int assigned vs int(0)
+
+	    You can check a typed field against the "irNull" variable found in the IndexedRedis or IndexedRedis.fields.
+
+	    from IndexedRedis import irNull
+	    ..
+	    e.x. notDangerFive = myResults.filter(dangerLevel__ne=irNull).filter(dangerLevel__ne=5)
+
+	    or even
+
+	    notDangerFive = MyModel.objects.filter(dangerLevel__ne=irNull).filter(dangerLevel__ne=5).all()
 
 
             Encodings
@@ -515,7 +521,9 @@ class IndexedRedisModel(object):
 			if key not in self.BINARY_FIELDS:
 				if value != None:
 					val = convertMethods[key](value)
-				if isinstance(val, (str, bytes, unicode)):
+				if isinstance(val, IRNullType):
+					val = 'IRNullType()'
+				elif isinstance(val, (str, bytes, unicode)):
 					val = "'%s'" %(tostr(val),)
 				else:
 					val = tostr(val)
@@ -1531,5 +1539,5 @@ class IndexedRedisDelete(IndexedRedisHelper):
 		return self.deleteMultiple(objs)
 		
 	
-		
+
 # vim:set ts=8 shiftwidth=8 softtabstop=8 noexpandtab :
