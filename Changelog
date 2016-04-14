@@ -13,12 +13,26 @@
 	different from int(0) for int fields. IRNull != '' or any other False
 	type, except another IRNull.
 
-	
-	So like:
-	from IndexedRedis import irNull
-	...
+		So like:
+		from IndexedRedis import irNull
+		...
 
-	reallyZero = myObjs.filter(age__ne=irNull).filter(age__eq=0)
+		reallyZero = myObjs.filter(age__ne=irNull).filter(age__eq=0)
+
+	- Split up some functionality across a couple files
+	- Introduce an AdvancedFieldTypes module, which contains an example
+	advanced field, for a datetime implementation. Pass this as the
+	"valueType" on an IRField to have it automatically convert to/from a
+	datetime. This stores a string on the backend, and is slightly less
+	efficent than using a property and storing an integer, but more
+	convienant.
+	- Introduce an IRPickleField, use this in place of IRField. It only takes
+	one argument right now, "name". It will pickle data before sending to
+	Redis, and automatically unpickle it upon retrieval. I highly recommend
+	not using this unless you absolutely have to, you are better off designing
+	native models than trying to stuff in objects.
+
+	
 
 3.0.2 - Apr 11 2016
 	- Fix issue with binary fields, they were always seen as "changed" even
