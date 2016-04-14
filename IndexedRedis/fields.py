@@ -80,11 +80,15 @@ class IRPickleField(IRField):
 		self.valueType = None
 
 	def toStorage(self, value):
+		if value in ('', irNull):
+			return value
 		if type(value) == str:
 			return value
 		return b64encode(pickle.dumps(value)).decode('ascii')
 
 	def convert(self, value):
+		if not value:
+			return value
 		if hasattr(value, 'encode'):
 			value = value.encode('ascii')
 		return pickle.loads(b64decode(value))
