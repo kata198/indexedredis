@@ -18,7 +18,7 @@ from base64 import b64encode, b64decode
 from .fields import IRField, IRNullType, irNull, IRPickleField, IRCompressedField
 from .compat_str import tostr, tobytes, defaultEncoding
 
-from QueryableList import QueryableListObjs
+from .IRQueryableList import IRQueryableList
 
 # * imports
 __all__ = ('INDEXED_REDIS_PREFIX', 'INDEXED_REDIS_VERSION', 'INDEXED_REDIS_VERSION_STR', 
@@ -540,6 +540,8 @@ class IndexedRedisModel(object):
 			return []
 
 		updatedFieldNames = []
+		# TODO: Check how this works with valueType fields
+		#  also check how this plays with updated fields
 		for fieldName, value in newData.items():
 			if currentData[fieldName] != value:
 				setattr(self, fieldName, value)
@@ -1000,7 +1002,7 @@ class IndexedRedisQuery(IndexedRedisHelper):
 		if matchedKeys:
 			return self.getMultiple(matchedKeys)
 
-		return QueryableListObjs([])
+		return IRQueryableList([])
 
 	def allByAge(self):
 		'''
@@ -1013,7 +1015,7 @@ class IndexedRedisQuery(IndexedRedisHelper):
 		if matchedKeys:
 			return self.getMultiple(matchedKeys)
 
-		return QueryableListObjs([])
+		return IRQueryableList([])
 
 	def allOnlyFields(self, fields):
 		'''
@@ -1027,7 +1029,7 @@ class IndexedRedisQuery(IndexedRedisHelper):
 		if matchedKeys:
 			return self.getMultipleOnlyFields(matchedKeys, fields)
 
-		return QueryableListObjs([])
+		return IRQueryableList([])
 
 	def allOnlyIndexedFields(self):
 		'''
@@ -1039,7 +1041,7 @@ class IndexedRedisQuery(IndexedRedisHelper):
 		if matchedKeys:
 			return self.getMultipleOnlyIndexedFields(matchedKeys)
 
-		return QueryableListObjs([])
+		return IRQueryableList([])
 		
 	
 	def first(self):
@@ -1125,7 +1127,7 @@ class IndexedRedisQuery(IndexedRedisHelper):
 
 		if len(pks) == 1:
 			# Optimization to not pipeline on 1 id
-			return QueryableListObjs([self.get(pks[0])])
+			return IRQueryableList([self.get(pks[0])])
 
 		conn = self._get_connection()
 		pipeline = conn.pipeline()
@@ -1135,7 +1137,7 @@ class IndexedRedisQuery(IndexedRedisHelper):
 
 		res = pipeline.execute()
 		
-		ret = QueryableListObjs()
+		ret = IRQueryableList()
 		i = 0
 		pksLen = len(pks)
 		while i < pksLen:
@@ -1195,7 +1197,7 @@ class IndexedRedisQuery(IndexedRedisHelper):
 			pks = list(pks)
 
 		if len(pks) == 1:
-			return QueryableListObjs([self.getOnlyFields(pks[0], fields)])
+			return IRQueryableList([self.getOnlyFields(pks[0], fields)])
 		conn = self._get_connection()
 		pipeline = conn.pipeline()
 
@@ -1204,7 +1206,7 @@ class IndexedRedisQuery(IndexedRedisHelper):
 			pipeline.hmget(key, fields)
 
 		res = pipeline.execute()
-		ret = QueryableListObjs()
+		ret = IRQueryableList()
 		pksLen = len(pks)
 		i = 0
 		numFields = len(fields)
@@ -1276,7 +1278,7 @@ class IndexedRedisSave(IndexedRedisHelper):
 		'''
 			save - Save an object associated with this model. **Interal Function!!** You probably want to just do object.save() instead of this.
 
-			@param obj - The object to save
+			@param obj <IndexedRedisModel or list<IndexedRedisModel> - The object to save, or a list of objects to save
 			@param usePipeline - Use a pipeline for saving. You should always want this, unless you are calling this function from within an existing pipeline.
 			@param forceID - if not False, force ID to this. If obj is list, this is also list. Forcing IDs also forces insert. Up to you to ensure ID will not clash.
 			@param conn - A connection or None
@@ -1294,7 +1296,7 @@ class IndexedRedisSave(IndexedRedisHelper):
 		else:
 			idConn = self._get_new_connection()
 
-		if isinstance(obj, list) or isinstance(obj, tuple):
+		if issubclass(obj.__class__, (list, tuple)):
 			objs = obj
 		else:
 			objs = [obj]
@@ -1303,7 +1305,7 @@ class IndexedRedisSave(IndexedRedisHelper):
 
 		if forceID is not False:
 			# Compat with old poor design.. :(
-			if isinstance(forceID, tuple) or isinstance(forceID, list):
+			if isinstance(forceID, (list, tuple)):
 				forceIDs = forceID
 			else:
 				forceIDs = [forceID]
@@ -1345,6 +1347,15 @@ class IndexedRedisSave(IndexedRedisHelper):
 
 		return ids
 
+	def saveMultiple(self, objs):
+		'''
+			saveMultiple - Save a list of objects using a pipeline.
+
+			@param objs < list<IndexedRedisModel> > - List of objects to save
+		'''
+		# Right now this can be done with existing save function, but I think that is not clear.
+		return self.save(objs)
+		
 
 	def _doSave(self, obj, isInsert, conn, pipeline=None):
 		if pipeline is None:
