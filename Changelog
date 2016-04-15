@@ -20,7 +20,7 @@
 		reallyZero = myObjs.filter(age__ne=irNull).filter(age__eq=0)
 
 	- Split up some functionality across a couple files
-	- Introduce an AdvancedFieldTypes module, which contains an example
+	- Introduce an AdvancedFieldValueTypes module, which contains an example
 	advanced field, for a datetime implementation. Pass this as the
 	"valueType" on an IRField to have it automatically convert to/from a
 	datetime. This stores a string on the backend, and is slightly less
@@ -31,9 +31,23 @@
 	Redis, and automatically unpickle it upon retrieval. I highly recommend
 	not using this unless you absolutely have to, you are better off designing
 	native models than trying to stuff in objects.
-	- Add compression via compressed fields, using zlib or bz2
+	- Add compression via compressed fields (IRCompressedField in
+	fields.compressed), using zlib or bz2
 
-	
+-3.1.1 - Apr 15 2016
+- Fix some 4.0 docs that slipped in to 3.0 series
+
+-3.1.0 - Apr 15 2016
+- Fix where on updating a model, some operations would occur outside
+of a
+  transaction.
+- Fix "reload" method to actually work. It now returns a dict of
+fields
+ changed -> tuple(old value, new value)
+- Allow model.saver.save to take a QueryableList (the return of
+all()) by
+       changing isinstance to issubclass.
+
 
 3.0.2 - Apr 11 2016
 	- Fix issue with binary fields, they were always seen as "changed" even

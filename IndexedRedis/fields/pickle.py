@@ -1,6 +1,6 @@
 # Copyright (c) 2014, 2015, 2016 Timothy Savannah under LGPL version 2.1. See LICENSE for more information.
 #
-# fields.pickle - Some types and objects related to pickled 
+# fields.pickle - Some types and objects related to pickled . Use this in place of IRField ( in FIELDS array ) to activate
 
 
 # vim:set ts=8 shiftwidth=8 softtabstop=8 noexpandtab :

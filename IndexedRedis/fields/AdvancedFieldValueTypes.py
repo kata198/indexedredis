@@ -1,3 +1,7 @@
+# Copyright (c) 2016 Timothy Savannah under LGPL version 2.1. See LICENSE for more information.
+#
+# AdvancedFieldValueTypes - Types that can be passed to "valueType" of an IRField for special implicit conversions
+#
 
 from datetime import datetime
 

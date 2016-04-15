@@ -1,6 +1,6 @@
 # Copyright (c) 2014, 2015, 2016 Timothy Savannah under LGPL version 2.1. See LICENSE for more information.
 #
-# fields.compressed - Some types and objects related to compressed fields
+# fields.compressed - Some types and objects related to compressed fields. Use in place of IRField ( in FIELDS array to activate functionality )
 #
 
 
@@ -20,7 +20,6 @@ __all__ = ('COMPRESS_MODE_BZ2', 'COMPRESS_MODE_ZLIB', 'IRCompressedField')
 COMPRESS_MODE_ZLIB = 'zlib'
 COMPRESS_MODE_BZ2 = 'bz2'
 
-# TODO: Figure out why this is getting compressed and decompressed for each save. 
 
 class IRCompressedField(IRField):
 

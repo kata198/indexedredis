@@ -1,3 +1,7 @@
+# Copyright (c) 2014, 2015, 2016 Timothy Savannah under LGPL version 2.1. See LICENSE for more information.
+#
+# IRQueryableList - QueryableList with some added callbacks to IndexedRedis
+#
 
 import sys
 
