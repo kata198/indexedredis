@@ -1022,7 +1022,7 @@ class IndexedRedisQuery(IndexedRedisHelper):
 		if matchedKeys:
 			return self.getMultiple(matchedKeys)
 
-		return IRQueryableList([])
+		return IRQueryableList([], mdl=self.mdl)
 
 	def allByAge(self):
 		'''
@@ -1035,7 +1035,7 @@ class IndexedRedisQuery(IndexedRedisHelper):
 		if matchedKeys:
 			return self.getMultiple(matchedKeys)
 
-		return IRQueryableList([])
+		return IRQueryableList([], mdl=self.mdl)
 
 	def allOnlyFields(self, fields):
 		'''
@@ -1049,7 +1049,7 @@ class IndexedRedisQuery(IndexedRedisHelper):
 		if matchedKeys:
 			return self.getMultipleOnlyFields(matchedKeys, fields)
 
-		return IRQueryableList([])
+		return IRQueryableList([], mdl=self.mdl)
 
 	def allOnlyIndexedFields(self):
 		'''
@@ -1061,7 +1061,7 @@ class IndexedRedisQuery(IndexedRedisHelper):
 		if matchedKeys:
 			return self.getMultipleOnlyIndexedFields(matchedKeys)
 
-		return IRQueryableList([])
+		return IRQueryableList([], mdl=self.mdl)
 		
 	
 	def first(self):
@@ -1147,7 +1147,7 @@ class IndexedRedisQuery(IndexedRedisHelper):
 
 		if len(pks) == 1:
 			# Optimization to not pipeline on 1 id
-			return IRQueryableList([self.get(pks[0])])
+			return IRQueryableList([self.get(pks[0])], mdl=self.mdl)
 
 		conn = self._get_connection()
 		pipeline = conn.pipeline()
@@ -1157,7 +1157,7 @@ class IndexedRedisQuery(IndexedRedisHelper):
 
 		res = pipeline.execute()
 		
-		ret = IRQueryableList()
+		ret = IRQueryableList(mdl=self.mdl)
 		i = 0
 		pksLen = len(pks)
 		while i < pksLen:
@@ -1217,7 +1217,7 @@ class IndexedRedisQuery(IndexedRedisHelper):
 			pks = list(pks)
 
 		if len(pks) == 1:
-			return IRQueryableList([self.getOnlyFields(pks[0], fields)])
+			return IRQueryableList([self.getOnlyFields(pks[0], fields)], mdl=self.mdl)
 		conn = self._get_connection()
 		pipeline = conn.pipeline()
 
@@ -1226,7 +1226,7 @@ class IndexedRedisQuery(IndexedRedisHelper):
 			pipeline.hmget(key, fields)
 
 		res = pipeline.execute()
-		ret = IRQueryableList()
+		ret = IRQueryableList(mdl=self.mdl)
 		pksLen = len(pks)
 		i = 0
 		numFields = len(fields)

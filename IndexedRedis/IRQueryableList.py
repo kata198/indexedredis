@@ -1,6 +1,6 @@
-# Copyright (c) 2014, 2015, 2016 Timothy Savannah under LGPL version 2.1. See LICENSE for more information.
+# Copyright (c) 2016 Timothy Savannah under LGPL version 2.1. See LICENSE for more information.
 #
-# fields - Some types and objects related to advanced fields
+# IRQueryableList - QueryableList with some added callbacks to IndexedRedis
 #
 
 
@@ -11,9 +11,76 @@ from QueryableList import QueryableListObjs
 
 
 class IRQueryableList(QueryableListObjs):
+	'''
+		IRQueryableList - A QueryableList for IndexedRedis models.
+
+		Only supports models of one type. Preferably, you should pass "mdl" to init, otherwise
+		  it will infer from the first object.
+
+		For performance, there is NOT type checking that all models provided are of the same type,
+		this is your responsibility. 
+
+		IndexedRedis will only ever return an IRQueryableList that follow these constraints (always have model defined,
+		  and only one type of model ever contained), but if you explicitly append objects you need to make sure they
+		  are of the correct type.
+	'''
+
+	def __init__(self, val=None, mdl=None):
+		'''
+			__init__ - Create this object
+
+			@param val - None for empty list, IndexedRedisModel for a one-item list, or a list/tuple or subclass of initial values.
+			@param mdl - The IndexedRedisModel that this list will contain. Provide this now if you can, otherwise it will be inferred from
+			  the first item added or present in the list.
+
+			@raises ValueError if "mdl" is not an IndexedRedisModel
+		'''
+		if val is None:
+			QueryableListObjs.__init__(self)
+		else:
+			QueryableListObjs.__init__(self, val)
 
 
-	# TODO: Decide if this should just take "mdl" as an additional argument to constructor, or infer from stored objects.
+		self.mdl = mdl
+
+		if not mdl:
+			# If not explicitly defined, try to infer model if objects were provided.
+			#  otherwise, inference will be attempted when an operation that requires it is performed.
+			self.mdl = self.getModel()
+		else:
+			# This is called in getModel() if we did infer, so no need to call twice.
+			self.__validate_model(mdl)
+
+
+	@staticmethod
+	def __validate_model(mdl):
+		'''
+			__validate_model - Internal function to check that model is of correct type.
+
+			Uses a class variable that has been defined for IndexedRedisModel s for a long time, not the type itself, to prevent circular imports etc.
+	
+			@param mdl - type to validate
+		'''
+		if not hasattr(mdl, '_is_ir_model'):
+			raise ValueError('Model %s is not an IndexedRedisModel' %(str(mdl.__class__.__name__),))
+
+	def getModel(self):
+		'''
+			getModel - get the IndexedRedisModel associated with this list. If one was not provided in constructor,
+			  it will be inferred from the first item in the list (if present)
+
+			  @return <None/IndexedRedisModel> - None if none could be found, otherwise the IndexedRedisModel type of the items in this list.
+
+			@raises ValueError if first item is not the expected type.
+		'''
+		if not self.mdl and len(self) > 0:
+			mdl = self[0].__class__
+			self.__validate_model(mdl)
+
+			self.mdl = mdl
+
+		return self.mdl
+
 
 	def delete(self):
 		'''
@@ -23,7 +90,7 @@ class IRQueryableList(QueryableListObjs):
 		'''
 		if len(self) == 0:
 			return 0
-		mdl = self[0].__class__
+		mdl = self.getModel()
 		return mdl.deleter.deleteMultiple(self)
 
 
@@ -33,7 +100,7 @@ class IRQueryableList(QueryableListObjs):
 		'''
 		if len(self) == 0:
 			return []
-		mdl = self[0].__class__
+		mdl = self.getModel()
 		return mdl.saver.save(self)
 
 
@@ -47,7 +114,7 @@ class IRQueryableList(QueryableListObjs):
 		'''
 		if len(self) == 0:
 			return []
-		mdl = self[0].__class__
+		mdl = self.getModel()
 
 		ret = []
 		for obj in self:
@@ -73,7 +140,7 @@ class IRQueryableList(QueryableListObjs):
 		if len(self) == 0:
 			return IRQueryableList()
 
-		mdl = self[0].__class__
+		mdl = self.getModel()
 		pks = [item._id for item in self if item._id]
 
 		return mdl.objects.getMultiple(pks)
