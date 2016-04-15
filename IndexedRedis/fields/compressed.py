@@ -17,15 +17,28 @@ from ..compat_str import tobytes
 
 __all__ = ('COMPRESS_MODE_BZ2', 'COMPRESS_MODE_ZLIB', 'IRCompressedField')
 
+# COMPRESS_MODE_ZLIB - Use to compress using zlib (gzip)
 COMPRESS_MODE_ZLIB = 'zlib'
+# COMPRESS_MODE_BZ2 - Use to compress using bz2 (bz2)
 COMPRESS_MODE_BZ2 = 'bz2'
 
 
 class IRCompressedField(IRField):
+	'''
+		IRCompressedField - A field that automatically compresses/decompresses going to/from Redis.
+
+		Pass this into the FIELDS array of the model to get this functionality,
+
+		like: 
+			FIELDS  = [ ..., IRCompressedField('my_compressed_field', compressMode=COMPRESS_MODE_ZLIB]
+	'''
 
 	# TODO: maybe support other compression levels. The headers change with different levels.
 	#  These are for 9.
-	def __init__(self, val, valueType=None, compressMode=COMPRESS_MODE_ZLIB):
+	def __init__(self, name, valueType=None, compressMode=COMPRESS_MODE_ZLIB):
+		'''
+			__init__ - Create this object
+		'''
 		if valueType is not None:
 			raise ValueError('IRCompressedField with any valueType other than None is invalid.')
 		self.valueType = None
