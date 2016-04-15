@@ -1262,7 +1262,7 @@ class IndexedRedisSave(IndexedRedisHelper):
 		else:
 			idConn = self._get_new_connection()
 
-		if isinstance(obj, list) or isinstance(obj, tuple):
+		if issubclass(obj.__class__, (list, tuple)):
 			objs = obj
 		else:
 			objs = [obj]
@@ -1327,7 +1327,7 @@ class IndexedRedisSave(IndexedRedisHelper):
 				if fieldName in self.base64Fields:
 					fieldValue = b64encode(tobytes(fieldValue))
 
-				conn.hset(key, fieldName, fieldValue)
+				pipeline.hset(key, fieldName, fieldValue)
 
 			self._add_id_to_keys(obj._id, pipeline)
 
@@ -1341,7 +1341,7 @@ class IndexedRedisSave(IndexedRedisHelper):
 				if fieldName in self.base64Fields:
 					newValue = b64encode(tobytes(newValue))
 
-				conn.hset(key, fieldName, newValue)
+				pipeline.hset(key, fieldName, newValue)
 
 				if fieldName in self.indexedFields:
 					self._rem_id_from_index(fieldName, obj._id, oldValue, pipeline)
