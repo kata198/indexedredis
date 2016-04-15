@@ -501,31 +501,44 @@ class IndexedRedisModel(object):
 
 		return saver.save(myCopy, usePipeline=True, forceID=forceID, conn=conn)
 
+
 	def reload(self):
 		'''
-                reload - Reload this object from the database.
+                reload - Reload this object from the database, overriding any local changes and merging in any updates.
 
                     @raises KeyError - if this object has not been saved (no primary key)
 
-                    @return - True if any updates occured, False if data remained the same.
+                    @return - Dict with the keys that were updated. Key is field name that was updated,
+		       and value is tuple of (old value, new value). 
+
 		'''
 		_id = self._id
 		if not _id:
 			raise KeyError('Object has never been saved! Cannot reload.')
 
 		currentData = self.asDict(False)
-		newData = self.objects.get(_id)
-		newData.pop('_id', '')
+
+		# Get the object, and compare the unconverted "asDict" repr.
+		#  If any changes, we will apply the already-convered value from
+		#  the object, but we compare the unconverted values (what's in the DB).
+		newDataObj = self.objects.get(_id)
+		if not newDataObj:
+			raise KeyError('Object with id=%d is not in database. Cannot reload.' %(_id,))
+
+		newData = newDataObj.asDict(False)
 		if currentData == newData:
 			return []
 
-		updatedFieldNames = []
-		for fieldName, value in newData.items():
-			if currentData[fieldName] != value:
-				setattr(self, fieldName, value)
-				updatedFieldNames.append(fieldName)
+		updatedFields = {}
+		for fieldName, newValue in newData.items():
+			currentValue = currentData.get(fieldName, '')
+			if currentValue != newValue:
+				# Use "converted" values in the updatedFields dict, and apply on the object.
+				updatedFields[fieldName] = ( getattr(self, fieldName, ''), getattr(newDataObj, fieldName, '') )
+				setattr(self, fieldName, getattr(newDataObj, fieldName, ''))
+				self._origData[fieldName] = newDataObj._origData[fieldName]
 
-		return updatedFieldNames
+		return updatedFields
                     
 
 	def __getstate__(self):
