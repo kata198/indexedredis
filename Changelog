@@ -1,3 +1,5 @@
+3.1.1 - Apr 15 2016
+	- Fix some 4.0 docs that slipped in to 3.0 series
 
 3.1.0 - Apr 15 2016
 	- Fix where on updating a model, some operations would occur outside of a
