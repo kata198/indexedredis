@@ -1,4 +1,12 @@
 
+3.1.0 - Apr 15 2016
+	- Fix where on updating a model, some operations would occur outside of a
+	transaction.
+	- Fix "reload" method to actually work. It now returns a dict of fields
+	changed -> tuple(old value, new value)
+	- Allow model.saver.save to take a QueryableList (the return of .all()) by
+	changing isinstance to issubclass.
+
 3.0.3 - Apr 11 2016
 	- Fix issue with binary fields, they were always seen as "changed" even
 	when no update was made, which could have caused unnecessary updates and
