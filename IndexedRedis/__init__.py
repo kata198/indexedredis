@@ -580,15 +580,6 @@ class IndexedRedisModel(object):
 		self._origData = stateDict['_origData']
 
 
-	def _decodeBase64Fields(self):
-		'''
-			_decodeBase64Fields - private method, do not call . Used for decoding base64 fields after fetch
-		'''
-		for fieldName in self.__class__.BASE64_FIELDS:
-			fieldValue = b64decode(getattr(self, fieldName))
-			setattr(self, fieldName, fieldValue)
-
-
 	@classmethod
 	def validateModel(model):
 		'''
@@ -822,6 +813,10 @@ class IndexedRedisQuery(IndexedRedisHelper):
 
 	def _dictToObj(self, theDict):
 		binaryFields = self.mdl.BINARY_FIELDS
+		for key, value in theDict.items():
+			if tostr(key) in self.mdl.BASE64_FIELDS:
+				theDict[key] = b64decode(value)
+				
 		if not binaryFields:
 			obj = self.mdl(**decodeDict(theDict))
 		else:
@@ -840,7 +835,6 @@ class IndexedRedisQuery(IndexedRedisHelper):
 					value = irField.convert(value)
 				setattr(obj, key, value)
 				obj._origData[key] = value
-		obj._decodeBase64Fields()
 		return obj
 
 
