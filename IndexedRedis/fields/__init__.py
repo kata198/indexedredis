@@ -30,7 +30,7 @@ class IRField(str):
 			if valueType == bool:
 				self.convert = self._convertBool
 		else:
-			self.convert = lambda x : x
+			self.convert = self._noConvert
 		self.valueType = valueType
 
 	def toStorage(self, value):
@@ -41,8 +41,7 @@ class IRField(str):
 			return irNull
 		return self.valueType(value)
 
-	@staticmethod
-	def _noConvert(value):
+	def _noConvert(self, value):
 		return value
 
 	def _convertBool(self, value):
@@ -57,6 +56,9 @@ class IRField(str):
 		# I'm not sure what to do here... Should we raise an exception because the data is invalid? Should just return True?
 		raise ValueError('Unexpected value for bool type: %s' %(value,))
 
+	@classmethod
+	def canIndex(cls):
+		return True
 
 	def __new__(cls, val='', valueType=None):
 		return str.__new__(cls, val)

@@ -285,20 +285,18 @@ class IndexedRedisModel(object):
 		self.BINARY_FIELDS = set(self.BINARY_FIELDS)
 
 		for fieldName in self.FIELDS:
-			if fieldName in self.BASE64_FIELDS or fieldName in self.BINARY_FIELDS:
+			if issubclass(fieldName.__class__, IRField):
+				val = fieldName.convert(kwargs.get(str(fieldName), ''))
+			elif fieldName in self.BASE64_FIELDS or fieldName in self.BINARY_FIELDS:
 				val = tobytes(kwargs.get(fieldName, b''))
-			elif not issubclass(fieldName.__class__, IRField):
-				val = tostr(kwargs.get(fieldName, ''))
 			else:
-				val = fieldName.convert(kwargs.get(fieldName, ''))
+				val = tostr(kwargs.get(fieldName, ''))
 			setattr(self, fieldName, val)
 			self._origData[fieldName] = val
 
-		self._convertFieldValues()
-
 		self._id = kwargs.get('_id', None)
 	
-	def asDict(self, includeMeta=False, convertValueTypes=True):
+	def asDict(self, includeMeta=False, forStorage=False):
 		'''
 			toDict / asDict - Get a dictionary representation of this model.
 
@@ -311,12 +309,15 @@ class IndexedRedisModel(object):
 		ret = {}
 		for fieldName in self.FIELDS:
 			val = getattr(self, fieldName, '')
-			if fieldName in self.BASE64_FIELDS or fieldName in self.BINARY_FIELDS:
+			if issubclass(fieldName.__class__, IRField) and hasattr(fieldName, 'toStorage'):
+				if forStorage is True:
+					ret[fieldName] = fieldName.toStorage(val)
+				else:
+					ret[fieldName] = val
+			elif fieldName in self.BASE64_FIELDS or fieldName in self.BINARY_FIELDS:
 				ret[fieldName] = tobytes(val)
 			else:
-				ret[fieldName] = getattr(fieldName, 'toStorage', tostr)(val)
-			if convertValueTypes is True and issubclass(fieldName.__class__, IRField) and fieldName.valueType:
-				ret[fieldName] = type(val)(fieldName.convert(ret[fieldName]))
+				ret[fieldName] = tostr(val)
 
 		if includeMeta is True:
 			ret['_id'] = getattr(self, '_id', '')
@@ -334,12 +335,13 @@ class IndexedRedisModel(object):
 			return True
 
 		for fieldName in self.FIELDS:
-			if fieldName in self.BASE64_FIELDS or fieldName in self.BINARY_FIELDS:
-				currentVal = tobytes(getattr(self, fieldName))
-			else:
-				currentVal = getattr(fieldName, 'toStorage', tostr)(getattr(self, fieldName))
+			thisVal = getattr(self, fieldName, '')
+#			if fieldName in self.BASE64_FIELDS or fieldName in self.BINARY_FIELDS:
+#				thisVal = tobytes(getattr(self, fieldName))
+#			else:
+#				thisVal = getattr(fieldName, 'toStorage', tostr)(getattr(self, fieldName))
 
-			if self._origData.get(fieldName, '') != currentVal:
+			if self._origData.get(fieldName, '') != thisVal:
 				return True
 		return False
 	
@@ -351,11 +353,12 @@ class IndexedRedisModel(object):
 		'''
 		updatedFields = {}
 		for fieldName in self.FIELDS:
-			if fieldName in self.BASE64_FIELDS or fieldName in self.BINARY_FIELDS:
-				thisVal = tobytes(getattr(self, fieldName))
-			else:
-				thisVal = getattr(fieldName, 'toStorage', tostr)(getattr(self, fieldName))
-			if self._origData[fieldName] != thisVal:
+			thisVal = getattr(self, fieldName, '')
+#			if fieldName in self.BASE64_FIELDS or fieldName in self.BINARY_FIELDS:
+#				thisVal = tobytes(getattr(self, fieldName))
+#			else:
+#				thisVal = getattr(fieldName, 'toStorage', tostr)(getattr(self, fieldName))
+			if self._origData.get(fieldName, '') != thisVal:
 				updatedFields[fieldName] = (self._origData[fieldName], thisVal)
 		return updatedFields
 
@@ -435,7 +438,7 @@ class IndexedRedisModel(object):
 		'''
                     
 		myClassName = self.__class__.__name__
-		myDict = self.asDict(True)
+		myDict = self.asDict(True, forStorage=False)
 		_id = myDict.pop('_id', 'None')
 		myPointerLoc = "0x%x" %(id(self),)
 		if not _id or _id == 'None':
@@ -451,7 +454,7 @@ class IndexedRedisModel(object):
 
                         @return - String of python init call to recreate this object
 		'''
-		myDict = self.asDict(True)
+		myDict = self.asDict(True, forStorage=False)
 		myClassName = self.__class__.__name__
 
 		ret = [myClassName, '(']
@@ -492,7 +495,7 @@ class IndexedRedisModel(object):
                     @param copyPrimaryKey <bool> default False - If True, any changes to the copy will save over-top the existing entry in Redis.
                         If False, only the data is copied, and nothing is saved.
 		'''
-		return self.__class__(**self.asDict(copyPrimaryKey, convertValueTypes=False))
+		return self.__class__(**self.asDict(copyPrimaryKey, forStorage=False))
 
 	def saveToExternal(self, redisCon):
 		'''
@@ -535,7 +538,7 @@ class IndexedRedisModel(object):
 		if not _id:
 			raise KeyError('Object has never been saved! Cannot reload.')
 
-		currentData = self.asDict(False, convertValueTypes=False)
+		currentData = self.asDict(False, forStorage=False)
 
 		# Get the object, and compare the unconverted "asDict" repr.
 		#  If any changes, we will apply the already-convered value from
@@ -544,7 +547,7 @@ class IndexedRedisModel(object):
 		if not newDataObj:
 			raise KeyError('Object with id=%d is not in database. Cannot reload.' %(_id,))
 
-		newData = newDataObj.asDict(False, convertValueTypes=False)
+		newData = newDataObj.asDict(False, forStorage=False)
 		if currentData == newData:
 			return []
 
@@ -564,7 +567,9 @@ class IndexedRedisModel(object):
 		'''
                 pickle uses this
 		'''
-		return self.asDict(True, convertValueTypes=False)
+		myData = self.asDict(True, forStorage=False)
+		myData['_origData'] = self._origData
+		return myData
 
 	def __setstate__(self, stateDict):
 		'''
@@ -572,6 +577,7 @@ class IndexedRedisModel(object):
 		'''
 		for key, value in stateDict.items():
 			setattr(self, key, value)
+		self._origData = stateDict['_origData']
 
 
 	def _decodeBase64Fields(self):
@@ -581,12 +587,6 @@ class IndexedRedisModel(object):
 		for fieldName in self.__class__.BASE64_FIELDS:
 			fieldValue = b64decode(getattr(self, fieldName))
 			setattr(self, fieldName, fieldValue)
-
-
-	def _convertFieldValues(self):
-		for field in self.FIELDS:
-			if issubclass(field.__class__, IRField):
-				setattr(self, field, field.convert(getattr(self, field)))
 
 
 	@classmethod
@@ -625,9 +625,9 @@ class IndexedRedisModel(object):
 			except UnicodeDecodeError as e:
 				raise InvalidModelException('%s All field names must be ascii-encodable. "%s" was not. Error was: %s' %(failedValidationStr, tostr(fieldName), str(e)))
 
-			if isinstance(fieldName, (IRPickleField, IRCompressedField)) and fieldName in indexedFieldSet:
+			if fieldName in indexedFieldSet and issubclass(fieldName.__class__, IRField) and fieldName.canIndex() is False:
 				raise InvalidModelException('%s Field Type %s - (%s) cannot be indexed.' %(failedValidationStr, str(fieldName.__class__.__name__), tostr(fieldName)))
-				
+
 
 		if bool(indexedFieldSet - fieldSet):
 			raise InvalidModelException('%s All INDEXED_FIELDS must also be present in FIELDS. %s exist only in INDEXED_FIELDS' %(failedValidationStr, str(list(indexedFieldSet - fieldSet)), ) )
@@ -680,6 +680,8 @@ class IndexedRedisHelper(object):
 		self.indexedFields = self.mdl.INDEXED_FIELDS
 		self.base64Fields = self.mdl.BASE64_FIELDS
 		self.binaryFields = self.mdl.BINARY_FIELDS
+
+		self.irFields = { fieldName : fieldName for fieldName in self.mdl.FIELDS if issubclass(fieldName.__class__, IRField) }
 
 		self._connection = None
 
@@ -833,10 +835,12 @@ class IndexedRedisQuery(IndexedRedisHelper):
 					nonBinaryItems[key] = value
 			obj = self.mdl(**decodeDict(nonBinaryItems))
 			for key, value in binaryItems.items():
+				irField = self.irFields.get(key)
+				if irField and hasattr(irField, 'convert'):
+					value = irField.convert(value)
 				setattr(obj, key, value)
 				obj._origData[key] = value
 		obj._decodeBase64Fields()
-#		self.mdl._convertFieldValues(obj) # Trying this in __init__ see how that goes
 		return obj
 
 
@@ -881,6 +885,18 @@ class IndexedRedisQuery(IndexedRedisHelper):
 				notFilter = False
 			if key not in filterObj.indexedFields:
 				raise ValueError('Field "' + key + '" is not in INDEXED_FIELDS array. Filtering is only supported on indexed fields.')
+
+			# TODO: refactor
+			if key in filterObj.irFields:
+				irField = filterObj.irFields[key]
+				if hasattr(irField, 'toStorage'):
+					value = irField.toStorage(value)
+#			for fieldName in filterObj.fieldNames:
+#				if fieldName == key:
+#					if issubclass(fieldName.__class__, IRField) and hasattr(fieldName, 'toStorage'):
+#						value = fieldName.toStorage(value)
+#					break
+
 			if notFilter is False:
 				filterObj.filters.append( (key, value) )
 			else:
@@ -1371,7 +1387,7 @@ class IndexedRedisSave(IndexedRedisHelper):
 		if pipeline is None:
 			pipeline = conn
 
-		newDict = obj.asDict(convertValueTypes=False)
+		newDict = obj.asDict(forStorage=True)
 		key = self._get_key_for_id(obj._id)
 
 		if isInsert is True:
@@ -1414,7 +1430,7 @@ class IndexedRedisSave(IndexedRedisHelper):
 
 		pipeline = conn.pipeline()
 
-		objDicts = [obj.asDict(True, convertValueTypes=False) for obj in objs]
+		objDicts = [obj.asDict(True, forStorage=True) for obj in objs]
 
 		for fieldName in self.indexedFields:
 			for objDict in objDicts:

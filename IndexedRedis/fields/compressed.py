@@ -12,6 +12,8 @@ import bz2
 
 from . import IRField, irNull
 
+from ..compat_str import tobytes
+
 
 __all__ = ('COMPRESS_MODE_BZ2', 'COMPRESS_MODE_ZLIB', 'IRCompressedField')
 
@@ -46,17 +48,21 @@ class IRCompressedField(IRField):
 	def toStorage(self, value):
 		if value in ('', irNull):
 			return value
-		if value.startswith(self.header):
+		if tobytes(value[:len(self.header)]) == self.header:
 			return value
-		return self.getCompressMod().compress(value, 9)
+		return self.getCompressMod().compress(tobytes(value), 9)
 
 	def convert(self, value):
 		if not value:
 			return value
-		if value.startswith(self.header):
+		if tobytes(value[:len(self.header)]) == self.header:
 			return self.getCompressMod().decompress(value)
 
 		return value
+
+	@classmethod
+	def canIndex(cls):
+		return False
 
 	def __new__(self, val, valueType=None, compressMode=COMPRESS_MODE_ZLIB):
 		return str.__new__(self, val)
