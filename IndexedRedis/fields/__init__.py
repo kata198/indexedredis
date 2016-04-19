@@ -6,9 +6,9 @@
 
 # vim:set ts=8 shiftwidth=8 softtabstop=8 noexpandtab :
 
-__all__ = ('IRField', 'IRNullType', 'irNull', 'IRPickleField', 'IRCompressedField')
+__all__ = ('IRField', 'IRNullType', 'irNull', 'IRPickleField', 'IRCompressedField', 'IRUnicodeField')
 
-from ..compat_str import tostr
+from ..compat_str import to_unicode
 
 try:
 	unicode
@@ -62,7 +62,7 @@ class IRField(str):
 			@param value - The value of the item to convert
 			@return A string value suitable for storing.
 		'''
-		return tostr(value)
+		return to_unicode(value)
 
 	def convert(self, value):
 		'''
@@ -73,6 +73,16 @@ class IRField(str):
 		if value in ('', irNull):
 			return irNull
 		return self.valueType(value)
+
+	# TODO: Test if including this function and then deleting it later will put it in pydoc.
+#	def toBytes(self, value):
+#		'''
+#			toBytes - Implement this function to return a "bytes" version of your object, to support base64 encoding
+#			  if default encoding won't work.
+#		'''
+#		raise NotImplementedError('toBytes is not really here.')
+#	del toBytes
+		
 
 	def _noConvert(self, value):
 		return value
@@ -93,8 +103,8 @@ class IRField(str):
 	def canIndex(cls):
 		return True
 
-	def __new__(cls, name='', valueType=None):
-		return str.__new__(cls, name)
+	def __new__(self, name='', valueType=None):
+		return str.__new__(self, name)
 
 
 class IRNullType(str):
@@ -107,11 +117,11 @@ class IRNullType(str):
 		You probably shouldn't ever need to use this directly, instead use the static instance, "irNull", defined in this module.
 	'''
 
-	def __new__(cls, val=''):
+	def __new__(self, val=''):
 		'''
 			Don't let this be assigned a value.
 		'''
-		return str.__new__(cls, '')
+		return str.__new__(self, '')
 
 	def __eq__(self, otherVal):
 		return bool(isinstance(otherVal, IRNullType))
@@ -135,5 +145,7 @@ irNull = IRNullType()
 
 from .compressed import IRCompressedField
 from .pickle import IRPickleField
+from .unicode import IRUnicodeField
+from .raw import IRRawField
 
 # vim:set ts=8 shiftwidth=8 softtabstop=8 noexpandtab :

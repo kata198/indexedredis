@@ -3,11 +3,14 @@
 # IRQueryableList - QueryableList with some added callbacks to IndexedRedis
 #
 
+# vim: set ts=8 shiftwidth=8 softtabstop=8 noexpandtab :
+
 import sys
 
-__all__ = ('defaultEncoding', 'tostr', 'tobytes')
+__all__ = ('defaultEncoding', 'to_unicode', 'tobytes')
 
 try:
+	global defaultEncoding
 	defaultEncoding = sys.getdefaultencoding()
 	if defaultEncoding == 'ascii':
 		defaultEncoding = 'utf-8'
@@ -45,17 +48,24 @@ getIndexedRedisEncoding = getEncoding
 
 if bytes == str:
 	# Python 2
-	def tostr(x):
+	def to_unicode(x):
 		if isinstance(x, unicode):
-			return x.encode(defaultEncoding)
+			return x
+		elif isinstance(x, str):
+			return x.decode(defaultEncoding)
 		else:
-			return str(x)
+			return str(x).decode(defaultEncoding)
 
-	tobytes = lambda x : x
+
+	def tobytes(x):
+		if isinstance(x, str):
+			return x
+		return str(x)
+#	tobytes = lambda x : str(x)
 else:
 	# Python 3
 	
-	def tostr(x):
+	def to_unicode(x):
 		if isinstance(x, bytes) is False:
 			return str(x)
 		return x.decode(defaultEncoding)
@@ -64,3 +74,5 @@ else:
 		if isinstance(x, bytes) is True:
 			return x
 		return x.encode(defaultEncoding)
+
+# vim: set ts=8 shiftwidth=8 softtabstop=8 noexpandtab :

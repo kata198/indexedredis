@@ -16,7 +16,7 @@ import redis
 from base64 import b64encode, b64decode
 
 from .fields import IRField, IRNullType, irNull, IRPickleField, IRCompressedField
-from .compat_str import tostr, tobytes, defaultEncoding
+from .compat_str import to_unicode, tobytes, defaultEncoding, setEncoding, getEncoding
 
 from .IRQueryableList import IRQueryableList
 
@@ -60,7 +60,7 @@ except NameError:
 
 
 # Changing redis encoding into requested encoding
-decodeDict = lambda origDict : {tostr(key) : tostr(origDict[key]) for key in origDict}
+decodeDict = lambda origDict : {to_unicode(key) : origDict[key] for key in origDict}
 
 validatedModels = set()
 
@@ -290,7 +290,7 @@ class IndexedRedisModel(object):
 			elif thisField in self.BASE64_FIELDS or thisField in self.BINARY_FIELDS:
 				val = tobytes(kwargs.get(thisField, b''))
 			else:
-				val = tostr(kwargs.get(thisField, ''))
+				val = to_unicode(kwargs.get(thisField, ''))
 			setattr(self, thisField, val)
 			self._origData[thisField] = val
 
@@ -315,8 +315,11 @@ class IndexedRedisModel(object):
 			elif thisField in self.BASE64_FIELDS or thisField in self.BINARY_FIELDS:
 				val = tobytes(val)
 			else:
-				val = tostr(val)
+				val = to_unicode(val)
+
 			if forStorage is True and thisField in self.BASE64_FIELDS:
+				if hasattr(thisField, 'toBytes'):
+					val = thisField.toBytes(val)
 				val = b64encode(val)
 
 			ret[thisField] = val
@@ -342,7 +345,7 @@ class IndexedRedisModel(object):
 #			if thisField in self.BASE64_FIELDS or thisField in self.BINARY_FIELDS:
 #				thisVal = tobytes(getattr(self, thisField))
 #			else:
-#				thisVal = getattr(thisField, 'toStorage', tostr)(getattr(self, thisField))
+#				thisVal = getattr(thisField, 'toStorage', to_unicode)(getattr(self, thisField))
 
 			if self._origData.get(thisField, '') != thisVal:
 				return True
@@ -362,7 +365,7 @@ class IndexedRedisModel(object):
 #			if thisField in self.BASE64_FIELDS or thisField in self.BINARY_FIELDS:
 #				thisVal = tobytes(getattr(self, thisField))
 #			else:
-#				thisVal = getattr(thisField, 'toStorage', tostr)(getattr(self, thisField))
+#				thisVal = getattr(thisField, 'toStorage', to_unicode)(getattr(self, thisField))
 			if self._origData.get(thisField, '') != thisVal:
 				updatedFields[thisField] = (self._origData[thisField], thisVal)
 		return updatedFields
@@ -449,8 +452,8 @@ class IndexedRedisModel(object):
 		if not _id or _id == 'None':
 			return '<%s obj (Not in DB) at %s>' %(myClassName, myPointerLoc)
 		elif self.hasUnsavedChanges():
-			return '<%s obj _id=%s (Unsaved Changes) at %s>' %(myClassName, tostr(_id), myPointerLoc)
-		return '<%s obj _id=%s at %s>' %(myClassName, tostr(_id), myPointerLoc)
+			return '<%s obj _id=%s (Unsaved Changes) at %s>' %(myClassName, to_unicode(_id), myPointerLoc)
+		return '<%s obj _id=%s at %s>' %(myClassName, to_unicode(_id), myPointerLoc)
 
 	def __repr__(self):
 		'''
@@ -466,7 +469,7 @@ class IndexedRedisModel(object):
 		# Only show id if saved
 		_id = myDict.pop('_id', '')
 		if _id:
-			ret += ['_id="', tostr(_id), '", ']
+			ret += ['_id="', to_unicode(_id), '", ']
 
 		# TODO: Note, trying to fit the type in here, but it's not perfect and may need to change when nullables are figured out
 		convertMethods = { thisField : (hasattr(thisField, 'convert') and thisField.convert or (lambda x : x)) for thisField in self.FIELDS}
@@ -479,9 +482,9 @@ class IndexedRedisModel(object):
 				if isinstance(val, IRNullType):
 					val = 'IRNullType()'
 				elif isinstance(val, (str, bytes, unicode)):
-					val = "'%s'" %(tostr(val),)
+					val = "'%s'" %(to_unicode(val),)
 				else:
-					val = tostr(val)
+					val = to_unicode(val)
 				ret += [key, '=', val, ', ']
 			else:
 				ret += [key, '=', repr(value), ', ']
@@ -619,10 +622,10 @@ class IndexedRedisModel(object):
 			try:
 				codecs.ascii_encode(thisField)
 			except UnicodeDecodeError as e:
-				raise InvalidModelException('%s All field names must be ascii-encodable. "%s" was not. Error was: %s' %(failedValidationStr, tostr(thisField), str(e)))
+				raise InvalidModelException('%s All field names must be ascii-encodable. "%s" was not. Error was: %s' %(failedValidationStr, to_unicode(thisField), str(e)))
 
 			if thisField in indexedFieldSet and issubclass(thisField.__class__, IRField) and thisField.canIndex() is False:
-				raise InvalidModelException('%s Field Type %s - (%s) cannot be indexed.' %(failedValidationStr, str(thisField.__class__.__name__), tostr(thisField)))
+				raise InvalidModelException('%s Field Type %s - (%s) cannot be indexed.' %(failedValidationStr, str(thisField.__class__.__name__), to_unicode(thisField)))
 
 
 		if bool(indexedFieldSet - fieldSet):
@@ -751,7 +754,7 @@ class IndexedRedisHelper(object):
 
 			@return - Key name string
 		'''
-		return ''.join([INDEXED_REDIS_PREFIX, self.keyName, ':idx:', indexedField, ':', getattr(indexedField, 'toStorage', tostr)(val)])
+		return ''.join([INDEXED_REDIS_PREFIX, self.keyName, ':idx:', indexedField, ':', getattr(indexedField, 'toStorage', to_unicode)(val)])
 		
 
 	def _get_key_for_id(self, pk):
@@ -763,7 +766,7 @@ class IndexedRedisHelper(object):
 
 			@return - Key name string
 		'''
-		return ''.join([INDEXED_REDIS_PREFIX, self.keyName, ':data:', tostr(pk)])
+		return ''.join([INDEXED_REDIS_PREFIX, self.keyName, ':data:', to_unicode(pk)])
 
 	def _get_next_id_key(self):
 		'''
@@ -783,7 +786,7 @@ class IndexedRedisHelper(object):
 		'''
 		if conn is None:
 			conn = self._get_connection()
-		return tostr(conn.get(self._get_next_id_key()) or 0)
+		return to_unicode(conn.get(self._get_next_id_key()) or 0)
 
 	def _getNextID(self, conn=None):
 		'''
@@ -796,7 +799,7 @@ class IndexedRedisHelper(object):
 		'''
 		if conn is None:
 			conn = self._get_connection()
-		return tostr(conn.incr(self._get_next_id_key()))
+		return to_unicode(conn.incr(self._get_next_id_key()))
 
 	def _getTempKey(self):
 		'''
@@ -819,7 +822,7 @@ class IndexedRedisQuery(IndexedRedisHelper):
 	def _redisResultToObj(self, theDict):
 		binaryFields = self.mdl.BINARY_FIELDS
 		for key, value in theDict.items():
-			if tostr(key) in self.mdl.BASE64_FIELDS:
+			if to_unicode(key) in self.mdl.BASE64_FIELDS:
 				theDict[key] = b64decode(value)
 				
 		if not binaryFields:
@@ -828,7 +831,7 @@ class IndexedRedisQuery(IndexedRedisHelper):
 			binaryItems = {}
 			nonBinaryItems = {}
 			for key, value in theDict.items():
-				key = tostr(key)
+				key = to_unicode(key)
 				if key in binaryFields:
 					binaryItems[key] = value
 				else:

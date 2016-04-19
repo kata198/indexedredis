@@ -9,3 +9,6 @@ include test.py
 include setup.py
 include requirements.txt
 recursive-include IndexedRedis *.py
+recursive-include tests *.py
+recursive-include tests/simple *.py
+include tests/simple/README

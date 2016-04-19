@@ -11,7 +11,7 @@ from IndexedRedis.fields import IRCompressedField
 class MyCompressModel(IndexedRedisModel):
 
     FIELDS = [ \
-        'name',
+        IRField('name'),
         IRCompressedField('data'),
     ]
 

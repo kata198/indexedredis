@@ -33,6 +33,24 @@
 	native models than trying to stuff in objects.
 	- Add compression via compressed fields (IRCompressedField in
 	fields.compressed), using zlib or bz2
+	- Change python2 to use unicode everywhere, to match python3 behaviour
+	- Don't try to decode every field with the default encoding. Default is
+	still to decode/encoding using that encoding (for items not in
+	BINARY_FIELDS). Now you can
+	use multiple encodings, or no encodings. There is a new field type,
+	fields.IRUnicodeField which allows specifying a non-default encoding.
+	
+	E.x. :
+
+	FIELDS = [ IRUnicodeField('name_english', encoding='utf-8'),
+	IRUnicodeField('name_jp', encoding='utf-16'),
+	IRUnicodeField('uses_default_encoding') ]
+
+	You may also use fields.IRRawField which will do no encoding or
+	conversions to/from Redis.
+	- Field Types can implement "toBytes" to allow them to be base64
+	encoded/decoded, in the event that normal decoding wouldn't work (like the
+	IRUnicodeField type)
 
 -3.1.1 - Apr 15 2016
 - Fix some 4.0 docs that slipped in to 3.0 series

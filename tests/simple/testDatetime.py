@@ -4,7 +4,7 @@ import datetime
 import sys
 import IndexedRedis
 from IndexedRedis import IndexedRedisModel, IRField
-from IndexedRedis.fields.AdvancedFieldValueTypes import IRDatetimeFieldType
+from IndexedRedis.fields.FieldValueTypes import IRDatetimeValue
 
 # vim: ts=4 sw=4 expandtab
 
@@ -12,7 +12,7 @@ class MyDatetimeModel(IndexedRedisModel):
 
     FIELDS = [ \
         'name',
-        IRField('timestamp', valueType=IRDatetimeFieldType),
+        IRField('timestamp', valueType=IRDatetimeValue),
     ]
 
     INDEXED_FIELDS = [ \
