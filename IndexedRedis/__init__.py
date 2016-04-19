@@ -81,7 +81,7 @@ class IndexedRedisModel(object):
 
             **Required Fields:**
 
-            *FIELDS* - REQUIRED. a list of strings which name the fields that can be used for storage.
+            *FIELDS* - REQUIRED. a list of strings which name the fields that can be used for storage. Can also be IRField or an implementing type (see AdvancedFields below)
 
                     Example: ['Name', 'Description', 'Model', 'Price']
 
@@ -284,15 +284,15 @@ class IndexedRedisModel(object):
 		self.BASE64_FIELDS = set(self.BASE64_FIELDS)
 		self.BINARY_FIELDS = set(self.BINARY_FIELDS)
 
-		for fieldName in self.FIELDS:
-			if issubclass(fieldName.__class__, IRField):
-				val = fieldName.convert(kwargs.get(str(fieldName), ''))
-			elif fieldName in self.BASE64_FIELDS or fieldName in self.BINARY_FIELDS:
-				val = tobytes(kwargs.get(fieldName, b''))
+		for thisField in self.FIELDS:
+			if issubclass(thisField.__class__, IRField):
+				val = thisField.convert(kwargs.get(str(thisField), ''))
+			elif thisField in self.BASE64_FIELDS or thisField in self.BINARY_FIELDS:
+				val = tobytes(kwargs.get(thisField, b''))
 			else:
-				val = tostr(kwargs.get(fieldName, ''))
-			setattr(self, fieldName, val)
-			self._origData[fieldName] = val
+				val = tostr(kwargs.get(thisField, ''))
+			setattr(self, thisField, val)
+			self._origData[thisField] = val
 
 		self._id = kwargs.get('_id', None)
 	
@@ -307,19 +307,19 @@ class IndexedRedisModel(object):
 			@return - Dictionary reprensetation of this object and all fields
 		'''
 		ret = {}
-		for fieldName in self.FIELDS:
-			val = getattr(self, fieldName, '')
-			if issubclass(fieldName.__class__, IRField) and hasattr(fieldName, 'toStorage'):
+		for thisField in self.FIELDS:
+			val = getattr(self, thisField, '')
+			if issubclass(thisField.__class__, IRField) and hasattr(thisField, 'toStorage'):
 				if forStorage is True:
-					val = fieldName.toStorage(val)
-			elif fieldName in self.BASE64_FIELDS or fieldName in self.BINARY_FIELDS:
+					val = thisField.toStorage(val)
+			elif thisField in self.BASE64_FIELDS or thisField in self.BINARY_FIELDS:
 				val = tobytes(val)
 			else:
 				val = tostr(val)
-			if forStorage is True and fieldName in self.BASE64_FIELDS:
+			if forStorage is True and thisField in self.BASE64_FIELDS:
 				val = b64encode(val)
 
-			ret[fieldName] = val
+			ret[thisField] = val
 				
 
 		if includeMeta is True:
@@ -337,14 +337,14 @@ class IndexedRedisModel(object):
 		if not self._id or not self._origData:
 			return True
 
-		for fieldName in self.FIELDS:
-			thisVal = getattr(self, fieldName, '')
-#			if fieldName in self.BASE64_FIELDS or fieldName in self.BINARY_FIELDS:
-#				thisVal = tobytes(getattr(self, fieldName))
+		for thisField in self.FIELDS:
+			thisVal = getattr(self, thisField, '')
+#			if thisField in self.BASE64_FIELDS or thisField in self.BINARY_FIELDS:
+#				thisVal = tobytes(getattr(self, thisField))
 #			else:
-#				thisVal = getattr(fieldName, 'toStorage', tostr)(getattr(self, fieldName))
+#				thisVal = getattr(thisField, 'toStorage', tostr)(getattr(self, thisField))
 
-			if self._origData.get(fieldName, '') != thisVal:
+			if self._origData.get(thisField, '') != thisVal:
 				return True
 		return False
 	
@@ -352,17 +352,19 @@ class IndexedRedisModel(object):
 		'''
 			getUpdatedFields - See changed fields.
 			
-			@return - a dictionary of fieldName : tuple(old, new)
+			@return - a dictionary of fieldName : tuple(old, new).
+
+			fieldName may be a string or may implement IRField (which implements string, and can be used just like a string)
 		'''
 		updatedFields = {}
-		for fieldName in self.FIELDS:
-			thisVal = getattr(self, fieldName, '')
-#			if fieldName in self.BASE64_FIELDS or fieldName in self.BINARY_FIELDS:
-#				thisVal = tobytes(getattr(self, fieldName))
+		for thisField in self.FIELDS:
+			thisVal = getattr(self, thisField, '')
+#			if thisField in self.BASE64_FIELDS or thisField in self.BINARY_FIELDS:
+#				thisVal = tobytes(getattr(self, thisField))
 #			else:
-#				thisVal = getattr(fieldName, 'toStorage', tostr)(getattr(self, fieldName))
-			if self._origData.get(fieldName, '') != thisVal:
-				updatedFields[fieldName] = (self._origData[fieldName], thisVal)
+#				thisVal = getattr(thisField, 'toStorage', tostr)(getattr(self, thisField))
+			if self._origData.get(thisField, '') != thisVal:
+				updatedFields[thisField] = (self._origData[thisField], thisVal)
 		return updatedFields
 
 	@classproperty
@@ -467,7 +469,7 @@ class IndexedRedisModel(object):
 			ret += ['_id="', tostr(_id), '", ']
 
 		# TODO: Note, trying to fit the type in here, but it's not perfect and may need to change when nullables are figured out
-		convertMethods = { fieldName : (hasattr(fieldName, 'convert') and fieldName.convert or (lambda x : x)) for fieldName in self.FIELDS}
+		convertMethods = { thisField : (hasattr(thisField, 'convert') and thisField.convert or (lambda x : x)) for thisField in self.FIELDS}
 
 		key = None
 		for key, value in myDict.items():
@@ -555,13 +557,13 @@ class IndexedRedisModel(object):
 			return []
 
 		updatedFields = {}
-		for fieldName, newValue in newData.items():
-			currentValue = currentData.get(fieldName, '')
+		for thisField, newValue in newData.items():
+			currentValue = currentData.get(thisField, '')
 			if currentValue != newValue:
 				# Use "converted" values in the updatedFields dict, and apply on the object.
-				updatedFields[fieldName] = ( getattr(self, fieldName, ''), getattr(newDataObj, fieldName, '') )
-				setattr(self, fieldName, getattr(newDataObj, fieldName, ''))
-				self._origData[fieldName] = newDataObj._origData[fieldName]
+				updatedFields[thisField] = ( getattr(self, thisField, ''), getattr(newDataObj, thisField, '') )
+				setattr(self, thisField, getattr(newDataObj, thisField, ''))
+				self._origData[thisField] = newDataObj._origData[thisField]
 
 		return updatedFields
                     
@@ -611,16 +613,16 @@ class IndexedRedisModel(object):
 		if not fieldSet:
 			raise InvalidModelException('%s No fields defined. Please populate the FIELDS array with a list of field names' %(failedValidationStr,))
 
-		for fieldName in fieldSet:
-			if fieldName == '_id':
+		for thisField in fieldSet:
+			if thisField == '_id':
 				raise InvalidModelException('%s You cannot have a field named _id, it is reserved for the primary key.' %(failedValidationStr,))
 			try:
-				codecs.ascii_encode(fieldName)
+				codecs.ascii_encode(thisField)
 			except UnicodeDecodeError as e:
-				raise InvalidModelException('%s All field names must be ascii-encodable. "%s" was not. Error was: %s' %(failedValidationStr, tostr(fieldName), str(e)))
+				raise InvalidModelException('%s All field names must be ascii-encodable. "%s" was not. Error was: %s' %(failedValidationStr, tostr(thisField), str(e)))
 
-			if fieldName in indexedFieldSet and issubclass(fieldName.__class__, IRField) and fieldName.canIndex() is False:
-				raise InvalidModelException('%s Field Type %s - (%s) cannot be indexed.' %(failedValidationStr, str(fieldName.__class__.__name__), tostr(fieldName)))
+			if thisField in indexedFieldSet and issubclass(thisField.__class__, IRField) and thisField.canIndex() is False:
+				raise InvalidModelException('%s Field Type %s - (%s) cannot be indexed.' %(failedValidationStr, str(thisField.__class__.__name__), tostr(thisField)))
 
 
 		if bool(indexedFieldSet - fieldSet):
@@ -670,12 +672,12 @@ class IndexedRedisHelper(object):
 		'''
 		self.mdl = mdl
 		self.keyName = self.mdl.KEY_NAME
-		self.fieldNames = self.mdl.FIELDS
+		self.fields = self.mdl.FIELDS
 		self.indexedFields = self.mdl.INDEXED_FIELDS
 		self.base64Fields = self.mdl.BASE64_FIELDS
 		self.binaryFields = self.mdl.BINARY_FIELDS
 
-		self.irFields = { fieldName : fieldName for fieldName in self.mdl.FIELDS if issubclass(fieldName.__class__, IRField) }
+		self.irFields = { thisField : thisField for thisField in self.mdl.FIELDS if issubclass(thisField.__class__, IRField) }
 
 		self._connection = None
 
@@ -814,7 +816,7 @@ class IndexedRedisQuery(IndexedRedisHelper):
 		self.notFilters = []
 
 
-	def _dictToObj(self, theDict):
+	def _redisResultToObj(self, theDict):
 		binaryFields = self.mdl.BINARY_FIELDS
 		for key, value in theDict.items():
 			if tostr(key) in self.mdl.BASE64_FIELDS:
@@ -839,6 +841,9 @@ class IndexedRedisQuery(IndexedRedisHelper):
 				setattr(obj, key, value)
 				obj._origData[key] = value
 		return obj
+	
+	# COMPAT 
+	_dictToObj = _redisResultToObj
 
 
 
@@ -888,10 +893,10 @@ class IndexedRedisQuery(IndexedRedisHelper):
 				irField = filterObj.irFields[key]
 				if hasattr(irField, 'toStorage'):
 					value = irField.toStorage(value)
-#			for fieldName in filterObj.fieldNames:
-#				if fieldName == key:
-#					if issubclass(fieldName.__class__, IRField) and hasattr(fieldName, 'toStorage'):
-#						value = fieldName.toStorage(value)
+#			for thisField in filterObj.fields:
+#				if thisField == key:
+#					if issubclass(thisField.__class__, IRField) and hasattr(thisField, 'toStorage'):
+#						value = thisField.toStorage(value)
 #					break
 
 			if notFilter is False:
@@ -1136,7 +1141,7 @@ class IndexedRedisQuery(IndexedRedisHelper):
 		if type(res) != dict or not len(res.keys()):
 			return None
 		res['_id'] = pk
-		return self._dictToObj(res)
+		return self._redisResultToObj(res)
 	
 	def getMultiple(self, pks):
 		'''
@@ -1169,7 +1174,7 @@ class IndexedRedisQuery(IndexedRedisHelper):
 				i += 1
 				continue
 			res[i]['_id'] = pks[i]
-			obj = self._dictToObj(res[i])
+			obj = self._redisResultToObj(res[i])
 			ret.append(obj)
 			i += 1
 			
@@ -1205,7 +1210,7 @@ class IndexedRedisQuery(IndexedRedisHelper):
 			return None
 			
 		objDict['_id'] = pk
-		return self._dictToObj(objDict)
+		return self._redisResultToObj(objDict)
 
 	def getMultipleOnlyFields(self, pks, fields):
 		'''
@@ -1255,7 +1260,7 @@ class IndexedRedisQuery(IndexedRedisHelper):
 				continue
 
 			objDict['_id'] = pks[i]
-			obj = self._dictToObj(objDict)
+			obj = self._redisResultToObj(objDict)
 			ret.append(obj)
 			i += 1
 			
@@ -1388,10 +1393,10 @@ class IndexedRedisSave(IndexedRedisHelper):
 		key = self._get_key_for_id(obj._id)
 
 		if isInsert is True:
-			for fieldName in self.fieldNames:
-				fieldValue = newDict.get(fieldName, '')
+			for thisField in self.fields:
+				fieldValue = newDict.get(thisField, '')
 
-				pipeline.hset(key, fieldName, fieldValue)
+				pipeline.hset(key, thisField, fieldValue)
 
 			self._add_id_to_keys(obj._id, pipeline)
 
@@ -1399,14 +1404,14 @@ class IndexedRedisSave(IndexedRedisHelper):
 				self._add_id_to_index(indexedField, obj._id, newDict[indexedField], pipeline)
 		else:
 			updatedFields = obj.getUpdatedFields()
-			for fieldName, fieldValue in updatedFields.items():
+			for thisField, fieldValue in updatedFields.items():
 				(oldValue, newValue) = fieldValue
 
-				pipeline.hset(key, fieldName, newValue)
+				pipeline.hset(key, thisField, newValue)
 
-				if fieldName in self.indexedFields:
-					self._rem_id_from_index(fieldName, obj._id, oldValue, pipeline)
-					self._add_id_to_index(fieldName, obj._id, newValue, pipeline)
+				if thisField in self.indexedFields:
+					self._rem_id_from_index(thisField, obj._id, oldValue, pipeline)
+					self._add_id_to_index(thisField, obj._id, newValue, pipeline)
 
 			obj._origData = copy.copy(newDict)
 
@@ -1424,10 +1429,10 @@ class IndexedRedisSave(IndexedRedisHelper):
 
 		objDicts = [obj.asDict(True, forStorage=True) for obj in objs]
 
-		for fieldName in self.indexedFields:
+		for indexedFieldName in self.indexedFields:
 			for objDict in objDicts:
-				self._rem_id_from_index(fieldName, objDict['_id'], objDict[fieldName], pipeline)
-				self._add_id_to_index(fieldName, objDict['_id'], objDict[fieldName], pipeline)
+				self._rem_id_from_index(indexedFieldName, objDict['_id'], objDict[indexedFieldName], pipeline)
+				self._add_id_to_index(indexedFieldName, objDict['_id'], objDict[indexedFieldName], pipeline)
 
 		pipeline.execute()
 
@@ -1462,8 +1467,8 @@ class IndexedRedisDelete(IndexedRedisHelper):
 		
 		pipeline.delete(self._get_key_for_id(obj._id))
 		self._rem_id_from_keys(obj._id, pipeline)
-		for fieldName in self.indexedFields:
-			self._rem_id_from_index(fieldName, obj._id, obj._origData[fieldName], pipeline)
+		for indexedFieldName in self.indexedFields:
+			self._rem_id_from_index(indexedFieldName, obj._id, obj._origData[indexedFieldName], pipeline)
 		obj._id = None
 
 		if executeAfter is True:
