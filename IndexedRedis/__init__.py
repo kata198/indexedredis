@@ -311,13 +311,16 @@ class IndexedRedisModel(object):
 			val = getattr(self, fieldName, '')
 			if issubclass(fieldName.__class__, IRField) and hasattr(fieldName, 'toStorage'):
 				if forStorage is True:
-					ret[fieldName] = fieldName.toStorage(val)
-				else:
-					ret[fieldName] = val
+					val = fieldName.toStorage(val)
 			elif fieldName in self.BASE64_FIELDS or fieldName in self.BINARY_FIELDS:
-				ret[fieldName] = tobytes(val)
+				val = tobytes(val)
 			else:
-				ret[fieldName] = tostr(val)
+				val = tostr(val)
+			if forStorage is True and fieldName in self.BASE64_FIELDS:
+				val = b64encode(val)
+
+			ret[fieldName] = val
+				
 
 		if includeMeta is True:
 			ret['_id'] = getattr(self, '_id', '')
@@ -1387,8 +1390,6 @@ class IndexedRedisSave(IndexedRedisHelper):
 		if isInsert is True:
 			for fieldName in self.fieldNames:
 				fieldValue = newDict.get(fieldName, '')
-				if fieldName in self.base64Fields:
-					fieldValue = b64encode(tobytes(fieldValue))
 
 				pipeline.hset(key, fieldName, fieldValue)
 
@@ -1400,9 +1401,6 @@ class IndexedRedisSave(IndexedRedisHelper):
 			updatedFields = obj.getUpdatedFields()
 			for fieldName, fieldValue in updatedFields.items():
 				(oldValue, newValue) = fieldValue
-
-				if fieldName in self.base64Fields:
-					newValue = b64encode(tobytes(newValue))
 
 				pipeline.hset(key, fieldName, newValue)
 
