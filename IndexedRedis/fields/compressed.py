@@ -33,9 +33,11 @@ class IRCompressedField(IRField):
 			FIELDS  = [ ..., IRCompressedField('my_compressed_field', compressMode=COMPRESS_MODE_ZLIB]
 	'''
 
+	CAN_INDEX = False
+
 	# TODO: maybe support other compression levels. The headers change with different levels.
 	#  These are for 9.
-	def __init__(self, name, compressMode=COMPRESS_MODE_ZLIB):
+	def __init__(self, name='', compressMode=COMPRESS_MODE_ZLIB):
 		'''
 			__init__ - Create this object
 		'''
@@ -47,7 +49,7 @@ class IRCompressedField(IRField):
 			self.compressMode = compressMode
 			self.header = b'BZh9'
 		else:
-			raise ValueError('Invalid compressMode, "%s", for field "%s". Should be one of the IndexedRedis.fields.compressed.COMPRESS_MODE_* constants.' %(str(compressMode), val))
+			raise ValueError('Invalid compressMode, "%s", for field "%s". Should be one of the IndexedRedis.fields.compressed.COMPRESS_MODE_* constants.' %(str(compressMode), name))
 
 	def getCompressMod(self):
 		if self.compressMode == COMPRESS_MODE_ZLIB:
@@ -70,11 +72,7 @@ class IRCompressedField(IRField):
 
 		return value
 
-	@classmethod
-	def canIndex(cls):
-		return False
-
-	def __new__(self, name, compressMode=COMPRESS_MODE_ZLIB):
+	def __new__(self, name='', compressMode=COMPRESS_MODE_ZLIB):
 		return IRField.__new__(self, name)
 
 

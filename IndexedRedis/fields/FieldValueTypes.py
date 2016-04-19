@@ -50,6 +50,8 @@ class IRJsonValue(dict):
         IRJsonValue - A value which is interpreted as json.
     '''
 
+    CAN_INDEX = False
+
     def __init__(self, *args, **kwargs):
         pass
 

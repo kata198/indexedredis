@@ -13,7 +13,7 @@ class IRRawField(IRField):
 		IRRawField - Return the raw data from Redis, without any extra encoding, decoding, or translation
 	'''
 
-	def __init__(self, name):
+	def __init__(self, name=''):
 		self.valueType = None
 
 	def convert(self, value=b''):
@@ -22,7 +22,7 @@ class IRRawField(IRField):
 	def toStorage(self, value=b''):
 		return value
 
-	def __new__(self, name):
+	def __new__(self, name=''):
 		return IRField.__new__(self, name)
 
 

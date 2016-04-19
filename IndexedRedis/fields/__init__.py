@@ -6,7 +6,7 @@
 
 # vim:set ts=8 shiftwidth=8 softtabstop=8 noexpandtab :
 
-__all__ = ('IRField', 'IRNullType', 'irNull', 'IRPickleField', 'IRCompressedField', 'IRUnicodeField')
+__all__ = ('IRField', 'IRNullType', 'irNull', 'IRPickleField', 'IRCompressedField', 'IRUnicodeField', 'IRRawField')
 
 from ..compat_str import to_unicode
 
@@ -38,10 +38,12 @@ class IRField(str):
 		 Which wll support up to 2 numerals and 5 decimal places.
 	'''
 
-	def __init__(self, name, valueType=None):
-		if not name:
-			raise ValueError('IRField defined without a name!')
+	# CAN_INDEX - Set this to True if this type can be indexed. Otherwise, set it to False to disallow indexing on this field.
+        #    The object itself is checked, so if a field is generally indexable except under certain conditions, the class can have
+        #      True while the specific object that should be disallowed can be False.
+	CAN_INDEX = True
 
+	def __init__(self, name='', valueType=None):
 		if valueType in (str, bytes, unicode):
 			valueType = None
 		if valueType != None:
@@ -52,6 +54,9 @@ class IRField(str):
 		else:
 			self.convert = self._noConvert
 		self.valueType = valueType
+
+		if getattr(valueType, 'CAN_INDEX', True) is False:
+			self.CAN_INDEX = False
 
 	def toStorage(self, value):
 		'''
@@ -99,11 +104,7 @@ class IRField(str):
 		# I'm not sure what to do here... Should we raise an exception because the data is invalid? Should just return True?
 		raise ValueError('Unexpected value for bool type: %s' %(value,))
 
-	@classmethod
-	def canIndex(cls):
-		return True
-
-	def __new__(self, name, valueType=None):
+	def __new__(self, name='', valueType=None):
 		if not name:
 			raise ValueError('IRField defined without a name!')
 

@@ -621,13 +621,21 @@ class IndexedRedisModel(object):
 		for thisField in fieldSet:
 			if thisField == '_id':
 				raise InvalidModelException('%s You cannot have a field named _id, it is reserved for the primary key.' %(failedValidationStr,))
+
+			# XXX: Is this ascii requirement still needed since all is unicode now?
 			try:
 				codecs.ascii_encode(thisField)
 			except UnicodeDecodeError as e:
 				raise InvalidModelException('%s All field names must be ascii-encodable. "%s" was not. Error was: %s' %(failedValidationStr, to_unicode(thisField), str(e)))
 
-			if thisField in indexedFieldSet and issubclass(thisField.__class__, IRField) and thisField.canIndex() is False:
+			if thisField in indexedFieldSet and issubclass(thisField.__class__, IRField) and thisField.CAN_INDEX is False:
 				raise InvalidModelException('%s Field Type %s - (%s) cannot be indexed.' %(failedValidationStr, str(thisField.__class__.__name__), to_unicode(thisField)))
+
+			if hasattr(IndexedRedisModel, thisField) is True:
+				raise InvalidModelException('%s Field name %s is a reserved attribute on IndexedRedisModel.' %(failedValidationStr, str(thisField)))
+
+			if str(thisField) == '':
+				raise InvalidModelException('%s Field defined without a name, or name was an empty string. Type=%s' %(failedValidationStr, str(type(thisField))))
 
 
 		if bool(indexedFieldSet - fieldSet):
@@ -677,12 +685,17 @@ class IndexedRedisHelper(object):
 		'''
 		self.mdl = mdl
 		self.keyName = self.mdl.KEY_NAME
+
+		self.irFields = { thisField : thisField for thisField in self.mdl.FIELDS if issubclass(thisField.__class__, IRField) }
+
 		self.fields = self.mdl.FIELDS
-		self.indexedFields = self.mdl.INDEXED_FIELDS
+		# XXX: When we do indexes, we may need to call "toStorage" on the field if it is an IRField, so replace-in the IRField's if present
+		self.indexedFields = [self.irFields.get(fieldName, fieldName) for fieldName in self.mdl.INDEXED_FIELDS]
+#		self.indexedFields = self.mdl.INDEXED_FIELDS
+			
 		self.base64Fields = self.mdl.BASE64_FIELDS
 		self.binaryFields = self.mdl.BINARY_FIELDS
 
-		self.irFields = { thisField : thisField for thisField in self.mdl.FIELDS if issubclass(thisField.__class__, IRField) }
 
 		self._connection = None
 
