@@ -4,7 +4,7 @@ import datetime
 import sys
 import IndexedRedis
 from IndexedRedis import IndexedRedisModel, IRField
-from IndexedRedis.AdvancedFieldTypes import IRDatetimeFieldType
+from IndexedRedis.fields.AdvancedFieldValueTypes import IRDatetimeFieldType
 
 # vim: ts=4 sw=4 expandtab
 

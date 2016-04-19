@@ -5,7 +5,6 @@ import sys
 import IndexedRedis
 from IndexedRedis import IndexedRedisModel, IRField
 from IndexedRedis.fields import IRPickleField
-from IndexedRedis.AdvancedFieldTypes import IRDatetimeFieldType
 
 # vim: ts=4 sw=4 expandtab
 
