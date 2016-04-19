@@ -20,9 +20,7 @@ class IRPickleField(IRField):
 		IRPickleField - A field which pickles its data before storage and loads after retrieval
 	'''
 
-	def __init__(self, val, valueType=None):
-		if valueType is not None:
-			raise ValueError('IRPickleField with any valueType other than None is invalid.')
+	def __init__(self, name):
 		self.valueType = None
 
 	def toStorage(self, value):
@@ -40,5 +38,8 @@ class IRPickleField(IRField):
 			value = value.encode('ascii')
 			return pickle.loads(b64decode(value))
 		return origData
+
+	def __new__(self, name):
+		return IRField.__new__(self, name)
 
 # vim:set ts=8 shiftwidth=8 softtabstop=8 noexpandtab :

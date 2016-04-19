@@ -35,12 +35,10 @@ class IRCompressedField(IRField):
 
 	# TODO: maybe support other compression levels. The headers change with different levels.
 	#  These are for 9.
-	def __init__(self, name, valueType=None, compressMode=COMPRESS_MODE_ZLIB):
+	def __init__(self, name, compressMode=COMPRESS_MODE_ZLIB):
 		'''
 			__init__ - Create this object
 		'''
-		if valueType is not None:
-			raise ValueError('IRCompressedField with any valueType other than None is invalid.')
 		self.valueType = None
 		if compressMode == COMPRESS_MODE_ZLIB:
 			self.compressMode = compressMode
@@ -76,8 +74,8 @@ class IRCompressedField(IRField):
 	def canIndex(cls):
 		return False
 
-	def __new__(self, val, valueType=None, compressMode=COMPRESS_MODE_ZLIB):
-		return str.__new__(self, val)
+	def __new__(self, name, compressMode=COMPRESS_MODE_ZLIB):
+		return IRField.__new__(self, name)
 
 
 # vim:set ts=8 shiftwidth=8 softtabstop=8 noexpandtab :

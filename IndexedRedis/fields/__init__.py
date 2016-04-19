@@ -38,7 +38,7 @@ class IRField(str):
 		 Which wll support up to 2 numerals and 5 decimal places.
 	'''
 
-	def __init__(self, name='', valueType=None):
+	def __init__(self, name, valueType=None):
 		if not name:
 			raise ValueError('IRField defined without a name!')
 
@@ -103,7 +103,10 @@ class IRField(str):
 	def canIndex(cls):
 		return True
 
-	def __new__(self, name='', valueType=None):
+	def __new__(self, name, valueType=None):
+		if not name:
+			raise ValueError('IRField defined without a name!')
+
 		return str.__new__(self, name)
 
 

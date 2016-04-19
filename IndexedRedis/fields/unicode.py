@@ -29,7 +29,8 @@ class IRUnicodeField(IRField):
 		In practice, you may have fields with different encodings (different languages maybe, different platforms, etc), and through this you can support those cases.
 	'''
 
-	def __init__(self, name='', encoding=None):
+	def __init__(self, name, encoding=None):
+		self.valueType = None
 		self.encoding = encoding
 
 
@@ -67,7 +68,7 @@ class IRUnicodeField(IRField):
 		return value.encode(self.getEncoding())
 
 
-	def __new__(self, name='', encoding=None):
-		return str.__new__(self, name)
+	def __new__(self, name, encoding=None):
+		return IRField.__new__(self, name)
 
 # vim:set ts=8 shiftwidth=8 softtabstop=8 noexpandtab :

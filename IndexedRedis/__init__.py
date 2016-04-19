@@ -320,6 +320,8 @@ class IndexedRedisModel(object):
 			if forStorage is True and thisField in self.BASE64_FIELDS:
 				if hasattr(thisField, 'toBytes'):
 					val = thisField.toBytes(val)
+				else:
+					val = tobytes(val)
 				val = b64encode(val)
 
 			ret[thisField] = val

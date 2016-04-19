@@ -3,12 +3,14 @@
 # FieldValueTypes - Types that can be passed to "valueType" of an IRField for special implicit conversions
 #
 
-import sys
+import json
+
+from . import irNull
 
 from datetime import datetime
-from ..compat_str import to_unicode, getEncoding
+from ..compat_str import to_unicode
 
-__all__ = ('IRDatetimeValue',)
+__all__ = ('IRDatetimeValue', 'IRJsonValue')
 
 class IRDatetimeValue(datetime):
     '''
@@ -41,3 +43,45 @@ class IRDatetimeValue(datetime):
         '''
         return datetime.__repr__(self).replace('IRDatetimeValue', 'datetime')
 
+
+# TODO: This probably shouldn't be indexable... although maybe when I implement hashed indexes.
+class IRJsonValue(dict):
+    '''
+        IRJsonValue - A value which is interpreted as json.
+    '''
+
+    def __init__(self, *args, **kwargs):
+        pass
+
+
+    def __str__(self):
+        if bool(self) is False:
+            return irNull
+
+        return json.dumps(self)
+            
+
+    def __new__(self, *args, **kwargs):
+        if len(args) == 1:
+
+            if issubclass(args[0].__class__, dict):
+                myRet = dict.__new__(self)
+                myRet.update(args[0])
+                return myRet
+
+
+            if type(args[0]) == bytes:
+                theArg = to_unicode(args[0])
+            else:
+                theArg = args[0]
+
+            if len(theArg) == 0:
+                return irNull
+
+            jsonDict = json.loads(theArg)
+
+            myRet = dict.__new__(self)
+            myRet.update(jsonDict)
+            return myRet
+
+        return irNull
