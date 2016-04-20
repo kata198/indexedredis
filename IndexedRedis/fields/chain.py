@@ -80,7 +80,7 @@ class IRFieldChain(IRField):
 		return value
 		
 
-	def __new__(self, name, chainedFields):
+	def __new__(self, name, chainedFields=None):
 		if not name:
 			raise ValueError('IRChainedField defined without a name!')
 

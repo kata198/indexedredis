@@ -22,6 +22,11 @@ COMPRESS_MODE_ZLIB = 'zlib'
 # COMPRESS_MODE_BZ2 - Use to compress using bz2 (bz2)
 COMPRESS_MODE_BZ2 = 'bz2'
 
+try:
+	unicode
+except NameError:
+	unicode = str
+
 
 class IRCompressedField(IRField):
 	'''
@@ -67,7 +72,7 @@ class IRCompressedField(IRField):
 	def convert(self, value):
 		if not value:
 			return value
-		if tobytes(value[:len(self.header)]) == self.header:
+		if issubclass(value.__class__, (bytes, str, unicode)) and tobytes(value[:len(self.header)]) == self.header:
 			return self.getCompressMod().decompress(value)
 
 		return value

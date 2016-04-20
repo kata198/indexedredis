@@ -105,9 +105,6 @@ class IRField(str):
 		raise ValueError('Unexpected value for bool type: %s' %(value,))
 
 	def __new__(self, name='', valueType=None):
-		if not name:
-			raise ValueError('IRField defined without a name!')
-
 		return str.__new__(self, name)
 
 
@@ -151,5 +148,7 @@ from .compressed import IRCompressedField
 from .pickle import IRPickleField
 from .unicode import IRUnicodeField
 from .raw import IRRawField
+from .chain import IRFieldChain
+from .b64 import IRBase64Field
 
 # vim:set ts=8 shiftwidth=8 softtabstop=8 noexpandtab :
