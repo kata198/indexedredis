@@ -51,6 +51,26 @@
 	- Field Types can implement "toBytes" to allow them to be base64
 	encoded/decoded, in the event that normal decoding wouldn't work (like the
 	IRUnicodeField type)
+	- Implement IRJsonValue which can be passed to valueType of IRField to
+	automatically convert to json before storing, and convert to a python dict
+	upon retrieval.
+	- Implement IRBase64Field as a field type which will base64-encode before
+	sending and base64-decode after retrieving. This adds a slight processing
+	overhead, but will save space and network traffic.
+	- Implement IRFieldChain, which allows chaining multiple field types
+	together. They will be applied left-to-right when going to redis, and
+	right-to-left when coming from. For example, to compress and base64 encode
+	a json dict, use:
+
+	FIELDS = [ ... , 
+	 IRFieldChain('myJsonData', [IRField(valueType=IRJsonValue),
+	 IRCompressedField, IRBase64Field]),
+	 ]
+
+	- Implement IRFixedPointField, for safely using floats in filtering and as
+	indexes. You define a fixed precision (decimalPlaces) and values will
+	always be represented/rounded to that many decimal places. This allows
+	values to be defined in a standard away independent of platform.
 
 -3.1.1 - Apr 15 2016
 - Fix some 4.0 docs that slipped in to 3.0 series
