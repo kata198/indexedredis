@@ -27,6 +27,9 @@ class IRFieldChain(IRField):
 		self.chainedFields = []
 		hasToBytes = False
 		for field in chainedFields:
+			# If we got jsut a class, construct it.
+			if type(field) == type:
+				field = field()
 			if str(field) != '':
 				raise ValueError('IRFieldChain has chained fields with a name set. The name should only be provided to the IRFieldChain object itself.')
 			if not issubclass(field.__class__, IRField):
