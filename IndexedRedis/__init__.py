@@ -377,6 +377,7 @@ class IndexedRedisModel(object):
 		'''
 			objects - Start filtering
 		'''
+		cls.validateModel()
 		return IndexedRedisQuery(cls)
 
 	@classproperty
@@ -906,16 +907,10 @@ class IndexedRedisQuery(IndexedRedisHelper):
 			if key not in filterObj.indexedFields:
 				raise ValueError('Field "' + key + '" is not in INDEXED_FIELDS array. Filtering is only supported on indexed fields.')
 
-			# TODO: refactor
 			if key in filterObj.irFields:
 				irField = filterObj.irFields[key]
 				if hasattr(irField, 'toStorage'):
 					value = irField.toStorage(value)
-#			for thisField in filterObj.fields:
-#				if thisField == key:
-#					if issubclass(thisField.__class__, IRField) and hasattr(thisField, 'toStorage'):
-#						value = thisField.toStorage(value)
-#					break
 
 			if notFilter is False:
 				filterObj.filters.append( (key, value) )
