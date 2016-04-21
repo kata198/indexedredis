@@ -6,7 +6,7 @@
 
 # vim:set ts=8 shiftwidth=8 softtabstop=8 noexpandtab :
 
-__all__ = ('IRField', 'IRNullType', 'irNull', 'IRPickleField', 'IRCompressedField', 'IRUnicodeField', 'IRRawField')
+__all__ = ('IRField', 'IRNullType', 'irNull', 'IRPickleField', 'IRCompressedField', 'IRUnicodeField', 'IRRawField', 'IRBase64Field', 'IRFixedPointField' )
 
 from ..compat_str import to_unicode
 
@@ -14,8 +14,6 @@ try:
 	unicode
 except NameError:
 	unicode = str
-
-# TODO: Implement a "Fixed-Point" type
 
 class IRField(str):
 	'''
@@ -56,6 +54,11 @@ class IRField(str):
 		self.valueType = valueType
 
 		if getattr(valueType, 'CAN_INDEX', True) is False:
+			self.CAN_INDEX = False
+		elif valueType == float:
+			# Floats are not filterable/indexable across platforms, as they may have different rounding issues, or different number
+			#  of points of accuracy, etc.
+			# Use fields.IRFixedPointField if you need to index/filter on a floating point value.
 			self.CAN_INDEX = False
 
 	def toStorage(self, value):
@@ -150,5 +153,6 @@ from .unicode import IRUnicodeField
 from .raw import IRRawField
 from .chain import IRFieldChain
 from .b64 import IRBase64Field
+from .fixedpoint import IRFixedPointField
 
 # vim:set ts=8 shiftwidth=8 softtabstop=8 noexpandtab :
