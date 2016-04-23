@@ -16,17 +16,20 @@ import redis
 from base64 import b64encode, b64decode
 
 from . import fields
-from .fields import IRField, IRNullType, irNull
+from .fields import IRField, IRFieldChain, IRNullType, irNull
 from .compat_str import to_unicode, tobytes, defaultEncoding, setEncoding, getEncoding, setDefaultIREncoding, getDefaultIREncoding
 
 from .IRQueryableList import IRQueryableList
+
+from .deprecated import deprecated, toggleDeprecatedMessages, deprecatedMessage
 
 # * imports
 __all__ = ('INDEXED_REDIS_PREFIX', 'INDEXED_REDIS_VERSION', 'INDEXED_REDIS_VERSION_STR', 
 	'IndexedRedisDelete', 'IndexedRedisHelper', 'IndexedRedisModel', 'IndexedRedisQuery', 'IndexedRedisSave',
 	'isIndexedRedisModel', 'setIndexedRedisEncoding', 'getIndexedRedisEncoding', 'InvalidModelException',
-	'fields', 'IRField', 'irNull',
+	'fields', 'IRField', 'IRFieldChain', 'irNull',
 	'setDefaultIREncoding', 'getDefaultIREncoding',
+	'toggleDeprecatedMessages',
 	# These (*Encoding) are imported, but I don't think from * should import them as they are fairly common names.
 	#   They have been renamed to be more specific (*DefaultIREncoding) names, but will be left via:
 	#      from IndexedRedis import setEncoding, getEncoding, defaultEncoding
@@ -627,6 +630,9 @@ class IndexedRedisModel(object):
 		if not fieldSet:
 			raise InvalidModelException('%s No fields defined. Please populate the FIELDS array with a list of field names' %(failedValidationStr,))
 
+		if base64FieldSet:
+			deprecatedMessage('Using BASE64_FIELDS array is deprecated. Please transition to use IndexedRedis.fields.IRBase64Field directly or in an IndexedRedis.fields.IRFieldChain', 'BASE64_FIELDS')
+
 		for thisField in fieldSet:
 			if thisField == '_id':
 				raise InvalidModelException('%s You cannot have a field named _id, it is reserved for the primary key.' %(failedValidationStr,))
@@ -869,8 +875,10 @@ class IndexedRedisQuery(IndexedRedisHelper):
 				obj._origData[key] = value
 		return obj
 	
+	def _dictToObj(self, theDict):
+		deprecatedMessage('_dictToObj is deprecated and will be removed in a future version. Use _redisResultToObj instead.', '_dictToObj')
 	# COMPAT 
-	_dictToObj = _redisResultToObj
+	#_dictToObj = _redisResultToObj
 
 
 

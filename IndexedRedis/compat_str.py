@@ -5,6 +5,8 @@
 
 # vim: set ts=8 shiftwidth=8 softtabstop=8 noexpandtab :
 
+from .deprecated import deprecated
+
 import sys
 
 __all__ = ('defaultIREncoding', 'to_unicode', 'tobytes', 'setDefaultIREncoding', 'setEncoding', 'getDefaultIREncoding', 'getEncoding')
@@ -42,8 +44,20 @@ def setDefaultIREncoding(encoding):
 	global defaultEncoding
 	defaultEncoding = defaultIREncoding
 
-setIndexedRedisEncoding = setDefaultIREncoding
-setEncoding = setDefaultIREncoding
+@deprecated('setEncoding is deprecated. Please use setDefaultIREncoding instead.')
+def setEncoding(encoding):
+	'''
+		@see setDefaultIREncoding
+
+		@deprecated
+	'''
+	return setDefaultIREncoding(encoding)
+
+
+@deprecated('setIndexedRedisEncoding is deprecated. Please use setDefaultIREncoding instead.')
+def setIndexedRedisEncoding(encoding):
+	return setEncoding(encoding)
+
 
 def getDefaultIREncoding():
 	'''
@@ -55,8 +69,20 @@ def getDefaultIREncoding():
 	global defaultIREncoding
 	return defaultIREncoding
 
-getIndexedRedisEncoding = getDefaultIREncoding
-getEncoding = getDefaultIREncoding
+
+@deprecated('IndexedRedis.getIndexedRedisEncoding is deprecated. Please use getDefaultIREncoding instead.')
+def getIndexedRedisEncoding():
+	return getDefaultIREncoding
+
+@deprecated('IndexedRedis.getEncoding is deprecated. Please use getDefaultIREncoding instead.')
+def getEncoding():
+	'''
+		@see getDefaultIREncoding
+
+		@deprecated
+	'''
+	return getDefaultIREncoding()
+
 
 # String Assurance
 
