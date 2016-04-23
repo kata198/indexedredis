@@ -56,6 +56,7 @@ class IRCompressedField(IRField):
 		else:
 			raise ValueError('Invalid compressMode, "%s", for field "%s". Should be one of the IndexedRedis.fields.compressed.COMPRESS_MODE_* constants.' %(str(compressMode), name))
 
+
 	def getCompressMod(self):
 		if self.compressMode == COMPRESS_MODE_ZLIB:
 			return zlib

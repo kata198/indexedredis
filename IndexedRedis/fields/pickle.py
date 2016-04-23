@@ -13,15 +13,10 @@ try:
 except ImportError:
 	import pickle
 
-# XXX: This pickle class uses base64 encoding and decoding implicitly, so it could possibly get double-encoded.
-#  I originally did that so that it could be used for indexes, but noting that python2 and python3 have different
-#  results for pickling the same object (they can decode the same pickle, but when you pickle a new object such as
-#  when filtering, you get a different result) I may just drop it.
-from base64 import b64encode, b64decode
-
-#def returnIt(val):
-#	return val
-#b64encode = b64decode = returnIt
+# NOTE: This pickle class originally had implcit base64 encoding and decoding so it could be used for indexes,
+#  but even with same protocol python2 and python3, and possibly even different platforms and same version
+#  create different pickles for the same objects. Can be as simple as the system supports microseconds,
+#  or has additional methods, or whatever, but it's not reliable so don't allow it.
 
 class IRPickleField(IRField):
 	'''
@@ -39,36 +34,28 @@ class IRPickleField(IRField):
 			return value
 		if type(value) == str:
 			return value
-		return b64encode(pickle.dumps(value, protocol=2)).decode('ascii')
+		return pickle.dumps(value, protocol=2)
 
 	def convert(self, value):
 		if not value:
 			return value
 		origData = value
-#		print ( "%s: %s" %(str(type(value)), str(dir(value))) )
 		loadedPickle = self.__loadPickle(value)
 		if loadedPickle is not None:
 			return loadedPickle
-#		if hasattr(value, 'encode'):
-#			print ('c2')
-#			value = value.encode('ascii')
-#			return pickle.loads(b64decode(value))
 		return origData
 
 	if sys.version_info.major == 2:
 		@staticmethod
 		def __loadPickle(value):
 			if hasattr(value, 'encode'):
-				value = value.encode('ascii')
-				return pickle.loads(b64decode(value))
+				return pickle.loads(value)
 			return None
 	else:
 		@staticmethod
 		def __loadPickle(value):
-			if type(value) == str:
-				value = value.decode('ascii')
 			if type(value) == bytes:
-				return pickle.loads(b64decode(value), encoding='bytes')
+				return pickle.loads(value, encoding='bytes')
 			return None
 
 	def __new__(self, name=''):

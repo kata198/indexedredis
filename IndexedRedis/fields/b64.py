@@ -13,7 +13,7 @@ from base64 import b64decode, b64encode
 
 class IRBase64Field(IRField):
 	'''
-		IRBase64Field - Encode/Decode data automatically into base64 for storage and from for retrieval. This saves space over storing in binary without a high performance overhead.
+		IRBase64Field - Encode/Decode data automatically into base64 for storage and from for retrieval. 
 	'''
 
 	def __init__(self, name=''):
