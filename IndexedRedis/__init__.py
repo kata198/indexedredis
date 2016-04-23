@@ -15,8 +15,9 @@ import redis
 
 from base64 import b64encode, b64decode
 
-from .fields import IRField, IRNullType, irNull, IRPickleField, IRCompressedField
-from .compat_str import to_unicode, tobytes, defaultEncoding, setEncoding, getEncoding
+from . import fields
+from .fields import IRField, IRNullType, irNull
+from .compat_str import to_unicode, tobytes, defaultEncoding, setEncoding, getEncoding, setDefaultIREncoding, getDefaultIREncoding
 
 from .IRQueryableList import IRQueryableList
 
@@ -24,7 +25,14 @@ from .IRQueryableList import IRQueryableList
 __all__ = ('INDEXED_REDIS_PREFIX', 'INDEXED_REDIS_VERSION', 'INDEXED_REDIS_VERSION_STR', 
 	'IndexedRedisDelete', 'IndexedRedisHelper', 'IndexedRedisModel', 'IndexedRedisQuery', 'IndexedRedisSave',
 	'isIndexedRedisModel', 'setIndexedRedisEncoding', 'getIndexedRedisEncoding', 'InvalidModelException',
-	'IRField', 'IRPickleField', 'IRCompressedField', 'IRNullType', 'irNull'
+	'fields', 'IRField', 'irNull',
+	'setDefaultIREncoding', 'getDefaultIREncoding',
+	# These (*Encoding) are imported, but I don't think from * should import them as they are fairly common names.
+	#   They have been renamed to be more specific (*DefaultIREncoding) names, but will be left via:
+	#      from IndexedRedis import setEncoding, getEncoding, defaultEncoding
+	#   as compat for now
+	#
+	# setEncoding, getEncoding, defaultEncoding 
 	 )
 
 # Prefix that all IndexedRedis keys will contain, as to not conflict with other stuff.
@@ -245,7 +253,7 @@ class IndexedRedisModel(object):
 
             IndexedRedis will use by default your system default encoding (sys.getdefaultencoding), unless it is ascii (python2) in which case it will default to utf-8.
 
-            You may change this via IndexedRedis.setEncoding
+            You may change this via IndexedRedis.setDefaultIREncoding
 
 	'''
 	
