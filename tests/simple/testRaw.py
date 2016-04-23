@@ -15,9 +15,6 @@ class MyRawModel(IndexedRedisModel):
         IRRawField('data'),
     ]
 
-#    BINARY_FIELDS = [ 'data']
-    BASE64_FIELDS = ['data']
-
     INDEXED_FIELDS = [ \
         'name',
 #        'data',

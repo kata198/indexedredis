@@ -13,6 +13,8 @@ class IRRawField(IRField):
 		IRRawField - Return the raw data from Redis, without any extra encoding, decoding, or translation
 	'''
 
+	CAN_INDEX = False
+
 	def __init__(self, name=''):
 		self.valueType = None
 
