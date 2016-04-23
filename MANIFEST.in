@@ -11,4 +11,5 @@ include requirements.txt
 recursive-include IndexedRedis *.py
 recursive-include tests *.py
 recursive-include tests/simple *.py
+recursive-include tests/UnitTests *.py
 include tests/simple/README
