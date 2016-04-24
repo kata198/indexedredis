@@ -829,7 +829,7 @@ class IndexedRedisHelper(object):
 		'''
 		if conn is None:
 			conn = self._get_connection()
-		return to_unicode(conn.incr(self._get_next_id_key()))
+		return int(conn.incr(self._get_next_id_key()))
 
 	def _getTempKey(self):
 		'''
@@ -854,6 +854,9 @@ class IndexedRedisQuery(IndexedRedisHelper):
 		for key, value in theDict.items():
 			if to_unicode(key) in self.mdl.BASE64_FIELDS:
 				theDict[key] = b64decode(value)
+
+		if '_id' in theDict:
+			theDict['_id'] = int(theDict['_id'])
 				
 		if not binaryFields:
 			obj = self.mdl(**decodeDict(theDict))

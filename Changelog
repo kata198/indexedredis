@@ -71,6 +71,7 @@
 	indexes. You define a fixed precision (decimalPlaces) and values will
 	always be represented/rounded to that many decimal places. This allows
 	values to be defined in a standard away independent of platform.
+	- Ensure "_id" field is always an integer, not mix of either bytes or str
 
 -3.1.1 - Apr 15 2016
 - Fix some 4.0 docs that slipped in to 3.0 series

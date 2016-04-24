@@ -19,7 +19,7 @@ class TestModelValidation(object):
 
     @staticmethod
     def __assertExceptions(name, testMethod, gotException, gotWrongException, contains):
-        assert bool(gotWrongException) is False, '[%s] Got exception for "%s", but was not expected (InvalidModelException). Got: " %s "' %(testMethod, str(gotWrongException))
+        assert bool(gotWrongException) is False, '[%s] Got exception for "%s", but was not expected (InvalidModelException). Got: " %s "' %(testMethod, name, str(gotWrongException))
         assert bool(gotException) is True, '[%s] Did not get InvalidModelException for "%s", but should have.' %(testMethod, name)
         if contains:
             if type(contains) not in (list, tuple):
@@ -119,6 +119,6 @@ class TestModelValidation(object):
 
             
 if __name__ == '__main__':
-    pipe  = subprocess.Popen('GoodTests.py "%s"' %(sys.argv[0],), shell=True).wait()
+    sys.exit(subprocess.Popen('GoodTests.py "%s"' %(sys.argv[0],), shell=True).wait())
 
 # vim: set ts=4 sw=4 expandtab
