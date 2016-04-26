@@ -72,6 +72,13 @@
 	always be represented/rounded to that many decimal places. This allows
 	values to be defined in a standard away independent of platform.
 	- Ensure "_id" field is always an integer, not mix of either bytes or str
+	- Add destroyModel function to deleter, so you can do
+	MyModel.deleter.destroyModel() to destroy all keys related to the model.
+	Very similar to MyModel.reset([]) but more efficient and direct.
+	- Change MyModel.objects.delete() ( so a delete with no filters, i.e.
+	delete all objects) to call destroyModel. This ensures if you have an
+	invalid model or an incompatible change, you can delete the objects
+	without fetching anything.
 
 -3.1.1 - Apr 15 2016
 - Fix some 4.0 docs that slipped in to 3.0 series
