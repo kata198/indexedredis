@@ -64,7 +64,7 @@ class IRFieldChain(IRField):
 
 			@return - The converted value, or "irNull" if no value was defined (and field type is not default/string)
 		'''
-		if value in ('', irNull):
+		if self._isNullValue(value):
 			return irNull
 
 		# XXX: Maybe just set this as a property

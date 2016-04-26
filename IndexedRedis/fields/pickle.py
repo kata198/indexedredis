@@ -30,7 +30,7 @@ class IRPickleField(IRField):
 		self.valueType = None
 
 	def toStorage(self, value):
-		if value in ('', irNull):
+		if self._isNullValue(value):
 			return value
 		if type(value) == str:
 			return value

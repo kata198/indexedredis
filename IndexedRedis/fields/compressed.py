@@ -64,7 +64,7 @@ class IRCompressedField(IRField):
 			return bz2
 
 	def toStorage(self, value):
-		if value in ('', irNull):
+		if self._isNullValue(value):
 			return value
 		if tobytes(value[:len(self.header)]) == self.header:
 			return value

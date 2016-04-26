@@ -8,7 +8,7 @@
 
 __all__ = ('IRField', 'IRNullType', 'irNull', 'IRPickleField', 'IRCompressedField', 'IRUnicodeField', 'IRRawField', 'IRBase64Field', 'IRFixedPointField' )
 
-from ..compat_str import to_unicode
+from ..compat_str import to_unicode, tobytes
 
 try:
 	unicode
@@ -20,13 +20,12 @@ class IRField(str):
 		IRField - An advanced field
 
 		@param name <str> - The field name
-		@param valueType <None/type> - The type to use for the value of this field. Default is str (None/bytes/str/unicode will all be "str")
+		@param valueType <None/type> - The type to use for the value of this field. Default is str (str/unicode will both be unicode). If on python3 and bytes are passed, will be decoded to bytes using default encoding.
+		  Using None, the raw data will be used (bytes) on retrieval and for storage.
 		  Can be a basic type (like int). Use BINARY_FIELDS array on the model to have value be "bytes"
 
-		If a type is defined other than default/str , an empty value (empty string in Redis) will be assigned to the IRNullType instance provided in this module, irNull.
+		If a type is defined other than default/str/bytes/None , an empty value (empty string in Redis) will be assigned to the IRNullType instance provided in this module, irNull.
 		irNull does not equal anything except irNull (or another IRNullType). Use this to check if a value has been assigned for other types.
-
-		Keep in mind that all storage happens as Strings, so your value should be able to flow to/from "str" without changing.
 
 		BE VERY CAREFUL ABOUT USING "float" as a type! It is an inprecise field and can vary from system to system. Instead of using a float,
 		consider using a fixed-point float string, like:
@@ -41,16 +40,23 @@ class IRField(str):
         #      True while the specific object that should be disallowed can be False.
 	CAN_INDEX = True
 
-	def __init__(self, name='', valueType=None):
-		if valueType in (str, bytes, unicode):
-			valueType = None
-		if valueType != None:
+	def __init__(self, name='', valueType=str):
+		if valueType in (str, unicode):
+			valueType = str
+			self.convert = self._convertStr
+		elif bytes != str and valueType == bytes:
+			valueType = bytes
+			self.convert = self._convertBytes
+			self.CAN_INDEX = False
+		elif valueType is None:
+			self.convert = self._noConvert
+			self.toStorage = self._noConvert
+			self.CAN_INDEX = False
+		else:
 			if not isinstance(valueType, type):
 				raise ValueError('valueType %s is not a type. Use int, str, etc' %(repr(valueType,)))
 			if valueType == bool:
 				self.convert = self._convertBool
-		else:
-			self.convert = self._noConvert
 		self.valueType = valueType
 
 		if getattr(valueType, 'CAN_INDEX', True) is False:
@@ -78,9 +84,17 @@ class IRField(str):
 
 			@return - The converted value, or "irNull" if no value was defined (and field type is not default/string)
 		'''
-		if value in ('', irNull):
+		if self._isNullValue(value):
 			return irNull
 		return self.valueType(value)
+
+	def _convertStr(self, value):
+		return to_unicode(value)
+
+	def _convertBytes(self, value):
+		return tobytes(value)
+	
+
 
 	# TODO: Test if including this function and then deleting it later will put it in pydoc.
 #	def toBytes(self, value):
@@ -96,7 +110,7 @@ class IRField(str):
 		return value
 
 	def _convertBool(self, value):
-		if value == '':
+		if self._isNullValue(value):
 			return irNull
 		xvalue = value.lower()
 		if xvalue in ('true', '1'):
@@ -106,6 +120,11 @@ class IRField(str):
 
 		# I'm not sure what to do here... Should we raise an exception because the data is invalid? Should just return True?
 		raise ValueError('Unexpected value for bool type: %s' %(value,))
+
+
+	@staticmethod
+	def _isNullValue(value):
+		return bool(value in (b'', '', irNull))
 
 	def __new__(self, name='', valueType=None):
 		return str.__new__(self, name)

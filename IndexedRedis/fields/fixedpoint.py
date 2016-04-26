@@ -33,13 +33,13 @@ class IRFixedPointField(IRField):
 		self.decimalPlaces = decimalPlaces
 
 	def convert(self, value):
-		if value in ('', irNull):
+		if self._isNullValue(value):
 			return irNull
 
 		return float(value)
 
 	def toStorage(self, value):
-		if value in ('', irNull):
+		if self._isNullValue(value):
 			return irNull
 
 		if type(value) != float:
