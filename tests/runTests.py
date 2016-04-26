@@ -27,14 +27,27 @@ MY_TEST_DIRECTORY = 'UnitTests'
 
 def findGoodTests():
     pathSplit  = os.environ['PATH'].split(':')
-    if '.' not in os.environ['PATH'].split(':'):
+    if '.' not in pathSplit:
         pathSplit = ['.'] + pathSplit
         os.environ['PATH'] = ':'.join(pathSplit)
-    with open('/dev/null', 'w') as devnull:
-        pipe =  subprocess.Popen("which GoodTests.py", shell=True, stdout=subprocess.PIPE, stderr=devnull, env=os.environ)
-        result = pipe.stdout.read().split()
-    ret = pipe.wait()
-    success = bool(ret == 0)
+
+    result = ''
+    success = False
+    for path in pathSplit:
+        if path.endswith('/'):
+            path = path[:-1]
+        guess = path + '/GoodTests.py'
+        print ( "Trying: %s\n" %(guess,))
+        if os.path.exists(guess):
+            success = True
+            result = guess
+            break
+
+#    with open(os.devnull, 'w') as devnull:
+#        pipe =  subprocess.Popen("which GoodTests.py", shell=True, stdout=subprocess.PIPE, stderr=devnull, env=os.environ)
+#        result = pipe.stdout.read().split()
+#    ret = pipe.wait()
+#    success = bool(ret == 0)
     return {
         'path'  :  result,
         "success" : success 
@@ -43,7 +56,7 @@ def findGoodTests():
 def download_goodTests():
     validAnswer = False
     while validAnswer == False:
-        sys.stdout.write('GoodTests notfound. Would you like to install it to local folder? (y/n): ')
+        sys.stdout.write('GoodTests not found. Would you like to install it to local folder? (y/n): ')
         sys.stdout.flush()
         answer = sys.stdin.readline().strip().lower()
         if answer not in ('y', 'n', 'yes', 'no'):
@@ -97,9 +110,13 @@ if __name__ == '__main__':
 
     thisDir = os.path.dirname(__file__)
     if not thisDir:
-        thisDir = os.getcwd()
+        thisDir = str(os.getcwd())
     elif not thisDir.startswith('/'):
-        thisDir = os.getcwd() + '/' + thisDir
+        thisDir = str(os.getcwd()) + '/' + thisDir
+
+    # If GoodTests is in current directory, make sure we find it later
+    if os.path.exists('./GoodTests.py'):
+        os.environ['PATH'] = str(os.getcwd()) + ':' + os.environ['PATH']
 
     os.chdir(thisDir)
 
@@ -126,12 +143,15 @@ if __name__ == '__main__':
 
     try:
         __import__(MY_PACKAGE_MODULE)
-    except ImportError:
-        sys.stderr.write('Could not import %s. Either install it or otherwise add to PYTHONPATH\n' %(MY_PACKAGE_MODULE,))
+    except ImportError as e:
+        if e.name != MY_PACKAGE_MODULE:
+            sys.stderr.write('Error while importing %s: %s\n  Likely this is another dependency that needs to be installed\nPerhaps run "pip install %s" or install the providing package.\n\n' %(e.name, str(e), e.name))
+            sys.exit(1)
+        sys.stderr.write('Could not import %s. Either install it or otherwise add to PYTHONPATH\n%s\n' %(MY_PACKAGE_MODULE, str(e)))
         sys.exit(1)
 
     sys.stdout.write('Starting test..\n')
     sys.stdout.flush()
     sys.stderr.flush()
-    pipe = subprocess.Popen(goodTestsInfo['path'] + [MY_TEST_DIRECTORY], shell=False)
+    pipe = subprocess.Popen([goodTestsInfo['path'], MY_TEST_DIRECTORY], env=os.environ, shell=False)
     pipe.wait()
