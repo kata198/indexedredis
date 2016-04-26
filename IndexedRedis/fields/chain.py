@@ -53,6 +53,9 @@ class IRFieldChain(IRField):
 			@param value - The value of the item to convert
 			@return A string value suitable for storing.
 		'''
+		if self._isNullValue(value):
+			return irNull
+
 		for chainedField in self.chainedFields:
 			value = chainedField.toStorage(value)
 

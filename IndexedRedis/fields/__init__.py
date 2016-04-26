@@ -124,6 +124,11 @@ class IRField(str):
 
 	@staticmethod
 	def _isNullValue(value):
+		'''
+			_isNullValue - Tests value if it should be represented by irNull.
+
+			convert and toStorage should test if value is null and return null (for most types)
+		'''
 		return bool(value in (b'', '', irNull))
 
 	def __new__(self, name='', valueType=None):

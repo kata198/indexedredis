@@ -5,7 +5,7 @@
 
 # vim: set ts=8 shiftwidth=8 softtabstop=8 noexpandtab :
 
-from . import IRField
+from . import IRField, irNull
 
 from ..compat_str import tobytes
 
