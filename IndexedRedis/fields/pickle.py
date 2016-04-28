@@ -18,6 +18,11 @@ except ImportError:
 #  create different pickles for the same objects. Can be as simple as the system supports microseconds,
 #  or has additional methods, or whatever, but it's not reliable so don't allow it.
 
+try:
+	unicode
+except NameError:
+	unicode = str
+
 class IRPickleField(IRField):
 	'''
 		IRPickleField - A field which pickles its data before storage and loads after retrieval
@@ -32,7 +37,7 @@ class IRPickleField(IRField):
 	def toStorage(self, value):
 		if self._isNullValue(value):
 			return value
-		if type(value) == str:
+		if type(value) in (str, unicode):
 			return value
 		return pickle.dumps(value, protocol=2)
 

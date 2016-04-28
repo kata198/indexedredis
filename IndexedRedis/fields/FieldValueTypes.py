@@ -12,6 +12,11 @@ from ..compat_str import to_unicode
 
 __all__ = ('IRDatetimeValue', 'IRJsonValue')
 
+try:
+	unicode
+except NameError:
+	unicode = str
+
 class IRDatetimeValue(datetime):
     '''
         IRDatetimeValue - A field type that is a datetime. Pass this as "valueType" to an IRField to use a datetime
@@ -24,7 +29,7 @@ class IRDatetimeValue(datetime):
             else:
                 theArg = args[0]
 
-            if type(theArg) == str and (theArg.isdigit() or len([1 for x in theArg.split('.') if x.isdigit()]) == 2):
+            if type(theArg) in (str, unicode) and (theArg.isdigit() or len([1 for x in theArg.split('.') if x.isdigit()]) == 2):
                 tmp = datetime.fromtimestamp(float(theArg))
             elif type(theArg) in (int, float):
                 tmp = datetime.fromtimestamp(float(theArg))

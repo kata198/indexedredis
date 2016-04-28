@@ -11,6 +11,11 @@ from ..compat_str import tobytes
 
 from base64 import b64decode, b64encode
 
+try:
+	unicode
+except NameError:
+	unicode = str
+
 class IRBase64Field(IRField):
 	'''
 		IRBase64Field - Encode/Decode data automatically into base64 for storage and from for retrieval. 
@@ -25,7 +30,7 @@ class IRBase64Field(IRField):
 			return value
 
 		# TODO: do this better maybe?
-		if not issubclass(value.__class__, (str, bytes)):
+		if not issubclass(value.__class__, (str, unicode, bytes)):
 			return value
 
 		try:

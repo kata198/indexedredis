@@ -135,7 +135,18 @@ class IRField(str):
 		return str.__new__(self, name)
 
 
-class IRNullType(str):
+# There is an odd "feature" of python 2.7 where the __eq__ method is not called when
+#  u'' == irNull
+#  however it is in all other forms (including: irNull == u'')
+#  
+#  when IRNullType extends str. But when it extends unicode, it works as expected.
+#
+if unicode == str:
+	IrNullBaseType = str
+else:
+	IrNullBaseType = unicode
+
+class IRNullType(IrNullBaseType):
 	'''
 		The type to represent NULL for anything except string which has no NULL.
 
@@ -149,7 +160,7 @@ class IRNullType(str):
 		'''
 			Don't let this be assigned a value.
 		'''
-		return str.__new__(self, '')
+		return IrNullBaseType.__new__(self, '')
 
 	def __eq__(self, otherVal):
 		return bool(isinstance(otherVal, IRNullType))
