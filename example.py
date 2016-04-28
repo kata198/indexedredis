@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 import sys
 import IndexedRedis
 from IndexedRedis import IndexedRedisModel, IRField

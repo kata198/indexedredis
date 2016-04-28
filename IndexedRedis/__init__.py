@@ -290,11 +290,6 @@ class IndexedRedisModel(object):
 
 		self._origData = {}
 
-		# Convert all field arrays to sets
-		self.FIELDS = set(self.FIELDS)
-		self.BASE64_FIELDS = set(self.BASE64_FIELDS)
-		self.BINARY_FIELDS = set(self.BINARY_FIELDS)
-
 		for thisField in self.FIELDS:
 			if issubclass(thisField.__class__, IRField):
 				val = thisField.convert(kwargs.get(str(thisField), ''))
@@ -621,6 +616,12 @@ class IndexedRedisModel(object):
 			return True
 
 		failedValidationStr = '"%s" Failed Model Validation:' %(str(model.__name__), ) 
+
+		# Convert items in model to set
+		#model.FIELDS = set(model.FIELDS)
+		#model.BASE64_FIELDS = set(model.BASE64_FIELDS)
+		#model.BINARY_FIELDS = set(model.BINARY_FIELDS)
+
 		
 		fieldSet = set(model.FIELDS)
 		indexedFieldSet = set(model.INDEXED_FIELDS)
