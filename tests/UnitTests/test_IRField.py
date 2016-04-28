@@ -75,6 +75,10 @@ class TestIRField(object):
 
             self.model = SimpleIRFieldModel_Json
 
+        # If KEEP_DATA is False (debug flag), then delete all objects before so prior test doesn't interfere
+        if self.KEEP_DATA is False and self.model:
+            self.model.objects.delete()
+
     def teardown_method(self, testMethod):
         '''
             teardown_method - Called after every method.

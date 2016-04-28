@@ -906,6 +906,7 @@ class IndexedRedisQuery(IndexedRedisHelper):
 	
 	def _dictToObj(self, theDict):
 		deprecatedMessage('_dictToObj is deprecated and will be removed in a future version. Use _redisResultToObj instead.', '_dictToObj')
+		return _redisResultToObj(theDict)
 	# COMPAT 
 	#_dictToObj = _redisResultToObj
 

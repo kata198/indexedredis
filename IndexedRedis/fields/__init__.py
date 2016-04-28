@@ -78,7 +78,7 @@ class IRField(str):
 			valueType = bytes
 			self.convert = self._convertBytes
 			self.CAN_INDEX = False
-		elif valueType == None:
+		elif valueType in (None, type(None)):
 			self.convert = self._noConvert
 			self.toStorage = self._noConvert
 			self.CAN_INDEX = False
