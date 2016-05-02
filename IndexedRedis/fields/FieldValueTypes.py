@@ -22,7 +22,10 @@ class IRDatetimeValue(datetime):
         IRDatetimeValue - A field type that is a datetime. Pass this as "valueType" to an IRField to use a datetime
     '''
 
+    CAN_INDEX = True
+
     def __new__(self, *args, **kwargs):
+        # No need to actually create this object, we just need to override instantiation to create a datetime from several forms.
         if len(args) == 1:
             if type(args[0]) == bytes:
                 theArg = to_unicode(args[0])
@@ -38,15 +41,15 @@ class IRDatetimeValue(datetime):
             else:
                 tmp = datetime.strptime(theArg, '%Y-%m-%d %H:%M:%S')
                 
-            return datetime.__new__(self, tmp.year, tmp.month, tmp.day, tmp.hour, tmp.minute, tmp.second)
+            return datetime(tmp.year, tmp.month, tmp.day, tmp.hour, tmp.minute, tmp.second)
         else:
-            return datetime.__new__(self, *args, **kwargs)
+            return datetime(*args, **kwargs)
 
-    def __repr__(self):
-        '''
-            __repr__ - Be invisible.
-        '''
-        return datetime.__repr__(self).replace('IRDatetimeValue', 'datetime')
+#    def __repr__(self):
+#        '''
+#            __repr__ - Be invisible.
+#        '''
+#        return datetime.__repr__(self).replace('IRDatetimeValue', 'datetime')
 
 
 # TODO: This probably shouldn't be indexable... although maybe when I implement hashed indexes.

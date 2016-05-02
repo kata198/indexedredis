@@ -21,6 +21,8 @@ class IRBase64Field(IRField):
 		IRBase64Field - Encode/Decode data automatically into base64 for storage and from for retrieval. 
 	'''
 
+	CAN_INDEX = False
+
 	def __init__(self, name=''):
 		# XXX: Maybe need to give this an "encoding" field incase it needs to decode a string? Or maybe a field type that does decoding itself?
 		self.valueType = None

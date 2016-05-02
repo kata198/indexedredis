@@ -29,6 +29,8 @@ class IRUnicodeField(IRField):
 		In practice, you may have fields with different encodings (different languages maybe, different platforms, etc), and through this you can support those cases.
 	'''
 
+	CAN_INDEX = True
+
 	def __init__(self, name='', encoding=None):
 		self.valueType = None
 		self.encoding = encoding

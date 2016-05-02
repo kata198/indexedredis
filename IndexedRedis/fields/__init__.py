@@ -8,6 +8,9 @@
 
 __all__ = ('IRField', 'IRNullType', 'irNull', 'IRPickleField', 'IRCompressedField', 'IRUnicodeField', 'IRRawField', 'IRBase64Field', 'IRFixedPointField' )
 
+import sys
+from datetime import datetime
+
 from ..compat_str import to_unicode, tobytes
 
 try:
@@ -28,17 +31,17 @@ class IRField(str):
 		irNull does not equal anything except irNull (or another IRNullType). Use this to check if a value has been assigned for other types.
 
 		BE VERY CAREFUL ABOUT USING "float" as a type! It is an inprecise field and can vary from system to system. Instead of using a float,
-		consider using a fixed-point float string, like:
+		consider using fields.IRFixedPointField, which is indexable.
 		
-		 myFixedPoint = "%2.5f" %(myFloatingPoint,)
-
-		 Which wll support up to 2 numerals and 5 decimal places.
 	'''
 
 	# CAN_INDEX - Set this to True if this type can be indexed. Otherwise, set it to False to disallow indexing on this field.
         #    The object itself is checked, so if a field is generally indexable except under certain conditions, the class can have
         #      True while the specific object that should be disallowed can be False.
-	CAN_INDEX = True
+        #
+        # If IRField base class is used, the following types are CAN_INDEX=True: str, unicode, int, bool.  Otherwise, if CAN_INDEX is defined
+        #   on the type, that value will be used.
+	CAN_INDEX = False
 
 	def __init__(self, name='', valueType=str):
 		if valueType in (str, unicode):
@@ -52,20 +55,37 @@ class IRField(str):
 			self.convert = self._noConvert
 			self.toStorage = self._noConvert
 			self.CAN_INDEX = False
+		# I don't like these next two conditions, but it will train folks to use the correct types (whereas they may just try to shove dict in, and give up that it doesn't work)
+		elif valueType == dict:
+			from .FieldValueTypes import IRJsonValue
+			valueType = IRJsonValue
+			sys.stderr.write('WARNING: Implicitly converting IRField(%s, valueType=dict) to IRField(%s, valueType=IndexedRedis.fields.FieldValueTypes.IRJsonValue)\n' %(repr(name), repr(name)))
+		elif valueType == datetime:
+			from .FieldValueTypes import IRDatetimeValue
+			valueType = datetime
+			sys.stderr.write('WARNING: Implicitly converting IRField(%s, valueType=datetime.datetime) to IRField(%s, valueType=IndexedRedis.fields.FieldValueTypes.IRDatetimeValue)\n' %(repr(name), repr(name)))
 		else:
 			if not isinstance(valueType, type):
 				raise ValueError('valueType %s is not a type. Use int, str, etc' %(repr(valueType,)))
 			if valueType == bool:
 				self.convert = self._convertBool
+			elif isinstance(valueType, (set, frozenset, list, tuple)):
+				raise ValueError('list types are not supported types.')
 		self.valueType = valueType
 
-		if getattr(valueType, 'CAN_INDEX', True) is False:
-			self.CAN_INDEX = False
-		elif valueType == float:
-			# Floats are not filterable/indexable across platforms, as they may have different rounding issues, or different number
-			#  of points of accuracy, etc.
-			# Use fields.IRFixedPointField if you need to index/filter on a floating point value.
-			self.CAN_INDEX = False
+		if valueType in (str, unicode, int, bool):
+			self.CAN_INDEX = True
+		elif hasattr(valueType, 'CAN_INDEX'):
+			self.CAN_INDEX = valueType.CAN_INDEX
+		# XXX: Commented because default CAN_INDEX is False.
+#		elif valueType == float:
+#			# Floats are not filterable/indexable across platforms, as they may have different rounding issues, or different number
+#			#  of points of accuracy, etc.
+#			# Use fields.IRFixedPointField if you need to index/filter on a floating point value.
+#			self.CAN_INDEX = False
+#		elif issubclass(valueType.__class__, object):
+#			# Don't allow objects to index by default unless they define CAN_INDEX to be True
+#			self.CAN_INDEX = False
 
 	def toStorage(self, value):
 		'''
