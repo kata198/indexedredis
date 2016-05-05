@@ -64,11 +64,11 @@ class IRField(str):
 			sys.stderr.write('WARNING: Implicitly converting IRField(%s, valueType=datetime.datetime) to IRField(%s, valueType=IndexedRedis.fields.FieldValueTypes.IRDatetimeValue)\n' %(repr(name), repr(name)))
 		else:
 			if not isinstance(valueType, type):
-				raise ValueError('valueType %s is not a type. Use int, str, etc' %(repr(valueType,)))
+				raise TypeError('valueType %s is not a type. Use int, str, etc' %(repr(valueType,)))
 			if valueType == bool:
 				self.convert = self._convertBool
 			elif isinstance(valueType, (set, frozenset, list, tuple)):
-				raise ValueError('list types are not supported types.')
+				raise TypeError('list types are not supported types. Use IRPickleField to store pickles of list-types (which allow storing objects, etc), or use IRField(.. valueType=IRJsonValue) to store basic data (strings, integers) in lists.')
 		self.valueType = valueType
 
 		if valueType in (str, unicode, int, bool):
