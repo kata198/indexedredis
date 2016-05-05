@@ -6,7 +6,7 @@
 
 # vim:set ts=8 shiftwidth=8 softtabstop=8 noexpandtab :
 
-__all__ = ('IRField', 'IRNullType', 'irNull', 'IRPickleField', 'IRCompressedField', 'IRUnicodeField', 'IRRawField', 'IRBase64Field', 'IRFixedPointField' )
+__all__ = ('IRField', 'IRNullType', 'irNull', 'IRPickleField', 'IRCompressedField', 'IRUnicodeField', 'IRRawField', 'IRBase64Field', 'IRFixedPointField', 'IRDatetimeValue', 'IRJsonValue' )
 
 import sys
 from datetime import datetime
@@ -57,11 +57,9 @@ class IRField(str):
 			self.CAN_INDEX = False
 		# I don't like these next two conditions, but it will train folks to use the correct types (whereas they may just try to shove dict in, and give up that it doesn't work)
 		elif valueType == dict:
-			from .FieldValueTypes import IRJsonValue
 			valueType = IRJsonValue
 			sys.stderr.write('WARNING: Implicitly converting IRField(%s, valueType=dict) to IRField(%s, valueType=IndexedRedis.fields.FieldValueTypes.IRJsonValue)\n' %(repr(name), repr(name)))
 		elif valueType == datetime:
-			from .FieldValueTypes import IRDatetimeValue
 			valueType = IRDatetimeValue
 			sys.stderr.write('WARNING: Implicitly converting IRField(%s, valueType=datetime.datetime) to IRField(%s, valueType=IndexedRedis.fields.FieldValueTypes.IRDatetimeValue)\n' %(repr(name), repr(name)))
 		else:
@@ -209,5 +207,7 @@ from .raw import IRRawField
 from .chain import IRFieldChain
 from .b64 import IRBase64Field
 from .fixedpoint import IRFixedPointField
+
+from .FieldValueTypes import IRDatetimeValue, IRJsonValue
 
 # vim:set ts=8 shiftwidth=8 softtabstop=8 noexpandtab :
