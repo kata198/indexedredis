@@ -5,7 +5,7 @@
 
 import json
 
-from . import irNull
+from . import irNull, IRNullType
 
 from datetime import datetime
 from ..compat_str import to_unicode
@@ -13,9 +13,9 @@ from ..compat_str import to_unicode
 __all__ = ('IRDatetimeValue', 'IRJsonValue')
 
 try:
-	unicode
+    unicode
 except NameError:
-	unicode = str
+    unicode = str
 
 class IRDatetimeValue(datetime):
     '''
@@ -51,13 +51,57 @@ class IRDatetimeValue(datetime):
 #        '''
 #        return datetime.__repr__(self).replace('IRDatetimeValue', 'datetime')
 
+def __ir_json__str__(self):
+#    if bool(self) is False:
+#        return irNull
 
-# TODO: This probably shouldn't be indexable... although maybe when I implement hashed indexes.
-class IRJsonValue(dict):
+    return json.dumps(self)
+        
+
+class _IRJsonDict(dict):
+    __str__ = __ir_json__str__
+    def __new__(self, *args, **kwargs):
+        return dict.__new__(self, *args, **kwargs)
+_IRJsonObject = _IRJsonDict
+
+class _IRJsonString(str):
+    __str__ = __ir_json__str__
+    def __new__(self, *args, **kwargs):
+        return str.__new__(self, *args, **kwargs)
+
+# Cannot subclass bool..... how stupid.
+#class _IRJsonBool(bool):
+#    __str__ = __ir_json__str__
+#    def __new__(self, *args, **kwargs):
+#        return bool.__new__(self, *args, **kwargs)
+    
+
+class _IRJsonArray(list):
+    __str__ = __ir_json__str__
+    def __new__(self, *args, **kwargs):
+        return list.__new__(self, *args, **kwargs)
+
+class _IRJsonNumber(float):
+    __str__ = __ir_json__str__
+    def __new__(self, *args, **kwargs):
+        return float.__new__(self, *args, **kwargs)
+
+# Cannot subclass NoneType, so use IRNullType to represent null.
+class _IRJsonNull(IRNullType):
+    def __str__(self):
+        return 'null'
+    
+
+class IRJsonValue(type):
     '''
-        IRJsonValue - A value which is interpreted as json.
+        IRJsonValue - A value which is interpreted as json. 
+            Supports object (dicts), strings, array, number. 
+
+        "null" is supported using IRNullType, because cannot subclass "NoneType".
+        "bool" is supported using a number 0.0 or 1.0 - because cannot subclass "bool"
     '''
 
+    # TODO: This probably shouldn't be indexable... although maybe when I implement hashed indexes.
     CAN_INDEX = False
 
     def __init__(self, *args, **kwargs):
@@ -74,12 +118,29 @@ class IRJsonValue(dict):
     def __new__(self, *args, **kwargs):
         if len(args) == 1:
 
+
             if issubclass(args[0].__class__, dict):
-                myRet = dict.__new__(self)
+                myRet = _IRJsonDict()
                 myRet.update(args[0])
                 return myRet
 
-
+            elif issubclass(args[0].__class__, (list, tuple)):
+                myRet = _IRJsonArray(args[0])
+                return myRet
+            elif issubclass(args[0].__class__, (int, float)):
+                myRet = _IRJsonNumber(args[0])
+                return myRet
+            elif isinstance(args[0], bool):
+                if args[0] is False:
+                    val = 0
+                else:
+                    val = 1
+                myRet = _IRJsonNumber(val)
+                return myRet
+            elif args[0] is None or issubclass(args[0].__class__, IRNullType):
+                myRet = _IRJsonNull()
+                return myRet
+                
             if type(args[0]) == bytes:
                 theArg = to_unicode(args[0])
             else:
@@ -88,10 +149,32 @@ class IRJsonValue(dict):
             if len(theArg) == 0:
                 return irNull
 
-            jsonDict = json.loads(theArg)
+            try:
+                jsonObj = json.loads(theArg)
+            except Exception as e:
+                raise ValueError('Cannot decode json [%s]: %s%s' %(str(e), str(type(theArg)), repr(theArg)))
 
-            myRet = dict.__new__(self)
-            myRet.update(jsonDict)
-            return myRet
+            if isinstance(jsonObj, dict):
+                myRet = _IRJsonDict()
+                myRet.update(jsonObj)
+                return myRet
+            elif issubclass(jsonObj.__class__, (list, tuple, set)):
+                myRet = _IRJsonArray(jsonObj)
+                return myRet
+            elif isinstance(jsonObj, (int, float)):
+                myRet = _IRJsonNumber(jsonObj)
+                return myRet
+            elif isinstance(jsonObj, bool):
+                if jsonObj is False:
+                    val = 0
+                else:
+                    val = 1
+                myRet = _IRJsonNumber(val)
+                return myRet
+            elif jsonObj is None:
+                return _IRJsonNull()
+            else:
+                myRet = _IRJsonString(jsonObj)
+                return myRet
 
         return irNull

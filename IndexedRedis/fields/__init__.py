@@ -181,10 +181,10 @@ class IRNullType(IrNullBaseType):
 		return IrNullBaseType.__new__(self, '')
 
 	def __eq__(self, otherVal):
-		return bool(isinstance(otherVal, IRNullType))
+		return bool(issubclass(otherVal.__class__, IRNullType))
 	
 	def __ne__(self, otherVal):
-		return not bool(isinstance(otherVal, IRNullType))
+		return not bool(issubclass(otherVal.__class__, IRNullType))
 
 	def __str__(self):
 		return ''
