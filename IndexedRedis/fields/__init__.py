@@ -62,7 +62,7 @@ class IRField(str):
 			sys.stderr.write('WARNING: Implicitly converting IRField(%s, valueType=dict) to IRField(%s, valueType=IndexedRedis.fields.FieldValueTypes.IRJsonValue)\n' %(repr(name), repr(name)))
 		elif valueType == datetime:
 			from .FieldValueTypes import IRDatetimeValue
-			valueType = datetime
+			valueType = IRDatetimeValue
 			sys.stderr.write('WARNING: Implicitly converting IRField(%s, valueType=datetime.datetime) to IRField(%s, valueType=IndexedRedis.fields.FieldValueTypes.IRDatetimeValue)\n' %(repr(name), repr(name)))
 		else:
 			if not isinstance(valueType, type):
