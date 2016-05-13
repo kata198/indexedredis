@@ -89,8 +89,6 @@ class TestIRField(object):
         if self.model and self.KEEP_DATA is False:
             self.model.objects.delete()
 
-        self.model.objects.delete()
-
     def test_simpleIRFieldSaveAndFetch(self):
         '''
             test_simpleIRFieldSaveAndFetch - Test that basic IRField's (default type or str type) have same behaviour as a string of field name (pre-IRField)
