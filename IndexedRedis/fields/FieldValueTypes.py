@@ -39,10 +39,19 @@ class IRDatetimeValue(datetime):
             elif issubclass(theArg.__class__, datetime):
                 tmp = theArg
             else:
+                # If microsecond is present, drop it. Not available on all platforms.
+                if '.' in theArg:
+                    theArg = theArg[:theArg.index('.')]
                 tmp = datetime.strptime(theArg, '%Y-%m-%d %H:%M:%S')
                 
             return datetime(tmp.year, tmp.month, tmp.day, tmp.hour, tmp.minute, tmp.second)
         else:
+            # If microsecond is present, drop it. Not available on all platforms.
+            if 'microsecond' in kwargs:
+                kwargs.pop('microsecond')
+            elif len(args) == 7:
+                args = args[:-1]
+
             return datetime(*args, **kwargs)
 
 #    def __repr__(self):
