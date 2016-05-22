@@ -109,6 +109,9 @@ This is the model you should extend.
 
 **Deprecated Fields:**
 
+The following class-level items have been deprecated in 4.0 and may be removed in a future version of IndexedRedis. 
+
+
 *BINARY_FIELDS* - A list of strings containing the names of fields which will be stored directly as unencoded bytes. This is generally faster and more space-efficient than using BASE64\_FIELDS, and should be used for purely binary data.
 
 	Example: ['picture', 'mp3_data']
@@ -181,6 +184,8 @@ e.x.
 
 An entry in "FIELDS" that is just a string name ( pre 4.0 style ) will be treated same as IRField('myname', valueType=str), and behaves exactly the same, so models are backwards-compatible.
 
+These objects (all importable from IndexedRedis.fields) can all be put in the FIELDS array.
+
 
 *IRField* - Standard field, takes a name and a "valueType", which is a native python type, or any type you create which implements \_\_new\_\_, taking a signle argument and returning the object. See IndexedRedis/fields/FieldValueTypes for example of how datetime and json are implemented.
 
@@ -201,6 +206,27 @@ When no valueType is defined, str/unicode is the type (same as pre-4.0), and def
 *IRUnicodeField* - Field that takes a parameter, "encoding", to define an encoding to use for this field. Use this to support fields with arbitrary encodings, as IRField will use the default encoding for strings.
 
 *IRRawField* - Field that is not converted in any, to or from Redis. On fetch this will always be "bytes" type (or str in python2). On python3 this is very similar to IRField(...valueType=None), but python2 needs this to store binary data without running into encoding issues.
+
+
+**Chaining Multiple Types**
+
+You can chain multiple types together using IRFieldChain. Instead of specifying the name on the IRField (or subclass), you specify the name on the IRFieldChain, and list all the types as the second argument (chainedFields). For storage, all operations will be applied left-to-right, and upon fetch the object will be decoded right-to-left.
+
+Example:
+
+	FIELDS = [ \\
+
+	...
+
+		IRChainField( 'longData', [ IRUnicodeField(encoding='utf-16'), IRCompressedField() ] )
+
+	]
+
+In the above example, you provide "longData" as a string. 
+
+For storage, that string is assumed to be utf-16, and will be compressed (left-to-right)
+
+For fetching, that string is first decompressed, and then encoded using utf-16.
 
 
 Model Validation
