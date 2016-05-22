@@ -58,19 +58,21 @@ class IRField(str):
 			self.toStorage = self._noConvert
 			self.CAN_INDEX = False
 		# I don't like these next two conditions, but it will train folks to use the correct types (whereas they may just try to shove dict in, and give up that it doesn't work)
-		elif valueType == dict:
+		elif valueType in (dict, list, tuple):
 			valueType = IRJsonValue
-			sys.stderr.write('WARNING: Implicitly converting IRField(%s, valueType=dict) to IRField(%s, valueType=IndexedRedis.fields.FieldValueTypes.IRJsonValue)\n' %(repr(name), repr(name)))
+			#sys.stderr.write('WARNING: Implicitly converting IRField(%s, valueType=%s) to IRField(%s, valueType=IndexedRedis.fields.FieldValueTypes.IRJsonValue)\n' %(repr(name), valueType.__name__, repr(name)))
+			self.CAN_INDEX = False
 		elif valueType == datetime:
 			valueType = IRDatetimeValue
-			sys.stderr.write('WARNING: Implicitly converting IRField(%s, valueType=datetime.datetime) to IRField(%s, valueType=IndexedRedis.fields.FieldValueTypes.IRDatetimeValue)\n' %(repr(name), repr(name)))
+			#sys.stderr.write('WARNING: Implicitly converting IRField(%s, valueType=datetime.datetime) to IRField(%s, valueType=IndexedRedis.fields.FieldValueTypes.IRDatetimeValue)\n' %(repr(name), repr(name)))
+			self.CAN_INDEX = True
 		else:
 			if not isinstance(valueType, type):
 				raise TypeError('valueType %s is not a type. Use int, str, etc' %(repr(valueType,)))
 			if valueType == bool:
 				self.convert = self._convertBool
-			elif isinstance(valueType, (set, frozenset, list, tuple)):
-				raise TypeError('list types are not supported types. Use IRPickleField to store pickles of list-types (which allow storing objects, etc), or use IRField(.. valueType=IRJsonValue) to store basic data (strings, integers) in lists.')
+			elif isinstance(valueType, (set, frozenset, )):
+				raise TypeError('set types are not supported types. Use IRPickleField to store pickles of any type (which allow storing objects, etc), or use IRField(.. valueType=IRJsonValue) to store basic data (strings, integers) in lists.')
 		self.valueType = valueType
 
 		if valueType in (str, unicode, int, bool):
