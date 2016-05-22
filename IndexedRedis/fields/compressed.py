@@ -19,6 +19,10 @@ __all__ = ('COMPRESS_MODE_BZ2', 'COMPRESS_MODE_ZLIB', 'IRCompressedField')
 
 # COMPRESS_MODE_ZLIB - Use to compress using zlib (gzip)
 COMPRESS_MODE_ZLIB = 'zlib'
+
+# All aliases for gzip compression
+_COMPRESS_MODE_ALIASES_ZLIB = ('gzip', 'gz')
+
 # COMPRESS_MODE_BZ2 - Use to compress using bz2 (bz2)
 COMPRESS_MODE_BZ2 = 'bz2'
 
@@ -47,11 +51,11 @@ class IRCompressedField(IRField):
 			__init__ - Create this object
 		'''
 		self.valueType = None
-		if compressMode == COMPRESS_MODE_ZLIB:
-			self.compressMode = compressMode
+		if compressMode == COMPRESS_MODE_ZLIB or compressMode in _COMPRESS_MODE_ALIASES_ZLIB:
+			self.compressMode = COMPRESS_MODE_ZLIB
 			self.header = b'x\xda'
 		elif compressMode == COMPRESS_MODE_BZ2:
-			self.compressMode = compressMode
+			self.compressMode = COMPRESS_MODE_BZ2
 			self.header = b'BZh9'
 		else:
 			raise ValueError('Invalid compressMode, "%s", for field "%s". Should be one of the IndexedRedis.fields.compressed.COMPRESS_MODE_* constants.' %(str(compressMode), name))
