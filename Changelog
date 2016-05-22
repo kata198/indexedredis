@@ -1,4 +1,4 @@
-4.0.0 - ??? ?? ????
+4.0.0 - ??? ?? ???? INCOMPLETE CHANGELOG - TODO UPDATE
 	- Introduce "IRField" as a type, wherein you can define field properties
 	within the field itself. See examples.py track_number as example.
 	- Implement basic client-side type conversion after fetching. The IRField

@@ -12,6 +12,7 @@ My tests have shown that for using equivalent models between flask/mysql and Ind
 
 It is compatible with python 2.7 and python 3. It has been tested with python 2.7, 3.4, 3.5.
 
+**Incomplete -- Does not contain all updates in the 4.0 series -- TODO.**
 
 Automatic and Native Types
 --------------------------
