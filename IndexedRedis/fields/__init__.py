@@ -47,9 +47,11 @@ class IRField(str):
 		if valueType in (str, unicode):
 			valueType = str
 			self.convert = self._convertStr
+			self.toStorage = self._convertStr
 		elif bytes != str and valueType == bytes:
 			valueType = bytes
 			self.convert = self._convertBytes
+			self.toStorage = self._convertBytes
 			self.CAN_INDEX = False
 		elif valueType in (None, type(None)):
 			self.convert = self._noConvert
