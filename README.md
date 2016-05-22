@@ -5,11 +5,22 @@ A redis-backed very very fast ORM-style framework that supports indexes. It perf
 
 IndexedRedis supports both "equals" and "not-equals" operators for comparison. It also provides full atomic support for replacing entire datasets (based on model), which is useful for providing a fast frontend for SQL. In that use-case, a task that runs on an interval would fetch/calculate datasets from the SQL backend, and do an atomic replace on the datasets the front-end would query.
 
+
 Further client-side filtering (like greater-than, contains, etc) is available after the data has been fetched (see "Filter Results" below)
 
 My tests have shown that for using equivalent models between flask/mysql and IndexedRedis, a 600% - 1200% performance increase occurs, yet if you design your storage directly as IndexedRedis models, you are able to achieve much higher gains.
 
-It is compatible with python 2.7 and python 3. It has been tested with python 2.7 and 3.4.
+It is compatible with python 2.7 and python 3. It has been tested with python 2.7, 3.4, 3.5.
+
+
+Automatic and Native Types
+--------------------------
+
+Since 4.0, IndexedRedis supports defining fields which will automatically be converted to/from native python types (such as int, float, datetime), as well as anything that can be represented with json (dicts, lists). You just provide the type in its native format, and all the conversion happens behind the scenes. When fetched, the object returned also contains fields in their native types.
+
+IndexedRedis also supports features such as automatically pickling/unpickling fields, compression/decompression, and supports defining your own custom field types through a standard interface.
+
+See "Advanced Fields" section below for more information.
 
 
 API Reference
@@ -35,16 +46,19 @@ This is the model you should extend.
 **Example Model:**
 
 	class Song(IndexedRedisModel):
-	    
+
 		FIELDS = [ \
-				'artist',
-				'title',
-				'album',
-				'track_number',
-				'duration',
-				'description',
-				'copyright',
-				'mp3_data',
+			'artist',
+			'title',
+			'album',
+			IRField('track_number', valueType=int), # Convert automatically to/from int
+			'duration',
+			IRField('releaseDate', valueType=datetime.datetime),  # Convert automatically to/from datetime
+			'description',
+			'copyright',
+			IRField('mp3_data', valueType=None), # Do not perform any conversion on the data.
+			IRCompressedField('thumbnail', compressMode='gzip'),      # Compress this field in storage using "bz2" compression
+            IRField('tags', valueType=list),
 		]
 
 		INDEXED_FIELDS = [ \
@@ -53,28 +67,19 @@ This is the model you should extend.
 					'track_number',
 		]
 
-		BINARY_FIELDS = [ 'mp3_data', ]
-
 		KEY_NAME = 'Songs'
 
 
 **Model Fields:**
 
-*FIELDS* - REQUIRED. A list of strings which name the fields that can be used for storage. (see "Advanced Fields" section below)
+*FIELDS* - REQUIRED. A list of string or IRField objects (or their subclasses) which name the fields that can be used for storage. (see "Advanced Fields" section below)
 
-	 Example: ['Name', 'Description', 'Model', 'Price']
+	 Example: ['Name', 'Description', 'Model', IRFixedPointField('Price', 2), IRField('timestamp', valueType=datetime), IRField('remainingStock', valueType=int)]
 
 *INDEXED_FIELDS* - A list of strings containing the names of fields that will be indexed. Can only filter on indexed fields. Adds insert/delete time. Entries must also be present in FIELDS.
 
 	 Example: ['Name', 'Model']
 
-*BINARY_FIELDS* - A list of strings containing the names of fields which will be stored directly as unencoded bytes. This is generally faster and more space-efficient than using BASE64\_FIELDS, and should be used for purely binary data.
-
-	Example: ['picture', 'mp3_data']
-
-*BASE64_FIELDS* - A list of strings containing the names of fields which will be automatically converted to/from base64 for storage. This is one way to store binary data, e.x. audio or pictures.
-
-	Example: ['picture', 'mp3_data']
 
 *KEY_NAME* - REQUIRED. A unique name name that represents this model. Think of it like a table name.
 
@@ -83,6 +88,24 @@ This is the model you should extend.
 *REDIS_CONNECTION_PARAMS* - provides the arguments to pass into "redis.Redis", to construct a redis object.
 
 	 Example: {'host' : '192.168.1.1'}
+
+
+**Deprecated Fields:**
+
+*BINARY_FIELDS* - A list of strings containing the names of fields which will be stored directly as unencoded bytes. This is generally faster and more space-efficient than using BASE64\_FIELDS, and should be used for purely binary data.
+
+	Example: ['picture', 'mp3_data']
+
+!!Deprecated. Use IRRawField  or IRField(..., valueType=None) for binary data. 
+
+
+*BASE64_FIELDS* - A list of strings containing the names of fields which will be automatically converted to/from base64 for storage. This is one way to store binary data, e.x. audio or pictures.
+
+	Example: ['picture', 'mp3_data']
+
+!!Deprecated. Use IRBase64Field for automatic to/from base64 conversion. You can combine this with IRCompressedField which may decrease storage requirements.
+
+Example:   IRFieldChain( 'myBase64Data', [ IRBase64Field(), IRCompressedField() ] )
 
 
 Advanced Fields
@@ -103,13 +126,13 @@ The first argument is the string of the field name.
 
 **Type**
 
-You can have a value automatically cast to a certain type (which saves a step if you need to filter further through the QueryableList results, like age__gt=15)
+You can have a value automatically cast to a certain type (which saves a step if you need to filter further through the QueryableList results, like age\_\_gt=15)
 
 by passing that type as "valueType". (e.x.  IRField('age', valueType=int))
 
 If you use "bool", the values 0 and case insensitive string 'false' will result in False, and 1 or 'true' will result in True.
 
-Be careful using floats, different hosts will have different floating point representations for the same value. Don't expect
+When using floats, consider using IRFixedPointField, which supports indexing and the same representation regardless of platform (unlike "float"). 
 
 floats to work cross-platform. Use a fixed point number as the string type ( like myFixedPoint = '%2.5f' %( 10.12345 ) )
 
@@ -137,50 +160,30 @@ e.x.
 	notDangerFive = myResults.filter(dangerLevel__ne=irNull).filter(dangerLevel__ne=5)
 
 
-**Complex Types**
+**Advanced Types**
 
-Please note that not all types are suitable for being stored in an IndexedRedisModel. If you are trying to store a dict, for example, consider just making those items natural fields, or store a foreign key to another object (using \_id), and consider that your model may need to be refactored from relational to soething more flat.
-
-
-Redis can only store strings, integers, and floats, and everything IndexedRedis stores is a string. 
-
-Consider that these advanced conversions can happen within your model class, as many complex types can be represented by a simple type.
-
-You can technically store any field as a pickle string, and use a getter/setter to do the pickling and unpickling, though I would consider that poor design.
-
-Here is an example of having a datetime object as a member of a model, whilst natively storing a simple type:
+An entry in "FIELDS" that is just a string name ( pre 4.0 style ) will be treated same as IRField('myname', valueType=str), and behaves exactly the same, so models are backwards-compatible.
 
 
-	class MyModel(IndexedRedisModel):
+*IRField* - Standard field, takes a name and a "valueType", which is a native python type, or any type you create which implements \_\_new\_\_, taking a signle argument and returning the object. See IndexedRedis/fields/FieldValueTypes for example of how datetime and json are implemented.
 
-	FIELDS = [ 'name', IRField('_timestamp', valueType=int) ]
+When no valueType is defined, str/unicode is the type (same as pre-4.0), and default encoding is used (see set/getDefaultIREncoding functions)
 
-	def __init__(self, *args, **kwargs):
-		if 'timestamp' in kwargs:
-			if isinstance(kwargs['timestamp'], datetime):
-				kwargs['_timestamp'] = int(kwargs['timestamp'].strftime('%s'))
-			else:
-				kwargs['_timestamp'] = kwargs['timestamp']
 
-			del kwargs['timestamp']
+*IRBase64Field* - Converts to and from Base64
 
-		IndexedRedis.__init__(self, *args, **kwargs)
 
-	@property
-	def timestamp(self):
-		if not self._timestamp:
-			return None
-		return datetime.datetime.fromtimestamp(self._timestamp)
+*IRCompressedField* - Automatically compresses before storage and decompresses after retrieval. Argument "compressMode" currently supports "zlib" (default) or "bz2".
 
-So you can create it like:
 
-	x = MyModel(name='Something', timestamp=datetime.now())
-	x.save()
+*IRFixedPointField* - A floating-point with a fixed number of decimal places. This type supports indexing using floats, whereas IRField(...valueType=float) does not, as different platforms have different accuracies, roundings, etc. Takes a parameter, decimalPlaces (default 5), to define the precision after the decimal point.
 
-And access the native \_timestamp field as a complex datetime object just by doing:
 
-	x.timestamp
+*IRPickleField* - Automaticly pickles the given object before storage, and unpickles after fetch. Not indexable.
 
+*IRUnicodeField* - Field that takes a parameter, "encoding", to define an encoding to use for this field. Use this to support fields with arbitrary encodings, as IRField will use the default encoding for strings.
+
+*IRRawField* - Field that is not converted in any, to or from Redis. On fetch this will always be "bytes" type (or str in python2). On python3 this is very similar to IRField(...valueType=None), but python2 needs this to store binary data without running into encoding issues.
 
 
 Model Validation
@@ -332,54 +335,15 @@ You may want to use the same model on multiple Redis instances. To do so, use th
 Then, use AltConnectionMyModel just as you would use MyModel.
 
 
-Binary/Bytes Data Support
--------------------------
-
-IndexedRedis, as of version 2.9.0, has the ability to store and retrieve unencoded (binary) data, e.x. image files, executables, raw device data, etc.
-
-
-Add the field name to the BINARY\_FIELDS array, and IndexedRedis will retrieve and store directly as binary unencoded data. 
-
-So you may have a model like this:
-
-
-	class FileObj(IndexedRedis.IndexedRedisModel):
-
-		FIELDS = [ 'filename', 'data', 'description' ]
-
-		INDEXED_FIELDS = [ 'filename' ]
-
-		BINARY_FIELDS  = ['data']
-
-
-
-Base64 Encoding Data Support
-----------------------------
-
-Since version 2.7.0, IndexedRedis has support for base64 encoding data, by adding the field name to the "BASE64\_FIELDS" array. Use this if you want to keep your data purely text-friendly, but for most cases you should probably use BINARY\_FIELDS.
-
-Simply by adding a field to the "BASE64\_FIELDS" array, IndexedRedis will transparently handle base64-encoding before store, and decoding after retrieval. 
-
-So you may have a model like this:
-
-	class FileObj(IndexedRedis.IndexedRedisModel):
-
-		FIELDS = [ 'filename', 'data', 'description' ]
-
-		INDEXED_FIELDS = [ 'filename' ]
-
-		BASE64_FIELDS  = ['data']
-
-
-In the "data" field you can dump file contents, like an mp3 or a jpeg, and IndexedRedis will handle all the encoding for you. You will just provide "bytes" data to that field.
-
-
 Encodings
 ---------
 
 IndexedRedis will use by default your system default encoding (sys.getdefaultencoding), unless it is ascii (python2) in which case it will default to utf-8.
 
-You may change this via IndexedRedis.setEncoding
+You may change this via IndexedRedis.setDefaultIREncoding.
+
+Use IRRawField to not perform any encoding/decoding, or use IRUnicodeField to use a different explicit encoding at a per-field level.
+
 
 Changes
 -------

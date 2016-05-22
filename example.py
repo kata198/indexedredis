@@ -1,8 +1,10 @@
 #!/usr/bin/env python
 
+import datetime
 import sys
 import IndexedRedis
 from IndexedRedis import IndexedRedisModel, IRField
+from IndexedRedis.fields import IRCompressedField, IRFieldChain
 
 # vim: ts=4 sw=4 expandtab
 
@@ -10,14 +12,17 @@ from IndexedRedis import IndexedRedisModel, IRField
 class Song(IndexedRedisModel):
     
     FIELDS = [ \
-            IRField('artist'),
+            'artist',
             'title',
             'album',
-            IRField('track_number', valueType=int),
+            IRField('track_number', valueType=int), # Convert automatically to/from int
             'duration',
+            IRField('releaseDate', valueType=datetime.datetime),
             'description',
             'copyright',
-            'mp3_data',
+            IRField('mp3_data', valueType=None), # Do not perform any conversion on the data.
+            IRCompressedField('thumbnail', compressMode='gzip'),      # Compress this field in storage using "bz2" compression
+            IRField('tags', valueType=list),
     ]
 
     INDEXED_FIELDS = [ \
@@ -26,14 +31,17 @@ class Song(IndexedRedisModel):
                 'track_number',
     ]
 
-    BINARY_FIELDS = [ 'mp3_data', ]
+#    BINARY_FIELDS = [ 'mp3_data', ]
 #    BASE64_FIELDS = [ 'mp3_data', ]
 
     KEY_NAME = 'Songs'
 
 if __name__ == '__main__':
 
-    fakeData = b"\x99\x12\x14"
+    fakeMp3 = b"\x99\x12\x14"
+#    fakeThumbnail = b"\x12\x55\x12\x15\x12\x15\x99"
+    fakeThumbnail = b"\x15\x1A\x1A\x1A\x1A\x1A\x1A\x1B\x1A\x1A\x1A\x1B" + (b"\x1A" * 30) # Compressable data
+
     sys.stdout.write('Testing IndexedRedis version %s\n' %(IndexedRedis.__version__,))
 
     if '--keep-data' not in sys.argv:
@@ -46,7 +54,9 @@ if __name__ == '__main__':
                             track_number=1,
                             duration='1:58',
                             description='A song about happy people',
-                            mp3_data=fakeData,
+                            mp3_data=fakeMp3,
+                            thumbnail=fakeThumbnail,
+                            tags=['happy', 'guitar', 'smooth'],
                             copyright='Copyright 2012 (c) Media Mogul Incorporated')
             newSongs.append(songObj)
 
@@ -56,7 +66,9 @@ if __name__ == '__main__':
                             track_number=2,
                             duration='2:54',
                             description='A song about joy',
-                            mp3_data=fakeData,
+                            mp3_data=fakeMp3,
+                            thumbnail=fakeThumbnail,
+                            tags=['joyful', 'piano', 'Key C'],
                             copyright='Copyright 2012 (c) Media Mogul Incorporated')
 
             newSongs.append(songObj)
@@ -67,7 +79,8 @@ if __name__ == '__main__':
                             track_number=1,
                             duration='15:44',
                             description='A sad song',
-                            mp3_data=fakeData,
+                            mp3_data=fakeMp3,
+                            thumbnail=fakeThumbnail,
                             copyright='Copyright 2014 (c) Cheese Industries')
             newSongs.append(songObj)
 
@@ -81,7 +94,8 @@ if __name__ == '__main__':
                             track_number=1,
                             duration='1:15',
                             description='Super Nintendo',
-                            mp3_data=fakeData,
+                            mp3_data=fakeMp3,
+                            thumbnail=fakeThumbnail,
                             copyright='Copyright 2014 (c) Cheese Industries')
             songObj.save()
 
@@ -91,7 +105,8 @@ if __name__ == '__main__':
                             track_number=2,
                             duration='1:55',
                             description='Super Nintendo',
-                            mp3_data=fakeData,
+                            mp3_data=fakeMp3,
+                            thumbnail=fakeThumbnail,
                             copyright='Copyright 2014 (c) Cheese Industries')
             songObj.save()
 
