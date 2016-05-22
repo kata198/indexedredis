@@ -434,7 +434,7 @@ class TestIRField(object):
 
     def test_DatetimeMicrosecond(self):
         datetimeStr = '2015-05-12 12:00:00'
-        datetimeObj = datetime.datetime(year=2015, month=05, day=12, hour=12, minute=0, second=0)
+        datetimeObj = datetime.datetime(year=2015, month=5, day=12, hour=12, minute=0, second=0)
 
         val = IRDatetimeValue(datetimeStr)
         assert val == datetimeObj, 'Expected datetime object created from string to match equivalent'
