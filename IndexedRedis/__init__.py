@@ -50,6 +50,28 @@ INDEXED_REDIS_VERSION_STR = '4.0.0'
 # Package version
 __version__ = INDEXED_REDIS_VERSION_STR
 
+# Default max number of connections, as connections can get eaten up in some circumstances,
+#   and newer python-redis has default of 2^31 connections... which doesn't make any sense given only 65535 ports..
+REDIS_DEFAULT_POOL_MAX_SIZE = 8
+
+
+def _createRedisPoolFromParams(connectionParams):
+	'''
+		_createRedisPoolFromParams - Creates a Pool which will be shared by a class, to prevent rising connection counts
+	'''
+	if 'connection_pool' in connectionParams:
+		return connectionParams['connection_pool']
+		
+
+	params = { 'max_connections' : REDIS_DEFAULT_POOL_MAX_SIZE }
+	if 'max_connections' in connectionParams:
+		params['max_connections'] = connectionParams['max_connections']
+		del connectionParams['max_connections']
+
+	connectionPool = redis.ConnectionPool(**params)
+	connectionParams['connection_pool'] = connectionPool
+	return connectionPool
+
 
 # COMPAT STUFF
 try:
@@ -276,8 +298,11 @@ class IndexedRedisModel(object):
 	# KEY_NAME - A string of a unique name which corrosponds to objects of this type.
 	KEY_NAME = None
 
-	# REDIS_CONNECTION_PARAMS - A dictionary of parameters to redis.Redis such as host or port. Will be used on all connections.
+	# REDIS_CONNECTION_PARAMS - A dictionary of parameters to redis.Redis such as host or port. Will be used on all connections. If neither 'connection_pool' nor 'max_connections' are specified, REDIS_DEFAULT_POOL_MAX_SIZE will be used to not exhaust system
 	REDIS_CONNECTION_PARAMS = {}
+
+	# Pool used for this object
+	_REDIS_CONNECTION_POOL = None
 
 	# Internal property to check inheritance
 	_is_ir_model = True
@@ -665,6 +690,13 @@ class IndexedRedisModel(object):
 			raise InvalidModelException('%s All BINARY_FIELDS must also be present in FIELDS. %s exist only in BINARY_FIELDS' %(failedValidationStr, str(list(binaryFieldSet - fieldSet)), ) )
 		if bool(binaryFieldSet.intersection(indexedFieldSet)):
 			raise InvalidModelException('%s You cannot index on a binary field.' %(failedValidationStr,))
+
+
+		# Ensure we cap max_connections, unless the user provides a pool or max_connections
+		if model._REDIS_CONNECTION_POOL:
+			model.REDIS_CONNECTION_PARAMS['connection_pool'] = model._REDIS_CONNECTION_POOL
+		else:
+			model._REDIS_CONNECTION_POOL = _createRedisPoolFromParams(model.REDIS_CONNECTION_PARAMS)
 
 		validatedModels.add(keyName)
 		return True
