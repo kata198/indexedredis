@@ -2,5 +2,11 @@
 *.pyc
 *.pyo
 *.egg-info
-build
-dist
+*.bak
+*.patch
+*.diff
+build/
+dist/
+myenv*/
+__pycache__/
+tests/IndexedRedis

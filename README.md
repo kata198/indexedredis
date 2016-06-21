@@ -28,13 +28,11 @@ See "Advanced Fields" section below for more information.
 API Reference
 -------------
 
-Most, but not all methods are documented here.
+Most, but not all methods are convered in this document.
+For full pydoc reference, see:
 
-See:
+http://htmlpreview.github.io/?https://github.com/kata198/indexedredis/blob/4.0/doc/IndexedRedis.html#IndexedRedisQuery 
 
-http://htmlpreview.github.io/?https://github.com/kata198/indexedredis/blob/master/IndexedRedis.html#IndexedRedisQuery 
-
-for full documentation, as a pydoc document.
 
 **Below is a quick highlight/overview:**
 
