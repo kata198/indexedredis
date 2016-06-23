@@ -79,6 +79,10 @@
 	delete all objects) to call destroyModel. This ensures if you have an
 	invalid model or an incompatible change, you can delete the objects
 	without fetching anything.
+	- Use connection pooling to limit connections to a unqiue Redis server
+	   at 32 (default). I've found that in some cases of network disruption,
+	   python-Redis can leak connections FAST, and within seconds exhaust all
+	   private ports available on a system. 
 
 -3.1.1 - Apr 15 2016
 - Fix some 4.0 docs that slipped in to 3.0 series
