@@ -549,13 +549,17 @@ class IndexedRedisModel(object):
 
 		key = None
 		for key, value in myDict.items():
-			if key not in self.BINARY_FIELDS:
+			if key not in self.BINARY_FIELDS and (bytes == str or not isinstance(value, bytes)):
 				if value != None:
 					val = convertMethods[key](value)
 				if isinstance(val, IRNullType):
 					val = 'IRNullType()'
-				elif isinstance(val, (str, bytes, unicode)):
-					val = "'%s'" %(to_unicode(val),)
+				elif isinstance(val, (str, unicode)):
+					try:
+						val = "'%s'" %(to_unicode(val),)
+					except:
+						# Python 2....
+						val = repr(val)
 				else:
 					val = to_unicode(val)
 				ret += [key, '=', val, ', ']
