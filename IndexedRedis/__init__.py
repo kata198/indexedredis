@@ -18,8 +18,11 @@ from base64 import b64encode, b64decode
 from . import fields
 from .fields import IRField, IRFieldChain, IRNullType, irNull
 from .compat_str import to_unicode, tobytes, defaultEncoding, setEncoding, getEncoding, setDefaultIREncoding, getDefaultIREncoding
+from .utils import hashDictOneLevel
 
 from .IRQueryableList import IRQueryableList
+
+
 
 from .deprecated import deprecated, toggleDeprecatedMessages, deprecatedMessage
 
@@ -49,6 +52,65 @@ INDEXED_REDIS_VERSION_STR = '4.0.0'
 
 # Package version
 __version__ = INDEXED_REDIS_VERSION_STR
+
+# Default max number of connections to each unique server, as connections can get eaten up in some circumstances,
+#   and python-redis has default of 2^31 connections... which doesn't make any sense given only 65535 ports..
+#   In a network-outage scenario, python-redis can quickly leak connections and exhaust all private ports
+REDIS_DEFAULT_POOL_MAX_SIZE = 32
+
+
+RedisPools = {}
+
+def getRedisPool(params):
+	'''
+		getRedisPool - Returns and possibly also creates a Redis connection pool
+			based on the REDIS_CONNECTION_PARAMS passed in.
+
+			The goal of this method is to keep a small connection pool rolling
+			to each unique Redis instance, otherwise during network issues etc
+			python-redis will leak connections and in short-order can exhaust
+			all the ports on a system. There's probably also some minor
+			performance gain in sharing Pools.
+
+			Will modify "params", if "host" and/or "port" are missing, will fill
+			them in with defaults, and prior to return will set "connection_pool"
+			on params, which will allow immediate return on the next call,
+			and allow access to the pool directly from the model object.
+
+			@param params <dict> - REDIS_CONNECTION_PARAMS - kwargs to redis.Redis
+
+			@return redis.ConnectionPool corrosponding to this unique server.
+	'''
+	global RedisPools
+
+	if 'connection_pool' in params:
+		return params['connection_pool']
+
+	hashValue = hashDictOneLevel(params)
+
+	if hashValue in RedisPools:
+		params['connection_pool'] = RedisPools[hashValue]
+		return RedisPools[hashValue]
+	
+	checkAgain = False
+	if 'host' not in params:
+		params['host'] = '127.0.0.1'
+		checkAgain = True
+	if 'port' not in params:
+		params['port'] = 6379
+		checkAgain = True
+
+	if checkAgain:
+		hashValue = hashDictOneLevel(params)
+		if hashValue in RedisPools:
+			params['connection_pool'] = RedisPools[hashValue]
+			return RedisPools[hashValue]
+
+	connectionPool = redis.ConnectionPool(**params)
+	params['connection_pool'] = connectionPool
+	RedisPools[hashValue] = connectionPool
+
+	return connectionPool
 
 
 # COMPAT STUFF
@@ -276,7 +338,9 @@ class IndexedRedisModel(object):
 	# KEY_NAME - A string of a unique name which corrosponds to objects of this type.
 	KEY_NAME = None
 
-	# REDIS_CONNECTION_PARAMS - A dictionary of parameters to redis.Redis such as host or port. Will be used on all connections.
+	# REDIS_CONNECTION_PARAMS - A dictionary of parameters to redis.Redis such as host or port. Unless "connection_pool" is specified,
+	#   each unique server will be assigned a pool to prevent leaking private ports, and on first connection of this model
+	#   that pool will be accessable via REDIS_CONNECTION_PARAMS['connection_pool']
 	REDIS_CONNECTION_PARAMS = {}
 
 	# Internal property to check inheritance
@@ -422,7 +486,7 @@ class IndexedRedisModel(object):
 	
 	@classmethod
 	def reset(cls, newValues):
-		conn = redis.Redis(**cls.REDIS_CONNECTION_PARAMS)
+		conn = cls.objects._get_new_connection()
 
 		transaction = conn.pipeline()
 		transaction.eval("""
@@ -720,7 +784,8 @@ class IndexedRedisHelper(object):
 			_get_new_connection - Get a new connection
 			internal
 		'''
-		return redis.Redis(**self.mdl.REDIS_CONNECTION_PARAMS)
+		pool = getRedisPool(self.mdl.REDIS_CONNECTION_PARAMS)
+		return redis.Redis(connection_pool=pool)
 
 	def _get_connection(self):
 		'''
