@@ -642,7 +642,8 @@ class IndexedRedisModel(object):
 				self._origData[thisField] = newDataObj._origData[thisField]
 
 		return updatedFields
-                    
+
+
 
 	def __getstate__(self):
 		'''
@@ -672,6 +673,9 @@ class IndexedRedisModel(object):
 
 			@raises - InvalidModelException if there is a problem with the model, and the message contains relevant information.
 		'''
+		if model == IndexedRedisModel:
+			raise ValueError('Cannot use IndexedRedisModel directly. You must implement this class for your model.')
+
 		global validatedModels
 		keyName = model.KEY_NAME
 		if not keyName:
@@ -848,10 +852,32 @@ class IndexedRedisHelper(object):
 			@param indexedField - string of field name
 			@param val - Value of field
 
-			@return - Key name string
+			@return - Key name string, potentially hashed.
+		'''
+		return ''.join([INDEXED_REDIS_PREFIX, self.keyName, ':idx:', indexedField, ':', getattr(indexedField, 'toIndex', to_unicode)(val)])
+
+	def _compat_get_str_key_for_index(self, indexedField, val):
+		'''
+			_compat_get_str_key_for_index - Return the key name as a string, even if it is a hashed index field.
+			  This is used in converting unhashed fields to a hashed index (called by _compat_rem_str_id_from_index which is called by compat_convertHashedIndexes)
+
+			  @param inde
+			@param indexedField - string of field name
+			@param val - Value of field
+
+			@return - Key name string, always a string regardless of hash
 		'''
 		return ''.join([INDEXED_REDIS_PREFIX, self.keyName, ':idx:', indexedField, ':', getattr(indexedField, 'toStorage', to_unicode)(val)])
-		
+
+	def _compat_rem_str_id_from_index(self, indexedField, pk, val, conn=None):
+		'''
+			_compat_rem_str_id_from_index - Used in compat_convertHashedIndexes to remove the old string repr of a field,
+				in order to later add the hashed value,
+		'''
+		if conn is None:
+			conn = self._get_connection()
+		conn.srem(self._compat_get_str_key_for_index(indexedField, val), pk)
+
 
 	def _get_key_for_id(self, pk):
 		'''
@@ -995,8 +1021,8 @@ class IndexedRedisQuery(IndexedRedisHelper):
 
 			if key in filterObj.irFields:
 				irField = filterObj.irFields[key]
-				if hasattr(irField, 'toStorage'):
-					value = irField.toStorage(value)
+				if hasattr(irField, 'toIndex'):
+					value = irField.toIndex(value)
 
 			if notFilter is False:
 				filterObj.filters.append( (key, value) )
@@ -1396,6 +1422,12 @@ class IndexedRedisQuery(IndexedRedisHelper):
 		saver = IndexedRedisSave(self.mdl)
 		saver.reindex(objs)
 
+	def compat_convertHashedIndexes(self):
+		objs = self.all()
+		saver = IndexedRedisSave(self.mdl)
+		saver.compat_convertHashedIndexes(objs)
+				
+
 
 class IndexedRedisSave(IndexedRedisHelper):
 	'''
@@ -1537,6 +1569,51 @@ class IndexedRedisSave(IndexedRedisHelper):
 
 		pipeline.execute()
 
+	def compat_convertHashedIndexes(self, objs, conn=None):
+		'''
+			compat_convertHashedIndexes - Reindex all fields for the provided objects, where the field value is hashed or not.
+			If the field is unhashable, do not allow
+		'''
+		if conn is None:
+			conn = self._get_connection()
+
+
+
+		# Do one pipeline per object.
+		#  XXX: Maybe we should do the whole thing in one pipeline? 
+
+		fields = []        # A list of the indexed fields
+		hashingFields = {} # A dict of idxField : IRField obj that WILL hash
+
+		# Iterate now so we do this once instead of per-object.
+		for indexedField in self.indexedFields:
+			hashingField = None
+			if indexedField in self.irFields:
+				fields.append(self.irFields[indexedField])
+				if indexedField.hashIndex is True:
+					hashingField = self.irFields[indexedField]
+			else:
+				fields.append(IRField(indexedField))
+			if hashingField is None:
+				hashingField = IRField(str(indexedField), hashIndex=True)
+
+			hashingFields[indexedField] = hashingField
+
+		objDicts = [obj.asDict(True, forStorage=True) for obj in objs]
+
+		# Iterate over all values. Remove the possibly stringed index, the possibly hashed index, and then put forth the hashed index.
+
+		for objDict in objDicts:
+			pipeline = conn.pipeline()
+			pk = objDict['_id']
+			for indexedField in fields:
+				# Remove the possibly stringed index
+				val = objDict[indexedField]
+
+				self._compat_rem_str_id_from_index(indexedField, pk, val, pipeline)
+				self._rem_id_from_index(hashingFields[indexedField], pk, val, pipeline)
+				self._add_id_to_index(indexedField, pk, val, pipeline)
+			pipeline.execute()
 
 
 

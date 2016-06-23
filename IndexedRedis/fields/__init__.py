@@ -13,6 +13,8 @@ from datetime import datetime
 
 from ..compat_str import to_unicode, tobytes
 
+from hashlib import md5
+
 try:
 	unicode
 except NameError:
@@ -43,7 +45,35 @@ class IRField(str):
         #   on the type, that value will be used.
 	CAN_INDEX = False
 
-	def __init__(self, name='', valueType=str):
+
+	# Start as a class variable, so "toIndex" works even if IRField constructor is not called (which really shouldn't be called on extending classes)
+	hashIndex = False
+
+	def __init__(self, name='', valueType=str, hashIndex=False):
+		'''
+			__init__ - Create an IRField. Use this directly in the FIELDS array for advanced functionality on a field.
+
+			@param name <str> - The name of this field
+			@param valueType <type> - The type that will be used for this field. Default str/unicode (and bytes on python2)
+				act the same as non-IRField FIELDS entries (just plain string), i.e. they are encoded to unicode to and from Redis.
+
+				If you pass in None, then no decoding will take place (so whatever you provide goes in, and bytes come out of Redis).
+				On python3, if you pass bytes, than the field will be left as bytes.
+
+				If bool is used, then "1" and "true" are True, "0" and "false" are False, any other value is an exception.
+
+				You can also pass an advanced type (see IndexedRedis.fields.FieldValueTypes) like datetime and json.
+
+				All types other than string/unicode/bytes/None will be assigned 'irNull' if they were not provided a value.
+				@see irNull - Equals only irNull (or other IRNullType instances). You can use this to check if an integer is defined versus 0, for example.
+
+				While this class is create for primitive types (like int's and datetimes), more complex types extend IRField (such as pickle, compressed, or unicode with a specific encoding).
+
+			@param hashIndex - If true, the md5 hash of the value will be used for indexing and filtering. This may be useful for very long fields.
+
+
+			NOTE: If you are extending IRField, you should probably not call this __init__ function. So long as you implement your own "convert", any fields used are set on a class-level.
+		'''
 		if valueType in (str, unicode):
 			valueType = str
 			self.convert = self._convertStr
@@ -89,6 +119,8 @@ class IRField(str):
 #			# Don't allow objects to index by default unless they define CAN_INDEX to be True
 #			self.CAN_INDEX = False
 
+		self.hashIndex = hashIndex
+
 	def toStorage(self, value):
 		'''
 			toStorage - Convert the value to a string representation for storage.
@@ -109,6 +141,28 @@ class IRField(str):
 		if self._isNullValue(value):
 			return irNull
 		return self.valueType(value)
+
+	def toIndex(self, value):
+		'''
+			toIndex - An optional method which will return the value prepped for index.
+
+			By default, "toStorage" will be called. If you provide "hashIndex=True" on the constructor,
+			the field will be md5summed for indexing purposes. This is useful for large strings, etc.
+		'''
+		ret = self.toStorage(value)
+		if self.isIndexHashed is False:
+			return ret
+
+		return md5(tobytes(ret)).hexdigest()
+
+	@property
+	def isIndexHashed(self):
+		'''
+			isIndexHashed - Returns if the index value should be hashed
+
+			@return <bool> - True if this field should be hashed before indexing / filtering
+		'''
+		return bool(self.hashIndex)
 
 	def _convertStr(self, value):
 		return to_unicode(value)
@@ -153,7 +207,7 @@ class IRField(str):
 		'''
 		return bool(value in (b'', '', irNull))
 
-	def __new__(self, name='', valueType=None):
+	def __new__(self, name='', valueType=None, hashIndex=False):
 		return str.__new__(self, name)
 
 
