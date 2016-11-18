@@ -8,7 +8,7 @@
 <td valign=bottom>&nbsp;<br>
 <font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="IndexedRedis.html"><font color="#ffffff">IndexedRedis</font></a>.<a href="IndexedRedis.fields.html"><font color="#ffffff">fields</font></a>.compressed</strong></big></big></font></td
 ><td align=right valign=bottom
-><font color="#ffffff" face="helvetica, arial"><a href="IndexedRedis.html">index</a><br></font></td></tr></table>
+><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br></font></td></tr></table>
     <p><tt>#&nbsp;Copyright&nbsp;(c)&nbsp;2014,&nbsp;2015,&nbsp;2016&nbsp;Timothy&nbsp;Savannah&nbsp;under&nbsp;LGPL&nbsp;version&nbsp;2.1.&nbsp;See&nbsp;LICENSE&nbsp;for&nbsp;more&nbsp;information.<br>
 #<br>
 #&nbsp;fields.compressed&nbsp;-&nbsp;Some&nbsp;types&nbsp;and&nbsp;objects&nbsp;related&nbsp;to&nbsp;compressed&nbsp;fields.&nbsp;Use&nbsp;in&nbsp;place&nbsp;of&nbsp;<a href="IndexedRedis.fields.html#IRField">IRField</a>&nbsp;(&nbsp;in&nbsp;FIELDS&nbsp;array&nbsp;to&nbsp;activate&nbsp;functionality&nbsp;)<br>
@@ -61,19 +61,33 @@ like:&nbsp;<br>
 Methods defined here:<br>
 <dl><dt><a name="IRCompressedField-__init__"><strong>__init__</strong></a>(self, name='', compressMode='zlib')</dt><dd><tt>__init__&nbsp;-&nbsp;Create&nbsp;this&nbsp;object</tt></dd></dl>
 
-<dl><dt><a name="IRCompressedField-convert"><strong>convert</strong></a>(self, value)</dt></dl>
+<dl><dt><a name="IRCompressedField-convert"><strong>convert</strong></a>(self, value)</dt><dd><tt>convert&nbsp;-&nbsp;Convert&nbsp;the&nbsp;value&nbsp;from&nbsp;storage&nbsp;(string)&nbsp;to&nbsp;the&nbsp;value&nbsp;type.<br>
+&nbsp;<br>
+@return&nbsp;-&nbsp;The&nbsp;converted&nbsp;value,&nbsp;or&nbsp;"irNull"&nbsp;if&nbsp;no&nbsp;value&nbsp;was&nbsp;defined&nbsp;(and&nbsp;field&nbsp;type&nbsp;is&nbsp;not&nbsp;default/string)</tt></dd></dl>
 
 <dl><dt><a name="IRCompressedField-getCompressMod"><strong>getCompressMod</strong></a>(self)</dt></dl>
 
-<dl><dt><a name="IRCompressedField-toStorage"><strong>toStorage</strong></a>(self, value)</dt></dl>
+<dl><dt><a name="IRCompressedField-toStorage"><strong>toStorage</strong></a>(self, value)</dt><dd><tt>toStorage&nbsp;-&nbsp;Convert&nbsp;the&nbsp;value&nbsp;to&nbsp;a&nbsp;string&nbsp;representation&nbsp;for&nbsp;storage.<br>
+&nbsp;<br>
+&nbsp;&nbsp;The&nbsp;default&nbsp;implementation&nbsp;will&nbsp;work&nbsp;here&nbsp;for&nbsp;basic&nbsp;types.<br>
+&nbsp;<br>
+@param&nbsp;value&nbsp;-&nbsp;The&nbsp;value&nbsp;of&nbsp;the&nbsp;item&nbsp;to&nbsp;convert<br>
+@return&nbsp;A&nbsp;string&nbsp;value&nbsp;suitable&nbsp;for&nbsp;storing.</tt></dd></dl>
 
 <hr>
 Static methods defined here:<br>
-<dl><dt><a name="IRCompressedField-__new__"><strong>__new__</strong></a>(self, name='', compressMode='zlib')</dt></dl>
+<dl><dt><a name="IRCompressedField-__new__"><strong>__new__</strong></a>(self, name='', compressMode='zlib')</dt><dd><tt>Create&nbsp;and&nbsp;return&nbsp;a&nbsp;new&nbsp;object.&nbsp;&nbsp;See&nbsp;help(type)&nbsp;for&nbsp;accurate&nbsp;signature.</tt></dd></dl>
 
 <hr>
 Data and other attributes defined here:<br>
 <dl><dt><strong>CAN_INDEX</strong> = False</dl>
+
+<hr>
+Methods inherited from <a href="IndexedRedis.fields.html#IRField">IndexedRedis.fields.IRField</a>:<br>
+<dl><dt><a name="IRCompressedField-toIndex"><strong>toIndex</strong></a>(self, value)</dt><dd><tt>toIndex&nbsp;-&nbsp;An&nbsp;optional&nbsp;method&nbsp;which&nbsp;will&nbsp;return&nbsp;the&nbsp;value&nbsp;prepped&nbsp;for&nbsp;index.<br>
+&nbsp;<br>
+By&nbsp;default,&nbsp;"toStorage"&nbsp;will&nbsp;be&nbsp;called.&nbsp;If&nbsp;you&nbsp;provide&nbsp;"hashIndex=True"&nbsp;on&nbsp;the&nbsp;constructor,<br>
+the&nbsp;field&nbsp;will&nbsp;be&nbsp;md5summed&nbsp;for&nbsp;indexing&nbsp;purposes.&nbsp;This&nbsp;is&nbsp;useful&nbsp;for&nbsp;large&nbsp;strings,&nbsp;etc.</tt></dd></dl>
 
 <hr>
 Data descriptors inherited from <a href="IndexedRedis.fields.html#IRField">IndexedRedis.fields.IRField</a>:<br>
@@ -83,6 +97,15 @@ Data descriptors inherited from <a href="IndexedRedis.fields.html#IRField">Index
 <dl><dt><strong>__weakref__</strong></dt>
 <dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
 </dl>
+<dl><dt><strong>isIndexHashed</strong></dt>
+<dd><tt>isIndexHashed&nbsp;-&nbsp;Returns&nbsp;if&nbsp;the&nbsp;index&nbsp;value&nbsp;should&nbsp;be&nbsp;hashed<br>
+&nbsp;<br>
+@return&nbsp;&lt;bool&gt;&nbsp;-&nbsp;True&nbsp;if&nbsp;this&nbsp;field&nbsp;should&nbsp;be&nbsp;hashed&nbsp;before&nbsp;indexing&nbsp;/&nbsp;filtering</tt></dd>
+</dl>
+<hr>
+Data and other attributes inherited from <a href="IndexedRedis.fields.html#IRField">IndexedRedis.fields.IRField</a>:<br>
+<dl><dt><strong>hashIndex</strong> = False</dl>
+
 <hr>
 Methods inherited from <a href="builtins.html#str">builtins.str</a>:<br>
 <dl><dt><a name="IRCompressedField-__add__"><strong>__add__</strong></a>(self, value, /)</dt><dd><tt>Return&nbsp;self+value.</tt></dd></dl>

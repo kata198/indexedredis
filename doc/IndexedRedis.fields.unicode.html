@@ -8,7 +8,7 @@
 <td valign=bottom>&nbsp;<br>
 <font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="IndexedRedis.html"><font color="#ffffff">IndexedRedis</font></a>.<a href="IndexedRedis.fields.html"><font color="#ffffff">fields</font></a>.unicode</strong></big></big></font></td
 ><td align=right valign=bottom
-><font color="#ffffff" face="helvetica, arial"><a href="IndexedRedis.html">index</a><br></font></td></tr></table>
+><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br></font></td></tr></table>
     <p><tt>#&nbsp;Copyright&nbsp;(c)&nbsp;2014,&nbsp;2015,&nbsp;2016&nbsp;Timothy&nbsp;Savannah&nbsp;under&nbsp;LGPL&nbsp;version&nbsp;2.1.&nbsp;See&nbsp;LICENSE&nbsp;for&nbsp;more&nbsp;information.<br>
 #<br>
 #&nbsp;fields.compressed&nbsp;-&nbsp;Some&nbsp;types&nbsp;and&nbsp;objects&nbsp;related&nbsp;to&nbsp;compressed&nbsp;fields.&nbsp;Use&nbsp;in&nbsp;place&nbsp;of&nbsp;<a href="IndexedRedis.fields.html#IRField">IRField</a>&nbsp;(&nbsp;in&nbsp;FIELDS&nbsp;array&nbsp;to&nbsp;activate&nbsp;functionality&nbsp;)<br>
@@ -58,9 +58,32 @@ In&nbsp;practice,&nbsp;you&nbsp;may&nbsp;have&nbsp;fields&nbsp;with&nbsp;differe
 </dl>
 <hr>
 Methods defined here:<br>
-<dl><dt><a name="IRUnicodeField-__init__"><strong>__init__</strong></a>(self, name='', encoding=None)</dt></dl>
+<dl><dt><a name="IRUnicodeField-__init__"><strong>__init__</strong></a>(self, name='', encoding=None)</dt><dd><tt>__init__&nbsp;-&nbsp;Create&nbsp;an&nbsp;<a href="IndexedRedis.fields.html#IRField">IRField</a>.&nbsp;Use&nbsp;this&nbsp;directly&nbsp;in&nbsp;the&nbsp;FIELDS&nbsp;array&nbsp;for&nbsp;advanced&nbsp;functionality&nbsp;on&nbsp;a&nbsp;field.<br>
+&nbsp;<br>
+@param&nbsp;name&nbsp;&lt;str&gt;&nbsp;-&nbsp;The&nbsp;name&nbsp;of&nbsp;this&nbsp;field<br>
+@param&nbsp;valueType&nbsp;&lt;type&gt;&nbsp;-&nbsp;The&nbsp;type&nbsp;that&nbsp;will&nbsp;be&nbsp;used&nbsp;for&nbsp;this&nbsp;field.&nbsp;Default&nbsp;str/unicode&nbsp;(and&nbsp;bytes&nbsp;on&nbsp;python2)<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;act&nbsp;the&nbsp;same&nbsp;as&nbsp;non-<a href="IndexedRedis.fields.html#IRField">IRField</a>&nbsp;FIELDS&nbsp;entries&nbsp;(just&nbsp;plain&nbsp;string),&nbsp;i.e.&nbsp;they&nbsp;are&nbsp;encoded&nbsp;to&nbsp;unicode&nbsp;to&nbsp;and&nbsp;from&nbsp;Redis.<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;If&nbsp;you&nbsp;pass&nbsp;in&nbsp;None,&nbsp;then&nbsp;no&nbsp;decoding&nbsp;will&nbsp;take&nbsp;place&nbsp;(so&nbsp;whatever&nbsp;you&nbsp;provide&nbsp;goes&nbsp;in,&nbsp;and&nbsp;bytes&nbsp;come&nbsp;out&nbsp;of&nbsp;Redis).<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;On&nbsp;python3,&nbsp;if&nbsp;you&nbsp;pass&nbsp;bytes,&nbsp;than&nbsp;the&nbsp;field&nbsp;will&nbsp;be&nbsp;left&nbsp;as&nbsp;bytes.<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;If&nbsp;bool&nbsp;is&nbsp;used,&nbsp;then&nbsp;"1"&nbsp;and&nbsp;"true"&nbsp;are&nbsp;True,&nbsp;"0"&nbsp;and&nbsp;"false"&nbsp;are&nbsp;False,&nbsp;any&nbsp;other&nbsp;value&nbsp;is&nbsp;an&nbsp;exception.<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;You&nbsp;can&nbsp;also&nbsp;pass&nbsp;an&nbsp;advanced&nbsp;type&nbsp;(see&nbsp;IndexedRedis.fields.FieldValueTypes)&nbsp;like&nbsp;datetime&nbsp;and&nbsp;json.<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;All&nbsp;types&nbsp;other&nbsp;than&nbsp;string/unicode/bytes/None&nbsp;will&nbsp;be&nbsp;assigned&nbsp;'irNull'&nbsp;if&nbsp;they&nbsp;were&nbsp;not&nbsp;provided&nbsp;a&nbsp;value.<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;@see&nbsp;irNull&nbsp;-&nbsp;Equals&nbsp;only&nbsp;irNull&nbsp;(or&nbsp;other&nbsp;IRNullType&nbsp;instances).&nbsp;You&nbsp;can&nbsp;use&nbsp;this&nbsp;to&nbsp;check&nbsp;if&nbsp;an&nbsp;integer&nbsp;is&nbsp;defined&nbsp;versus&nbsp;0,&nbsp;for&nbsp;example.<br>
+&nbsp;<br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;While&nbsp;this&nbsp;class&nbsp;is&nbsp;create&nbsp;for&nbsp;primitive&nbsp;types&nbsp;(like&nbsp;int's&nbsp;and&nbsp;datetimes),&nbsp;more&nbsp;complex&nbsp;types&nbsp;extend&nbsp;<a href="IndexedRedis.fields.html#IRField">IRField</a>&nbsp;(such&nbsp;as&nbsp;pickle,&nbsp;compressed,&nbsp;or&nbsp;unicode&nbsp;with&nbsp;a&nbsp;specific&nbsp;encoding).<br>
+&nbsp;<br>
+@param&nbsp;hashIndex&nbsp;-&nbsp;If&nbsp;true,&nbsp;the&nbsp;md5&nbsp;hash&nbsp;of&nbsp;the&nbsp;value&nbsp;will&nbsp;be&nbsp;used&nbsp;for&nbsp;indexing&nbsp;and&nbsp;filtering.&nbsp;This&nbsp;may&nbsp;be&nbsp;useful&nbsp;for&nbsp;very&nbsp;long&nbsp;fields.<br>
+&nbsp;<br>
+&nbsp;<br>
+NOTE:&nbsp;If&nbsp;you&nbsp;are&nbsp;extending&nbsp;<a href="IndexedRedis.fields.html#IRField">IRField</a>,&nbsp;you&nbsp;should&nbsp;probably&nbsp;not&nbsp;call&nbsp;this&nbsp;__init__&nbsp;function.&nbsp;So&nbsp;long&nbsp;as&nbsp;you&nbsp;implement&nbsp;your&nbsp;own&nbsp;"convert",&nbsp;any&nbsp;fields&nbsp;used&nbsp;are&nbsp;set&nbsp;on&nbsp;a&nbsp;class-level.</tt></dd></dl>
 
-<dl><dt><a name="IRUnicodeField-convert"><strong>convert</strong></a>(self, value='')</dt></dl>
+<dl><dt><a name="IRUnicodeField-convert"><strong>convert</strong></a>(self, value='')</dt><dd><tt>convert&nbsp;-&nbsp;Convert&nbsp;the&nbsp;value&nbsp;from&nbsp;storage&nbsp;(string)&nbsp;to&nbsp;the&nbsp;value&nbsp;type.<br>
+&nbsp;<br>
+@return&nbsp;-&nbsp;The&nbsp;converted&nbsp;value,&nbsp;or&nbsp;"irNull"&nbsp;if&nbsp;no&nbsp;value&nbsp;was&nbsp;defined&nbsp;(and&nbsp;field&nbsp;type&nbsp;is&nbsp;not&nbsp;default/string)</tt></dd></dl>
 
 <dl><dt><a name="IRUnicodeField-getEncoding"><strong>getEncoding</strong></a>(self)</dt></dl>
 
@@ -68,7 +91,7 @@ Methods defined here:<br>
 
 <hr>
 Static methods defined here:<br>
-<dl><dt><a name="IRUnicodeField-__new__"><strong>__new__</strong></a>(self, name='', encoding=None)</dt></dl>
+<dl><dt><a name="IRUnicodeField-__new__"><strong>__new__</strong></a>(self, name='', encoding=None)</dt><dd><tt>Create&nbsp;and&nbsp;return&nbsp;a&nbsp;new&nbsp;object.&nbsp;&nbsp;See&nbsp;help(type)&nbsp;for&nbsp;accurate&nbsp;signature.</tt></dd></dl>
 
 <hr>
 Data and other attributes defined here:<br>
@@ -76,6 +99,11 @@ Data and other attributes defined here:<br>
 
 <hr>
 Methods inherited from <a href="IndexedRedis.fields.html#IRField">IndexedRedis.fields.IRField</a>:<br>
+<dl><dt><a name="IRUnicodeField-toIndex"><strong>toIndex</strong></a>(self, value)</dt><dd><tt>toIndex&nbsp;-&nbsp;An&nbsp;optional&nbsp;method&nbsp;which&nbsp;will&nbsp;return&nbsp;the&nbsp;value&nbsp;prepped&nbsp;for&nbsp;index.<br>
+&nbsp;<br>
+By&nbsp;default,&nbsp;"toStorage"&nbsp;will&nbsp;be&nbsp;called.&nbsp;If&nbsp;you&nbsp;provide&nbsp;"hashIndex=True"&nbsp;on&nbsp;the&nbsp;constructor,<br>
+the&nbsp;field&nbsp;will&nbsp;be&nbsp;md5summed&nbsp;for&nbsp;indexing&nbsp;purposes.&nbsp;This&nbsp;is&nbsp;useful&nbsp;for&nbsp;large&nbsp;strings,&nbsp;etc.</tt></dd></dl>
+
 <dl><dt><a name="IRUnicodeField-toStorage"><strong>toStorage</strong></a>(self, value)</dt><dd><tt>toStorage&nbsp;-&nbsp;Convert&nbsp;the&nbsp;value&nbsp;to&nbsp;a&nbsp;string&nbsp;representation&nbsp;for&nbsp;storage.<br>
 &nbsp;<br>
 &nbsp;&nbsp;The&nbsp;default&nbsp;implementation&nbsp;will&nbsp;work&nbsp;here&nbsp;for&nbsp;basic&nbsp;types.<br>
@@ -91,6 +119,15 @@ Data descriptors inherited from <a href="IndexedRedis.fields.html#IRField">Index
 <dl><dt><strong>__weakref__</strong></dt>
 <dd><tt>list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
 </dl>
+<dl><dt><strong>isIndexHashed</strong></dt>
+<dd><tt>isIndexHashed&nbsp;-&nbsp;Returns&nbsp;if&nbsp;the&nbsp;index&nbsp;value&nbsp;should&nbsp;be&nbsp;hashed<br>
+&nbsp;<br>
+@return&nbsp;&lt;bool&gt;&nbsp;-&nbsp;True&nbsp;if&nbsp;this&nbsp;field&nbsp;should&nbsp;be&nbsp;hashed&nbsp;before&nbsp;indexing&nbsp;/&nbsp;filtering</tt></dd>
+</dl>
+<hr>
+Data and other attributes inherited from <a href="IndexedRedis.fields.html#IRField">IndexedRedis.fields.IRField</a>:<br>
+<dl><dt><strong>hashIndex</strong> = False</dl>
+
 <hr>
 Methods inherited from <a href="builtins.html#str">builtins.str</a>:<br>
 <dl><dt><a name="IRUnicodeField-__add__"><strong>__add__</strong></a>(self, value, /)</dt><dd><tt>Return&nbsp;self+value.</tt></dd></dl>
