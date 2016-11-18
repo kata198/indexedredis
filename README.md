@@ -15,7 +15,7 @@ It is compatible with python 2.7 and python 3. It has been tested with python 2.
 4.0 Status
 ----------
 
-**Incomplete -- Does not contain all updates in the 4.0 series, but due to lack of time this stable code with many improvements over IndexedRedis 3 has been sitting idle for 8 months. So I've released it. There should be plenty of examples in the "tests" directory, and it's completely backwards-compatible with IndexedRedis 3, so feel free to explore for new features!.**
+**Incomplete -- This document does not contain all updates in the 4.0 series, but due to lack of time this stable code with many improvements over IndexedRedis 3 has been sitting idle for 8 months. So I've released it. There should be plenty of examples in the "tests" directory, and it's completely backwards-compatible with IndexedRedis 3, so feel free to explore for new features!.**
 
 If you want to write additional / better documentation, please email me at kata198 at gmail dot com . 
 
