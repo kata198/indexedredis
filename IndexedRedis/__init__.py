@@ -15,25 +15,102 @@ import redis
 
 from base64 import b64encode, b64decode
 
-from QueryableList import QueryableListObjs
+from . import fields
+from .fields import IRField, IRFieldChain, IRNullType, irNull
+from .compat_str import to_unicode, tobytes, defaultEncoding, setEncoding, getEncoding, setDefaultIREncoding, getDefaultIREncoding
+from .utils import hashDictOneLevel
+
+from .IRQueryableList import IRQueryableList
+
+
+
+from .deprecated import deprecated, toggleDeprecatedMessages, deprecatedMessage
 
 # * imports
 __all__ = ('INDEXED_REDIS_PREFIX', 'INDEXED_REDIS_VERSION', 'INDEXED_REDIS_VERSION_STR', 
 	'IndexedRedisDelete', 'IndexedRedisHelper', 'IndexedRedisModel', 'IndexedRedisQuery', 'IndexedRedisSave',
 	'isIndexedRedisModel', 'setIndexedRedisEncoding', 'getIndexedRedisEncoding', 'InvalidModelException',
+	'fields', 'IRField', 'IRFieldChain', 'irNull',
+	'setDefaultIREncoding', 'getDefaultIREncoding',
+	'toggleDeprecatedMessages',
+	# These (*Encoding) are imported, but I don't think from * should import them as they are fairly common names.
+	#   They have been renamed to be more specific (*DefaultIREncoding) names, but will be left via:
+	#      from IndexedRedis import setEncoding, getEncoding, defaultEncoding
+	#   as compat for now
+	#
+	# setEncoding, getEncoding, defaultEncoding 
 	 )
 
 # Prefix that all IndexedRedis keys will contain, as to not conflict with other stuff.
 INDEXED_REDIS_PREFIX = '_ir_|'
 
 # Version as a tuple (major, minor, patchlevel)
-INDEXED_REDIS_VERSION = (3, 0, 3)
+INDEXED_REDIS_VERSION = (4, 0, 0)
 
 # Version as a string
-INDEXED_REDIS_VERSION_STR = '3.0.3'
+INDEXED_REDIS_VERSION_STR = '4.0.0'
 
 # Package version
 __version__ = INDEXED_REDIS_VERSION_STR
+
+# Default max number of connections to each unique server, as connections can get eaten up in some circumstances,
+#   and python-redis has default of 2^31 connections... which doesn't make any sense given only 65535 ports..
+#   In a network-outage scenario, python-redis can quickly leak connections and exhaust all private ports
+REDIS_DEFAULT_POOL_MAX_SIZE = 32
+
+
+RedisPools = {}
+
+def getRedisPool(params):
+	'''
+		getRedisPool - Returns and possibly also creates a Redis connection pool
+			based on the REDIS_CONNECTION_PARAMS passed in.
+
+			The goal of this method is to keep a small connection pool rolling
+			to each unique Redis instance, otherwise during network issues etc
+			python-redis will leak connections and in short-order can exhaust
+			all the ports on a system. There's probably also some minor
+			performance gain in sharing Pools.
+
+			Will modify "params", if "host" and/or "port" are missing, will fill
+			them in with defaults, and prior to return will set "connection_pool"
+			on params, which will allow immediate return on the next call,
+			and allow access to the pool directly from the model object.
+
+			@param params <dict> - REDIS_CONNECTION_PARAMS - kwargs to redis.Redis
+
+			@return redis.ConnectionPool corrosponding to this unique server.
+	'''
+	global RedisPools
+
+	if 'connection_pool' in params:
+		return params['connection_pool']
+
+	hashValue = hashDictOneLevel(params)
+
+	if hashValue in RedisPools:
+		params['connection_pool'] = RedisPools[hashValue]
+		return RedisPools[hashValue]
+	
+	checkAgain = False
+	if 'host' not in params:
+		params['host'] = '127.0.0.1'
+		checkAgain = True
+	if 'port' not in params:
+		params['port'] = 6379
+		checkAgain = True
+
+	if checkAgain:
+		hashValue = hashDictOneLevel(params)
+		if hashValue in RedisPools:
+			params['connection_pool'] = RedisPools[hashValue]
+			return RedisPools[hashValue]
+
+	connectionPool = redis.ConnectionPool(**params)
+	params['connection_pool'] = connectionPool
+	RedisPools[hashValue] = connectionPool
+
+	return connectionPool
 
 
 # COMPAT STUFF
@@ -45,67 +122,18 @@ except NameError:
 			self.getter = getter
 		def __get__(self, instance, owner):
 			return self.getter(owner)
+
+
+
+# TODO: make this better
 try:
-	defaultEncoding = sys.getdefaultencoding()
-	if defaultEncoding == 'ascii':
-		defaultEncoding = 'utf-8'
-except:
-	defaultEncoding = 'utf-8'
+	unicode
+except NameError:
+	unicode = str
 
-
-# String Assurance
-
-if bytes == str:
-	# Python 2
-	def tostr(x):
-		if isinstance(x, unicode):
-			return x.encode(defaultEncoding)
-		else:
-			return str(x)
-
-	tobytes = lambda x : x
-else:
-	# Python 3
-	
-	def tostr(x):
-		if isinstance(x, bytes) is False:
-			return str(x)
-		return x.decode(defaultEncoding)
-
-	def tobytes(x):
-		if isinstance(x, bytes) is True:
-			return x
-		return x.encode(defaultEncoding)
-
-# Encoding stuff
-
-def setEncoding(encoding):
-	'''
-		setEncoding - Sets the encoding used by IndexedRedis. 
-
-		@note Aliased as "setIndexedRedisEncoding" so import * has a namespaced name.
-
-		@param encoding - An encoding (like utf-8)
-	'''
-	global defaultEncoding
-	defaultEncoding = encoding
-
-setIndexedRedisEncoding = setEncoding
-
-def getEncoding():
-	'''
-		getEncoding - Get the encoding that IndexedRedis will use
-
-	@note Aliased as "setIndexedRedisEncoding" so import * has a namespaced name.
-
-	'''
-	global defaultEncoding
-	return defaultEncoding
-
-getIndexedRedisEncoding = getEncoding
 
 # Changing redis encoding into requested encoding
-decodeDict = lambda origDict : {tostr(key) : tostr(origDict[key]) for key in origDict}
+decodeDict = lambda origDict : {to_unicode(key) : origDict[key] for key in origDict}
 
 validatedModels = set()
 
@@ -126,7 +154,7 @@ class IndexedRedisModel(object):
 
             **Required Fields:**
 
-            *FIELDS* - REQUIRED. a list of strings which name the fields that can be used for storage.
+            *FIELDS* - REQUIRED. a list of strings which name the fields that can be used for storage. Can also be IRField or an implementing type (see AdvancedFields below)
 
                     Example: ['Name', 'Description', 'Model', 'Price']
 
@@ -240,12 +268,57 @@ class IndexedRedisModel(object):
                    getUpdatedFields - See changes since last fetch
 
 
+            Advanced Fields
+	    ---------------
+
+	    IndexedRedis since version 4.0 allows you to pass elements of type IRField (extends str) in the FIELDS element.
+
+	    Doing so allows you to specify certain properties about the field.
+
+
+	    Example:
+
+		FIELDS = [ 'name', IRField('age', valueType=int), 'birthday' ]
+
+	   **Field Name**
+
+	   The first argument is the string of the field name.
+
+	    **Type**
+
+	    You can have a value automatically cast to a certain type (which saves a step if you need to filter further through the QueryableList results, like age__gt=15)
+
+	    by passing that type as "valueType". (e.x.  IRField('age', valueType=int))
+
+	    If you use "bool", the values 0 and case insensitive string 'false' will result in False, and 1 or 'true' will result in True.
+
+	    Be careful using floats, different hosts will have different floating point representations for the same value. Don't expect
+
+	    floats to work cross-platform. Use a fixed point number as the string type ( like myFixedPoint = '%2.5f' %( 10.12345 ) )
+
+	    ** Null Values **
+
+            For any type except strings (including the default type, string), a null value is assigned irNull (of type IRNullType).
+
+	    irNull does not equal empty string, or anything except another irNull. This is to destinguish say, no int assigned vs int(0)
+
+	    You can check a typed field against the "irNull" variable found in the IndexedRedis or IndexedRedis.fields.
+
+	    from IndexedRedis import irNull
+	    ..
+	    e.x. notDangerFive = myResults.filter(dangerLevel__ne=irNull).filter(dangerLevel__ne=5)
+
+	    or even
+
+	    notDangerFive = MyModel.objects.filter(dangerLevel__ne=irNull).filter(dangerLevel__ne=5).all()
+
+
             Encodings
             ---------
 
             IndexedRedis will use by default your system default encoding (sys.getdefaultencoding), unless it is ascii (python2) in which case it will default to utf-8.
 
-            You may change this via IndexedRedis.setEncoding
+            You may change this via IndexedRedis.setDefaultIREncoding
 
 	'''
 	
@@ -261,11 +334,13 @@ class IndexedRedisModel(object):
 
 	# BINARY_FIELDS - Fields that are not encoded in any way
 	BINARY_FIELDS = []
-
+	
 	# KEY_NAME - A string of a unique name which corrosponds to objects of this type.
 	KEY_NAME = None
 
-	# REDIS_CONNECTION_PARAMS - A dictionary of parameters to redis.Redis such as host or port. Will be used on all connections.
+	# REDIS_CONNECTION_PARAMS - A dictionary of parameters to redis.Redis such as host or port. Unless "connection_pool" is specified,
+	#   each unique server will be assigned a pool to prevent leaking private ports, and on first connection of this model
+	#   that pool will be accessable via REDIS_CONNECTION_PARAMS['connection_pool']
 	REDIS_CONNECTION_PARAMS = {}
 
 	# Internal property to check inheritance
@@ -279,36 +354,48 @@ class IndexedRedisModel(object):
 
 		self._origData = {}
 
-		# Convert all field arrays to sets
-		self.FIELDS = set(self.FIELDS)
-		self.BASE64_FIELDS = set(self.BASE64_FIELDS)
-		self.BINARY_FIELDS = set(self.BINARY_FIELDS)
-
-		for fieldName in self.FIELDS:
-			if fieldName in self.BASE64_FIELDS or fieldName in self.BINARY_FIELDS:
-				val = tobytes(kwargs.get(fieldName, b''))
+		for thisField in self.FIELDS:
+			if issubclass(thisField.__class__, IRField):
+				val = thisField.convert(kwargs.get(str(thisField), ''))
+			elif thisField in self.BASE64_FIELDS or thisField in self.BINARY_FIELDS:
+				val = tobytes(kwargs.get(thisField, b''))
 			else:
-				val = tostr(kwargs.get(fieldName, ''))
-			setattr(self, fieldName, val)
-			self._origData[fieldName] = val
+				val = to_unicode(kwargs.get(thisField, ''))
+			setattr(self, thisField, val)
+			self._origData[thisField] = val
 
 		self._id = kwargs.get('_id', None)
 	
-	def asDict(self, includeMeta=False):
+	def asDict(self, includeMeta=False, forStorage=False):
 		'''
 			toDict / asDict - Get a dictionary representation of this model.
 
 			@param includeMeta - Include metadata in return. For now, this is only pk stored as "_id"
+			@param convertValueTypes <bool> - default True. If False, fields with fieldValue defined will be converted to that type.
+				Use True when saving, etc, as native type is always either str or bytes.
 
 			@return - Dictionary reprensetation of this object and all fields
 		'''
 		ret = {}
-		for fieldName in self.FIELDS:
-			val = getattr(self, fieldName, '')
-			if fieldName in self.BASE64_FIELDS or fieldName in self.BINARY_FIELDS:
-				ret[fieldName] = tobytes(val)
+		for thisField in self.FIELDS:
+			val = getattr(self, thisField, '')
+			if issubclass(thisField.__class__, IRField) and hasattr(thisField, 'toStorage'):
+				if forStorage is True:
+					val = thisField.toStorage(val)
+			elif thisField in self.BASE64_FIELDS or thisField in self.BINARY_FIELDS:
+				val = tobytes(val)
 			else:
-				ret[fieldName] = tostr(val)
+				val = to_unicode(val)
+
+			if forStorage is True and thisField in self.BASE64_FIELDS:
+				if hasattr(thisField, 'toBytes'):
+					val = thisField.toBytes(val)
+				else:
+					val = tobytes(val)
+				val = b64encode(val)
+
+			ret[thisField] = val
+				
 
 		if includeMeta is True:
 			ret['_id'] = getattr(self, '_id', '')
@@ -325,12 +412,14 @@ class IndexedRedisModel(object):
 		if not self._id or not self._origData:
 			return True
 
-		for fieldName in self.FIELDS:
-			if fieldName in self.BASE64_FIELDS or fieldName in self.BINARY_FIELDS:
-				currentVal = tobytes(getattr(self, fieldName))
-			else:
-				currentVal = tostr(getattr(self, fieldName))
-			if self._origData.get(fieldName, '') != currentVal:
+		for thisField in self.FIELDS:
+			thisVal = getattr(self, thisField, '')
+#			if thisField in self.BASE64_FIELDS or thisField in self.BINARY_FIELDS:
+#				thisVal = tobytes(getattr(self, thisField))
+#			else:
+#				thisVal = getattr(thisField, 'toStorage', to_unicode)(getattr(self, thisField))
+
+			if self._origData.get(thisField, '') != thisVal:
 				return True
 		return False
 	
@@ -338,16 +427,19 @@ class IndexedRedisModel(object):
 		'''
 			getUpdatedFields - See changed fields.
 			
-			@return - a dictionary of fieldName : tuple(old, new)
+			@return - a dictionary of fieldName : tuple(old, new).
+
+			fieldName may be a string or may implement IRField (which implements string, and can be used just like a string)
 		'''
 		updatedFields = {}
-		for fieldName in self.FIELDS:
-			if fieldName in self.BASE64_FIELDS or fieldName in self.BINARY_FIELDS:
-				thisVal = tobytes(getattr(self, fieldName))
-			else:
-				thisVal = tostr(getattr(self, fieldName))
-			if self._origData[fieldName] != thisVal:
-				updatedFields[fieldName] = (self._origData[fieldName], thisVal)
+		for thisField in self.FIELDS:
+			thisVal = getattr(self, thisField, '')
+#			if thisField in self.BASE64_FIELDS or thisField in self.BINARY_FIELDS:
+#				thisVal = tobytes(getattr(self, thisField))
+#			else:
+#				thisVal = getattr(thisField, 'toStorage', to_unicode)(getattr(self, thisField))
+			if self._origData.get(thisField, '') != thisVal:
+				updatedFields[thisField] = (self._origData[thisField], thisVal)
 		return updatedFields
 
 	@classproperty
@@ -355,6 +447,7 @@ class IndexedRedisModel(object):
 		'''
 			objects - Start filtering
 		'''
+		cls.validateModel()
 		return IndexedRedisQuery(cls)
 
 	@classproperty
@@ -393,7 +486,7 @@ class IndexedRedisModel(object):
 	
 	@classmethod
 	def reset(cls, newValues):
-		conn = redis.Redis(**cls.REDIS_CONNECTION_PARAMS)
+		conn = cls.objects._get_new_connection()
 
 		transaction = conn.pipeline()
 		transaction.eval("""
@@ -426,14 +519,14 @@ class IndexedRedisModel(object):
 		'''
                     
 		myClassName = self.__class__.__name__
-		myDict = self.asDict(True)
+		myDict = self.asDict(True, forStorage=False)
 		_id = myDict.pop('_id', 'None')
 		myPointerLoc = "0x%x" %(id(self),)
 		if not _id or _id == 'None':
 			return '<%s obj (Not in DB) at %s>' %(myClassName, myPointerLoc)
 		elif self.hasUnsavedChanges():
-			return '<%s obj _id=%s (Unsaved Changes) at %s>' %(myClassName, tostr(_id), myPointerLoc)
-		return '<%s obj _id=%s at %s>' %(myClassName, tostr(_id), myPointerLoc)
+			return '<%s obj _id=%s (Unsaved Changes) at %s>' %(myClassName, to_unicode(_id), myPointerLoc)
+		return '<%s obj _id=%s at %s>' %(myClassName, to_unicode(_id), myPointerLoc)
 
 	def __repr__(self):
 		'''
@@ -442,19 +535,34 @@ class IndexedRedisModel(object):
 
                         @return - String of python init call to recreate this object
 		'''
-		myDict = self.asDict(True)
+		myDict = self.asDict(True, forStorage=False)
 		myClassName = self.__class__.__name__
 
 		ret = [myClassName, '(']
 		# Only show id if saved
 		_id = myDict.pop('_id', '')
 		if _id:
-			ret += ['_id="', tostr(_id), '", ']
+			ret += ['_id="', to_unicode(_id), '", ']
+
+		# TODO: Note, trying to fit the type in here, but it's not perfect and may need to change when nullables are figured out
+		convertMethods = { thisField : (hasattr(thisField, 'convert') and thisField.convert or (lambda x : x)) for thisField in self.FIELDS}
 
 		key = None
 		for key, value in myDict.items():
-			if key not in self.BINARY_FIELDS:
-				ret += [key, '=', "'", tostr(value or ''), "'", ', ']
+			if key not in self.BINARY_FIELDS and (bytes == str or not isinstance(value, bytes)):
+				if value != None:
+					val = convertMethods[key](value)
+				if isinstance(val, IRNullType):
+					val = 'IRNullType()'
+				elif isinstance(val, (str, unicode)):
+					try:
+						val = "'%s'" %(to_unicode(val),)
+					except:
+						# Python 2....
+						val = repr(val)
+				else:
+					val = to_unicode(val)
+				ret += [key, '=', val, ', ']
 			else:
 				ret += [key, '=', repr(value), ', ']
 		if key is not None or not _id:
@@ -472,7 +580,7 @@ class IndexedRedisModel(object):
                     @param copyPrimaryKey <bool> default False - If True, any changes to the copy will save over-top the existing entry in Redis.
                         If False, only the data is copied, and nothing is saved.
 		'''
-		return self.__class__(**self.asDict(copyPrimaryKey))
+		return self.__class__(**self.asDict(copyPrimaryKey, forStorage=False))
 
 	def saveToExternal(self, redisCon):
 		'''
@@ -503,36 +611,51 @@ class IndexedRedisModel(object):
 
 	def reload(self):
 		'''
-                reload - Reload this object from the database.
+                reload - Reload this object from the database, overriding any local changes and merging in any updates.
 
                     @raises KeyError - if this object has not been saved (no primary key)
 
-                    @return - True if any updates occured, False if data remained the same.
+                    @return - Dict with the keys that were updated. Key is field name that was updated,
+		       and value is tuple of (old value, new value). 
+
 		'''
 		_id = self._id
 		if not _id:
 			raise KeyError('Object has never been saved! Cannot reload.')
 
-		currentData = self.asDict(False)
-		newData = self.objects.get(_id)
-		newData.pop('_id', '')
+		currentData = self.asDict(False, forStorage=False)
+
+		# Get the object, and compare the unconverted "asDict" repr.
+		#  If any changes, we will apply the already-convered value from
+		#  the object, but we compare the unconverted values (what's in the DB).
+		newDataObj = self.objects.get(_id)
+		if not newDataObj:
+			raise KeyError('Object with id=%d is not in database. Cannot reload.' %(_id,))
+
+		newData = newDataObj.asDict(False, forStorage=False)
 		if currentData == newData:
 			return []
 
-		updatedFieldNames = []
-		for fieldName, value in newData.items():
-			if currentData[fieldName] != value:
-				setattr(self, fieldName, value)
-				updatedFieldNames.append(fieldName)
+		updatedFields = {}
+		for thisField, newValue in newData.items():
+			currentValue = currentData.get(thisField, '')
+			if currentValue != newValue:
+				# Use "converted" values in the updatedFields dict, and apply on the object.
+				updatedFields[thisField] = ( getattr(self, thisField, ''), getattr(newDataObj, thisField, '') )
+				setattr(self, thisField, getattr(newDataObj, thisField, ''))
+				self._origData[thisField] = newDataObj._origData[thisField]
 
-		return updatedFieldNames
-                    
+		return updatedFields
+
+
 
 	def __getstate__(self):
 		'''
                 pickle uses this
 		'''
-		return self.asDict(True)
+		myData = self.asDict(True, forStorage=False)
+		myData['_origData'] = self._origData
+		return myData
 
 	def __setstate__(self, stateDict):
 		'''
@@ -540,15 +663,8 @@ class IndexedRedisModel(object):
 		'''
 		for key, value in stateDict.items():
 			setattr(self, key, value)
+		self._origData = stateDict['_origData']
 
-
-	def _decodeBase64Fields(self):
-		'''
-			_decodeBase64Fields - private method, do not call . Used for decoding base64 fields after fetch
-		'''
-		for fieldName in self.__class__.BASE64_FIELDS:
-			fieldValue = b64decode(getattr(self, fieldName))
-			setattr(self, fieldName, fieldValue)
 
 	@classmethod
 	def validateModel(model):
@@ -561,6 +677,9 @@ class IndexedRedisModel(object):
 
 			@raises - InvalidModelException if there is a problem with the model, and the message contains relevant information.
 		'''
+		if model == IndexedRedisModel:
+			raise ValueError('Cannot use IndexedRedisModel directly. You must implement this class for your model.')
+
 		global validatedModels
 		keyName = model.KEY_NAME
 		if not keyName:
@@ -569,6 +688,12 @@ class IndexedRedisModel(object):
 			return True
 
 		failedValidationStr = '"%s" Failed Model Validation:' %(str(model.__name__), ) 
+
+		# Convert items in model to set
+		#model.FIELDS = set(model.FIELDS)
+		#model.BASE64_FIELDS = set(model.BASE64_FIELDS)
+		#model.BINARY_FIELDS = set(model.BINARY_FIELDS)
+
 		
 		fieldSet = set(model.FIELDS)
 		indexedFieldSet = set(model.INDEXED_FIELDS)
@@ -578,14 +703,28 @@ class IndexedRedisModel(object):
 		if not fieldSet:
 			raise InvalidModelException('%s No fields defined. Please populate the FIELDS array with a list of field names' %(failedValidationStr,))
 
-		for fieldName in fieldSet:
-			if fieldName == '_id':
+		if base64FieldSet:
+			deprecatedMessage('Using BASE64_FIELDS array is deprecated. Please transition to use IndexedRedis.fields.IRBase64Field directly or in an IndexedRedis.fields.IRFieldChain', 'BASE64_FIELDS')
+
+		for thisField in fieldSet:
+			if thisField == '_id':
 				raise InvalidModelException('%s You cannot have a field named _id, it is reserved for the primary key.' %(failedValidationStr,))
+
+			# XXX: Is this ascii requirement still needed since all is unicode now?
 			try:
-				codecs.ascii_encode(fieldName)
+				codecs.ascii_encode(thisField)
 			except UnicodeDecodeError as e:
-				raise InvalidModelException('%s All field names must be ascii-encodable. "%s" was not. Error was: %s' %(failedValidationStr, tostr(fieldName), str(e)))
-				
+				raise InvalidModelException('%s All field names must be ascii-encodable. "%s" was not. Error was: %s' %(failedValidationStr, to_unicode(thisField), str(e)))
+
+			if thisField in indexedFieldSet and issubclass(thisField.__class__, IRField) and thisField.CAN_INDEX is False:
+				raise InvalidModelException('%s Field Type %s - (%s) cannot be indexed.' %(failedValidationStr, str(thisField.__class__.__name__), to_unicode(thisField)))
+
+			if hasattr(IndexedRedisModel, thisField) is True:
+				raise InvalidModelException('%s Field name %s is a reserved attribute on IndexedRedisModel.' %(failedValidationStr, str(thisField)))
+
+			if str(thisField) == '':
+				raise InvalidModelException('%s Field defined without a name, or name was an empty string. Type=%s' %(failedValidationStr, str(type(thisField))))
+
 
 		if bool(indexedFieldSet - fieldSet):
 			raise InvalidModelException('%s All INDEXED_FIELDS must also be present in FIELDS. %s exist only in INDEXED_FIELDS' %(failedValidationStr, str(list(indexedFieldSet - fieldSet)), ) )
@@ -634,10 +773,17 @@ class IndexedRedisHelper(object):
 		'''
 		self.mdl = mdl
 		self.keyName = self.mdl.KEY_NAME
-		self.fieldNames = self.mdl.FIELDS
-		self.indexedFields = self.mdl.INDEXED_FIELDS
+
+		self.irFields = { thisField : thisField for thisField in self.mdl.FIELDS if issubclass(thisField.__class__, IRField) }
+
+		self.fields = self.mdl.FIELDS
+		# XXX: When we do indexes, we may need to call "toStorage" on the field if it is an IRField, so replace-in the IRField's if present
+		self.indexedFields = [self.irFields.get(fieldName, fieldName) for fieldName in self.mdl.INDEXED_FIELDS]
+#		self.indexedFields = self.mdl.INDEXED_FIELDS
+			
 		self.base64Fields = self.mdl.BASE64_FIELDS
 		self.binaryFields = self.mdl.BINARY_FIELDS
+
 
 		self._connection = None
 
@@ -646,7 +792,8 @@ class IndexedRedisHelper(object):
 			_get_new_connection - Get a new connection
 			internal
 		'''
-		return redis.Redis(**self.mdl.REDIS_CONNECTION_PARAMS)
+		pool = getRedisPool(self.mdl.REDIS_CONNECTION_PARAMS)
+		return redis.Redis(connection_pool=pool)
 
 	def _get_connection(self):
 		'''
@@ -709,10 +856,32 @@ class IndexedRedisHelper(object):
 			@param indexedField - string of field name
 			@param val - Value of field
 
-			@return - Key name string
+			@return - Key name string, potentially hashed.
 		'''
-		return ''.join([INDEXED_REDIS_PREFIX, self.keyName, ':idx:', indexedField, ':', tostr(val)])
-		
+		return ''.join([INDEXED_REDIS_PREFIX, self.keyName, ':idx:', indexedField, ':', getattr(indexedField, 'toIndex', to_unicode)(val)])
+
+	def _compat_get_str_key_for_index(self, indexedField, val):
+		'''
+			_compat_get_str_key_for_index - Return the key name as a string, even if it is a hashed index field.
+			  This is used in converting unhashed fields to a hashed index (called by _compat_rem_str_id_from_index which is called by compat_convertHashedIndexes)
+
+			  @param inde
+			@param indexedField - string of field name
+			@param val - Value of field
+
+			@return - Key name string, always a string regardless of hash
+		'''
+		return ''.join([INDEXED_REDIS_PREFIX, self.keyName, ':idx:', indexedField, ':', getattr(indexedField, 'toStorage', to_unicode)(val)])
+
+	def _compat_rem_str_id_from_index(self, indexedField, pk, val, conn=None):
+		'''
+			_compat_rem_str_id_from_index - Used in compat_convertHashedIndexes to remove the old string repr of a field,
+				in order to later add the hashed value,
+		'''
+		if conn is None:
+			conn = self._get_connection()
+		conn.srem(self._compat_get_str_key_for_index(indexedField, val), pk)
+
 
 	def _get_key_for_id(self, pk):
 		'''
@@ -723,7 +892,7 @@ class IndexedRedisHelper(object):
 
 			@return - Key name string
 		'''
-		return ''.join([INDEXED_REDIS_PREFIX, self.keyName, ':data:', tostr(pk)])
+		return ''.join([INDEXED_REDIS_PREFIX, self.keyName, ':data:', to_unicode(pk)])
 
 	def _get_next_id_key(self):
 		'''
@@ -743,7 +912,7 @@ class IndexedRedisHelper(object):
 		'''
 		if conn is None:
 			conn = self._get_connection()
-		return tostr(conn.get(self._get_next_id_key()) or 0)
+		return to_unicode(conn.get(self._get_next_id_key()) or 0)
 
 	def _getNextID(self, conn=None):
 		'''
@@ -756,7 +925,7 @@ class IndexedRedisHelper(object):
 		'''
 		if conn is None:
 			conn = self._get_connection()
-		return tostr(conn.incr(self._get_next_id_key()))
+		return int(conn.incr(self._get_next_id_key()))
 
 	def _getTempKey(self):
 		'''
@@ -766,7 +935,7 @@ class IndexedRedisHelper(object):
 
 class IndexedRedisQuery(IndexedRedisHelper):
 	'''
-		IndexedRedisQuery - The query object. This is the return of "Model.objects" and "Model.objects.filter"
+		IndexedRedisQuery - The query object. This is the return of "Model.objects" and "Model.objects.filter*"
 	'''
 	
 	def __init__(self, *args, **kwargs):
@@ -776,25 +945,40 @@ class IndexedRedisQuery(IndexedRedisHelper):
 		self.notFilters = []
 
 
-	def _dictToObj(self, theDict):
+	def _redisResultToObj(self, theDict):
 		binaryFields = self.mdl.BINARY_FIELDS
+		for key, value in theDict.items():
+			if to_unicode(key) in self.mdl.BASE64_FIELDS:
+				theDict[key] = b64decode(value)
+
+		if '_id' in theDict:
+			theDict['_id'] = int(theDict['_id'])
+				
 		if not binaryFields:
 			obj = self.mdl(**decodeDict(theDict))
 		else:
 			binaryItems = {}
 			nonBinaryItems = {}
 			for key, value in theDict.items():
-				key = tostr(key)
+				key = to_unicode(key)
 				if key in binaryFields:
 					binaryItems[key] = value
 				else:
 					nonBinaryItems[key] = value
 			obj = self.mdl(**decodeDict(nonBinaryItems))
 			for key, value in binaryItems.items():
+				irField = self.irFields.get(key)
+				if irField and hasattr(irField, 'convert'):
+					value = irField.convert(value)
 				setattr(obj, key, value)
 				obj._origData[key] = value
-		obj._decodeBase64Fields()
 		return obj
+	
+	def _dictToObj(self, theDict):
+		deprecatedMessage('_dictToObj is deprecated and will be removed in a future version. Use _redisResultToObj instead.', '_dictToObj')
+		return _redisResultToObj(theDict)
+	# COMPAT 
+	#_dictToObj = _redisResultToObj
 
 
 
@@ -838,6 +1022,12 @@ class IndexedRedisQuery(IndexedRedisHelper):
 				notFilter = False
 			if key not in filterObj.indexedFields:
 				raise ValueError('Field "' + key + '" is not in INDEXED_FIELDS array. Filtering is only supported on indexed fields.')
+
+			if key in filterObj.irFields:
+				irField = filterObj.irFields[key]
+				if hasattr(irField, 'toIndex'):
+					value = irField.toIndex(value)
+
 			if notFilter is False:
 				filterObj.filters.append( (key, value) )
 			else:
@@ -956,6 +1146,7 @@ class IndexedRedisQuery(IndexedRedisHelper):
 
 			return matchedKeys
 
+
 	def all(self):
 		'''
 			all - Get the underlying objects which match the filter criteria.
@@ -968,7 +1159,7 @@ class IndexedRedisQuery(IndexedRedisHelper):
 		if matchedKeys:
 			return self.getMultiple(matchedKeys)
 
-		return QueryableListObjs([])
+		return IRQueryableList([], mdl=self.mdl)
 
 	def allByAge(self):
 		'''
@@ -981,7 +1172,7 @@ class IndexedRedisQuery(IndexedRedisHelper):
 		if matchedKeys:
 			return self.getMultiple(matchedKeys)
 
-		return QueryableListObjs([])
+		return IRQueryableList([], mdl=self.mdl)
 
 	def allOnlyFields(self, fields):
 		'''
@@ -995,7 +1186,7 @@ class IndexedRedisQuery(IndexedRedisHelper):
 		if matchedKeys:
 			return self.getMultipleOnlyFields(matchedKeys, fields)
 
-		return QueryableListObjs([])
+		return IRQueryableList([], mdl=self.mdl)
 
 	def allOnlyIndexedFields(self):
 		'''
@@ -1007,7 +1198,7 @@ class IndexedRedisQuery(IndexedRedisHelper):
 		if matchedKeys:
 			return self.getMultipleOnlyIndexedFields(matchedKeys)
 
-		return QueryableListObjs([])
+		return IRQueryableList([], mdl=self.mdl)
 		
 	
 	def first(self):
@@ -1065,7 +1256,9 @@ class IndexedRedisQuery(IndexedRedisHelper):
 			delete - Deletes all entries matching the filter criteria
 
 		'''
-		return self.mdl.deleter.deleteMultiple(self.allOnlyIndexedFields())
+		if self.filters or self.notFilters:
+			return self.mdl.deleter.deleteMultiple(self.allOnlyIndexedFields())
+		return self.mdl.deleter.destroyModel()
 
 	def get(self, pk):
 		'''
@@ -1079,7 +1272,7 @@ class IndexedRedisQuery(IndexedRedisHelper):
 		if type(res) != dict or not len(res.keys()):
 			return None
 		res['_id'] = pk
-		return self._dictToObj(res)
+		return self._redisResultToObj(res)
 	
 	def getMultiple(self, pks):
 		'''
@@ -1093,7 +1286,7 @@ class IndexedRedisQuery(IndexedRedisHelper):
 
 		if len(pks) == 1:
 			# Optimization to not pipeline on 1 id
-			return QueryableListObjs([self.get(pks[0])])
+			return IRQueryableList([self.get(pks[0])], mdl=self.mdl)
 
 		conn = self._get_connection()
 		pipeline = conn.pipeline()
@@ -1103,7 +1296,7 @@ class IndexedRedisQuery(IndexedRedisHelper):
 
 		res = pipeline.execute()
 		
-		ret = QueryableListObjs()
+		ret = IRQueryableList(mdl=self.mdl)
 		i = 0
 		pksLen = len(pks)
 		while i < pksLen:
@@ -1112,7 +1305,7 @@ class IndexedRedisQuery(IndexedRedisHelper):
 				i += 1
 				continue
 			res[i]['_id'] = pks[i]
-			obj = self._dictToObj(res[i])
+			obj = self._redisResultToObj(res[i])
 			ret.append(obj)
 			i += 1
 			
@@ -1148,7 +1341,7 @@ class IndexedRedisQuery(IndexedRedisHelper):
 			return None
 			
 		objDict['_id'] = pk
-		return self._dictToObj(objDict)
+		return self._redisResultToObj(objDict)
 
 	def getMultipleOnlyFields(self, pks, fields):
 		'''
@@ -1163,7 +1356,7 @@ class IndexedRedisQuery(IndexedRedisHelper):
 			pks = list(pks)
 
 		if len(pks) == 1:
-			return QueryableListObjs([self.getOnlyFields(pks[0], fields)])
+			return IRQueryableList([self.getOnlyFields(pks[0], fields)], mdl=self.mdl)
 		conn = self._get_connection()
 		pipeline = conn.pipeline()
 
@@ -1172,7 +1365,7 @@ class IndexedRedisQuery(IndexedRedisHelper):
 			pipeline.hmget(key, fields)
 
 		res = pipeline.execute()
-		ret = QueryableListObjs()
+		ret = IRQueryableList(mdl=self.mdl)
 		pksLen = len(pks)
 		i = 0
 		numFields = len(fields)
@@ -1198,7 +1391,7 @@ class IndexedRedisQuery(IndexedRedisHelper):
 				continue
 
 			objDict['_id'] = pks[i]
-			obj = self._dictToObj(objDict)
+			obj = self._redisResultToObj(objDict)
 			ret.append(obj)
 			i += 1
 			
@@ -1227,16 +1420,60 @@ class IndexedRedisQuery(IndexedRedisHelper):
 
 	def reindex(self):
 		'''
-			reindex - Reindexes the objects matching current filterset. Use this if you add/remove a field to INDEXED_FIELDS
+			reindex - Reindexes the objects matching current filterset. Use this if you add/remove a field to INDEXED_FIELDS.
+
+			If you change the value of "hashIndex" on a field, you need to call #compat_convertHashedIndexes instead.
 		'''
 		objs = self.all()
 		saver = IndexedRedisSave(self.mdl)
 		saver.reindex(objs)
 
+	def compat_convertHashedIndexes(self, fetchAll=True):
+		'''
+			compat_convertHashedIndexes - Reindex fields, used for when you change the propery "hashIndex" on one or more fields.
+
+			For each field, this will delete both the hash and unhashed keys to an object, 
+			  and then save a hashed or unhashed value, depending on that field's value for "hashIndex".
+
+			For an IndexedRedisModel class named "MyModel", call as "MyModel.objects.compat_convertHashedIndexes()"
+
+			NOTE: This works one object at a time (regardless of #fetchAll), so that an unhashable object does not trash all data.
+
+			This method is intended to be used while your application is offline,
+			  as it doesn't make sense to be changing your model while applications are actively using it.
+
+			@param fetchAll <bool>, Default True - If True, all objects will be fetched first, then converted.
+			  This is generally what you want to do, as it is more efficient. If you are memory contrainted,
+			  you can set this to "False", and it will fetch one object at a time, convert it, and save it back.
+
+		'''
+
+		saver = IndexedRedisSave(self.mdl)
+
+		if fetchAll is True:
+			objs = self.all()
+			saver.compat_convertHashedIndexes(objs)
+		else:
+			didWarnOnce = False
+
+			pks = self.getPrimaryKeys()
+			for pk in pks:
+				obj = self.get(pk)
+				if not obj:
+					if didWarnOnce is False:
+						sys.stderr.write('WARNING(once)! An object (type=%s , pk=%d) disappered while '  \
+							'running compat_convertHashedIndexes! This probably means an application '  \
+							'is using the model while converting indexes. This is a very BAD IDEA (tm).')
+						
+						didWarnOnce = True
+					continue
+				saver.compat_convertHashedIndexes([obj])
+
+
 
 class IndexedRedisSave(IndexedRedisHelper):
 	'''
-		IndexedRedisClass - Class used to save objects. Used with Model.save is called.
+		IndexedRedisSave - Class used to save objects. Used with Model.save is called.
 			Except for advanced usage, this is probably for internal only.
 	'''
 
@@ -1244,7 +1481,7 @@ class IndexedRedisSave(IndexedRedisHelper):
 		'''
 			save - Save an object associated with this model. **Interal Function!!** You probably want to just do object.save() instead of this.
 
-			@param obj - The object to save
+			@param obj <IndexedRedisModel or list<IndexedRedisModel> - The object to save, or a list of objects to save
 			@param usePipeline - Use a pipeline for saving. You should always want this, unless you are calling this function from within an existing pipeline.
 			@param forceID - if not False, force ID to this. If obj is list, this is also list. Forcing IDs also forces insert. Up to you to ensure ID will not clash.
 			@param conn - A connection or None
@@ -1262,7 +1499,7 @@ class IndexedRedisSave(IndexedRedisHelper):
 		else:
 			idConn = self._get_new_connection()
 
-		if isinstance(obj, list) or isinstance(obj, tuple):
+		if issubclass(obj.__class__, (list, tuple)):
 			objs = obj
 		else:
 			objs = [obj]
@@ -1271,7 +1508,7 @@ class IndexedRedisSave(IndexedRedisHelper):
 
 		if forceID is not False:
 			# Compat with old poor design.. :(
-			if isinstance(forceID, tuple) or isinstance(forceID, list):
+			if isinstance(forceID, (list, tuple)):
 				forceIDs = forceID
 			else:
 				forceIDs = [forceID]
@@ -1313,21 +1550,28 @@ class IndexedRedisSave(IndexedRedisHelper):
 
 		return ids
 
+	def saveMultiple(self, objs):
+		'''
+			saveMultiple - Save a list of objects using a pipeline.
+
+			@param objs < list<IndexedRedisModel> > - List of objects to save
+		'''
+		# Right now this can be done with existing save function, but I think that is not clear.
+		return self.save(objs)
+		
 
 	def _doSave(self, obj, isInsert, conn, pipeline=None):
 		if pipeline is None:
 			pipeline = conn
 
-		newDict = obj.toDict()
+		newDict = obj.asDict(forStorage=True)
 		key = self._get_key_for_id(obj._id)
 
 		if isInsert is True:
-			for fieldName in self.fieldNames:
-				fieldValue = newDict.get(fieldName, '')
-				if fieldName in self.base64Fields:
-					fieldValue = b64encode(tobytes(fieldValue))
+			for thisField in self.fields:
+				fieldValue = newDict.get(thisField, '')
 
-				conn.hset(key, fieldName, fieldValue)
+				pipeline.hset(key, thisField, fieldValue)
 
 			self._add_id_to_keys(obj._id, pipeline)
 
@@ -1335,17 +1579,14 @@ class IndexedRedisSave(IndexedRedisHelper):
 				self._add_id_to_index(indexedField, obj._id, newDict[indexedField], pipeline)
 		else:
 			updatedFields = obj.getUpdatedFields()
-			for fieldName, fieldValue in updatedFields.items():
+			for thisField, fieldValue in updatedFields.items():
 				(oldValue, newValue) = fieldValue
 
-				if fieldName in self.base64Fields:
-					newValue = b64encode(tobytes(newValue))
+				pipeline.hset(key, thisField, newValue)
 
-				conn.hset(key, fieldName, newValue)
-
-				if fieldName in self.indexedFields:
-					self._rem_id_from_index(fieldName, obj._id, oldValue, pipeline)
-					self._add_id_to_index(fieldName, obj._id, newValue, pipeline)
+				if thisField in self.indexedFields:
+					self._rem_id_from_index(thisField, obj._id, oldValue, pipeline)
+					self._add_id_to_index(thisField, obj._id, newValue, pipeline)
 
 			obj._origData = copy.copy(newDict)
 
@@ -1361,15 +1602,66 @@ class IndexedRedisSave(IndexedRedisHelper):
 
 		pipeline = conn.pipeline()
 
-		objDicts = [obj.toDict(True) for obj in objs]
+		objDicts = [obj.asDict(True, forStorage=True) for obj in objs]
 
-		for fieldName in self.indexedFields:
+		for indexedFieldName in self.indexedFields:
 			for objDict in objDicts:
-				self._rem_id_from_index(fieldName, objDict['_id'], objDict[fieldName], pipeline)
-				self._add_id_to_index(fieldName, objDict['_id'], objDict[fieldName], pipeline)
+				self._rem_id_from_index(indexedFieldName, objDict['_id'], objDict[indexedFieldName], pipeline)
+				self._add_id_to_index(indexedFieldName, objDict['_id'], objDict[indexedFieldName], pipeline)
 
 		pipeline.execute()
 
+	def compat_convertHashedIndexes(self, objs, conn=None):
+		'''
+			compat_convertHashedIndexes - Reindex all fields for the provided objects, where the field value is hashed or not.
+			If the field is unhashable, do not allow.
+
+			NOTE: This works one object at a time. It is intended to be used while your application is offline,
+			  as it doesn't make sense to be changing your model while applications are actively using it.
+
+			@param objs <IndexedRedisModel objects to convert>
+			@param conn <redis.Redis or None> - Specific Redis connection or None to reuse.
+		'''
+		if conn is None:
+			conn = self._get_connection()
+
+
+
+		# Do one pipeline per object.
+		#  XXX: Maybe we should do the whole thing in one pipeline? 
+
+		fields = []        # A list of the indexed fields
+		hashingFields = {} # A dict of idxField : IRField obj that WILL hash
+
+		# Iterate now so we do this once instead of per-object.
+		for indexedField in self.indexedFields:
+			hashingField = None
+			if indexedField in self.irFields:
+				fields.append(self.irFields[indexedField])
+				if indexedField.hashIndex is True:
+					hashingField = self.irFields[indexedField]
+			else:
+				fields.append(IRField(indexedField))
+			if hashingField is None:
+				hashingField = IRField(str(indexedField), hashIndex=True)
+
+			hashingFields[indexedField] = hashingField
+
+		objDicts = [obj.asDict(True, forStorage=True) for obj in objs]
+
+		# Iterate over all values. Remove the possibly stringed index, the possibly hashed index, and then put forth the hashed index.
+
+		for objDict in objDicts:
+			pipeline = conn.pipeline()
+			pk = objDict['_id']
+			for indexedField in fields:
+				# Remove the possibly stringed index
+				val = objDict[indexedField]
+
+				self._compat_rem_str_id_from_index(indexedField, pk, val, pipeline)
+				self._rem_id_from_index(hashingFields[indexedField], pk, val, pipeline)
+				self._add_id_to_index(indexedField, pk, val, pipeline)
+			pipeline.execute()
 
 
 
@@ -1401,8 +1693,9 @@ class IndexedRedisDelete(IndexedRedisHelper):
 		
 		pipeline.delete(self._get_key_for_id(obj._id))
 		self._rem_id_from_keys(obj._id, pipeline)
-		for fieldName in self.indexedFields:
-			self._rem_id_from_index(fieldName, obj._id, obj._origData[fieldName], pipeline)
+		for indexedFieldName in self.indexedFields:
+			self._rem_id_from_index(indexedFieldName, obj._id, obj._origData[indexedFieldName], pipeline)
+
 		obj._id = None
 
 		if executeAfter is True:
@@ -1455,7 +1748,30 @@ class IndexedRedisDelete(IndexedRedisHelper):
 
 		objs = self.mdl.objects.getMultipleOnlyIndexedFields(pks)
 		return self.deleteMultiple(objs)
+
+	def destroyModel(self):
+		'''
+			destroyModel - Destroy everything related to this model in one swoop.
+
+			    Same effect as Model.reset([]) - Except slightly more efficient.
+
+			    This function is called if you do Model.objects.delete() with no filters set.
+
+			@return - Number of keys deleted. Note, this is NOT number of models deleted, but total keys.
+		'''
+		conn = self._get_connection()
+		pipeline = conn.pipeline()
+		pipeline.eval("""
+		local matchingKeys = redis.call('KEYS', '%s*')
+
+		for _,key in ipairs(matchingKeys) do
+			redis.call('DEL', key)
+		end
+
+		return #matchingKeys
+		""" %( ''.join([INDEXED_REDIS_PREFIX, self.mdl.KEY_NAME, ':']), ), 0)
+		return pipeline.execute()[0]
 		
 	
-		
+
 # vim:set ts=8 shiftwidth=8 softtabstop=8 noexpandtab :

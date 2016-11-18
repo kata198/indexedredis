@@ -1,0 +1,53 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html><head><title>Python: module IndexedRedis.compat_str</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+</head><body bgcolor="#f0f0f8">
+
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
+<tr bgcolor="#7799ee">
+<td valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="IndexedRedis.html"><font color="#ffffff">IndexedRedis</font></a>.compat_str</strong></big></big></font></td
+><td align=right valign=bottom
+><font color="#ffffff" face="helvetica, arial"><a href="IndexedRedis.html">index</a><br></font></td></tr></table>
+    <p><tt>#&nbsp;Copyright&nbsp;(c)&nbsp;2014,&nbsp;2015,&nbsp;2016&nbsp;Timothy&nbsp;Savannah&nbsp;under&nbsp;LGPL&nbsp;version&nbsp;2.1.&nbsp;See&nbsp;LICENSE&nbsp;for&nbsp;more&nbsp;information.<br>
+#<br>
+#&nbsp;IRQueryableList&nbsp;-&nbsp;QueryableList&nbsp;with&nbsp;some&nbsp;added&nbsp;callbacks&nbsp;to&nbsp;IndexedRedis<br>
+#</tt></p>
+<p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#aa55cc">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Modules</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#aa55cc"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><table width="100%" summary="list"><tr><td width="25%" valign=top><a href="sys.html">sys</a><br>
+</td><td width="25%" valign=top></td><td width="25%" valign=top></td><td width="25%" valign=top></td></tr></table></td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#eeaa77">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Functions</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#eeaa77"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><dl><dt><a name="-getDefaultIREncoding"><strong>getDefaultIREncoding</strong></a>()</dt><dd><tt>getEncoding&nbsp;-&nbsp;Get&nbsp;the&nbsp;default&nbsp;encoding&nbsp;that&nbsp;IndexedRedis&nbsp;will&nbsp;use&nbsp;for&nbsp;all&nbsp;field&nbsp;data.<br>
+&nbsp;&nbsp;You&nbsp;can&nbsp;override&nbsp;this&nbsp;on&nbsp;a&nbsp;per-field&nbsp;basis&nbsp;by&nbsp;using&nbsp;an&nbsp;IRField&nbsp;(such&nbsp;as&nbsp;IRUnicodeField&nbsp;or&nbsp;IRRawField)<br>
+&nbsp;<br>
+&nbsp;&nbsp;@return&nbsp;&lt;str&gt;&nbsp;-&nbsp;Default&nbsp;encoding&nbsp;string</tt></dd></dl>
+ <dl><dt><a name="-getEncoding"><strong>getEncoding</strong></a> = _deprecated_wrapper(*args, **kwargs)</dt></dl>
+ <dl><dt><a name="-setDefaultIREncoding"><strong>setDefaultIREncoding</strong></a>(encoding)</dt><dd><tt>setDefaultIREncoding&nbsp;-&nbsp;Sets&nbsp;the&nbsp;default&nbsp;encoding&nbsp;used&nbsp;by&nbsp;IndexedRedis.<br>
+&nbsp;&nbsp;This&nbsp;will&nbsp;be&nbsp;the&nbsp;default&nbsp;encoding&nbsp;used&nbsp;for&nbsp;field&nbsp;data.&nbsp;You&nbsp;can&nbsp;override&nbsp;this&nbsp;on&nbsp;a<br>
+&nbsp;&nbsp;per-field&nbsp;basis&nbsp;by&nbsp;using&nbsp;an&nbsp;IRField&nbsp;(such&nbsp;as&nbsp;IRUnicodeField&nbsp;or&nbsp;IRRawField)<br>
+&nbsp;<br>
+@param&nbsp;encoding&nbsp;-&nbsp;An&nbsp;encoding&nbsp;(like&nbsp;utf-8)</tt></dd></dl>
+ <dl><dt><a name="-setEncoding"><strong>setEncoding</strong></a> = _deprecated_wrapper(*args, **kwargs)</dt></dl>
+ <dl><dt><a name="-to_unicode"><strong>to_unicode</strong></a>(x)</dt><dd><tt>#&nbsp;Python&nbsp;3</tt></dd></dl>
+ <dl><dt><a name="-tobytes"><strong>tobytes</strong></a>(x)</dt></dl>
+</td></tr></table><p>
+<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
+<tr bgcolor="#55aa55">
+<td colspan=3 valign=bottom>&nbsp;<br>
+<font color="#ffffff" face="helvetica, arial"><big><strong>Data</strong></big></font></td></tr>
+    
+<tr><td bgcolor="#55aa55"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
+<td width="100%"><strong>__all__</strong> = ('defaultIREncoding', 'to_unicode', 'tobytes', 'setDefaultIREncoding', 'setEncoding', 'getDefaultIREncoding', 'getEncoding')<br>
+<strong>defaultIREncoding</strong> = 'utf-8'</td></tr></table>
+</body></html>

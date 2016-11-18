@@ -6,7 +6,7 @@ from setuptools import setup
 
 if __name__ == '__main__':
 
-    summary = 'redis-backed very very fast [O(1) efficency searches) ORM-style framework that supports indexes, and complete atomic replacement of datasets'
+    summary = 'A super-fast ORM backed by Redis, supporting models and indexes with O(1) searches'
     try:
         with open('README.rst', 'rt') as f:
             long_description = f.read()
@@ -15,8 +15,8 @@ if __name__ == '__main__':
         long_description = summary
 
     setup(name='indexedredis',
-        version='3.0.3',
-        packages=['IndexedRedis'],
+        version='4.0.0',
+        packages=['IndexedRedis', 'IndexedRedis.fields'],
         install_requires=['redis', 'QueryableList'],
         requires=['redis', 'QueryableList'],
         provides=['indexedredis'],
@@ -36,6 +36,7 @@ if __name__ == '__main__':
             'Programming Language :: Python :: 2.7',
             'Programming Language :: Python :: 3',
             'Programming Language :: Python :: 3.4',
+            'Programming Language :: Python :: 3.5',
             'Topic :: Database :: Front-Ends',
             'Topic :: Software Development :: Libraries :: Python Modules',
         ]
