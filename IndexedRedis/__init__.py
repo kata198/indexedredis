@@ -45,10 +45,10 @@ __all__ = ('INDEXED_REDIS_PREFIX', 'INDEXED_REDIS_VERSION', 'INDEXED_REDIS_VERSI
 INDEXED_REDIS_PREFIX = '_ir_|'
 
 # Version as a tuple (major, minor, patchlevel)
-INDEXED_REDIS_VERSION = (4, 0, 0)
+INDEXED_REDIS_VERSION = (4, 0, 1)
 
 # Version as a string
-INDEXED_REDIS_VERSION_STR = '4.0.0'
+INDEXED_REDIS_VERSION_STR = '4.0.1'
 
 # Package version
 __version__ = INDEXED_REDIS_VERSION_STR
