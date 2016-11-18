@@ -130,57 +130,65 @@ class TestHashedIndexes(object):
         self.models.append(HashedIdxMdlForReindex)
         self.models.append(UnHashedIdxMdlForReindex)
 
-        # Start with same model but one has hash, one does not.
-        #  First, save the value as a hash
-        myObj = HashedIdxMdlForReindex(name='Tim', value='purple')
-        ids = myObj.save()
+        # Test both with fetchAll=True and fetchAll=False (i.e. fetch all beforehand, fetch one-at-a-time.
+        for fetchAll in (True, False):
+            prefixStr = "compat_convertHashedIndexes(fetchAll=%s)" %(str(fetchAll), )
 
-        assert ids , 'Failed to save myObj'
+            HashedIdxMdlForReindex.objects.delete()
+            UnHashedIdxMdlForReindex.objects.delete()
 
-        filterResults = HashedIdxMdlForReindex.objects.filter(value='purple').all()
-        assert len(filterResults) == 1 , 'Expected to get object off filter, but did not'
+            # Start with same model but one has hash, one does not.
+            #  First, save the value as a hash
+            myObj = HashedIdxMdlForReindex(name='Tim', value='purple')
+            ids = myObj.save()
 
-        filterResults = UnHashedIdxMdlForReindex.objects.filter(value='purple').all()
-        assert len(filterResults) == 0, 'Expected to not get objects without using hash filter'
+            otherObj = HashedIdxMdlForReindex(name='George', value='nurple')
 
-        filterResults = UnHashedIdxMdlForReindex.objects.filter(name='Tim').all()
-        assert len(filterResults) == 1, 'Expected to be able to filter using either model on field that does not change.'
+            assert ids , 'Failed to save myObj'
 
-        filterResults = HashedIdxMdlForReindex.objects.filter(name='Tim').all()
-        assert len(filterResults) == 1, 'Expected to be able to filter using either model on field that does not change.'
+            filterResults = HashedIdxMdlForReindex.objects.filter(value='purple').all()
+            assert len(filterResults) == 1 , prefixStr + 'Expected to get object off filter, but did not'
 
-        # Now, reindex using the unhashed model. This should flip everythng.
-        UnHashedIdxMdlForReindex.objects.compat_convertHashedIndexes()
+            filterResults = UnHashedIdxMdlForReindex.objects.filter(value='purple').all()
+            assert len(filterResults) == 0, prefixStr + 'Expected to not get objects without using hash filter'
 
-        filterResults = UnHashedIdxMdlForReindex.objects.filter(value='purple').all()
-        assert len(filterResults) == 1, 'Expected to get object after reindexing without hash'
+            filterResults = UnHashedIdxMdlForReindex.objects.filter(name='Tim').all()
+            assert len(filterResults) == 1, prefixStr + 'Expected to be able to filter using either model on field that does not change.'
 
-        filterResults = HashedIdxMdlForReindex.objects.filter(value='purple').all()
-        assert len(filterResults) == 0, 'Expected to not get object using hash search without hashed index'
+            filterResults = HashedIdxMdlForReindex.objects.filter(name='Tim').all()
+            assert len(filterResults) == 1, prefixStr + 'Expected to be able to filter using either model on field that does not change.'
 
-        filterResults = UnHashedIdxMdlForReindex.objects.filter(name='Tim').all()
-        assert len(filterResults) == 1, 'Expected to be able to filter using either model on field that does not change.'
+            # Now, reindex using the unhashed model. This should flip everythng.
+            UnHashedIdxMdlForReindex.objects.compat_convertHashedIndexes(fetchAll)
 
-        filterResults = HashedIdxMdlForReindex.objects.filter(name='Tim').all()
-        assert len(filterResults) == 1, 'Expected to be able to filter using either model on field that does not change.'
+            filterResults = UnHashedIdxMdlForReindex.objects.filter(value='purple').all()
+            assert len(filterResults) == 1, prefixStr + 'Expected to get object after reindexing without hash'
+
+            filterResults = HashedIdxMdlForReindex.objects.filter(value='purple').all()
+            assert len(filterResults) == 0, prefixStr + 'Expected to not get object using hash search without hashed index'
+
+            filterResults = UnHashedIdxMdlForReindex.objects.filter(name='Tim').all()
+            assert len(filterResults) == 1, prefixStr + 'Expected to be able to filter using either model on field that does not change.'
+
+            filterResults = HashedIdxMdlForReindex.objects.filter(name='Tim').all()
+            assert len(filterResults) == 1, prefixStr + 'Expected to be able to filter using either model on field that does not change.'
 
 
-        # Now, flip back to hashed and perform same tests
+            # Now, flip back to hashed and perform same tests
 
-        HashedIdxMdlForReindex.objects.compat_convertHashedIndexes()
+            HashedIdxMdlForReindex.objects.compat_convertHashedIndexes(fetchAll)
 
-        filterResults = UnHashedIdxMdlForReindex.objects.filter(value='purple').all()
-        assert len(filterResults) == 0, 'Expected to not get object after reindexing with hash'
+            filterResults = UnHashedIdxMdlForReindex.objects.filter(value='purple').all()
+            assert len(filterResults) == 0, prefixStr + 'Expected to not get object after reindexing with hash'
 
-        filterResults = HashedIdxMdlForReindex.objects.filter(value='purple').all()
-        assert len(filterResults) == 1, 'Expected to get object using hash search with hashed index'
+            filterResults = HashedIdxMdlForReindex.objects.filter(value='purple').all()
+            assert len(filterResults) == 1, prefixStr + 'Expected to get object using hash search with hashed index'
 
-        filterResults = UnHashedIdxMdlForReindex.objects.filter(name='Tim').all()
-        assert len(filterResults) == 1, 'Expected to be able to filter using either model on field that does not change.'
+            filterResults = UnHashedIdxMdlForReindex.objects.filter(name='Tim').all()
+            assert len(filterResults) == 1, prefixStr + 'Expected to be able to filter using either model on field that does not change.'
 
-        filterResults = HashedIdxMdlForReindex.objects.filter(name='Tim').all()
-        assert len(filterResults) == 1, 'Expected to be able to filter using either model on field that does not change.'
-
+            filterResults = HashedIdxMdlForReindex.objects.filter(name='Tim').all()
+            assert len(filterResults) == 1, prefixStr + 'Expected to be able to filter using either model on field that does not change.'
 
 
 if __name__ == '__main__':

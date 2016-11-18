@@ -1,92 +1,99 @@
 4.0.0 - ??? ?? ???? INCOMPLETE CHANGELOG - TODO UPDATE
-	- Introduce "IRField" as a type, wherein you can define field properties
-	within the field itself. See examples.py track_number as example.
-	- Implement basic client-side type conversion after fetching. The IRField
-	has a valueType, which, when provided with a type, will convert the value
-	to that type. When "bool" is provided, it will accept "1", "True" (case
-	insensitive) as true, 
-	and "0", "False" (case insensitive) as false, and raise exception for
-	other values.
-	- Add IRNullType which will be used for non-string null values (like if a
-	valueType=int field has never been set, it will be returned as irNull.
-	irNull only equals other IRNullTypes, so it can be filtered out and is
-	different from int(0) for int fields. IRNull != '' or any other False
-	type, except another IRNull.
+- Introduce "IRField" as a type, wherein you can define field properties
+within the field itself. See examples.py track_number as example.
+- Implement basic client-side type conversion after fetching. The IRField
+has a valueType, which, when provided with a type, will convert the value
+to that type. When "bool" is provided, it will accept "1", "True" (case
+insensitive) as true, 
+and "0", "False" (case insensitive) as false, and raise exception for
+other values.
+- Add IRNullType which will be used for non-string null values (like if a
+valueType=int field has never been set, it will be returned as irNull.
+irNull only equals other IRNullTypes, so it can be filtered out and is
+different from int(0) for int fields. IRNull != '' or any other False
+type, except another IRNull.
 
-		So like:
-		from IndexedRedis import irNull
-		...
+	So like:
+	from IndexedRedis import irNull
+	...
 
-		reallyZero = myObjs.filter(age__ne=irNull).filter(age__eq=0)
+	reallyZero = myObjs.filter(age__ne=irNull).filter(age__eq=0)
 
-	- Split up some functionality across a couple files
-	- Introduce an AdvancedFieldValueTypes module, which contains an example
-	advanced field, for a datetime implementation. Pass this as the
-	"valueType" on an IRField to have it automatically convert to/from a
-	datetime. This stores a string on the backend, and is slightly less
-	efficent than using a property and storing an integer, but more
-	convienant.
-	- Introduce an IRPickleField, use this in place of IRField. It only takes
-	one argument right now, "name". It will pickle data before sending to
-	Redis, and automatically unpickle it upon retrieval. I highly recommend
-	not using this unless you absolutely have to, you are better off designing
-	native models than trying to stuff in objects.
-	- Add compression via compressed fields (IRCompressedField in
-	fields.compressed), using zlib or bz2
-	- Change python2 to use unicode everywhere, to match python3 behaviour
-	- Don't try to decode every field with the default encoding. Default is
-	still to decode/encoding using that encoding (for items not in
-	BINARY_FIELDS). Now you can
-	use multiple encodings, or no encodings. There is a new field type,
-	fields.IRUnicodeField which allows specifying a non-default encoding.
-	
-	E.x. :
+- Split up some functionality across a couple files
+- Introduce an AdvancedFieldValueTypes module, which contains an example
+advanced field, for a datetime implementation. Pass this as the
+"valueType" on an IRField to have it automatically convert to/from a
+datetime. This stores a string on the backend, and is slightly less
+efficent than using a property and storing an integer, but more
+convienant.
+- Introduce an IRPickleField, use this in place of IRField. It only takes
+one argument right now, "name". It will pickle data before sending to
+Redis, and automatically unpickle it upon retrieval. I highly recommend
+not using this unless you absolutely have to, you are better off designing
+native models than trying to stuff in objects.
+- Add compression via compressed fields (IRCompressedField in
+fields.compressed), using zlib or bz2
+- Change python2 to use unicode everywhere, to match python3 behaviour
+- Don't try to decode every field with the default encoding. Default is
+still to decode/encoding using that encoding (for items not in
+BINARY_FIELDS). Now you can
+use multiple encodings, or no encodings. There is a new field type,
+fields.IRUnicodeField which allows specifying a non-default encoding.
 
-	FIELDS = [ IRUnicodeField('name_english', encoding='utf-8'),
-	IRUnicodeField('name_jp', encoding='utf-16'),
-	IRUnicodeField('uses_default_encoding') ]
+E.x. :
 
-	You may also use fields.IRRawField which will do no encoding or
-	conversions to/from Redis.
-	- Field Types can implement "toBytes" to allow them to be base64
-	encoded/decoded, in the event that normal decoding wouldn't work (like the
-	IRUnicodeField type)
-	- Implement IRJsonValue which can be passed to valueType of IRField to
-	automatically convert to json before storing, and convert to a python dict
-	upon retrieval.
-	- Implement IRBase64Field as a field type which will base64-encode before
-	sending and base64-decode after retrieving. This adds a slight processing
-	overhead, but will save space and network traffic.
-	- Implement IRFieldChain, which allows chaining multiple field types
-	together. They will be applied left-to-right when going to redis, and
-	right-to-left when coming from. For example, to compress and base64 encode
-	a json dict, use:
+FIELDS = [ IRUnicodeField('name_english', encoding='utf-8'),
+IRUnicodeField('name_jp', encoding='utf-16'),
+IRUnicodeField('uses_default_encoding') ]
 
-	FIELDS = [ ... , 
-	 IRFieldChain('myJsonData', [IRField(valueType=IRJsonValue),
-	 IRCompressedField, IRBase64Field]),
-	 ]
+You may also use fields.IRRawField which will do no encoding or
+conversions to/from Redis.
+- Field Types can implement "toBytes" to allow them to be base64
+encoded/decoded, in the event that normal decoding wouldn't work (like the
+IRUnicodeField type)
+- Implement IRJsonValue which can be passed to valueType of IRField to
+automatically convert to json before storing, and convert to a python dict
+upon retrieval.
+- Implement IRBase64Field as a field type which will base64-encode before
+sending and base64-decode after retrieving. This adds a slight processing
+overhead, but will save space and network traffic.
+- Implement IRFieldChain, which allows chaining multiple field types
+together. They will be applied left-to-right when going to redis, and
+right-to-left when coming from. For example, to compress and base64 encode
+a json dict, use:
 
-	- Implement IRFixedPointField, for safely using floats in filtering and as
-	indexes. You define a fixed precision (decimalPlaces) and values will
-	always be represented/rounded to that many decimal places. This allows
-	values to be defined in a standard away independent of platform.
-	- Ensure "_id" field is always an integer, not mix of either bytes or str
-	- Add destroyModel function to deleter, so you can do
-	MyModel.deleter.destroyModel() to destroy all keys related to the model.
-	Very similar to MyModel.reset([]) but more efficient and direct.
-	- Change MyModel.objects.delete() ( so a delete with no filters, i.e.
-	delete all objects) to call destroyModel. This ensures if you have an
-	invalid model or an incompatible change, you can delete the objects
-	without fetching anything.
-	- Use connection pooling to limit connections to a unqiue Redis server
-	   at 32 (default). I've found that in some cases of network disruption,
-	   python-Redis can leak connections FAST, and within seconds exhaust all
-	   private ports available on a system. 
-	- Support hashed indexes, by passing hashIndex=True to an IRField.
-	  This will create use an md5 hash in the key in lieu of the field value,
-	  which will save memory, network bandwidth, and increase speed where
-	  very large values are indexed.
+FIELDS = [ ... , 
+ IRFieldChain('myJsonData', [IRField(valueType=IRJsonValue),
+ IRCompressedField, IRBase64Field]),
+ ]
+
+- Implement IRFixedPointField, for safely using floats in filtering and as
+indexes. You define a fixed precision (decimalPlaces) and values will
+always be represented/rounded to that many decimal places. This allows
+values to be defined in a standard away independent of platform.
+- Ensure "_id" field is always an integer, not mix of either bytes or str
+- Add destroyModel function to deleter, so you can do
+MyModel.deleter.destroyModel() to destroy all keys related to the model.
+Very similar to MyModel.reset([]) but more efficient and direct.
+- Change MyModel.objects.delete() ( so a delete with no filters, i.e.
+delete all objects) to call destroyModel. This ensures if you have an
+invalid model or an incompatible change, you can delete the objects
+without fetching anything.
+- Use connection pooling to limit connections to a unqiue Redis server
+   at 32 (default). I've found that in some cases of network disruption,
+   python-Redis can leak connections FAST, and within seconds exhaust all
+   private ports available on a system. 
+- Support hashed indexes, by passing hashIndex=True to an IRField.
+  This will create use an md5 hash in the key in lieu of the field value,
+  which will save memory, network bandwidth, and increase speed where
+  very large values are indexed.
+- Add "compat_convertHashedIndexes" on IndexedRedisSave, i.e.
+"MyModel.objects.compat_convertHashedIndexes()" which should be used to
+reindex a model when any field changes the value of the "hashIndex"
+property.
+
+- Probably a lot more stuff, but this has been sitting around for almost 8
+months due to me not having enough time to write up complete documentation!!
 
 -3.1.1 - Apr 15 2016
 - Fix some 4.0 docs that slipped in to 3.0 series
