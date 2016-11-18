@@ -12,8 +12,12 @@ My tests have shown that for using equivalent models between flask/mysql and Ind
 
 It is compatible with python 2.7 and python 3. It has been tested with python 2.7, 3.4, 3.5.
 
+4.0 Status
+----------
 
-**Incomplete -- Does not contain all updates in the 4.0 series -- TODO.**
+**Incomplete -- Does not contain all updates in the 4.0 series, but due to lack of time this stable code with many improvements over IndexedRedis 3 has been sitting idle for 8 months. So I've released it. There should be plenty of examples in the "tests" directory, and it's completely backwards-compatible with IndexedRedis 3, so feel free to explore for new features!.**
+
+If you want to write additional / better documentation, please email me at kata198 at gmail dot com . 
 
 Automatic and Native Types
 --------------------------
@@ -209,6 +213,43 @@ In the above example, you provide "longData" as a string.
 For storage, that string is assumed to be utf-16, and will be compressed (left-to-right)
 
 For fetching, that string is first decompressed, and then encoded using utf-16.
+
+
+**Hash-Lookups (performance)**
+
+
+If you want to index/search on very large strings/bytes (such as maybe a genome), IndexedRedis supports hashing the key, i.e. the value will be stored as the value itself, but the key reference used for lookup will be a hash of that string.
+
+This increases performance, saves network traffic, and shrinks storage requirements.
+
+
+To do this, set the "hashIndex" attribute of an IRField to True.
+
+	FIELDS = [ \
+
+	...
+		IRField ( 'genomeStr', hashIndex=True )
+	]
+
+and that's it! Filter and fetch and all operations remain the same (i.e. you just use the value directly, same as if "hashIndex" was False), but behind-the-scenes the lookups will all be done with the MD5 hash of the value.
+
+
+**Converting existing models to/from hashed indexes**
+
+
+IndexedRedis provides helper methods to automatically convert existing unhashed keys to hashed, and also hashed keys back to unhashed.
+
+To do this, change your IndexedRedisModel accordingly, and then call (for a model class named MyModel):
+
+	MyModel.objects.compat_convertHashedIndexes()
+
+This will delete both the hashed and non-hashed key-value for any IRField which supports the "hashIndex" property.
+If you just call "reindex" and you've changed the property "hashIndex" on any field, you'll be left with lingering key-values.
+
+This function, by default (fetchAll=True) will fetch all records of this paticular model, and operate on them one-by-one. This is more efficient, but if memory constraints are an issue, you can pass fetchAll=False, which will fetch one object, convert indexes, save, then fetch next object. This is slower, but uses less memory.
+
+NOTHING should be using the models while this function is being called (it doesn't make sense anyway to change schema whilst using it).
+
 
 
 Model Validation

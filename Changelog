@@ -1,4 +1,11 @@
-4.0.0 - ??? ?? ???? INCOMPLETE CHANGELOG - TODO UPDATE
+4.0.0 - Fri Nov 18 2016 INCOMPLETE CHANGELOG - TODO UPDATE
+
+NOTE - This is not a complete changelog, but I haven't had time, and
+IndexedRedis 4.0 has sat stable and idle for 8 months! It is completely
+backwards compatible with IndexedRedis 3.0, and there are plenty of code
+examples in the "tests" directory to get you started on indulging in all the
+great new features. <3 <3
+
 - Introduce "IRField" as a type, wherein you can define field properties
 within the field itself. See examples.py track_number as example.
 - Implement basic client-side type conversion after fetching. The IRField
