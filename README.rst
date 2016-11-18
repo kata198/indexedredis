@@ -35,7 +35,7 @@ API Reference
 Most, but not all methods are convered in this document.
 For full pydoc reference, see:
 
-http://htmlpreview.github.io/?https://github.com/kata198/indexedredis/blob/4.0/doc/IndexedRedis.html#IndexedRedisQuery 
+https://pythonhosted.org/indexedredis/
 
 
 **Below is a quick highlight/overview:**
