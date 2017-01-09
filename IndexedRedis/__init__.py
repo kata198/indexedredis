@@ -1,4 +1,4 @@
-# Copyright (c) 2014, 2015, 2016 Timothy Savannah under LGPL version 2.1. See LICENSE for more information.
+# Copyright (c) 2014, 2015, 2016, 2017 Timothy Savannah under LGPL version 2.1. See LICENSE for more information.
 #  IndexedRedis A redis-backed very very fast ORM-style framework that supports indexes, and searches with O(1) efficency.
 #    It has syntax similar to Django and Flask and other ORMs, but is itself unique in many ways.
 
@@ -362,7 +362,12 @@ class IndexedRedisModel(object):
 			else:
 				val = to_unicode(kwargs.get(thisField, ''))
 			setattr(self, thisField, val)
-			self._origData[thisField] = val
+			# Generally, we want to copy the value incase it is used by reference (like a list)
+			#   we will miss the update (an append will affect both).
+			try:
+				self._origData[thisField] = copy.copy(val)
+			except:
+				self._origData[thisField] = val
 
 		self._id = kwargs.get('_id', None)
 	
@@ -403,6 +408,33 @@ class IndexedRedisModel(object):
 
 	toDict = asDict
 
+
+	def _convertFieldForStorage(self, thisField, val):
+		'''
+			_convertFieldForStorage - Converts a field to its storage representation
+
+			@param thisField <IRField/str> - A field on the model
+			@param val <?> - The value of that field to convert to storage representation
+
+			@return <?> - The storage representation of "val"
+		'''
+		if issubclass(thisField.__class__, IRField) and hasattr(thisField, 'toStorage'):
+			val = thisField.toStorage(val)
+		elif thisField in self.BASE64_FIELDS or thisField in self.BINARY_FIELDS:
+			val = tobytes(val)
+		else:
+			val = to_unicode(val)
+
+		if thisField in self.BASE64_FIELDS:
+			if hasattr(thisField, 'toBytes'):
+				val = thisField.toBytes(val)
+			else:
+				val = tobytes(val)
+			val = b64encode(val)
+
+		return val
+
+
 	def hasUnsavedChanges(self):
 		'''
 			hasUnsavedChanges - Check if any unsaved changes are present in this model, or if it has never been saved.
@@ -441,6 +473,26 @@ class IndexedRedisModel(object):
 			if self._origData.get(thisField, '') != thisVal:
 				updatedFields[thisField] = (self._origData[thisField], thisVal)
 		return updatedFields
+
+	def _getUpdatedFieldsForStorage(self):
+		'''
+			_getUpdatedFieldsForStorage - Gets any changed fields, taking into account the storage representation
+
+			@return - A dictionary of the fieldName : tuple(oldStorage, newStorage)
+
+			fieldName may be a string or may implement IRField (which implements string, and can be used just like a string)
+		'''
+
+		updatedFields = {}
+		for thisField in self.FIELDS:
+			thisVal = getattr(self, thisField, '')
+			thisVal = self._convertFieldForStorage(thisField, thisVal)
+
+			origVal = self._convertFieldForStorage(thisField, self._origData.get(thisField, ''))
+			if thisVal != origVal:
+				updatedFields[thisField] = (origVal, thisVal)
+		return updatedFields
+
 
 	@classproperty
 	def objects(cls):
@@ -1582,13 +1634,17 @@ class IndexedRedisSave(IndexedRedisHelper):
 			for thisField, fieldValue in updatedFields.items():
 				(oldValue, newValue) = fieldValue
 
-				pipeline.hset(key, thisField, newValue)
+				oldValueForStorage = obj._convertFieldForStorage(thisField, oldValue)
+				newValueForStorage = obj._convertFieldForStorage(thisField, newValue)
+
+				pipeline.hset(key, thisField, newValueForStorage)
 
 				if thisField in self.indexedFields:
-					self._rem_id_from_index(thisField, obj._id, oldValue, pipeline)
-					self._add_id_to_index(thisField, obj._id, newValue, pipeline)
+					self._rem_id_from_index(thisField, obj._id, oldValueForStorage, pipeline)
+					self._add_id_to_index(thisField, obj._id, newValueForStorage, pipeline)
 
-			obj._origData = copy.copy(newDict)
+				obj._origData[thisField] = newValue
+
 
 	def reindex(self, objs, conn=None):
 		'''
