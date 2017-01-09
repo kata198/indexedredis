@@ -1,3 +1,11 @@
+4.1.0 - Mon Jan 9 2017
+- Fix issue where fields that implemented toStorage (complex IRFields) would sometimes have problems
+doing updates
+- Fix issue where field values that work as-reference (like lists) would be seen to not update. We now make
+a copy in the "_origData" dict, if possible. If doesn't support copy.copy, we fallback to value assignment.
+- Add tests, specifically for IRPickleField with lists where these issues came up
+
+
 4.0.2 - Fri Nov 18 2016
 - Update link to pypi to be pythonhosted.org
 
