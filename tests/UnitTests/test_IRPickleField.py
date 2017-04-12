@@ -59,8 +59,6 @@ class TestIRField(object):
 
 
     def test_withStrings(self):
-        # NOTE: This is currently failing. Pickle field doesn't currently work with strings or bytes
-        assert False , 'Pickle field does not currently support string/byte values'
         SimpleIRPickleFieldModel = self.model
 
         myObj = SimpleIRPickleFieldModel(name='test1')
@@ -135,11 +133,29 @@ class TestIRField(object):
         myObjRefetched = SimpleIRPickleFieldModel.objects.filter(name='test1').first()
 
         assert myObj.data == ['one', 'two', 'three'] , 'Expected to be able to modify and update a pickled list. Got back: %s' %(repr(myObj.data),)
+
+        bytes_data = b'\x11\x22\x33\x44\xAA\xBB\xCC'
+        bytes_data2 = b'\xDD\xEE'
+
+        myObj.data = bytes_data
+
+        myObj.save()
+
+        myObjRefetched = SimpleIRPickleFieldModel.objects.filter(name='test1').first()
         
+        assert myObjRefetched.data == bytes_data , 'Expected to be able to save bytes data in IRPickleField'
+
+        myObj = myObjRefetched
+        
+        myObj.data = bytes_data2
+        myObj.save()
+
+
+        myObjRefetched = SimpleIRPickleFieldModel.objects.filter(name='test1').first()
+        
+        assert myObjRefetched.data == bytes_data2 , 'Expected to be able to modify bytes data in IRPickleField.\nGot:  \t\t%s\nExpected:\t%s' %(repr(bytes_data2), repr(myObjRefetched.data))
 
         
-
-
 
 
 if __name__ == '__main__':

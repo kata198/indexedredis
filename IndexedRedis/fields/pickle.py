@@ -1,4 +1,4 @@
-# Copyright (c) 2014, 2015, 2016 Timothy Savannah under LGPL version 2.1. See LICENSE for more information.
+# Copyright (c) 2014, 2015, 2016, 2017 Timothy Savannah under LGPL version 2.1. See LICENSE for more information.
 #
 # fields.pickle - Some types and objects related to pickled . Use this in place of IRField ( in FIELDS array ) to activate
 
@@ -13,6 +13,8 @@ try:
 except ImportError:
 	import pickle
 
+from IndexedRedis.compat_str import isStringy, isEncodedString, tobytes
+
 # NOTE: This pickle class originally had implcit base64 encoding and decoding so it could be used for indexes,
 #  but even with same protocol python2 and python3, and possibly even different platforms and same version
 #  create different pickles for the same objects. Can be as simple as the system supports microseconds,
@@ -22,6 +24,9 @@ try:
 	unicode
 except NameError:
 	unicode = str
+
+
+PICKLE_HEADER = b'~\x06\x28\x19\x89PKL'
 
 class IRPickleField(IRField):
 	'''
@@ -36,12 +41,35 @@ class IRPickleField(IRField):
 	def __init__(self, name=''):
 		self.valueType = None
 
+	@staticmethod
+	def _ensure_pickle_header(value):
+		value = tobytes(value)
+		if not value.startswith(PICKLE_HEADER):
+			return PICKLE_HEADER + value
+		return value
+
+	@staticmethod
+	def _strip_pickle_header(value):
+		value = tobytes(value)
+		if value.startswith(PICKLE_HEADER):
+			value = value[len(PICKLE_HEADER):]
+		return value
+	
+	@staticmethod
+	def _has_pickle_header(value):
+		value = tobytes(value)
+		return value.startswith(PICKLE_HEADER)
+
+
 	def toStorage(self, value):
 		if self._isNullValue(value):
 			return value
-		if type(value) in (str, unicode):
-			return value
-		return pickle.dumps(value, protocol=2)
+		if isStringy(value):
+			if IRPickleField._has_pickle_header(value):
+				return value
+
+		return IRPickleField._ensure_pickle_header(pickle.dumps(value, protocol=2))
+		raise AssertionError("oops, didn't expect a %s object!" %(value.__class__.__name__, ))
 
 	def convert(self, value):
 		if not value:
@@ -52,18 +80,11 @@ class IRPickleField(IRField):
 			return loadedPickle
 		return origData
 
-	if sys.version_info.major == 2:
-		@staticmethod
-		def __loadPickle(value):
-			if hasattr(value, 'encode'):
-				return pickle.loads(value)
-			return None
-	else:
-		@staticmethod
-		def __loadPickle(value):
-			if type(value) == bytes:
-				return pickle.loads(value, encoding='bytes')
-			return None
+	@staticmethod
+	def __loadPickle(value):
+		if not isEncodedString(value) and isStringy(value) and IRPickleField._has_pickle_header(value):
+			return pickle.loads(IRPickleField._strip_pickle_header(value))
+		return None
 
 	def __new__(self, name=''):
 		return IRField.__new__(self, name)
