@@ -1,3 +1,21 @@
+5.0.0 - ??? ??? ? ????
+
+- Improve IRPickleField to work with ALL types (including now, strings and
+bytes)
+  **BACKWARDS INCOMPATIBLE**
+  This changes the way IRPickleField stores data.
+
+  You can use Model.compat_convertPickleFields() to convert the data in all
+  pickle fields on all objects. You MUST run this after upgrade, as it does
+  not support a mix of new and old format.
+
+  If you need to stay up and running for a while after upgrade, change the
+  field to be:
+    from IndexedRedis.fields.compat_pickle import IRCompatPickleField
+
+  But you should really just convert right away, This compat field will not be
+  around long and may be removed at any time in the future
+
 4.1.0 - Mon Jan 9 2017
 - Fix issue where fields that implemented toStorage (complex IRFields) would sometimes have problems
 doing updates
