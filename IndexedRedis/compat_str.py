@@ -102,6 +102,12 @@ if bytes == str:
 			return x
 		return str(x)
 #	tobytes = lambda x : str(x)
+
+	def isStringy(x):
+		return issubclass(x.__class__, basestring)
+	
+	encoded_str_type = unicode
+
 else:
 	# Python 3
 	def to_unicode(x):
@@ -113,5 +119,13 @@ else:
 		if isinstance(x, bytes) is True:
 			return x
 		return x.encode(defaultIREncoding)
+
+	def isStringy(x):
+		return issubclass(x.__class__, (str, bytes))
+
+	encoded_str_type = str
+
+def isEncodedString(x):
+	return issubclass(x.__class__, encoded_str_type)
 
 # vim: set ts=8 shiftwidth=8 softtabstop=8 noexpandtab :
