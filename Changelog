@@ -36,6 +36,9 @@ This allows there to be a difference from not-set and empty-string value items
   item was set to default string, or empty value. It's on you to make sure
   your code either handles both, or you convert your datasets accordingly. 
 
+- Remove formerly deprecated IndexedRedisModel.BASE64_FIELDS - You've been
+warned for a while now to use fields.IRField.IRBase64Field
+
 4.1.1 - Wed Apr 12 2017
 
 - Ensure that the "origData" structure gets updated after a save which
