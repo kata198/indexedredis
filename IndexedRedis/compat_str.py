@@ -89,6 +89,7 @@ def getEncoding():
 if bytes == str:
 	# Python 2
 	def to_unicode(x):
+		global defaultIREncoding
 		if isinstance(x, unicode):
 			return x
 		elif isinstance(x, str):
@@ -98,9 +99,13 @@ if bytes == str:
 
 
 	def tobytes(x):
+		global defaultIREncoding
 		if isinstance(x, str):
 			return x
-		return str(x)
+		try:
+			return str(x)
+		except:
+			return x.encode(defaultIREncoding)
 #	tobytes = lambda x : str(x)
 
 	def isStringy(x):
@@ -111,11 +116,13 @@ if bytes == str:
 else:
 	# Python 3
 	def to_unicode(x):
+		global defaultIREncoding
 		if isinstance(x, bytes) is False:
 			return str(x)
 		return x.decode(defaultIREncoding)
 
 	def tobytes(x):
+		global defaultIREncoding
 		if isinstance(x, bytes) is True:
 			return x
 		return x.encode(defaultIREncoding)
