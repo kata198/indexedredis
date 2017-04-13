@@ -7,7 +7,7 @@
 
 from . import IRField, irNull
 
-from ..compat_str import tobytes
+from ..compat_str import tobytes, isStringy
 
 from base64 import b64decode, b64encode
 
@@ -32,11 +32,13 @@ class IRBase64Field(IRField):
 			return value
 
 		# TODO: do this better maybe?
-		if not issubclass(value.__class__, (str, unicode, bytes)):
+		if not isStringy(value):
 			return value
 
 		try:
-			return b64decode(tobytes(value))
+			# In python2, this will return empty string if it fails sometimes
+			#  python3 always raises exception
+			return b64decode(tobytes(value)) or value
 		except Exception as e:
 			# XXX: remove this print before release
 			print ("Exception %s\n" %(str(e),))
