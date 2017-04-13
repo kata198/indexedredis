@@ -1,3 +1,10 @@
+4.1.2 - Wed Apr 12 2017
+
+- Fix some potential encoding issues on python2
+- Fixup some potential issues with IRBase64Field on python2 ( keep in mind,
+BASE64_FIELDS is going away in IndexedRedis 5.0.0! )
+- Some minor performance updates in encoding/decoding paths
+
 4.1.1 - Wed Apr 12 2017
 
 - Ensure that the "origData" structure gets updated after a save which
