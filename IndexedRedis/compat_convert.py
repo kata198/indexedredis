@@ -7,8 +7,6 @@ import copy
 
 # vim:set ts=8 shiftwidth=8 softtabstop=8 noexpandtab :
 
-# TODO: Add a "filterFetchOnlyFields" helper method
-
 def compat_convertPickleFields(mdlClass):
 	'''
 		compat_convertPickleFields - Convert pickle fields on given model from the old format to the new format.
@@ -29,8 +27,6 @@ def compat_convertPickleFields(mdlClass):
 
 	pickleFieldsStr = [str(field) for field in pickleFields]
 
-	allPks = mdlClass.objects.getPrimaryKeys()
-
 
 	oldFields = copy.copy(mdlClass.FIELDS)
 
@@ -40,7 +36,7 @@ def compat_convertPickleFields(mdlClass):
 			mdlClass.FIELDS[i] = IRCompatPickleField(str(oldFields[i]))
 
 
-	partialObjs = mdlClass.objects.getMultipleOnlyFields(allPks, pickleFieldsStr)
+	partialObjs = mdlClass.objects.allOnlyFields(pickleFieldsStr)
 
 	# Restore fields
 	mdlClass.FIELDS = copy.copy(oldFields)
