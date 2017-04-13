@@ -6,7 +6,11 @@
 
 # vim:set ts=8 shiftwidth=8 softtabstop=8 noexpandtab :
 
-__all__ = ('IRField', 'IRNullType', 'irNull', 'IRPickleField', 'IRCompressedField', 'IRUnicodeField', 'IRRawField', 'IRBase64Field', 'IRFixedPointField', 'IRDatetimeValue', 'IRJsonValue', 'IR_NULL_STR', 'IR_NULL_BYTES', 'IR_NULL_UNICODE', 'IR_NULL_STRINGS' )
+__all__ = ('IRField', 'IRNullType', 'irNull', 'IRPickleField', 
+	'IRCompressedField', 'IRUnicodeField', 'IRRawField', 'IRBase64Field', 
+	'IRFixedPointField', 'IRDatetimeValue', 'IRJsonValue', 
+	'IRBytesField',
+	'IR_NULL_STR', 'IR_NULL_BYTES', 'IR_NULL_UNICODE', 'IR_NULL_STRINGS' )
 
 import sys
 from datetime import datetime
@@ -70,7 +74,10 @@ class IRField(str):
 				act the same as non-IRField FIELDS entries (just plain string), i.e. they are encoded to unicode to and from Redis.
 
 				If you pass in None, then no decoding will take place (so whatever you provide goes in, and bytes come out of Redis).
+				This is similar to IRFieldRaw
+
 				On python3, if you pass bytes, than the field will be left as bytes.
+				To be both python2 and python3 compatible, however, you can use IRBytesField
 
 				If bool is used, then "1" and "true" are True, "0" and "false" are False, any other value is an exception.
 
@@ -183,17 +190,6 @@ class IRField(str):
 		return tobytes(value)
 	
 
-
-	# TODO: Test if including this function and then deleting it later will put it in pydoc.
-#	def toBytes(self, value):
-#		'''
-#			toBytes - Implement this function to return a "bytes" version of your object, to support base64 encoding
-#			  if default encoding won't work.
-#		'''
-#		raise NotImplementedError('toBytes is not really here.')
-#	del toBytes
-		
-
 	def _noConvert(self, value):
 		return value
 
@@ -283,6 +279,7 @@ from .raw import IRRawField
 from .chain import IRFieldChain
 from .b64 import IRBase64Field
 from .fixedpoint import IRFixedPointField
+from .bytes import IRBytesField
 
 from .FieldValueTypes import IRDatetimeValue, IRJsonValue
 
