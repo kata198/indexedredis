@@ -756,7 +756,10 @@ class IndexedRedisModel(object):
 			raise InvalidModelException('%s No fields defined. Please populate the FIELDS array with a list of field names' %(failedValidationStr,))
 
 		if base64FieldSet:
-			deprecatedMessage('Using BASE64_FIELDS array is deprecated. Please transition to use IndexedRedis.fields.IRBase64Field directly or in an IndexedRedis.fields.IRFieldChain', 'BASE64_FIELDS')
+			deprecatedMessage('Using BASE64_FIELDS array is deprecated. Please transition to use IndexedRedis.fields.IRBase64Field directly or in an IndexedRedis.fields.IRFieldChain. THIS IS GOING AWAY IN 5.0.0!!! SEE CHANGELOG', 'BASE64_FIELDS')
+
+		if binaryFieldSet:
+			deprecatedMessage('Using BINARY_FIELDS array is deprecated. Please transition to use IndexedRedis.fields.IRBytesField directly or in a IRFieldChain as a replacement. THIS IS GOING AWAY IN 5.0.0!!! SEE CHANGELOG', 'BINARY_FIELDS')
 
 		for thisField in fieldSet:
 			if thisField == '_id':
