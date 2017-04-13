@@ -38,6 +38,7 @@ This allows there to be a difference from not-set and empty-string value items
 
 - Remove formerly deprecated IndexedRedisModel.BASE64_FIELDS - You've been
 warned for a while now to use fields.IRField.IRBase64Field
+  **BACKWARDS INCOMPATIBLE**
   To convert, remove the BASE64_FIELDS array from your model. For any items
   that are in it, change it in the FIELDS array to be:
     IRBase64Field
@@ -54,6 +55,13 @@ warned for a while now to use fields.IRField.IRBase64Field
 
   Models with BASE64_FIELDS defined will generate an error upon validation.
 
+- Remove IndexedRedis.BINARY_FIELDS - Use the new IRBytesField to act the same
+way as a BINARY_FIELD did on python3 or python2, use IRField(valueType=bytes)
+[python 3 only], or use IRRawField for no encoding/decoding at all. You can
+combine these in a chain just like IRBase64Field.
+  **BACKWARDS INCOMPATIBLE**
+
+  Models with BINARY_FIELDS defined will generate an error upon validation.
 
 
 4.1.2 - Wed Apr 12 2017
