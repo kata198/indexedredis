@@ -809,6 +809,19 @@ class IndexedRedisModel(object):
 			REDIS_CONNECTION_PARAMS = redisConnectionParams
 		return ConnectedIndexedRedisModel
 
+	def compat_convertPickleFields(mdlClass):
+		'''
+			compat_convertPickleFields - Convert pickle fields on given model from the old format to the new format.
+
+			This is not threadsafe, should be run while things are not in motion. Will only affect the pickle-type fields.
+
+			This function expects that all objects are either old format or new format, does not handle mixed.
+
+			You should set your models to use IRNewPickleField, then call this method.
+		
+		'''
+		from compat_convert import compat_convertPickleFields
+		compat_convertPickleFields(mdlClass)
 
 		
 class IndexedRedisHelper(object):
