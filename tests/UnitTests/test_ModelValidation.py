@@ -117,6 +117,33 @@ class TestModelValidation(object):
 
         self.__testMethods(ValidModel, 'Valid Model', '', shouldHaveException=False)
 
+    def test_base64FieldsError(self):
+
+        class InvalidModelBase64(IndexedRedisModel):
+            FIELDS = ['a', 'b']
+            INDEXED_FIELDS = ['a']
+
+            BASE64_FIELDS = ['b']
+
+            KEY_NAME='Test_InvalidBase64'
+
+        self.__testMethods(InvalidModelBase64, 'Model has removed support for BASE64_FIELDS', '', shouldHaveException=True)
+
+
+    def test_binaryFieldsError(self):
+
+        class InvalidModelBase64(IndexedRedisModel):
+            FIELDS = ['a', 'b']
+            INDEXED_FIELDS = ['a']
+
+            BINARY_FIELDS = ['b']
+
+            KEY_NAME='Test_InvalidBinary'
+
+        self.__testMethods(InvalidModelBase64, 'Model has removed support for BINARY_FIELDS', '', shouldHaveException=True)
+
+            
+
             
 if __name__ == '__main__':
     sys.exit(subprocess.Popen('GoodTests.py "%s"' %(sys.argv[0],), shell=True).wait())
