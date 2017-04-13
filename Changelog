@@ -1,3 +1,30 @@
+4.1.3 - Wed Apr 12 2017
+
+** IMPORTANT -- UPGRADE TO THIS, ADJUST YOUR CODE IN DEV TO PREPARE FOR 5.0.0
+**
+
+- Add IRBytesField to work the same as BINARY_FIELDS on both python2 and 3.
+BINARY_FIELDS is going away in python 5.0.0
+
+- Add the new Pickle field implementation from 5.0.0 (which supports pickling
+ALL types, but is not compatible). This is named IRNewPickleField and can be
+found in
+	from IndexedRedis.fields.new_pickle import IRNewPickleField
+
+You can change your models to use this field, then on each model call
+	myModel.compat_convertPickleFields()
+
+to convert the data form the old form to the new form.
+
+Please see the 5.0.0 preview release also released today.
+
+At 4.1.3 you can
+make all your code forwards-compatible (with the exception of pickle fields,
+which need to be converted post-update)
+
+Several things are changing backwards-incompatible, but if you start making
+changes now, you can run on 4.1.3 and then upgrade to 5.0.0 without issue.
+
 4.1.2 - Wed Apr 12 2017
 
 - Fix some potential encoding issues on python2
