@@ -205,7 +205,7 @@ Example:
 
 	...
 
-		IRChainField( 'longData', [ IRUnicodeField(encoding='utf-16'), IRCompressedField() ] )
+		IRFieldChain( 'longData', [ IRUnicodeField(encoding='utf-16'), IRCompressedField() ] )
 	]
 
 In the above example, you provide "longData" as a string. 
