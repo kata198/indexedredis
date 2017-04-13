@@ -1,4 +1,18 @@
-5.0.0 - ??? ??? ? ????
+5.0.0preview - Apr 13 2017 - Official release TBD
+
+This is a PREVIEW RELEASE for 5.0.0. This change has many
+backwards-incompatible changes, which improve the code quality, reduce corner
+cases, make things more consistent and more versatile, etc.
+
+If you are using IndexedRedis and plan to upgrade at any point, it is a good
+idea to check and update your codebase to deal with the changes here.
+
+See the Changelog for details, thus far you can be compatible with 4.1.3 and
+5.0.0 at the same time, though a few features (like default irNull for all
+IRField's) will not occur until you update (though you can prepare your
+conditionals for both).
+
+
 
 - Improve IRPickleField to work with ALL types (including now, strings and
 bytes)
