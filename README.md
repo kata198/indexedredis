@@ -94,27 +94,6 @@ This is the model you should extend.
 	 Example: {'host' : '192.168.1.1'}
 
 
-**Deprecated Fields:**
-
-The following class-level items have been deprecated in 4.0 and may be removed in a future version of IndexedRedis. 
-
-
-*BINARY_FIELDS* - A list of strings containing the names of fields which will be stored directly as unencoded bytes. This is generally faster and more space-efficient than using BASE64\_FIELDS, and should be used for purely binary data.
-
-	Example: ['picture', 'mp3_data']
-
-!!Deprecated. Use IRRawField  or IRField(..., valueType=None) for binary data. 
-
-
-*BASE64_FIELDS* - A list of strings containing the names of fields which will be automatically converted to/from base64 for storage. This is one way to store binary data, e.x. audio or pictures.
-
-	Example: ['picture', 'mp3_data']
-
-!!Deprecated. Use IRBase64Field for automatic to/from base64 conversion. You can combine this with IRCompressedField which may decrease storage requirements.
-
-Example:   IRFieldChain( 'myBase64Data', [ IRBase64Field(), IRCompressedField() ] )
-
-
 Advanced Fields
 ---------------
 
@@ -145,7 +124,9 @@ floats to work cross-platform. Use a fixed point number as the string type ( lik
 
 **NULL Values**
 
-    For any type except strings (including the default type, string), a null value is assigned irNull (of type IRNullType).
+For any type except strings (including the default type, string), a null value is assigned irNull (of type IRNullType).
+
+If any IRField is unassigned, it holds a value of *irNull*. For classic string-fields (not IRField, just a string in FIELDS array), the default value remains empty string.
 
 irNull does not equal empty string, or anything except another irNull. This is to destinguish say, no int assigned vs int(0)
 
@@ -193,6 +174,9 @@ When no valueType is defined, str/unicode is the type (same as pre-4.0), and def
 *IRUnicodeField* - Field that takes a parameter, "encoding", to define an encoding to use for this field. Use this to support fields with arbitrary encodings, as IRField will use the default encoding for strings.
 
 *IRRawField* - Field that is not converted in any, to or from Redis. On fetch this will always be "bytes" type (or str in python2). On python3 this is very similar to IRField(...valueType=None), but python2 needs this to store binary data without running into encoding issues.
+
+
+*IRBytesField* - Field that forces the data to be "bytes", python2 and python3 compatible. If you need python3 only, you can use IRField(valueType=bytes). For no encoding/decoding at all, see IRRawField
 
 
 **Chaining Multiple Types**
@@ -411,16 +395,25 @@ You may change this via IndexedRedis.setDefaultIREncoding.
 Use IRRawField to not perform any encoding/decoding, or use IRUnicodeField to use a different explicit encoding at a per-field level.
 
 
+Backwards-Incompatible Changes
+------------------------------
+
+IndexedRedis 5.0.0 introduces several backwards-incompatible changes. See Changelog for details.
+
 Changes
 -------
 
 See https://raw.githubusercontent.com/kata198/indexedredis/master/Changelog
 
-Example
--------
+Examples
+--------
 
 
-See https://raw.githubusercontent.com/kata198/indexedredis/master/test.py
+See https://raw.githubusercontent.com/kata198/indexedredis/master/example.py
+
+Also check out
+
+https://github.com/kata198/indexedredis/tree/master/tests/simple
 
 
 Contact Me
