@@ -13,8 +13,6 @@ import sys
 import uuid
 import redis
 
-from base64 import b64encode, b64decode
-
 from . import fields
 from .fields import IRField, IRFieldChain, IRNullType, irNull, IR_NULL_STR, IR_NULL_BYTES, IR_NULL_STRINGS
 from .compat_str import to_unicode, tobytes, defaultEncoding, setEncoding, getEncoding, setDefaultIREncoding, getDefaultIREncoding
@@ -163,10 +161,6 @@ class IndexedRedisModel(object):
             *INDEXED_FIELDS* -  a list of strings containing the names of fields that will be indexed. Can only filter on indexed fields. Adds insert/delete time. Contents must also be in FIELDS.
 
                     Example: ['Name', 'Model']
-
-            *BASE64_FIELDS* - A list of strings which name the fields that will be stored as base64-encoded strings. All entries must also be present in FIELDS.
-
-                    Example: ['data', 'blob']
 
 	    *BINARY_FIELDS* - A list of strings which name the fields that will be stored as unencoded binary data. All entries must also be present in FIELDS. 
 
@@ -330,9 +324,6 @@ class IndexedRedisModel(object):
 	#  You can only search on indexed fields, but they add time to insertion/deletion
 	INDEXED_FIELDS = []
 
-	# BASE64 FIELDS - Fields in this list (must also be present in FIELDS) are encoded into base64 before sending and decoded upon retriving.
-	BASE64_FIELDS = []
-
 	# BINARY_FIELDS - Fields that are not encoded in any way
 	BINARY_FIELDS = []
 	
@@ -363,7 +354,7 @@ class IndexedRedisModel(object):
 
 				elif val != irNull:
 					val = thisField.convert(val)
-			elif thisField in self.BASE64_FIELDS or thisField in self.BINARY_FIELDS:
+			elif thisField in self.BINARY_FIELDS:
 				val = tobytes(kwargs.get(thisField, b''))
 			else:
 				val = to_unicode(kwargs.get(thisField, ''))
@@ -398,17 +389,10 @@ class IndexedRedisModel(object):
 			elif issubclass(thisField.__class__, IRField) and hasattr(thisField, 'toStorage'):
 				if forStorage is True:
 					val = thisField.toStorage(val)
-			elif thisField in self.BASE64_FIELDS or thisField in self.BINARY_FIELDS:
+			elif thisField in self.BINARY_FIELDS:
 				val = tobytes(val)
 			else:
 				val = to_unicode(val)
-
-			if forStorage is True and thisField in self.BASE64_FIELDS:
-				if hasattr(thisField, 'toBytes'):
-					val = thisField.toBytes(val)
-				else:
-					val = tobytes(val)
-				val = b64encode(val)
 
 			ret[thisField] = val
 				
@@ -434,17 +418,10 @@ class IndexedRedisModel(object):
 
 		if issubclass(thisField.__class__, IRField) and hasattr(thisField, 'toStorage'):
 			val = thisField.toStorage(val)
-		elif thisField in self.BASE64_FIELDS or thisField in self.BINARY_FIELDS:
+		elif thisField in self.BINARY_FIELDS:
 			val = tobytes(val)
 		else:
 			val = to_unicode(val)
-
-		if thisField in self.BASE64_FIELDS:
-			if hasattr(thisField, 'toBytes'):
-				val = thisField.toBytes(val)
-			else:
-				val = tobytes(val)
-			val = b64encode(val)
 
 		return val
 
@@ -460,10 +437,6 @@ class IndexedRedisModel(object):
 
 		for thisField in self.FIELDS:
 			thisVal = getattr(self, thisField, '')
-#			if thisField in self.BASE64_FIELDS or thisField in self.BINARY_FIELDS:
-#				thisVal = tobytes(getattr(self, thisField))
-#			else:
-#				thisVal = getattr(thisField, 'toStorage', to_unicode)(getattr(self, thisField))
 
 			if self._origData.get(thisField, '') != thisVal:
 				return True
@@ -480,10 +453,7 @@ class IndexedRedisModel(object):
 		updatedFields = {}
 		for thisField in self.FIELDS:
 			thisVal = getattr(self, thisField, '')
-#			if thisField in self.BASE64_FIELDS or thisField in self.BINARY_FIELDS:
-#				thisVal = tobytes(getattr(self, thisField))
-#			else:
-#				thisVal = getattr(thisField, 'toStorage', to_unicode)(getattr(self, thisField))
+
 			if self._origData.get(thisField, '') != thisVal:
 				updatedFields[thisField] = (self._origData[thisField], thisVal)
 		return updatedFields
@@ -759,20 +729,19 @@ class IndexedRedisModel(object):
 
 		# Convert items in model to set
 		#model.FIELDS = set(model.FIELDS)
-		#model.BASE64_FIELDS = set(model.BASE64_FIELDS)
 		#model.BINARY_FIELDS = set(model.BINARY_FIELDS)
 
 		
 		fieldSet = set(model.FIELDS)
 		indexedFieldSet = set(model.INDEXED_FIELDS)
-		base64FieldSet = set(model.BASE64_FIELDS)
 		binaryFieldSet = set(model.BINARY_FIELDS)
 
 		if not fieldSet:
 			raise InvalidModelException('%s No fields defined. Please populate the FIELDS array with a list of field names' %(failedValidationStr,))
 
-		if base64FieldSet:
-			deprecatedMessage('Using BASE64_FIELDS array is deprecated. Please transition to use IndexedRedis.fields.IRBase64Field directly or in an IndexedRedis.fields.IRFieldChain', 'BASE64_FIELDS')
+
+		if hasattr(model, 'BASE64_FIELDS'):
+			raise InvalidModelException('BASE64_FIELDS is no longer supported since IndexedRedis 5.0.0 . Use IndexedRedis.fields.IRBase64Field in the FIELDS array for the same functionality.')
 
 		for thisField in fieldSet:
 			if thisField == '_id':
@@ -797,10 +766,6 @@ class IndexedRedisModel(object):
 		if bool(indexedFieldSet - fieldSet):
 			raise InvalidModelException('%s All INDEXED_FIELDS must also be present in FIELDS. %s exist only in INDEXED_FIELDS' %(failedValidationStr, str(list(indexedFieldSet - fieldSet)), ) )
 		
-		if bool(base64FieldSet - fieldSet):
-			raise InvalidModelException('%s All BASE64_FIELDS must also be present in FIELDS. %s exist only in BASE64_FIELDS' %(failedValidationStr, str(list(base64FieldSet - fieldSet)), ) )
-		if bool(base64FieldSet.intersection(indexedFieldSet)):
-			raise InvalidModelException('%s You cannot index on a base64-encoded field.' %(failedValidationStr,))
 		if bool(binaryFieldSet - fieldSet):
 			raise InvalidModelException('%s All BINARY_FIELDS must also be present in FIELDS. %s exist only in BINARY_FIELDS' %(failedValidationStr, str(list(binaryFieldSet - fieldSet)), ) )
 		if bool(binaryFieldSet.intersection(indexedFieldSet)):
@@ -860,7 +825,6 @@ class IndexedRedisHelper(object):
 		self.indexedFields = [self.irFields.get(fieldName, fieldName) for fieldName in self.mdl.INDEXED_FIELDS]
 #		self.indexedFields = self.mdl.INDEXED_FIELDS
 			
-		self.base64Fields = self.mdl.BASE64_FIELDS
 		self.binaryFields = self.mdl.BINARY_FIELDS
 
 
@@ -1026,9 +990,6 @@ class IndexedRedisQuery(IndexedRedisHelper):
 
 	def _redisResultToObj(self, theDict):
 		binaryFields = self.mdl.BINARY_FIELDS
-		for key, value in theDict.items():
-			if to_unicode(key) in self.mdl.BASE64_FIELDS:
-				theDict[key] = b64decode(value)
 
 		if '_id' in theDict:
 			theDict['_id'] = int(theDict['_id'])

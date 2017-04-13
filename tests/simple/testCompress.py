@@ -16,7 +16,6 @@ class MyCompressModel(IndexedRedisModel):
     ]
 
     BINARY_FIELDS = [ 'data']
-    BASE64_FIELDS = ['data']
 
     INDEXED_FIELDS = [ \
         'name',
