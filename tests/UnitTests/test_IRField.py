@@ -33,7 +33,7 @@ class TestIRField(object):
         self.model = None
 
         # Models should be given different names and key names so they are validated again.
-        if testMethod in (self.test_simpleIRFieldSaveAndFetch, self.test_emptyStrNotNull):
+        if testMethod in (self.test_simpleIRFieldSaveAndFetch, self.test_emptyStrNotNull, self.test_updatedFieldsAfterSave):
             class SimpleIRFieldModel(IndexedRedisModel):
 
                 FIELDS = [ IRField('name', valueType=str), IRField('favColour') ]
@@ -448,6 +448,50 @@ class TestIRField(object):
         val = IRDatetimeValue(datetimeStr)
         assert val == datetimeObj, 'Expected datetime object created from string including microseconds to match equivalent without microseconds'
 
+    def test_updatedFieldsAfterSave(self):
+    
+        SimpleIRFieldModel = self.model
+
+        obj = SimpleIRFieldModel()
+
+        updatedFields = obj.getUpdatedFields()
+
+        assert updatedFields == {}, 'Expected empty updatedFields on newly created object'
+
+        obj.favColour = 'purple'
+
+        updatedFields = obj.getUpdatedFields()
+        assert 'favColour' in updatedFields , 'Expected favColour to show up in updatedFields after updating value'
+
+        assert not updatedFields['favColour'][0]  , 'Expected old value in updatedFields["favColour"] to be False'
+        assert updatedFields['favColour'][1] == 'purple' , 'Expected new value to be in updatedFields["favColour"][1]'
+
+        obj.name = 'hello'
+
+        obj.save()
+
+        updatedFields = obj.getUpdatedFields()
+        assert updatedFields == {}, 'Expected empty updatedFields after saving'
+
+        fetchedObj = SimpleIRFieldModel.objects.filter(name='hello').first()
+
+        updatedFields = obj.getUpdatedFields()
+        assert updatedFields == {}, 'Expected empty updatedFields after fetching'
+
+        obj.favColour = 'purple'
+        updatedFields = obj.getUpdatedFields()
+        assert updatedFields == {}, 'Expected empty updatedFields after changing to same value'
+        
+
+        obj.favColour = 'red'
+        updatedFields = obj.getUpdatedFields()
+
+        assert updatedFields['favColour'][0] == 'purple' , 'Expected old value to be in updatedFields["favColour"][0]'
+        assert updatedFields['favColour'][1] == 'red' , 'Expected new value to be in updatedFields["favColour"][1]'
+
+        obj.save()
+        updatedFields = obj.getUpdatedFields()
+        assert updatedFields == {}, 'Expected empty updatedFields after updating'
 
 
 
