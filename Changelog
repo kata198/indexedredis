@@ -1,3 +1,12 @@
+4.1.1 - Wed Apr 12 2017
+
+- Ensure that the "origData" structure gets updated after a save which
+performs an insert. It was previously only updated after an "update", but not
+an insert. This prevents those fields as being seen as changed and updated
+again if you save the inserted object.
+- Update "runTests.py" to be version 1.2.3 from GoodTests.py
+
+
 4.1.0 - Mon Jan 9 2017
 - Fix issue where fields that implemented toStorage (complex IRFields) would sometimes have problems
 doing updates
