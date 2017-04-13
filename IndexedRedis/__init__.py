@@ -162,8 +162,6 @@ class IndexedRedisModel(object):
 
                     Example: ['Name', 'Model']
 
-	    *BINARY_FIELDS* - A list of strings which name the fields that will be stored as unencoded binary data. All entries must also be present in FIELDS. 
-
 
             *KEY_NAME* - REQUIRED. A unique name name that represents this model. Think of it like a table name. 
 
@@ -324,9 +322,6 @@ class IndexedRedisModel(object):
 	#  You can only search on indexed fields, but they add time to insertion/deletion
 	INDEXED_FIELDS = []
 
-	# BINARY_FIELDS - Fields that are not encoded in any way
-	BINARY_FIELDS = []
-	
 	# KEY_NAME - A string of a unique name which corrosponds to objects of this type.
 	KEY_NAME = None
 
@@ -354,8 +349,6 @@ class IndexedRedisModel(object):
 
 				elif val != irNull:
 					val = thisField.convert(val)
-			elif thisField in self.BINARY_FIELDS:
-				val = tobytes(kwargs.get(thisField, b''))
 			else:
 				val = to_unicode(kwargs.get(thisField, ''))
 			setattr(self, thisField, val)
@@ -389,8 +382,6 @@ class IndexedRedisModel(object):
 			elif issubclass(thisField.__class__, IRField) and hasattr(thisField, 'toStorage'):
 				if forStorage is True:
 					val = thisField.toStorage(val)
-			elif thisField in self.BINARY_FIELDS:
-				val = tobytes(val)
 			else:
 				val = to_unicode(val)
 
@@ -418,8 +409,6 @@ class IndexedRedisModel(object):
 
 		if issubclass(thisField.__class__, IRField) and hasattr(thisField, 'toStorage'):
 			val = thisField.toStorage(val)
-		elif thisField in self.BINARY_FIELDS:
-			val = tobytes(val)
 		else:
 			val = to_unicode(val)
 
@@ -585,7 +574,7 @@ class IndexedRedisModel(object):
 
 		key = None
 		for key, value in myDict.items():
-			if key not in self.BINARY_FIELDS and (bytes == str or not isinstance(value, bytes)):
+			if bytes == str or not isinstance(value, bytes):
 				if value not in (None, irNull):
 					val = convertMethods[key](value)
 				else:
@@ -729,12 +718,10 @@ class IndexedRedisModel(object):
 
 		# Convert items in model to set
 		#model.FIELDS = set(model.FIELDS)
-		#model.BINARY_FIELDS = set(model.BINARY_FIELDS)
 
 		
 		fieldSet = set(model.FIELDS)
 		indexedFieldSet = set(model.INDEXED_FIELDS)
-		binaryFieldSet = set(model.BINARY_FIELDS)
 
 		if not fieldSet:
 			raise InvalidModelException('%s No fields defined. Please populate the FIELDS array with a list of field names' %(failedValidationStr,))
@@ -742,6 +729,9 @@ class IndexedRedisModel(object):
 
 		if hasattr(model, 'BASE64_FIELDS'):
 			raise InvalidModelException('BASE64_FIELDS is no longer supported since IndexedRedis 5.0.0 . Use IndexedRedis.fields.IRBase64Field in the FIELDS array for the same functionality.')
+
+		if hasattr(model, 'BINARY_FIELDS'):
+			raise InvalidModelException('BINARY_FIELDS is no longer supported since IndexedRedis 5.0.0 . Use IndexedRedis.fields.IRBytesField in the FIELDS array for the same functionality, use IRBytesField for same functionality. Use IRField(valueType=bytes) for python-3 only support. Use IRRawField to perform no conversion at all.')
 
 		for thisField in fieldSet:
 			if thisField == '_id':
@@ -766,11 +756,6 @@ class IndexedRedisModel(object):
 		if bool(indexedFieldSet - fieldSet):
 			raise InvalidModelException('%s All INDEXED_FIELDS must also be present in FIELDS. %s exist only in INDEXED_FIELDS' %(failedValidationStr, str(list(indexedFieldSet - fieldSet)), ) )
 		
-		if bool(binaryFieldSet - fieldSet):
-			raise InvalidModelException('%s All BINARY_FIELDS must also be present in FIELDS. %s exist only in BINARY_FIELDS' %(failedValidationStr, str(list(binaryFieldSet - fieldSet)), ) )
-		if bool(binaryFieldSet.intersection(indexedFieldSet)):
-			raise InvalidModelException('%s You cannot index on a binary field.' %(failedValidationStr,))
-
 		validatedModels.add(keyName)
 		return True
 
@@ -825,9 +810,6 @@ class IndexedRedisHelper(object):
 		self.indexedFields = [self.irFields.get(fieldName, fieldName) for fieldName in self.mdl.INDEXED_FIELDS]
 #		self.indexedFields = self.mdl.INDEXED_FIELDS
 			
-		self.binaryFields = self.mdl.BINARY_FIELDS
-
-
 		self._connection = None
 
 	def _get_new_connection(self):
@@ -989,32 +971,11 @@ class IndexedRedisQuery(IndexedRedisHelper):
 
 
 	def _redisResultToObj(self, theDict):
-		binaryFields = self.mdl.BINARY_FIELDS
-
 		if '_id' in theDict:
 			theDict['_id'] = int(theDict['_id'])
 				
-		if not binaryFields:
-			obj = self.mdl(**decodeDict(theDict))
-		else:
-			binaryItems = {}
-			nonBinaryItems = {}
-			for key, value in theDict.items():
-				key = to_unicode(key)
-				if key in binaryFields:
-					binaryItems[key] = value
-				else:
-					nonBinaryItems[key] = value
-			obj = self.mdl(**decodeDict(nonBinaryItems))
-			for key, value in binaryItems.items():
-				if value in IR_NULL_STRINGS:
-					value = irNull
-				else:
-					irField = self.irFields.get(key)
-					if irField and hasattr(irField, 'convert'):
-						value = irField.convert(value)
-				setattr(obj, key, value)
-				obj._origData[key] = value
+		obj = self.mdl(**decodeDict(theDict))
+
 		return obj
 	
 

@@ -4,7 +4,7 @@ import datetime
 import sys
 import IndexedRedis
 from IndexedRedis import IndexedRedisModel, IRField
-from IndexedRedis.fields import IRCompressedField
+from IndexedRedis.fields import IRCompressedField, IRBytesField, IRFieldChain
 
 # vim: ts=4 sw=4 expandtab
 
@@ -12,10 +12,8 @@ class MyCompressModel(IndexedRedisModel):
 
     FIELDS = [ \
         IRField('name'),
-        IRCompressedField('data'),
+        IRFieldChain('data', [IRBytesField(), IRCompressedField()]),
     ]
-
-    BINARY_FIELDS = [ 'data']
 
     INDEXED_FIELDS = [ \
         'name',
