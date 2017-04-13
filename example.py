@@ -4,7 +4,7 @@ import datetime
 import sys
 import IndexedRedis
 from IndexedRedis import IndexedRedisModel, IRField
-from IndexedRedis.fields import IRCompressedField, IRFieldChain, IRRawField
+from IndexedRedis.fields import IRCompressedField, IRFieldChain, IRRawField, IRBytesField
 
 # vim: ts=4 sw=4 expandtab
 
@@ -21,7 +21,7 @@ class Song(IndexedRedisModel):
             'description',
             'copyright',
             IRRawField('mp3_data'), # Do not perform any conversion on the data.
-            IRCompressedField('thumbnail', compressMode='gzip'),      # Compress this field in storage using "bz2" compression
+            IRFieldChain('thumbnail', [IRBytesField(), IRCompressedField(compressMode='gzip')]),      # Compress this field in storage using "bz2" compression
             IRField('tags', valueType=list),
     ]
 
