@@ -6,7 +6,7 @@
 
 # vim:set ts=8 shiftwidth=8 softtabstop=8 noexpandtab :
 
-__all__ = ('IRField', 'IRNullType', 'irNull', 'IRPickleField', 'IRCompressedField', 'IRUnicodeField', 'IRRawField', 'IRBase64Field', 'IRFixedPointField', 'IRDatetimeValue', 'IRJsonValue' )
+__all__ = ('IRField', 'IRNullType', 'irNull', 'IRPickleField', 'IRCompressedField', 'IRUnicodeField', 'IRRawField', 'IRBase64Field', 'IRFixedPointField', 'IRDatetimeValue', 'IRJsonValue', 'IR_NULL_STR', 'IR_NULL_BYTES', 'IR_NULL_UNICODE', 'IR_NULL_STRINGS' )
 
 import sys
 from datetime import datetime
@@ -19,6 +19,18 @@ try:
 	unicode
 except NameError:
 	unicode = str
+
+IR_NULL_STR = 'IRNullType()'
+IR_NULL_BYTES = b'IRNullType()'
+IR_NULL_UNICODE = u'IRNullType()'
+
+if sys.version_info.major >= 3:
+	IR_NULL_STRINGS = (IR_NULL_STR, IR_NULL_BYTES)
+else:
+	# This generates a unicode warning, but we SHOULDN'T have such a condition.. I don't think
+#	IR_NULL_STRINGS = (IR_NULL_STR, IR_NULL_UNICODE)
+	IR_NULL_STRINGS = (IR_NULL_STR, )
+
 
 class IRField(str):
 	'''
@@ -205,7 +217,7 @@ class IRField(str):
 
 			convert and toStorage should test if value is null and return null (for most types)
 		'''
-		return bool(value in (b'', '', irNull))
+		return bool(value in (b'', '', irNull) or value in IR_NULL_STRINGS )
 
 	def __new__(self, name='', valueType=None, hashIndex=False):
 		return str.__new__(self, name)
@@ -246,9 +258,15 @@ class IRNullType(IrNullBaseType):
 
 	def __str__(self):
 		return ''
+
+	def __bool__(self):
+		return False
+	
+	def __nonzero__(self):
+		return False
 	
 	def __repr__(self):
-		return 'IRNullType()'
+		return IR_NULL_STR
 
 
 # For all fields which have a type, if they have a null value this will be returned. IRNullType('') != str('') so you can

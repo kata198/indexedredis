@@ -16,7 +16,7 @@ import redis
 from base64 import b64encode, b64decode
 
 from . import fields
-from .fields import IRField, IRFieldChain, IRNullType, irNull
+from .fields import IRField, IRFieldChain, IRNullType, irNull, IR_NULL_STR, IR_NULL_BYTES, IR_NULL_STRINGS
 from .compat_str import to_unicode, tobytes, defaultEncoding, setEncoding, getEncoding, setDefaultIREncoding, getDefaultIREncoding
 from .compat_convert import compat_convertPickleFields
 from .utils import hashDictOneLevel
@@ -357,7 +357,12 @@ class IndexedRedisModel(object):
 
 		for thisField in self.FIELDS:
 			if issubclass(thisField.__class__, IRField):
-				val = thisField.convert(kwargs.get(str(thisField), ''))
+				val = kwargs.get(str(thisField), irNull)
+				if val in IR_NULL_STRINGS:
+					val = irNull
+
+				elif val != irNull:
+					val = thisField.convert(val)
 			elif thisField in self.BASE64_FIELDS or thisField in self.BINARY_FIELDS:
 				val = tobytes(kwargs.get(thisField, b''))
 			else:
@@ -384,8 +389,13 @@ class IndexedRedisModel(object):
 		'''
 		ret = {}
 		for thisField in self.FIELDS:
-			val = getattr(self, thisField, '')
-			if issubclass(thisField.__class__, IRField) and hasattr(thisField, 'toStorage'):
+			val = getattr(self, thisField, irNull)
+			if val == irNull or val in IR_NULL_STRINGS:
+				if forStorage is True:
+					val = IR_NULL_STR
+				else:
+					val = irNull
+			elif issubclass(thisField.__class__, IRField) and hasattr(thisField, 'toStorage'):
 				if forStorage is True:
 					val = thisField.toStorage(val)
 			elif thisField in self.BASE64_FIELDS or thisField in self.BINARY_FIELDS:
@@ -419,6 +429,9 @@ class IndexedRedisModel(object):
 
 			@return <?> - The storage representation of "val"
 		'''
+		if val == irNull:
+			return IR_NULL_STR
+
 		if issubclass(thisField.__class__, IRField) and hasattr(thisField, 'toStorage'):
 			val = thisField.toStorage(val)
 		elif thisField in self.BASE64_FIELDS or thisField in self.BINARY_FIELDS:
@@ -603,8 +616,10 @@ class IndexedRedisModel(object):
 		key = None
 		for key, value in myDict.items():
 			if key not in self.BINARY_FIELDS and (bytes == str or not isinstance(value, bytes)):
-				if value != None:
+				if value not in (None, irNull):
 					val = convertMethods[key](value)
+				else:
+					val = irNull
 				if isinstance(val, IRNullType):
 					val = 'IRNullType()'
 				elif isinstance(val, (str, unicode)):
@@ -1031,9 +1046,12 @@ class IndexedRedisQuery(IndexedRedisHelper):
 					nonBinaryItems[key] = value
 			obj = self.mdl(**decodeDict(nonBinaryItems))
 			for key, value in binaryItems.items():
-				irField = self.irFields.get(key)
-				if irField and hasattr(irField, 'convert'):
-					value = irField.convert(value)
+				if value in IR_NULL_STRINGS:
+					value = irNull
+				else:
+					irField = self.irFields.get(key)
+					if irField and hasattr(irField, 'convert'):
+						value = irField.convert(value)
 				setattr(obj, key, value)
 				obj._origData[key] = value
 		return obj
@@ -1087,7 +1105,9 @@ class IndexedRedisQuery(IndexedRedisHelper):
 			if key not in filterObj.indexedFields:
 				raise ValueError('Field "' + key + '" is not in INDEXED_FIELDS array. Filtering is only supported on indexed fields.')
 
-			if key in filterObj.irFields:
+			if value == irNull:
+				value = IR_NULL_STR
+			elif key in filterObj.irFields:
 				irField = filterObj.irFields[key]
 				if hasattr(irField, 'toIndex'):
 					value = irField.toIndex(value)
@@ -1633,7 +1653,11 @@ class IndexedRedisSave(IndexedRedisHelper):
 
 		if isInsert is True:
 			for thisField in self.fields:
-				fieldValue = newDict.get(thisField, '')
+				if issubclass(thisField.__class__, IRField):
+					default = IR_NULL_STR
+				else:
+					default = ''
+				fieldValue = newDict.get(thisField, default)
 
 				pipeline.hset(key, thisField, fieldValue)
 

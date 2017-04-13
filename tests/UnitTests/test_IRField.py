@@ -36,7 +36,7 @@ class TestIRField(object):
         if testMethod in (self.test_simpleIRFieldSaveAndFetch, self.test_emptyStrNotNull):
             class SimpleIRFieldModel(IndexedRedisModel):
 
-                FIELDS = [ IRField('name', valueType=str), IRField('favColour') ]
+                FIELDS = [ IRField('name', valueType=str), IRField('favColour'), 'strField' ]
                 INDEXED_FIELDS = ['name', 'favColour']
 
                 KEY_NAME = 'Test_SimpleIRFieldModel'
@@ -132,7 +132,8 @@ class TestIRField(object):
 
         myObj = SimpleIRFieldModel(name='Tim')
 
-        assert myObj.favColour != irNull, 'Expected empty string value to not be assigned irNull'
+        assert myObj.strField != irNull, 'Expected empty classic string field value to not be assigned irNull'
+        assert myObj.favColour is irNull, 'Expected empty IRField value to be irNull'
 
         ids = myObj.save()
         assert ids, 'Expected to get ids returned from save, but did not.'
@@ -142,7 +143,8 @@ class TestIRField(object):
         assert fetchObj, 'Expected to get an object returned for .get on same id as saved.'
         assert fetchObj._id == ids[0], 'ID on fetched object not same as we requested.'
 
-        assert fetchObj.favColour != irNull, 'Expected empty string value on fetch to not be assigned irNull'
+        assert fetchObj.strField != irNull, 'Expected empty classic string field value on fetch to not be assigned irNull'
+        assert fetchObj.favColour == irNull, 'Expected IRField not being set to still be irNull'
 
 
     def test_noneFieldValue(self):

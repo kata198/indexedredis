@@ -16,6 +16,22 @@ bytes)
   But you should really just convert right away, This compat field will not be
   around long and may be removed at any time in the future
 
+- Default IRField's which have not been set to irNull (instead of empty string).
+Classic string fields (just a string name, not an IRField object) will retain
+the empty string.
+This allows there to be a difference from not-set and empty-string value items
+(which can be meaningful in several contexts)
+  **BACKWARDS INCOMPATIBLE**
+
+  Consider if you are testing like
+  if myObj.someField == ''
+  that this will stop working on newly created objects if you aren't setting
+  the value, and expecting that to test such a condition. You can use:
+    if not myObj.someField
+  or
+    if (myObj.someField in ('', b'', irNull)
+  to support both.
+
 4.1.0 - Mon Jan 9 2017
 - Fix issue where fields that implemented toStorage (complex IRFields) would sometimes have problems
 doing updates
