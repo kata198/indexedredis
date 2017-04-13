@@ -32,6 +32,10 @@ This allows there to be a difference from not-set and empty-string value items
     if (myObj.someField in ('', b'', irNull)
   to support both.
 
+  There is no "compat convert" method for this, because it's unknown if an
+  item was set to default string, or empty value. It's on you to make sure
+  your code either handles both, or you convert your datasets accordingly. 
+
 4.1.1 - Wed Apr 12 2017
 
 - Ensure that the "origData" structure gets updated after a save which
