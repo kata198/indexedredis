@@ -10,14 +10,18 @@ Further client-side filtering (like greater-than, contains, etc) is available af
 
 My tests have shown that for using equivalent models between flask/mysql and IndexedRedis, a 600% - 1200% performance increase occurs, yet if you design your storage directly as IndexedRedis models, you are able to achieve much higher gains.
 
-It is compatible with python 2.7 and python 3. It has been tested with python 2.7, 3.4, 3.5.
+It is compatible with python 2.7 and python 3. It has been tested with python 2.7, 3.4, 3.5, 3.6.
 
-4.0 Status
+
+5.0 Status
 ----------
 
-**Incomplete -- This document does not contain all updates in the 4.0 series, but due to lack of time this stable code with many improvements over IndexedRedis 3 has been sitting idle for 8 months. So I've released it. There should be plenty of examples in the "tests" directory, and it's completely backwards-compatible with IndexedRedis 3, so feel free to explore for new features!.**
+Version 5.0.0 will be backwards incompatible with previous versions by removing some old legacy stuff, and changing some behaviour.
 
-If you want to write additional / better documentation, please email me at kata198 at gmail dot com . 
+Most of these changes can be made using version 4.1.3 or greater in the 4.1 series, so when 5.0.0 comes around, you won't have to further update your code (with the exception of the pickle IRField type, see the ChangeLog for details).
+
+Details can be found in the 5.0.0 ChangeLog, found here: https://github.com/kata198/indexedredis/blob/5.0branch/Changelog
+
 
 Automatic and Native Types
 --------------------------
@@ -32,7 +36,8 @@ See "Advanced Fields" section below for more information.
 API Reference
 -------------
 
-Most, but not all methods are convered in this document.
+Many, but not all methods and types are convered in this document.
+
 For full pydoc reference, see:
 
 https://pythonhosted.org/indexedredis/
@@ -399,6 +404,53 @@ You may want to use the same model on multiple Redis instances. To do so, use th
 	AltConnectionMyModel = MyModel.connect({'host' : 'althost', 'db' : 4})
 
 Then, use AltConnectionMyModel just as you would use MyModel.
+
+
+Client-Side Filtering/Methods
+-----------------------------
+
+After you retrieve a bunch of objects from redis (by calling .all(), for example), you get an IRQueryableList of the fetched objects.
+
+This is a smart list, which wraps QueryableList (https://github.com/kata198/QueryableList) and thus allows further filtering using a multitude of more advanced filtering (contains, case-insensitive comparisons, split-filters, etc). See the QueryableList docs for all the available operations.
+
+These operations will act on the objects AFTER FETCH, but are useful because sometimes you need to filter beyond simple equals or not equals, which are the current limits of the Redis backend.
+
+You can chain like:
+
+	# Fetch from Redis all objects where field1 is equal to "something".
+	#  Then, client side, filter where csvData is not null AND when split by comma contains "someItem" as an element.
+	#  Then, still client side, filter where ( status is in "pending" or "saved" ) OR lastUpdated is less-than or equal to 700 seconds ago.
+	#    (Keep in mind to make sure lastUpdated is an IRField(..valueType=int) or float, else you'll be comparing string)
+
+	myObjects = MyModel.objects.filter(field1='something').all().filter(csvData__isnull=False, csvData__splitcontains=("," , "someItem")).filterOr(status__in=('pending', 'saved'), lastUpdated__lte(time.time() - 700))
+
+
+Some other methods on an IRQueryableList are:
+
+	* **getModel** - Return the model associated with these objects
+
+	* **delete** - Delete all the objects in this list.
+
+		NOTE: It is more efficent to do
+
+			MyModel.objects.filter(...).delete()
+
+		Than to do:
+
+			MyModel.objects.filter(...).all().delete()
+
+		because the latter actually fetches the full objects, then deletes them, whereas the first just deletes the matched items.
+
+		However, sometimes you may want to do additional filtering client-side before deleting, and this supports that.
+	
+	* **save** - Save all the objects in this list. If these are all existing objects, then only the fields which changed since fetch will be updated.
+
+	* **reload** - Reloads all the objects in this list, inline. This will fetch the most current data from Redis, and apply them on top of the items.
+
+		The return of this function will be a list with the same indexes as the IRQueryableList. The items will be either a KeyError exception (if the item was deleted on the Redis-side), or a dict of fields that were updated, key as the field name, and value as a tuple of (old value, new value)
+
+	* **refetch** - Fetch again all the objects in this list, and return as a new IRQueryableList. Note, this does NOT perform the filter again, but fetches each of the items based on its internal primary key
+
 
 
 Encodings
