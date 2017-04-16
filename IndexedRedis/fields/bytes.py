@@ -26,6 +26,8 @@ class IRBytesField(IRField):
 
 	convert = IRField._convertBytes
 
+	convertFromInput = IRField._convertBytes
+
 	toStorage = IRField._convertBytes
 
 	def __new__(self, name=''):

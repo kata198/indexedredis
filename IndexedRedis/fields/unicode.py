@@ -64,6 +64,8 @@ class IRUnicodeField(IRField):
 
 			return value
 
+	convertFromInput = convert
+
 	def toBytes(self, value):
 		if type(value) == bytes:
 			return value

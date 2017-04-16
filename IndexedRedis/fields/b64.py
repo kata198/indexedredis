@@ -45,6 +45,9 @@ class IRBase64Field(IRField):
 
 		return value
 
+	def convertFromInput(self, value=''):
+		return value
+
 	def toStorage(self, value=b''):
 		if not value:
 			return ''

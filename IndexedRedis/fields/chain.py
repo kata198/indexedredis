@@ -78,6 +78,19 @@ class IRFieldChain(IRField):
 			value = chainedField.convert(value)
 
 		return value
+	
+	def convertFromInput(self, value):
+		if self._isNullValue(value):
+			return irNull
+
+		# XXX: Maybe just set this as a property
+		chainedFieldsReversed = self.chainedFields[:]
+		chainedFieldsReversed.reverse()
+
+		for chainedField in chainedFieldsReversed:
+			value = chainedField.convertFromInput(value)
+
+		return value
 
 	def _toBytes(self, value):
 		for chainedField in self.chainedFields:

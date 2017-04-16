@@ -335,25 +335,46 @@ class IndexedRedisModel(object):
 
 		self._origData = {}
 
-		for thisField in self.FIELDS:
-			if issubclass(thisField.__class__, IRField):
-				val = kwargs.get(str(thisField), irNull)
-				if val in IR_NULL_STRINGS:
-					val = irNull
+		if kwargs.get('__fromRedis', False) is True:
+			for thisField in self.FIELDS:
+				if issubclass(thisField.__class__, IRField):
+					val = kwargs.get(str(thisField), irNull)
+					if val in IR_NULL_STRINGS:
+						val = irNull
 
-				elif val != irNull:
-					val = thisField.convert(val)
-			else:
-				val = to_unicode(kwargs.get(thisField, ''))
-			setattr(self, thisField, val)
-			# Generally, we want to copy the value incase it is used by reference (like a list)
-			#   we will miss the update (an append will affect both).
-			try:
-				self._origData[thisField] = copy.copy(val)
-			except:
-				self._origData[thisField] = val
+					elif val != irNull:
+						val = thisField.convert(val)
+				else:
+					val = to_unicode(kwargs.get(thisField, ''))
+				setattr(self, thisField, val)
+				# Generally, we want to copy the value incase it is used by reference (like a list)
+				#   we will miss the update (an append will affect both).
+				try:
+					self._origData[thisField] = copy.copy(val)
+				except:
+					self._origData[thisField] = val
+		else:
+			for thisField in self.FIELDS:
+				if issubclass(thisField.__class__, IRField):
+					val = kwargs.get(str(thisField), irNull)
+					if val in IR_NULL_STRINGS or val == irNull:
+						pass
+					else:
+						val = thisField.convertFromInput(val)
+				else:
+					val = to_unicode(kwargs.get(str(thisField), ''))
+
+				setattr(self, thisField, val)
+
+				try:
+					self._origData[thisField] = copy.copy(val)
+				except:
+					self._origData[thisField] = val
+
+				
 
 		self._id = kwargs.get('_id', None)
+
 	
 	def asDict(self, includeMeta=False, forStorage=False):
 		'''
@@ -977,7 +998,7 @@ class IndexedRedisQuery(IndexedRedisHelper):
 		if '_id' in theDict:
 			theDict['_id'] = int(theDict['_id'])
 				
-		obj = self.mdl(**decodeDict(theDict))
+		obj = self.mdl(**decodeDict(theDict), __fromRedis=True)
 
 		return obj
 	

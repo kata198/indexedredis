@@ -37,6 +37,11 @@ class IRFixedPointField(IRField):
 			return irNull
 
 		return float(value)
+	
+	def convertFromInput(self, value):
+		if self._isNullValue(value):
+			return irNull
+		return float(value)
 
 	def toStorage(self, value):
 		if self._isNullValue(value):

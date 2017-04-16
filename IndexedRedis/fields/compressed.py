@@ -81,6 +81,9 @@ class IRCompressedField(IRField):
 			return self.getCompressMod().decompress(value)
 
 		return value
+	
+	def convertFromInput(self, value):
+		return value
 
 	def __new__(self, name='', compressMode=COMPRESS_MODE_ZLIB):
 		return IRField.__new__(self, name)

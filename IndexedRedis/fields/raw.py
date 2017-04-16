@@ -21,6 +21,9 @@ class IRRawField(IRField):
 	def convert(self, value=b''):
 		return value
 
+	def convertFromInput(self, value):
+		return value
+
 	def toStorage(self, value=b''):
 		return value
 

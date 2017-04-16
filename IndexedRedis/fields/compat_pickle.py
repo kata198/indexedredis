@@ -52,6 +52,9 @@ class IRCompatPickleField(IRField):
 			return loadedPickle
 		return origData
 
+	def convertFromInput(self, value):
+		return value
+
 	if sys.version_info.major == 2:
 		@staticmethod
 		def __loadPickle(value):

@@ -96,14 +96,17 @@ class IRField(str):
 		if valueType in (str, unicode):
 			valueType = str
 			self.convert = self._convertStr
+			self.convertFromInput = self._convertStr
 			self.toStorage = self._convertStr
 		elif bytes != str and valueType == bytes:
 			valueType = bytes
 			self.convert = self._convertBytes
+			self.convertFromInput = self._convertBytes
 			self.toStorage = self._convertBytes
 			self.CAN_INDEX = False
 		elif valueType in (None, type(None)):
 			self.convert = self._noConvert
+			self.convertFromInput = self._noConvert
 			self.toStorage = self._noConvert
 			self.CAN_INDEX = False
 		# I don't like these next two conditions, but it will train folks to use the correct types (whereas they may just try to shove dict in, and give up that it doesn't work)
@@ -159,6 +162,15 @@ class IRField(str):
 		'''
 		if self._isNullValue(value):
 			return irNull
+		return self.valueType(value)
+
+	def convertFromInput(self, value):
+		'''
+			convertFromInput - Convert the value from input (constructor) to the value type.
+
+			  This is intended to be used when the data is guarenteed to NOT be from storage.
+
+		'''
 		return self.valueType(value)
 
 	def toIndex(self, value):

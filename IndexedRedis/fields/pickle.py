@@ -79,6 +79,9 @@ class IRPickleField(IRField):
 		if loadedPickle is not None:
 			return loadedPickle
 		return origData
+	
+	def convertFromInput(self, value):
+		return value
 
 	@staticmethod
 	def __loadPickle(value):
