@@ -76,6 +76,13 @@ defaultIREncoding
   You shouldn't notice this. You should be using setDefaultIREncoding or
   getDefaultIREncoding for default encodings
 
+- Introduce a new IRField method called "convertFromInput", which is like
+"convert", but is used when the input is guarenteed to NOT come from storage.
+This will simplify a lot of things, remove some conditional and weird garbage,
+etc. Constructing objects is now a lot cheapear.
+  TODO: Go through and audit all fields, write lots of tests, clean up code to
+  take full advantage of this change
+
 
 - NOTE: new_pickle.IRNewPickleField is now IRPickleField, and the old IRPickleField is now fields.compat_pickle.IRCompatPickleField
 
