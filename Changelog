@@ -63,6 +63,11 @@ combine these in a chain just like IRBase64Field.
 
   Models with BINARY_FIELDS defined will generate an error upon validation.
 
+- Make copy.copy and copy.deepcopy on an IndexedRedisModel call
+IndexedRedisModel.copy(False), in order to copy the data, but NOT to have the
+copy be linked to the database. A save on the copy will be an insert, the
+parent will remain an update.
+  **BACKWARDS INCOMPATIBLE**
 
 - NOTE: new_pickle.IRNewPickleField is now IRPickleField, and the old IRPickleField is now fields.compat_pickle.IRCompatPickleField
 
