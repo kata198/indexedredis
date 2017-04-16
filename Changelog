@@ -69,6 +69,14 @@ copy be linked to the database. A save on the copy will be an insert, the
 parent will remain an update.
   **BACKWARDS INCOMPATIBLE**
 
+- Removed the old, deprecated, compat global "defaultEncoding", retaining just
+defaultIREncoding
+  **BACKWARDS INCOMPATIBLE**
+
+  You shouldn't notice this. You should be using setDefaultIREncoding or
+  getDefaultIREncoding for default encodings
+
+
 - NOTE: new_pickle.IRNewPickleField is now IRPickleField, and the old IRPickleField is now fields.compat_pickle.IRCompatPickleField
 
 4.1.4 - Sat Apr 15 2017
