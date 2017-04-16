@@ -15,7 +15,7 @@ import redis
 
 from . import fields
 from .fields import IRField, IRFieldChain, IRNullType, irNull, IR_NULL_STR, IR_NULL_BYTES, IR_NULL_STRINGS
-from .compat_str import to_unicode, tobytes, defaultEncoding, setEncoding, getEncoding, setDefaultIREncoding, getDefaultIREncoding
+from .compat_str import to_unicode, tobytes, setEncoding, getEncoding, setDefaultIREncoding, getDefaultIREncoding
 from .compat_convert import compat_convertPickleFields
 from .utils import hashDictOneLevel
 
@@ -32,12 +32,6 @@ __all__ = ('INDEXED_REDIS_PREFIX', 'INDEXED_REDIS_VERSION', 'INDEXED_REDIS_VERSI
 	'fields', 'IRField', 'IRFieldChain', 'irNull',
 	'setDefaultIREncoding', 'getDefaultIREncoding',
 	'toggleDeprecatedMessages',
-	# These (*Encoding) are imported, but I don't think from * should import them as they are fairly common names.
-	#   They have been renamed to be more specific (*DefaultIREncoding) names, but will be left via:
-	#      from IndexedRedis import setEncoding, getEncoding, defaultEncoding
-	#   as compat for now
-	#
-	# setEncoding, getEncoding, defaultEncoding 
 	 )
 
 # Prefix that all IndexedRedis keys will contain, as to not conflict with other stuff.

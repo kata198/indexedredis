@@ -19,10 +19,6 @@ try:
 except:
 	defaultIREncoding = 'utf-8'
 
-# COMPAT: OLD NAME (defaultEncoding -> defaultIREncoding)
-global defaultEncoding
-defaultEncoding = defaultIREncoding
-
 # Encoding stuff
 
 def setDefaultIREncoding(encoding):
@@ -40,9 +36,6 @@ def setDefaultIREncoding(encoding):
 
 	global defaultIREncoding
 	defaultIREncoding = encoding
-	# COMPAT: OLD NAME (defaultEncoding -> defaultIREncoding
-	global defaultEncoding
-	defaultEncoding = defaultIREncoding
 
 @deprecated('setEncoding is deprecated. Please use setDefaultIREncoding instead.')
 def setEncoding(encoding):
