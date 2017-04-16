@@ -66,6 +66,9 @@ combine these in a chain just like IRBase64Field.
 
 - NOTE: new_pickle.IRNewPickleField is now IRPickleField, and the old IRPickleField is now fields.compat_pickle.IRCompatPickleField
 
+4.1.4 - Sat Apr 15 2017
+
+- Update READMEs a bit
 
 4.1.3 - Wed Apr 12 2017
 
