@@ -609,6 +609,15 @@ class IndexedRedisModel(object):
 		'''
 		return self.__class__(**self.asDict(copyPrimaryKey, forStorage=False))
 
+	def __copy__(self):
+		'''
+			__copy__ - Used by the "copy" module to make a copy,
+			  which will NOT be linked to the original entry in the database, but will contain the same data
+		'''
+		return self.copy(False)
+
+	__deepcopy__ = __copy__
+
 	def saveToExternal(self, redisCon):
 		'''
 			saveToExternal - Saves this object to a different Redis than that specified by REDIS_CONNECTION_PARAMS on this model.
