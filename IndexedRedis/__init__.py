@@ -337,15 +337,13 @@ class IndexedRedisModel(object):
 
 		if kwargs.get('__fromRedis', False) is True:
 			for thisField in self.FIELDS:
-				if issubclass(thisField.__class__, IRField):
-					val = kwargs.get(str(thisField), irNull)
-					if val in IR_NULL_STRINGS:
-						val = irNull
+				val = kwargs.get(str(thisField), thisField.getDefaultValue())
+				if val in IR_NULL_STRINGS:
+					val = irNull
 
-					elif val != irNull:
-						val = thisField.convert(val)
-				else:
-					val = to_unicode(kwargs.get(thisField, ''))
+				elif val != irNull:
+					val = thisField.convert(val)
+
 				setattr(self, thisField, val)
 				# Generally, we want to copy the value incase it is used by reference (like a list)
 				#   we will miss the update (an append will affect both).
@@ -355,14 +353,11 @@ class IndexedRedisModel(object):
 					self._origData[thisField] = val
 		else:
 			for thisField in self.FIELDS:
-				if issubclass(thisField.__class__, IRField):
-					val = kwargs.get(str(thisField), irNull)
-					if val in IR_NULL_STRINGS or val == irNull:
-						pass
-					else:
-						val = thisField.convertFromInput(val)
-				else:
-					val = to_unicode(kwargs.get(str(thisField), ''))
+				val = kwargs.get(str(thisField), thisField.getDefaultValue())
+				if val in IR_NULL_STRINGS:
+					val = irNull
+				elif val != irNull:
+					val = thisField.convertFromInput(val)
 
 				setattr(self, thisField, val)
 
