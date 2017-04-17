@@ -1,15 +1,13 @@
-# Copyright (c) 2014, 2015, 2016 Timothy Savannah under LGPL version 2.1. See LICENSE for more information.
+# Copyright (c) 2014, 2015, 2016, 2017 Timothy Savannah under LGPL version 2.1. See LICENSE for more information.
 #
 # IRQueryableList - QueryableList with some added callbacks to IndexedRedis
 #
 
 # vim: set ts=8 shiftwidth=8 softtabstop=8 noexpandtab :
 
-from .deprecated import deprecated
-
 import sys
 
-__all__ = ('defaultIREncoding', 'to_unicode', 'tobytes', 'setDefaultIREncoding', 'setEncoding', 'getDefaultIREncoding', 'getEncoding')
+__all__ = ('defaultIREncoding', 'to_unicode', 'tobytes', 'setDefaultIREncoding', 'getDefaultIREncoding')
 
 try:
 	global defaultIREncoding
@@ -37,44 +35,15 @@ def setDefaultIREncoding(encoding):
 	global defaultIREncoding
 	defaultIREncoding = encoding
 
-@deprecated('setEncoding is deprecated. Please use setDefaultIREncoding instead.')
-def setEncoding(encoding):
-	'''
-		@see setDefaultIREncoding
-
-		@deprecated
-	'''
-	return setDefaultIREncoding(encoding)
-
-
-@deprecated('setIndexedRedisEncoding is deprecated. Please use setDefaultIREncoding instead.')
-def setIndexedRedisEncoding(encoding):
-	return setEncoding(encoding)
-
-
 def getDefaultIREncoding():
 	'''
-		getEncoding - Get the default encoding that IndexedRedis will use for all field data.
+		getDefaultIREncoding - Get the default encoding that IndexedRedis will use for all field data.
 		  You can override this on a per-field basis by using an IRField (such as IRUnicodeField or IRRawField)
 
 		  @return <str> - Default encoding string
 	'''
 	global defaultIREncoding
 	return defaultIREncoding
-
-
-@deprecated('IndexedRedis.getIndexedRedisEncoding is deprecated. Please use getDefaultIREncoding instead.')
-def getIndexedRedisEncoding():
-	return getDefaultIREncoding
-
-@deprecated('IndexedRedis.getEncoding is deprecated. Please use getDefaultIREncoding instead.')
-def getEncoding():
-	'''
-		@see getDefaultIREncoding
-
-		@deprecated
-	'''
-	return getDefaultIREncoding()
 
 
 # String Assurance

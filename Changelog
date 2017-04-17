@@ -70,7 +70,7 @@ parent will remain an update.
   **BACKWARDS INCOMPATIBLE**
 
 - Removed the old, deprecated, compat global "defaultEncoding", retaining just
-defaultIREncoding
+defaultIREncoding. Also, removed deprecated getEncoding and setEncoding, use getDefaultIREncoding and setDefaultIREncoding
   **BACKWARDS INCOMPATIBLE**
 
   You shouldn't notice this. You should be using setDefaultIREncoding or

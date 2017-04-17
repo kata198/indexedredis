@@ -14,8 +14,8 @@ import uuid
 import redis
 
 from . import fields
-from .fields import IRField, IRFieldChain, IRNullType, irNull, IR_NULL_STR, IR_NULL_BYTES, IR_NULL_STRINGS
-from .compat_str import to_unicode, tobytes, setEncoding, getEncoding, setDefaultIREncoding, getDefaultIREncoding
+from .fields import IRField, IRFieldChain, IRClassicField, IRNullType, irNull, IR_NULL_STR, IR_NULL_BYTES, IR_NULL_STRINGS
+from .compat_str import to_unicode, tobytes, setDefaultIREncoding, getDefaultIREncoding
 from .compat_convert import compat_convertPickleFields
 from .utils import hashDictOneLevel
 
