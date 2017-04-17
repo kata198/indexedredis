@@ -9,7 +9,7 @@
 __all__ = ('IRField', 'IRNullType', 'irNull', 'IRPickleField', 
 	'IRCompressedField', 'IRUnicodeField', 'IRRawField', 'IRBase64Field', 
 	'IRFixedPointField', 'IRDatetimeValue', 'IRJsonValue', 
-	'IRBytesField',
+	'IRBytesField', 'IRClassicField',
 	'IR_NULL_STR', 'IR_NULL_BYTES', 'IR_NULL_UNICODE', 'IR_NULL_STRINGS' )
 
 import sys
@@ -33,9 +33,14 @@ class IRField(str):
 		IRField - An advanced field
 
 		@param name <str> - The field name
+
 		@param valueType <None/type> - The type to use for the value of this field. Default is str (str/unicode will both be unicode). If on python3 and bytes are passed, will be decoded to bytes using default encoding.
 		  Using None, the raw data will be used (bytes) on retrieval and for storage.
 		  Can be a basic type (like int). Use BINARY_FIELDS array on the model to have value be "bytes"
+
+		@param hashIndex <bool> (default False) - If True, the value will be hashed for use in the index. This is useful on fields where the value may be very large. For smaller fields, can keep this as False.
+
+		@param defaultValue <any> (default irNull) - The value assigned to this field as a "default", i.e. when no value has yet been set. Generally, it makes sense to keep this as irNull, but you may want a different default.
 
 		If a type is defined other than default/str/bytes/None , an empty value (empty string in Redis) will be assigned to the IRNullType instance provided in this module, irNull.
 		irNull does not equal anything except irNull (or another IRNullType). Use this to check if a value has been assigned for other types.
@@ -57,7 +62,7 @@ class IRField(str):
 	# Start as a class variable, so "toIndex" works even if IRField constructor is not called (which really shouldn't be called on extending classes)
 	hashIndex = False
 
-	def __init__(self, name='', valueType=str, hashIndex=False):
+	def __init__(self, name='', valueType=str, defaultValue=irNull, hashIndex=False):
 		'''
 			__init__ - Create an IRField. Use this directly in the FIELDS array for advanced functionality on a field.
 
@@ -80,11 +85,15 @@ class IRField(str):
 
 				While this class is create for primitive types (like int's and datetimes), more complex types extend IRField (such as pickle, compressed, or unicode with a specific encoding).
 
-			@param hashIndex - If true, the md5 hash of the value will be used for indexing and filtering. This may be useful for very long fields.
+			@param defaultValue <any> (default irNull) - The value assigned to this field as a "default", i.e. when no value has yet been set. Generally, it makes sense to keep this as irNull, but you may want a different default.
+
+			@param hashIndex <bool> (default False) - If true, the md5 hash of the value will be used for indexing and filtering. This may be useful for very long fields.
 
 
 			NOTE: If you are extending IRField, you should probably not call this __init__ function. So long as you implement your own "convert", any fields used are set on a class-level.
 		'''
+		self.defaultValue = defaultValue
+
 		if valueType in (str, unicode):
 			valueType = str
 			self.convert = self._convertStr
@@ -178,6 +187,12 @@ class IRField(str):
 
 		return md5(tobytes(ret)).hexdigest()
 
+	def getDefaultValue(self):
+		if not hasattr(self, 'defaultValue'):
+			return irNull
+
+		return self.defaultValue
+
 	@property
 	def isIndexHashed(self):
 		'''
@@ -231,6 +246,7 @@ from .chain import IRFieldChain
 from .b64 import IRBase64Field
 from .fixedpoint import IRFixedPointField
 from .bytes import IRBytesField
+from .classic import IRClassicField
 
 from .FieldValueTypes import IRDatetimeValue, IRJsonValue
 
