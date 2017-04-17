@@ -6,6 +6,8 @@
 # vim: set ts=8 shiftwidth=8 softtabstop=8 noexpandtab :
 
 from hashlib import md5
+
+
 import sys
 
 __all__ = ('toggleDeprecatedMessages', 'deprecated', 'deprecatedMessage')
@@ -44,7 +46,8 @@ def deprecatedMessage(msg, key=None):
 		# First warning, let them know how to disable. 
 		sys.stderr.write('== DeprecatedWarning: warnings can be disabled by calling IndexedRedis.toggleDeprecatedMessages(False)\n')
 	if key is None:
-		key = md5(msg).hexdigest()
+		from .compat_str import tobytes
+		key = md5(tobytes(msg)).hexdigest()
 
 	if key not in _alreadyWarned:
 		_alreadyWarned[key] = True
