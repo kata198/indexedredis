@@ -12,14 +12,14 @@ from IndexedRedis.fields import IRCompressedField, IRFieldChain, IRRawField, IRB
 class Song(IndexedRedisModel):
     
     FIELDS = [ \
-            'artist',
-            'title',
-            'album',
+            IRField('artist'),
+            IRField('title'),
+            IRField('album'),
             IRField('track_number', valueType=int), # Convert automatically to/from int
-            'duration',
+            IRField('duration'),
             IRField('releaseDate', valueType=datetime.datetime),
-            'description',
-            'copyright',
+            IRField('description'),
+            IRField('copyright'),
             IRRawField('mp3_data'), # Do not perform any conversion on the data.
             IRFieldChain('thumbnail', [IRBytesField(), IRCompressedField(compressMode='gzip')]),      # Compress this field in storage using "bz2" compression
             IRField('tags', valueType=list),
@@ -45,7 +45,6 @@ if __name__ == '__main__':
 
     if '--keep-data' not in sys.argv:
             newSongs = []
-
             # Add data
             songObj = Song(artist='The Merry Men',
                             title='Happy Go Lucky',
@@ -57,6 +56,7 @@ if __name__ == '__main__':
                             thumbnail=fakeThumbnail,
                             tags=['happy', 'guitar', 'smooth'],
                             copyright='Copyright 2012 (c) Media Mogul Incorporated')
+
             newSongs.append(songObj)
 
             songObj = Song(artist='The Merry Men',
@@ -116,14 +116,14 @@ if __name__ == '__main__':
 
     sys.stdout.write("Merry Men Songs:\n")
     for song in merryMenSongs:
-            pprint(song.asDict())
+            pprint(song.asDict(strKeys=True))
             sys.stdout.write('\n')
 
     # Query some songs not by artist
     sys.stdout.write('\n\nNot Mega Men Songs:\n')
     notMegaMenSongs = Song.objects.filterInline(artist__ne='Mega Men').all()
     for song in notMegaMenSongs:
-            pprint(song.asDict())
+            pprint(song.asDict(strKeys=True))
             sys.stdout.write('\n')
 
 
@@ -137,7 +137,7 @@ if __name__ == '__main__':
 
     allTrackOneSongs = getTracks(Song.objects, 1)
     for song in allTrackOneSongs:
-            pprint(song.asDict())
+            pprint(song.asDict(strKeys=True))
             sys.stdout.write('\n')
 
     sys.stdout.write('\nMega Men track ones:')
@@ -146,14 +146,14 @@ if __name__ == '__main__':
 
     objs = getTracks(megaMenTracks, 1)
     for song in objs:
-            pprint(song.asDict())
+            pprint(song.asDict(strKeys=True))
             sys.stdout.write('\n')
 
     sys.stdout.write('\nMega Men track twos (should be just one entry):\n')
 
     objs = getTracks(megaMenTracks, 2)
     for song in objs:
-            pprint(song.asDict())
+            pprint(song.asDict(strKeys=True))
             sys.stdout.write('\n')
 
     pk = song.getPk()
@@ -165,7 +165,7 @@ if __name__ == '__main__':
     song.delete()
     objs = getTracks(megaMenTracks, 2)
     for song in objs:
-            pprint(song.asDict())
+            pprint(song.asDict(strKeys=True))
             sys.stdout.write('\n')
 
     sys.stdout.write('\nSong pk=%s exists? (should now be False) %s\n' %(pk, str(Song.objects.exists(pk)) ) )
