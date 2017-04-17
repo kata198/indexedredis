@@ -393,11 +393,9 @@ class IndexedRedisModel(object):
 					val = IR_NULL_STR
 				else:
 					val = irNull
-			elif issubclass(thisField.__class__, IRField) and hasattr(thisField, 'toStorage'):
+			else:
 				if forStorage is True:
 					val = thisField.toStorage(val)
-			else:
-				val = to_unicode(val)
 
 			if strKeys:
 				ret[str(thisField)] = val
@@ -424,10 +422,7 @@ class IndexedRedisModel(object):
 		if val == irNull:
 			return IR_NULL_STR
 
-		if issubclass(thisField.__class__, IRField) and hasattr(thisField, 'toStorage'):
-			val = thisField.toStorage(val)
-		else:
-			val = to_unicode(val)
+		val = thisField.toStorage(val)
 
 		return val
 
@@ -846,9 +841,9 @@ class IndexedRedisHelper(object):
 		self.mdl = mdl
 		self.keyName = self.mdl.KEY_NAME
 
-		self.irFields = { thisField : thisField for thisField in self.mdl.FIELDS if issubclass(thisField.__class__, IRField) }
-
 		self.fields = self.mdl.FIELDS
+
+		self.irFields = { irField : irField for irField in self.fields }
 		# XXX: When we do indexes, we may need to call "toStorage" on the field if it is an IRField, so replace-in the IRField's if present
 		self.indexedFields = [self.irFields.get(fieldName, fieldName) for fieldName in self.mdl.INDEXED_FIELDS]
 #		self.indexedFields = self.mdl.INDEXED_FIELDS
@@ -1065,7 +1060,7 @@ class IndexedRedisQuery(IndexedRedisHelper):
 
 			if value == irNull:
 				value = IR_NULL_STR
-			elif key in filterObj.irFields:
+			else:
 				irField = filterObj.irFields[key]
 				if hasattr(irField, 'toIndex'):
 					value = irField.toIndex(value)
@@ -1611,11 +1606,8 @@ class IndexedRedisSave(IndexedRedisHelper):
 
 		if isInsert is True:
 			for thisField in self.fields:
-				if issubclass(thisField.__class__, IRField):
-					default = IR_NULL_STR
-				else:
-					default = ''
-				fieldValue = newDict.get(thisField, default)
+
+				fieldValue = newDict.get(thisField, thisField.getDefaultValue())
 
 				pipeline.hset(key, thisField, fieldValue)
 
