@@ -280,7 +280,7 @@ class IRField(str):
 		
 		return ''.join(ret)
 
-	def __new__(self, name='', valueType=None, hashIndex=False):
+	def __new__(self, name='', valueType=None, defaultValue=irNull, hashIndex=False):
 		return str.__new__(self, name)
 
 
