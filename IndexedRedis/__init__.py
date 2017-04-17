@@ -757,6 +757,10 @@ class IndexedRedisModel(object):
 		if hasattr(model, 'BINARY_FIELDS'):
 			raise InvalidModelException('BINARY_FIELDS is no longer supported since IndexedRedis 5.0.0 . Use IndexedRedis.fields.IRBytesField in the FIELDS array for the same functionality, use IRBytesField for same functionality. Use IRField(valueType=bytes) for python-3 only support. Use IRRawField to perform no conversion at all.')
 
+		newFields = []
+		updatedFields = []
+		mustUpdateFields = False
+
 		for thisField in fieldSet:
 			if thisField == '_id':
 				raise InvalidModelException('%s You cannot have a field named _id, it is reserved for the primary key.' %(failedValidationStr,))
@@ -775,6 +779,18 @@ class IndexedRedisModel(object):
 
 			if str(thisField) == '':
 				raise InvalidModelException('%s Field defined without a name, or name was an empty string. Type=%s' %(failedValidationStr, str(type(thisField))))
+
+			if issubclass(thisField.__class__, IRField):
+				newFields.append(thisField)
+			else:
+				mustUpdateFields = True
+				newField = IRClassicField(thisField)
+				newFields.append(newField)
+				updatedFields.append(thisField)
+
+		if mustUpdateFields is True:
+			model.FIELDS = newFields
+			deprecatedMessage('Model "%s" contains plain-string fields. These have been converted to IRClassicField objects to retain the same functionality. plain-string fields will be removed in a future version. The converted fields are: %s' %(model.__name__, repr(updatedFields)), 'UPDATED_FIELDS_' + model.__name__)
 
 
 		if bool(indexedFieldSet - fieldSet):
