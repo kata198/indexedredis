@@ -53,6 +53,9 @@ class IRBase64Field(IRField):
 			return ''
 		return b64encode(tobytes(value))
 
+	def _getReprProperties(self):
+		return []
+
 	def __new__(self, name=''):
 		return IRField.__new__(self, name)
 

@@ -92,6 +92,14 @@ class IRFieldChain(IRField):
 
 		return value
 
+	def _getReprProperties(self):
+		chainedFieldsRepr = []
+		for chainedField in self.chainedFields:
+			fieldRepr = chainedField.__class__.__name__ + '( ' + ', '.join(chainedField._getReprProperties()) + ' )'
+			chainedFieldsRepr.append(fieldRepr)
+
+		return ['chainedFields=[ %s ]' %(', '.join(chainedFieldsRepr), )]
+
 	def _toBytes(self, value):
 		for chainedField in self.chainedFields:
 			if hasattr(chainedField, 'toBytes'):

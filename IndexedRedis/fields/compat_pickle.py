@@ -68,6 +68,9 @@ class IRCompatPickleField(IRField):
 				return pickle.loads(value, encoding='bytes')
 			return None
 
+	def _getReprProperties(self):
+		return []
+
 	def __new__(self, name=''):
 		return IRField.__new__(self, name)
 

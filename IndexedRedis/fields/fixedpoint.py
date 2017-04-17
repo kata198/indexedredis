@@ -55,6 +55,9 @@ class IRFixedPointField(IRField):
 	def _getFormatStr(self):
 		return '%.' + str(self.decimalPlaces) + 'f'
 
+	def _getReprProperties(self):
+		return [ 'decimalPlaces=%d' %(decimalPlaces, ) ]
+
 	def __new__(self, name='', decimalPlaces=5):
 		return IRField.__new__(self, name)
 

@@ -27,6 +27,9 @@ class IRRawField(IRField):
 	def toStorage(self, value=b''):
 		return value
 
+	def _getReprProperties(self):
+		return []
+
 	def __new__(self, name=''):
 		return IRField.__new__(self, name)
 

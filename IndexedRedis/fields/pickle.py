@@ -89,6 +89,9 @@ class IRPickleField(IRField):
 			return pickle.loads(IRPickleField._strip_pickle_header(value))
 		return None
 
+	def _getReprProperties(self):
+		return []
+
 	def __new__(self, name=''):
 		return IRField.__new__(self, name)
 

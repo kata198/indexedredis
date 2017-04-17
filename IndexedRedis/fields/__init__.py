@@ -234,6 +234,52 @@ class IRField(str):
 		'''
 		return bool(value in (b'', '', irNull) or value in IR_NULL_STRINGS )
 
+	def _getReprProperties(self):
+		'''
+			_getReprProperties - Get the properties of this field to display in repr().
+
+				These should be in the form of $propertyName=$propertyRepr
+
+				The default IRField implementation handles just the "hashIndex" property.
+
+				defaultValue is part of "__repr__" impl. You should just extend this method
+				with your object's properties instead of rewriting repr.
+
+		'''
+		ret = []
+		if hasattr(self, 'hashIndex'):
+			ret.append('hashIndex=%s' %(self.hashIndex, ))
+
+		return ret
+
+
+	def __repr__(self):
+		'''
+			__repr__ - Return an object-representation string of this field instance.
+
+			You should NOT need to extend this on your IRField, instead just implement _getReprProperties
+
+			  to return your type's specific properties associated with this instance.
+
+			  @see _getReprProperties
+		'''
+		ret = [ self.__class__.__name__, '( ', '"%s"' %(str(self), ) ]
+
+		reprProperties = self._getReprProperties()
+
+		defaultValue = self.getDefaultValue()
+		if defaultValue == irNull:
+			reprProperties.append('defaultValue=irNull')
+		else:
+			reprProperties.append('defaultValue=%s' %(repr(defaultValue), ))
+
+		ret.append(', ')
+		ret.append(', '.join(reprProperties))
+
+		ret.append(' )')
+		
+		return ''.join(ret)
+
 	def __new__(self, name='', valueType=None, hashIndex=False):
 		return str.__new__(self, name)
 
