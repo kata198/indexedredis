@@ -742,7 +742,8 @@ class IndexedRedisModel(object):
 		keyName = model.KEY_NAME
 		if not keyName:
 			raise InvalidModelException('"%s" has no KEY_NAME defined.' %(str(model.__name__), ) )
-		if keyName in validatedModels:
+
+		if model in validatedModels:
 			return True
 
 		failedValidationStr = '"%s" Failed Model Validation:' %(str(model.__name__), ) 
@@ -803,7 +804,7 @@ class IndexedRedisModel(object):
 		if bool(indexedFieldSet - fieldSet):
 			raise InvalidModelException('%s All INDEXED_FIELDS must also be present in FIELDS. %s exist only in INDEXED_FIELDS' %(failedValidationStr, str(list(indexedFieldSet - fieldSet)), ) )
 		
-		validatedModels.add(keyName)
+		validatedModels.add(model)
 		return True
 
 	@classmethod
