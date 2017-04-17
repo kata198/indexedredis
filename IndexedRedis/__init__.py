@@ -376,13 +376,17 @@ class IndexedRedisModel(object):
 		self._id = kwargs.get('_id', None)
 
 	
-	def asDict(self, includeMeta=False, forStorage=False):
+	def asDict(self, includeMeta=False, forStorage=False, strKeys=False):
 		'''
 			toDict / asDict - Get a dictionary representation of this model.
 
 			@param includeMeta - Include metadata in return. For now, this is only pk stored as "_id"
+
 			@param convertValueTypes <bool> - default True. If False, fields with fieldValue defined will be converted to that type.
 				Use True when saving, etc, as native type is always either str or bytes.
+
+			@param strKeys <bool> Default False - If True, just the string value of the field name will be used as the key.
+				Otherwise, the IRField itself will be (although represented and indexed by string)
 
 			@return - Dictionary reprensetation of this object and all fields
 		'''
@@ -400,7 +404,10 @@ class IndexedRedisModel(object):
 			else:
 				val = to_unicode(val)
 
-			ret[thisField] = val
+			if strKeys:
+				ret[str(thisField)] = val
+			else:
+				ret[thisField] = val
 				
 
 		if includeMeta is True:
@@ -559,7 +566,7 @@ class IndexedRedisModel(object):
 		'''
                     
 		myClassName = self.__class__.__name__
-		myDict = self.asDict(True, forStorage=False)
+		myDict = self.asDict(True, forStorage=False, strKeys=True)
 		_id = myDict.pop('_id', 'None')
 		myPointerLoc = "0x%x" %(id(self),)
 		if not _id or _id == 'None':
@@ -575,7 +582,7 @@ class IndexedRedisModel(object):
 
                         @return - String of python init call to recreate this object
 		'''
-		myDict = self.asDict(True, forStorage=False)
+		myDict = self.asDict(True, forStorage=False, strKeys=True)
 		myClassName = self.__class__.__name__
 
 		ret = [myClassName, '(']
@@ -604,9 +611,9 @@ class IndexedRedisModel(object):
 						val = repr(val)
 				else:
 					val = to_unicode(val)
-				ret += [key, '=', val, ', ']
+				ret += [str(key), '=', val, ', ']
 			else:
-				ret += [key, '=', repr(value), ', ']
+				ret += [str(key), '=', repr(value), ', ']
 		if key is not None or not _id:
 			# At least one iteration, so strip trailing comma
 			ret.pop()
