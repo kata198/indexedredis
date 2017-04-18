@@ -92,6 +92,8 @@ etc. Constructing objects is now a lot cheapear.
 
 - repr on FIELDS now shows the field type and any properties specific to that object. asDict now takes a new param, (strKeys, default False), which will str the keys instead of using the IRField (so if you are pretty-printing the asDict repr, you'll want to use this to prevent the field types from creeping into the printout)
 
+- Some minor cleanups/fixups/optimizations
+
 - NOTE: new_pickle.IRNewPickleField is now IRPickleField, and the old IRPickleField is now fields.compat_pickle.IRCompatPickleField
 
 4.1.4 - Sat Apr 15 2017
