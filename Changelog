@@ -2,19 +2,10 @@
 
 - Improve IRPickleField to work with ALL types (including now, strings and
 bytes)
-  **BACKWARDS INCOMPATIBLE**
-  This changes the way IRPickleField stores data.
 
-  You can use Model.compat_convertPickleFields() to convert the data in all
-  pickle fields on all objects. You MUST run this after upgrade, as it does
-  not support a mix of new and old format.
-
-  If you need to stay up and running for a while after upgrade, change the
-  field to be:
-    from IndexedRedis.fields.compat_pickle import IRCompatPickleField
-
-  But you should really just convert right away, This compat field will not be
-  around long and may be removed at any time in the future
+  THIS WAS PREVIOUSLY BACKWARDS-INCOMPATIBLE, BUT HAS BEEN MADE COMPATIBLE
+  WITHOUT CHANGES TO YOUR CODE. **DO NOT RUN THE COMPAT FUNCTION SHIPPED WITH
+  4.1.3 - 4.1.4**
 
 - Default IRField's which have not been set to irNull (instead of empty string).
 Classic string fields (just a string name, not an IRField object) will retain
@@ -94,7 +85,6 @@ etc. Constructing objects is now a lot cheapear.
 
 - Some minor cleanups/fixups/optimizations
 
-- NOTE: new_pickle.IRNewPickleField is now IRPickleField, and the old IRPickleField is now fields.compat_pickle.IRCompatPickleField
 
 4.1.4 - Sat Apr 15 2017
 

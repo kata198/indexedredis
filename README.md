@@ -18,7 +18,7 @@ It is compatible with python 2.7 and python 3. It has been tested with python 2.
 
 Version 5.0.0 will be backwards incompatible with previous versions by removing some old legacy stuff, and changing some behaviour.
 
-Most of these changes can be made using version 4.1.3 or greater in the 4.1 series, so when 5.0.0 comes around, you won't have to further update your code (with the exception of the pickle IRField type, see the ChangeLog for details).
+Most of these changes can be made using version 4.1.4 or greater in the 4.1 series, so when 5.0.0 comes around, you can be as close as possible and may not need to update any code.
 
 Details can be found in the 5.0.0 ChangeLog, found here: https://github.com/kata198/indexedredis/blob/5.0branch/Changelog
 
