@@ -1,4 +1,4 @@
-# Copyright (c) 2014, 2015, 2016 Timothy Savannah under LGPL version 2.1. See LICENSE for more information.
+# Copyright (c) 2014, 2015, 2016, 2017 Timothy Savannah under LGPL version 2.1. See LICENSE for more information.
 #
 # fields - Some types and objects related to advanced fields
 #
@@ -16,6 +16,7 @@ import sys
 from datetime import datetime
 
 from ..compat_str import to_unicode, tobytes
+from ..deprecated import deprecatedMessage
 
 from .null import irNull, IR_NULL_STRINGS, IR_NULL_STR, IR_NULL_BYTES, IR_NULL_UNICODE, IRNullType
 
@@ -113,11 +114,11 @@ class IRField(str):
 		# I don't like these next two conditions, but it will train folks to use the correct types (whereas they may just try to shove dict in, and give up that it doesn't work)
 		elif valueType in (dict, list, tuple):
 			valueType = IRJsonValue
-			#sys.stderr.write('WARNING: Implicitly converting IRField(%s, valueType=%s) to IRField(%s, valueType=IndexedRedis.fields.FieldValueTypes.IRJsonValue)\n' %(repr(name), valueType.__name__, repr(name)))
+			deprecatedMessage('WARNING: Implicitly converting IRField(%s, valueType=%s) to IRField(%s, valueType=IndexedRedis.fields.FieldValueTypes.IRJsonValue)\n' %(repr(name), valueType.__name__, repr(name)), printStack=True)
 			self.CAN_INDEX = False
 		elif valueType == datetime:
 			valueType = IRDatetimeValue
-			#sys.stderr.write('WARNING: Implicitly converting IRField(%s, valueType=datetime.datetime) to IRField(%s, valueType=IndexedRedis.fields.FieldValueTypes.IRDatetimeValue)\n' %(repr(name), repr(name)))
+			deprecatedMessage('WARNING: Implicitly converting IRField(%s, valueType=datetime.datetime) to IRField(%s, valueType=IndexedRedis.fields.FieldValueTypes.IRDatetimeValue)\n' %(repr(name), repr(name)), printStack=True)
 			self.CAN_INDEX = True
 		else:
 			if not isinstance(valueType, type):
