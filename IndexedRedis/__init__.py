@@ -686,11 +686,12 @@ class IndexedRedisModel(object):
 
 		updatedFields = {}
 		for thisField, newValue in newData.items():
-			currentValue = currentData.get(thisField, '')
+			defaultValue = thisField.getDefaultValue()
+			currentValue = currentData.get(thisField, defaultValue)
 			if currentValue != newValue:
 				# Use "converted" values in the updatedFields dict, and apply on the object.
-				updatedFields[thisField] = ( getattr(self, thisField, ''), getattr(newDataObj, thisField, '') )
-				setattr(self, thisField, getattr(newDataObj, thisField, ''))
+				updatedFields[thisField] = ( currentValue, newValue) 
+				setattr(self, thisField, newValue)
 				self._origData[thisField] = newDataObj._origData[thisField]
 
 		return updatedFields
@@ -768,16 +769,7 @@ class IndexedRedisModel(object):
 				codecs.ascii_encode(thisField)
 			except UnicodeDecodeError as e:
 				raise InvalidModelException('%s All field names must be ascii-encodable. "%s" was not. Error was: %s' %(failedValidationStr, to_unicode(thisField), str(e)))
-
-			if thisField in indexedFieldSet and issubclass(thisField.__class__, IRField) and thisField.CAN_INDEX is False:
-				raise InvalidModelException('%s Field Type %s - (%s) cannot be indexed.' %(failedValidationStr, str(thisField.__class__.__name__), to_unicode(thisField)))
-
-			if hasattr(IndexedRedisModel, thisField) is True:
-				raise InvalidModelException('%s Field name %s is a reserved attribute on IndexedRedisModel.' %(failedValidationStr, str(thisField)))
-
-			if str(thisField) == '':
-				raise InvalidModelException('%s Field defined without a name, or name was an empty string. Type=%s' %(failedValidationStr, str(type(thisField))))
-
+			# If a classic string field, convert to IRClassicField
 			if issubclass(thisField.__class__, IRField):
 				newFields.append(thisField)
 			else:
@@ -785,6 +777,19 @@ class IndexedRedisModel(object):
 				newField = IRClassicField(thisField)
 				newFields.append(newField)
 				updatedFields.append(thisField)
+
+				thisField = newField
+
+			if str(thisField) == '':
+				raise InvalidModelException('%s Field defined without a name, or name was an empty string. Type=%s' %(failedValidationStr, str(type(thisField))))
+
+			if thisField in indexedFieldSet and thisField.CAN_INDEX is False:
+				raise InvalidModelException('%s Field Type %s - (%s) cannot be indexed.' %(failedValidationStr, str(thisField.__class__.__name__), to_unicode(thisField)))
+
+			if hasattr(IndexedRedisModel, thisField) is True:
+				raise InvalidModelException('%s Field name %s is a reserved attribute on IndexedRedisModel.' %(failedValidationStr, str(thisField)))
+
+
 
 		if mustUpdateFields is True:
 			model.FIELDS = newFields
@@ -844,9 +849,9 @@ class IndexedRedisHelper(object):
 		self.fields = self.mdl.FIELDS
 
 		self.irFields = { irField : irField for irField in self.fields }
-		# XXX: When we do indexes, we may need to call "toStorage" on the field if it is an IRField, so replace-in the IRField's if present
-		self.indexedFields = [self.irFields.get(fieldName, fieldName) for fieldName in self.mdl.INDEXED_FIELDS]
-#		self.indexedFields = self.mdl.INDEXED_FIELDS
+
+		self.indexedFields = [self.irFields[fieldName] for fieldName in self.mdl.INDEXED_FIELDS]
+
 			
 		self._connection = None
 
@@ -1682,15 +1687,16 @@ class IndexedRedisSave(IndexedRedisHelper):
 
 		# Iterate now so we do this once instead of per-object.
 		for indexedField in self.indexedFields:
-			hashingField = None
-			if indexedField in self.irFields:
-				fields.append(self.irFields[indexedField])
-				if indexedField.hashIndex is True:
-					hashingField = self.irFields[indexedField]
+
+			fields.append(self.irFields[indexedField])
+
+			# Reuse the existing field if it is set to hash, otherwise
+			#   generate one that is, but set to hash index.
+			if indexedField.hashIndex is True:
+				hashingField = self.irFields[indexedField]
 			else:
-				fields.append(IRField(indexedField))
-			if hashingField is None:
-				hashingField = IRField(str(indexedField), hashIndex=True)
+				# Make one of the same type, but with hashIndex set to True
+				hashingField = self.irFields[indexedField].__class__(str(indexedField), hashIndex=True)
 
 			hashingFields[indexedField] = hashingField
 
@@ -1702,12 +1708,16 @@ class IndexedRedisSave(IndexedRedisHelper):
 			pipeline = conn.pipeline()
 			pk = objDict['_id']
 			for indexedField in fields:
-				# Remove the possibly stringed index
 				val = objDict[indexedField]
 
+				# Remove the possibly stringed index
 				self._compat_rem_str_id_from_index(indexedField, pk, val, pipeline)
+				# Remove the possibly hashed index
 				self._rem_id_from_index(hashingFields[indexedField], pk, val, pipeline)
+				# Add the new (hashed or unhashed) form.
 				self._add_id_to_index(indexedField, pk, val, pipeline)
+
+			# Launch all at once
 			pipeline.execute()
 
 
