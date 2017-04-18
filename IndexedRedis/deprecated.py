@@ -7,7 +7,7 @@
 
 from hashlib import md5
 
-
+import traceback
 import sys
 
 __all__ = ('toggleDeprecatedMessages', 'deprecated', 'deprecatedMessage')
@@ -30,15 +30,18 @@ def toggleDeprecatedMessages(enabled):
 global _alreadyWarned
 _alreadyWarned = {}
 
-def deprecatedMessage(msg, key=None):
+def deprecatedMessage(msg, key=None, printStack=False):
 	'''
 		deprecatedMessage - Print a deprecated messsage (unless they are toggled off). Will print a message only once (based on "key")
 
 		@param msg <str> - Deprecated message to possibly print
+		
 		@param key <anything> - A key that is specific to this message. 
 			If None is provided (default), one will be generated from the md5 of the message.
 		        However, better to save cycles and provide a unique key if at all possible.
 			The decorator uses the function itself as the key.
+
+		@param printStack <bool> Default False, if True print a stack trace
 	'''
 	if __deprecatedMessagesEnabled is False:
 		return
@@ -52,6 +55,11 @@ def deprecatedMessage(msg, key=None):
 	if key not in _alreadyWarned:
 		_alreadyWarned[key] = True
 		sys.stderr.write('== DeprecatedWarning: %s\n' %(msg, ))
+		if printStack:
+			sys.stderr.write('  at:\n')
+			curStack = traceback.extract_stack()
+
+			sys.stderr.write('  ' + '\n  '.join(traceback.format_list(curStack[:-2])).replace('\t', '    ') + '\n')
 
 
 def deprecated(msg):
