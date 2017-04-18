@@ -35,8 +35,9 @@ class IRPickleField(IRField):
 	# Sigh.... so we _can_ index on a pickle'd field, except even with the same protocol the pickling is different between python2 and python3
 	CAN_INDEX = False
 
-	def __init__(self, name=''):
+	def __init__(self, name='', defaultValue=irNull):
 		self.valueType = None
+		self.defaultValue = defaultValue
 
 	def toStorage(self, value):
 		if self._isNullValue(value):
@@ -65,7 +66,7 @@ class IRPickleField(IRField):
 	def _getReprProperties(self):
 		return []
 
-	def __new__(self, name=''):
+	def __new__(self, name='', defaultValue=irNull):
 		return IRField.__new__(self, name)
 
 # vim:set ts=8 shiftwidth=8 softtabstop=8 noexpandtab :
