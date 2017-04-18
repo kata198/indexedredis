@@ -21,8 +21,9 @@ class IRBytesField(IRField):
 
 	CAN_INDEX = False
 
-	def __init__(self, name=''):
+	def __init__(self, name='', defaultValue=irNull):
 		self.valueType = None
+		self.defaultValue = defaultValue
 
 	convert = IRField._convertBytes
 
@@ -30,7 +31,7 @@ class IRBytesField(IRField):
 
 	toStorage = IRField._convertBytes
 
-	def __new__(self, name=''):
+	def __new__(self, name='', defaultValue=irNull):
 		return IRField.__new__(self, name)
 
 

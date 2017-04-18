@@ -23,9 +23,10 @@ class IRBase64Field(IRField):
 
 	CAN_INDEX = False
 
-	def __init__(self, name=''):
+	def __init__(self, name='', defaultValue=irNull):
 		# XXX: Maybe need to give this an "encoding" field incase it needs to decode a string? Or maybe a field type that does decoding itself?
 		self.valueType = None
+		self.defaultValue = irNull
 
 	def convert(self, value=b''):
 		if not value:
@@ -56,7 +57,7 @@ class IRBase64Field(IRField):
 	def _getReprProperties(self):
 		return []
 
-	def __new__(self, name=''):
+	def __new__(self, name='', defaultValue=irNull):
 		return IRField.__new__(self, name)
 
 

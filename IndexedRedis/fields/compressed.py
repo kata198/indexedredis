@@ -46,11 +46,13 @@ class IRCompressedField(IRField):
 
 	# TODO: maybe support other compression levels. The headers change with different levels.
 	#  These are for 9.
-	def __init__(self, name='', compressMode=COMPRESS_MODE_ZLIB):
+	def __init__(self, name='', compressMode=COMPRESS_MODE_ZLIB, defaultValue=irNull):
 		'''
 			__init__ - Create this object
 		'''
 		self.valueType = None
+		self.defaultValue = defaultValue
+
 		if compressMode == COMPRESS_MODE_ZLIB or compressMode in _COMPRESS_MODE_ALIASES_ZLIB:
 			self.compressMode = COMPRESS_MODE_ZLIB
 			self.header = b'x\xda'
@@ -88,7 +90,7 @@ class IRCompressedField(IRField):
 	def _getReprProperties(self):
 		return [ 'compressMode="%s"' %(self.compressMode, ) ]
 
-	def __new__(self, name='', compressMode=COMPRESS_MODE_ZLIB):
+	def __new__(self, name='', compressMode=COMPRESS_MODE_ZLIB, defaultValue=irNull):
 		return IRField.__new__(self, name)
 
 

@@ -22,7 +22,7 @@ class IRFixedPointField(IRField):
 
 	CAN_INDEX = True
 
-	def __init__(self, name='', decimalPlaces=5):
+	def __init__(self, name='', decimalPlaces=5, defaultValue=irNull):
 		'''
 			__init__ - Create this object.
 
@@ -31,6 +31,7 @@ class IRFixedPointField(IRField):
 			  this many digits after the decimal point.
 		'''
 		self.decimalPlaces = decimalPlaces
+		self.defaultValue = defaultValue
 
 	def convert(self, value):
 		if self._isNullValue(value):
@@ -58,7 +59,7 @@ class IRFixedPointField(IRField):
 	def _getReprProperties(self):
 		return [ 'decimalPlaces=%d' %(decimalPlaces, ) ]
 
-	def __new__(self, name='', decimalPlaces=5):
+	def __new__(self, name='', decimalPlaces=5, defaultValue=irNull):
 		return IRField.__new__(self, name)
 
 

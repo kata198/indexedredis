@@ -16,7 +16,6 @@ import redis
 from . import fields
 from .fields import IRField, IRFieldChain, IRClassicField, IRNullType, irNull, IR_NULL_STR, IR_NULL_BYTES, IR_NULL_STRINGS
 from .compat_str import to_unicode, tobytes, setDefaultIREncoding, getDefaultIREncoding
-from .compat_convert import compat_convertPickleFields
 from .utils import hashDictOneLevel
 
 from .IRQueryableList import IRQueryableList
@@ -817,18 +816,6 @@ class IndexedRedisModel(object):
 		class ConnectedIndexedRedisModel(cls):
 			REDIS_CONNECTION_PARAMS = redisConnectionParams
 		return ConnectedIndexedRedisModel
-
-	@classmethod
-	def compat_convertPickleFields(cls):
-		'''
-			compat_convertPickleFields - Convert pickle fields on this model from the old format to the new format.
-
-			This is not threadsafe, should be run while things are not in motion. Will only affect the pickle-type fields.
-
-			This function expects that all objects are either old format or new format, does not handle mixed.
-		'''
-		return compat_convertPickleFields(cls)
-
 
 		
 class IndexedRedisHelper(object):

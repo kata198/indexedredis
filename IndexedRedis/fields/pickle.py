@@ -25,9 +25,6 @@ try:
 except NameError:
 	unicode = str
 
-
-PICKLE_HEADER = b'~\x06\x28\x19\x89PKL'
-
 class IRPickleField(IRField):
 	'''
 		IRPickleField - A field which pickles its data before storage and loads after retrieval.
@@ -38,38 +35,15 @@ class IRPickleField(IRField):
 	# Sigh.... so we _can_ index on a pickle'd field, except even with the same protocol the pickling is different between python2 and python3
 	CAN_INDEX = False
 
-	def __init__(self, name=''):
+	def __init__(self, name='', defaultValue=irNull):
 		self.valueType = None
-
-	@staticmethod
-	def _ensure_pickle_header(value):
-		value = tobytes(value)
-		if not value.startswith(PICKLE_HEADER):
-			return PICKLE_HEADER + value
-		return value
-
-	@staticmethod
-	def _strip_pickle_header(value):
-		value = tobytes(value)
-		if value.startswith(PICKLE_HEADER):
-			value = value[len(PICKLE_HEADER):]
-		return value
-	
-	@staticmethod
-	def _has_pickle_header(value):
-		value = tobytes(value)
-		return value.startswith(PICKLE_HEADER)
-
+		self.defaultValue = defaultValue
 
 	def toStorage(self, value):
 		if self._isNullValue(value):
 			return value
-		if isStringy(value):
-			if IRPickleField._has_pickle_header(value):
-				return value
 
-		return IRPickleField._ensure_pickle_header(pickle.dumps(value, protocol=2))
-		raise AssertionError("oops, didn't expect a %s object!" %(value.__class__.__name__, ))
+		return pickle.dumps(value, protocol=2)
 
 	def convert(self, value):
 		if not value:
@@ -85,14 +59,14 @@ class IRPickleField(IRField):
 
 	@staticmethod
 	def __loadPickle(value):
-		if not isEncodedString(value) and isStringy(value) and IRPickleField._has_pickle_header(value):
-			return pickle.loads(IRPickleField._strip_pickle_header(value))
+		if not isEncodedString(value) and isStringy(value):
+			return pickle.loads(value)
 		return None
 
 	def _getReprProperties(self):
 		return []
 
-	def __new__(self, name=''):
+	def __new__(self, name='', defaultValue=irNull):
 		return IRField.__new__(self, name)
 
 # vim:set ts=8 shiftwidth=8 softtabstop=8 noexpandtab :

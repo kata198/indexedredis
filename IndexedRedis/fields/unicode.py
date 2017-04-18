@@ -7,6 +7,8 @@
 
 
 from . import IRField
+from .null import irNull
+
 from ..compat_str import getDefaultIREncoding
 
 import sys
@@ -31,9 +33,10 @@ class IRUnicodeField(IRField):
 
 	CAN_INDEX = True
 
-	def __init__(self, name='', encoding=None):
+	def __init__(self, name='', encoding=None, defaultValue=irNull):
 		self.valueType = None
 		self.encoding = encoding
+		self.defaultValue = defaultValue
 
 
 	def getEncoding(self):
@@ -75,7 +78,7 @@ class IRUnicodeField(IRField):
 		return ['encoding=%s' %(repr(self.encoding), )]
 
 
-	def __new__(self, name='', encoding=None):
+	def __new__(self, name='', encoding=None, defaultValue=irNull):
 		return IRField.__new__(self, name)
 
 # vim:set ts=8 shiftwidth=8 softtabstop=8 noexpandtab :

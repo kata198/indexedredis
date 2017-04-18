@@ -7,6 +7,7 @@
 # vim: set ts=8 shiftwidth=8 softtabstop=8 noexpandtab :
 
 from . import IRField
+from .null import irNull
 
 class IRRawField(IRField):
 	'''
@@ -15,8 +16,9 @@ class IRRawField(IRField):
 
 	CAN_INDEX = False
 
-	def __init__(self, name=''):
+	def __init__(self, name='', defaultValue=irNull):
 		self.valueType = None
+		self.defaultValue = defaultValue
 
 	def convert(self, value=b''):
 		return value
@@ -30,7 +32,7 @@ class IRRawField(IRField):
 	def _getReprProperties(self):
 		return []
 
-	def __new__(self, name=''):
+	def __new__(self, name='', defaultValue=irNull):
 		return IRField.__new__(self, name)
 
 
