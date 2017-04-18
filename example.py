@@ -187,22 +187,37 @@ if __name__ == '__main__':
 ##         OUTPUT:            #
 ###############################
 
+#Testing IndexedRedis version 4.1.4
 #Merry Men Songs:
-#{'album': 'The Merry Men LP',
-# 'artist': 'The Merry Men',
-# 'copyright': 'Copyright 2012 (c) Media Mogul Incorporated',
-# 'description': 'A song about happy people',
-# 'duration': '1:58',
-# 'title': 'Happy Go Lucky',
-# 'track_number': '1'}
-#
 #{'album': 'The Merry Men LP',
 # 'artist': 'The Merry Men',
 # 'copyright': 'Copyright 2012 (c) Media Mogul Incorporated',
 # 'description': 'A song about joy',
 # 'duration': '2:54',
+# 'mp3_data': b'\x99\x12\x14',
+# 'releaseDate': IRNullType(),
+# 'tags': ['joyful', 'piano', 'Key C'],
+# 'thumbnail': b'\x15\x1a\x1a\x1a\x1a\x1a\x1a\x1b\x1a\x1a\x1a\x1b'
+#              b'\x1a\x1a\x1a\x1a\x1a\x1a\x1a\x1a\x1a\x1a\x1a\x1a'
+#              b'\x1a\x1a\x1a\x1a\x1a\x1a\x1a\x1a\x1a\x1a\x1a\x1a'
+#              b'\x1a\x1a\x1a\x1a\x1a\x1a',
 # 'title': 'Joy to Joy',
-# 'track_number': '2'}
+# 'track_number': 2}
+#
+#{'album': 'The Merry Men LP',
+# 'artist': 'The Merry Men',
+# 'copyright': 'Copyright 2012 (c) Media Mogul Incorporated',
+# 'description': 'A song about happy people',
+# 'duration': '1:58',
+# 'mp3_data': b'\x99\x12\x14',
+# 'releaseDate': IRNullType(),
+# 'tags': ['happy', 'guitar', 'smooth'],
+# 'thumbnail': b'\x15\x1a\x1a\x1a\x1a\x1a\x1a\x1b\x1a\x1a\x1a\x1b'
+#              b'\x1a\x1a\x1a\x1a\x1a\x1a\x1a\x1a\x1a\x1a\x1a\x1a'
+#              b'\x1a\x1a\x1a\x1a\x1a\x1a\x1a\x1a\x1a\x1a\x1a\x1a'
+#              b'\x1a\x1a\x1a\x1a\x1a\x1a',
+# 'title': 'Happy Go Lucky',
+# 'track_number': 1}
 #
 #
 #
@@ -210,54 +225,96 @@ if __name__ == '__main__':
 #{'album': 'The Merry Men LP',
 # 'artist': 'The Merry Men',
 # 'copyright': 'Copyright 2012 (c) Media Mogul Incorporated',
-# 'description': 'A song about happy people',
-# 'duration': '1:58',
-# 'title': 'Happy Go Lucky',
-# 'track_number': '1'}
+# 'description': 'A song about joy',
+# 'duration': '2:54',
+# 'mp3_data': b'\x99\x12\x14',
+# 'releaseDate': IRNullType(),
+# 'tags': ['joyful', 'piano', 'Key C'],
+# 'thumbnail': b'\x15\x1a\x1a\x1a\x1a\x1a\x1a\x1b\x1a\x1a\x1a\x1b'
+#              b'\x1a\x1a\x1a\x1a\x1a\x1a\x1a\x1a\x1a\x1a\x1a\x1a'
+#              b'\x1a\x1a\x1a\x1a\x1a\x1a\x1a\x1a\x1a\x1a\x1a\x1a'
+#              b'\x1a\x1a\x1a\x1a\x1a\x1a',
+# 'title': 'Joy to Joy',
+# 'track_number': 2}
 #
 #{'album': 'Misery loses comfort',
 # 'artist': 'The Unhappy Folk',
 # 'copyright': 'Copyright 2014 (c) Cheese Industries',
 # 'description': 'A sad song',
 # 'duration': '15:44',
+# 'mp3_data': b'\x99\x12\x14',
+# 'releaseDate': IRNullType(),
+# 'tags': IRNullType(),
+# 'thumbnail': b'\x15\x1a\x1a\x1a\x1a\x1a\x1a\x1b\x1a\x1a\x1a\x1b'
+#              b'\x1a\x1a\x1a\x1a\x1a\x1a\x1a\x1a\x1a\x1a\x1a\x1a'
+#              b'\x1a\x1a\x1a\x1a\x1a\x1a\x1a\x1a\x1a\x1a\x1a\x1a'
+#              b'\x1a\x1a\x1a\x1a\x1a\x1a',
 # 'title': 'Sadly she waits',
-# 'track_number': '1'}
+# 'track_number': 1}
 #
 #{'album': 'The Merry Men LP',
 # 'artist': 'The Merry Men',
 # 'copyright': 'Copyright 2012 (c) Media Mogul Incorporated',
-# 'description': 'A song about joy',
-# 'duration': '2:54',
-# 'title': 'Joy to Joy',
-# 'track_number': '2'}
+# 'description': 'A song about happy people',
+# 'duration': '1:58',
+# 'mp3_data': b'\x99\x12\x14',
+# 'releaseDate': IRNullType(),
+# 'tags': ['happy', 'guitar', 'smooth'],
+# 'thumbnail': b'\x15\x1a\x1a\x1a\x1a\x1a\x1a\x1b\x1a\x1a\x1a\x1b'
+#              b'\x1a\x1a\x1a\x1a\x1a\x1a\x1a\x1a\x1a\x1a\x1a\x1a'
+#              b'\x1a\x1a\x1a\x1a\x1a\x1a\x1a\x1a\x1a\x1a\x1a\x1a'
+#              b'\x1a\x1a\x1a\x1a\x1a\x1a',
+# 'title': 'Happy Go Lucky',
+# 'track_number': 1}
 #
 #
 #
 #
 #All track one songs:
-#{'album': 'The Merry Men LP',
-# 'artist': 'The Merry Men',
-# 'copyright': 'Copyright 2012 (c) Media Mogul Incorporated',
-# 'description': 'A song about happy people',
-# 'duration': '1:58',
-# 'title': 'Happy Go Lucky',
-# 'track_number': '1'}
+#{'album': 'Super Tracks',
+# 'artist': 'Mega Men',
+# 'copyright': 'Copyright 2014 (c) Cheese Industries',
+# 'description': 'Super Nintendo',
+# 'duration': '1:15',
+# 'mp3_data': b'\x99\x12\x14',
+# 'releaseDate': IRNullType(),
+# 'tags': IRNullType(),
+# 'thumbnail': b'\x15\x1a\x1a\x1a\x1a\x1a\x1a\x1b\x1a\x1a\x1a\x1b'
+#              b'\x1a\x1a\x1a\x1a\x1a\x1a\x1a\x1a\x1a\x1a\x1a\x1a'
+#              b'\x1a\x1a\x1a\x1a\x1a\x1a\x1a\x1a\x1a\x1a\x1a\x1a'
+#              b'\x1a\x1a\x1a\x1a\x1a\x1a',
+# 'title': 'Nintendo 1',
+# 'track_number': 1}
 #
 #{'album': 'Misery loses comfort',
 # 'artist': 'The Unhappy Folk',
 # 'copyright': 'Copyright 2014 (c) Cheese Industries',
 # 'description': 'A sad song',
 # 'duration': '15:44',
+# 'mp3_data': b'\x99\x12\x14',
+# 'releaseDate': IRNullType(),
+# 'tags': IRNullType(),
+# 'thumbnail': b'\x15\x1a\x1a\x1a\x1a\x1a\x1a\x1b\x1a\x1a\x1a\x1b'
+#              b'\x1a\x1a\x1a\x1a\x1a\x1a\x1a\x1a\x1a\x1a\x1a\x1a'
+#              b'\x1a\x1a\x1a\x1a\x1a\x1a\x1a\x1a\x1a\x1a\x1a\x1a'
+#              b'\x1a\x1a\x1a\x1a\x1a\x1a',
 # 'title': 'Sadly she waits',
-# 'track_number': '1'}
+# 'track_number': 1}
 #
-#{'album': 'Super Tracks',
-# 'artist': 'Mega Men',
-# 'copyright': 'Copyright 2014 (c) Cheese Industries',
-# 'description': 'Super Nintendo',
-# 'duration': '1:15',
-# 'title': 'Nintendo 1',
-# 'track_number': '1'}
+#{'album': 'The Merry Men LP',
+# 'artist': 'The Merry Men',
+# 'copyright': 'Copyright 2012 (c) Media Mogul Incorporated',
+# 'description': 'A song about happy people',
+# 'duration': '1:58',
+# 'mp3_data': b'\x99\x12\x14',
+# 'releaseDate': IRNullType(),
+# 'tags': ['happy', 'guitar', 'smooth'],
+# 'thumbnail': b'\x15\x1a\x1a\x1a\x1a\x1a\x1a\x1b\x1a\x1a\x1a\x1b'
+#              b'\x1a\x1a\x1a\x1a\x1a\x1a\x1a\x1a\x1a\x1a\x1a\x1a'
+#              b'\x1a\x1a\x1a\x1a\x1a\x1a\x1a\x1a\x1a\x1a\x1a\x1a'
+#              b'\x1a\x1a\x1a\x1a\x1a\x1a',
+# 'title': 'Happy Go Lucky',
+# 'track_number': 1}
 #
 #
 #Mega Men track ones:{'album': 'Super Tracks',
@@ -265,134 +322,43 @@ if __name__ == '__main__':
 # 'copyright': 'Copyright 2014 (c) Cheese Industries',
 # 'description': 'Super Nintendo',
 # 'duration': '1:15',
+# 'mp3_data': b'\x99\x12\x14',
+# 'releaseDate': IRNullType(),
+# 'tags': IRNullType(),
+# 'thumbnail': b'\x15\x1a\x1a\x1a\x1a\x1a\x1a\x1b\x1a\x1a\x1a\x1b'
+#              b'\x1a\x1a\x1a\x1a\x1a\x1a\x1a\x1a\x1a\x1a\x1a\x1a'
+#              b'\x1a\x1a\x1a\x1a\x1a\x1a\x1a\x1a\x1a\x1a\x1a\x1a'
+#              b'\x1a\x1a\x1a\x1a\x1a\x1a',
 # 'title': 'Nintendo 1',
-# 'track_number': '1'}
+# 'track_number': 1}
 #
 #
-#Mega Men track twos:
+#Mega Men track twos (should be just one entry):
 #{'album': 'Super Tracks',
 # 'artist': 'Mega Men',
 # 'copyright': 'Copyright 2014 (c) Cheese Industries',
 # 'description': 'Super Nintendo',
 # 'duration': '1:55',
+# 'mp3_data': b'\x99\x12\x14',
+# 'releaseDate': IRNullType(),
+# 'tags': IRNullType(),
+# 'thumbnail': b'\x15\x1a\x1a\x1a\x1a\x1a\x1a\x1b\x1a\x1a\x1a\x1b'
+#              b'\x1a\x1a\x1a\x1a\x1a\x1a\x1a\x1a\x1a\x1a\x1a\x1a'
+#              b'\x1a\x1a\x1a\x1a\x1a\x1a\x1a\x1a\x1a\x1a\x1a\x1a'
+#              b'\x1a\x1a\x1a\x1a\x1a\x1a',
 # 'title': 'Nintendo 2',
-# 'track_number': '2'}
+# 'track_number': 2}
 #
 #
-####After Delete, Mega Men Track twos (should be blank):
-
-# Merry Men Songs:
-# {'album': 'The Merry Men LP',
-#  'artist': 'The Merry Men',
-#  'copyright': 'Copyright 2012 (c) Media Mogul Incorporated',
-#  'description': 'A song about happy people',
-#  'duration': '1:58',
-#  'mp3_data': b'\x99\x12\x14',
-#  'title': 'Happy Go Lucky',
-#  'track_number': '1'}
-# 
-# {'album': 'The Merry Men LP',
-#  'artist': 'The Merry Men',
-#  'copyright': 'Copyright 2012 (c) Media Mogul Incorporated',
-#  'description': 'A song about joy',
-#  'duration': '2:54',
-#  'mp3_data': b'\x99\x12\x14',
-#  'title': 'Joy to Joy',
-#  'track_number': '2'}
-# 
-# 
-# 
-# Not Mega Men Songs:
-# {'album': 'Misery loses comfort',
-#  'artist': 'The Unhappy Folk',
-#  'copyright': 'Copyright 2014 (c) Cheese Industries',
-#  'description': 'A sad song',
-#  'duration': '15:44',
-#  'mp3_data': b'\x99\x12\x14',
-#  'title': 'Sadly she waits',
-#  'track_number': '1'}
-# 
-# {'album': 'The Merry Men LP',
-#  'artist': 'The Merry Men',
-#  'copyright': 'Copyright 2012 (c) Media Mogul Incorporated',
-#  'description': 'A song about happy people',
-#  'duration': '1:58',
-#  'mp3_data': b'\x99\x12\x14',
-#  'title': 'Happy Go Lucky',
-#  'track_number': '1'}
-# 
-# {'album': 'The Merry Men LP',
-#  'artist': 'The Merry Men',
-#  'copyright': 'Copyright 2012 (c) Media Mogul Incorporated',
-#  'description': 'A song about joy',
-#  'duration': '2:54',
-#  'mp3_data': b'\x99\x12\x14',
-#  'title': 'Joy to Joy',
-#  'track_number': '2'}
-# 
-# 
-# 
-# 
-# All track one songs:
-# {'album': 'Misery loses comfort',
-#  'artist': 'The Unhappy Folk',
-#  'copyright': 'Copyright 2014 (c) Cheese Industries',
-#  'description': 'A sad song',
-#  'duration': '15:44',
-#  'mp3_data': b'\x99\x12\x14',
-#  'title': 'Sadly she waits',
-#  'track_number': '1'}
-# 
-# {'album': 'The Merry Men LP',
-#  'artist': 'The Merry Men',
-#  'copyright': 'Copyright 2012 (c) Media Mogul Incorporated',
-#  'description': 'A song about happy people',
-#  'duration': '1:58',
-#  'mp3_data': b'\x99\x12\x14',
-#  'title': 'Happy Go Lucky',
-#  'track_number': '1'}
-# 
-# {'album': 'Super Tracks',
-#  'artist': 'Mega Men',
-#  'copyright': 'Copyright 2014 (c) Cheese Industries',
-#  'description': 'Super Nintendo',
-#  'duration': '1:15',
-#  'mp3_data': b'\x99\x12\x14',
-#  'title': 'Nintendo 1',
-#  'track_number': '1'}
-# 
-# 
-# Mega Men track ones:{'album': 'Super Tracks',
-#  'artist': 'Mega Men',
-#  'copyright': 'Copyright 2014 (c) Cheese Industries',
-#  'description': 'Super Nintendo',
-#  'duration': '1:15',
-#  'mp3_data': b'\x99\x12\x14',
-#  'title': 'Nintendo 1',
-#  'track_number': '1'}
-# 
-# 
-# Mega Men track twos (should be just one entry):
-# {'album': 'Super Tracks',
-#  'artist': 'Mega Men',
-#  'copyright': 'Copyright 2014 (c) Cheese Industries',
-#  'description': 'Super Nintendo',
-#  'duration': '1:55',
-#  'mp3_data': b'\x99\x12\x14',
-#  'title': 'Nintendo 2',
-#  'track_number': '2'}
-# 
-# 
-# Primary key of previous song: 6
-# 
-# Song pk=6 exists? (should be True) True
-# 
-# After Delete, Mega Men Track twos (should be blank):
-# 
-# Song pk=6 exists? (should now be False) False
-# 
-# Deleting remaining Mega Men Tracks: 1 deleted.
-# 
-# Remaining Mega Men tracks (should be blank):
-# []
-# 
+#Primary key of previous song: 6
+#
+#Song pk=6 exists? (should be True) True
+#
+#After Delete, Mega Men Track twos (should be blank):
+#
+#Song pk=6 exists? (should now be False) False
+#
+#Deleting remaining Mega Men Tracks: 1 deleted.
+#
+#Remaining Mega Men tracks (should be blank):
+#IRQueryableList([])
