@@ -79,7 +79,9 @@ etc. Constructing objects is now a lot cheapear.
 
 - Add IRClassicField as a replacement for the plain-string name in FIELDS array. validateModel will automatically convert these to IRClassicField and warn you that these may go away. I have not yet decided if 5.0.0 will generate error or just warning for now.
 
-- Allow specifying a defaultValue on IRFields. This specifies what the default value will be (was not set) for each field. TODO: Still working on this
+- Allow specifying a defaultValue on IRFields. This specifies what the default
+value will be (was not set) for each field. Every IRField type (Except
+IRClassicField) supports specifying a default value.
 
 - repr on FIELDS now shows the field type and any properties specific to that object. asDict now takes a new param, (strKeys, default False), which will str the keys instead of using the IRField (so if you are pretty-printing the asDict repr, you'll want to use this to prevent the field types from creeping into the printout)
 
