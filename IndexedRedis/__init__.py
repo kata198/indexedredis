@@ -370,7 +370,7 @@ class IndexedRedisModel(object):
 		self._id = kwargs.get('_id', None)
 
 	
-	def asDict(self, includeMeta=False, forStorage=False, strKeys=False):
+	def asDict(self, includeMeta=False, forStorage=False, strKeys=True):
 		'''
 			toDict / asDict - Get a dictionary representation of this model.
 
@@ -379,7 +379,7 @@ class IndexedRedisModel(object):
 			@param convertValueTypes <bool> - default True. If False, fields with fieldValue defined will be converted to that type.
 				Use True when saving, etc, as native type is always either str or bytes.
 
-			@param strKeys <bool> Default False - If True, just the string value of the field name will be used as the key.
+			@param strKeys <bool> Default True - If True, just the string value of the field name will be used as the key.
 				Otherwise, the IRField itself will be (although represented and indexed by string)
 
 			@return - Dictionary reprensetation of this object and all fields
@@ -670,7 +670,7 @@ class IndexedRedisModel(object):
 		if not _id:
 			raise KeyError('Object has never been saved! Cannot reload.')
 
-		currentData = self.asDict(False, forStorage=False)
+		currentData = self.asDict(False, forStorage=False, strKeys=False)
 
 		# Get the object, and compare the unconverted "asDict" repr.
 		#  If any changes, we will apply the already-convered value from
@@ -679,7 +679,7 @@ class IndexedRedisModel(object):
 		if not newDataObj:
 			raise KeyError('Object with id=%d is not in database. Cannot reload.' %(_id,))
 
-		newData = newDataObj.asDict(False, forStorage=False)
+		newData = newDataObj.asDict(False, forStorage=False, strKeys=False)
 		if currentData == newData:
 			return []
 
@@ -701,7 +701,7 @@ class IndexedRedisModel(object):
 		'''
                 pickle uses this
 		'''
-		myData = self.asDict(True, forStorage=False)
+		myData = self.asDict(True, forStorage=False, strKeys=False)
 		myData['_origData'] = self._origData
 		return myData
 
@@ -1596,7 +1596,7 @@ class IndexedRedisSave(IndexedRedisHelper):
 		if pipeline is None:
 			pipeline = conn
 
-		newDict = obj.asDict(forStorage=True)
+		newDict = obj.asDict(forStorage=True, strKeys=False)
 		key = self._get_key_for_id(obj._id)
 
 		if isInsert is True:
@@ -1644,7 +1644,7 @@ class IndexedRedisSave(IndexedRedisHelper):
 
 		pipeline = conn.pipeline()
 
-		objDicts = [obj.asDict(True, forStorage=True) for obj in objs]
+		objDicts = [obj.asDict(True, forStorage=True, strKeys=False) for obj in objs]
 
 		for indexedFieldName in self.indexedFields:
 			for objDict in objDicts:
@@ -1690,7 +1690,7 @@ class IndexedRedisSave(IndexedRedisHelper):
 
 			hashingFields[indexedField] = hashingField
 
-		objDicts = [obj.asDict(True, forStorage=True) for obj in objs]
+		objDicts = [obj.asDict(True, forStorage=True, strKeys=False) for obj in objs]
 
 		# Iterate over all values. Remove the possibly stringed index, the possibly hashed index, and then put forth the hashed index.
 
