@@ -1,4 +1,4 @@
-# Copyright (c) 2014, 2015, 2016 Timothy Savannah under LGPL version 2.1. See LICENSE for more information.
+# Copyright (c) 2014, 2015, 2016, 2017 Timothy Savannah under LGPL version 2.1. See LICENSE for more information.
 #
 # chain - Support for chaining multiple IRField's (so for example to compress a json value)
 #
@@ -25,7 +25,7 @@ class IRFieldChain(IRField):
 			raise ValueError('IRFieldChain has empty name.')
 
 		self.chainedFields = []
-		hasToBytes = False
+
 		for field in chainedFields:
 			# If we got jsut a class, construct it.
 			if type(field) == type:
@@ -35,13 +35,9 @@ class IRFieldChain(IRField):
 			if not issubclass(field.__class__, IRField):
 				raise ValueError("IRFieldChain's 'chainedFields' (second arg) should only contain IRField objects or subclasses thereof. Got: %s %s" %(str(type(field)), repr(field)))
 
-			if hasattr(field, 'toBytes'):
-				hasToBytes = True
 
 			self.chainedFields.append(field)
 
-		if hasToBytes is True:
-			self.toBytes = self._toBytes
 
 
 	def toStorage(self, value):
@@ -94,12 +90,6 @@ class IRFieldChain(IRField):
 
 		return ['chainedFields=[ %s ]' %(', '.join(chainedFieldsRepr), )]
 
-	def _toBytes(self, value):
-		for chainedField in self.chainedFields:
-			if hasattr(chainedField, 'toBytes'):
-				value = chainedField.toBytes(value)
-		return value
-		
 
 	def __new__(self, name, chainedFields=None):
 		if not name:

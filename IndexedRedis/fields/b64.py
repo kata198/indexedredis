@@ -23,16 +23,26 @@ class IRBase64Field(IRField):
 
 	CAN_INDEX = False
 
-	def __init__(self, name='', defaultValue=irNull):
-		# XXX: Maybe need to give this an "encoding" field incase it needs to decode a string? Or maybe a field type that does decoding itself?
+	def __init__(self, name='', defaultValue=irNull, encoding=None):
+		'''
+			__init__ - Create an IRBase64Field object.
+
+			@param name <str> - Field name
+
+			@param defaultValue <any> (Default irNull) - Default value of field
+
+			@param encoding <None/str> (default None) - An explicit encoding to use when converting to bytes. If None, the global defaultIREncoding will be used.
+
+		'''
 		self.valueType = None
+		self.encoding = encoding
 		self.defaultValue = irNull
 
 	def convert(self, value=b''):
 		if not isStringy(value) or not value:
 			return value
 
-		return b64decode(tobytes(value))
+		return b64decode(tobytes(value, self.encoding))
 
 	def convertFromInput(self, value=''):
 		return value
@@ -40,12 +50,12 @@ class IRBase64Field(IRField):
 	def toStorage(self, value=b''):
 		if not value:
 			return ''
-		return b64encode(tobytes(value))
+		return b64encode(tobytes(value, self.encoding))
 
 	def _getReprProperties(self):
 		return []
 
-	def __new__(self, name='', defaultValue=irNull):
+	def __new__(self, name='', defaultValue=irNull, encoding=None):
 		return IRField.__new__(self, name)
 
 

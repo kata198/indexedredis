@@ -8,7 +8,7 @@ from IndexedRedis.fields import IRCompressedField, IRUnicodeField, IRFieldChain,
 
 
 # Make sure native type will fail
-# setDefaultIREncoding('ascii')
+setDefaultIREncoding('ascii')
 
 # on python2 you'll probably get some unicode escape sequences, but you'll get pretty pictures on python3
 prettyPictures = b' \xe2\x9c\x8f \xe2\x9c\x90 \xe2\x9c\x91 \xe2\x9c\x92 \xe2\x9c\x93 \xe2\x9c\x94 \xe2\x9c\x95 \xe2\x9c\x96 \xe2\x9c\x97 \xe2\x9c\x98 \xe2\x9c\x99 \xe2\x9c\x9a \xe2\x9c\x9b \xe2\x9c\x9c \xe2\x9c\x9d \xe2\x9c\x9e \xe2\x9c\x9f \xe2\x9c\xa0 \xe2\x9c\xa1 \xe2\x9c\xa2 \xe2\x9c\xa3 \xe2\x9c\xa4 \xe2\x9c\xa5 \xe2\x9c\xa6 \xe2\x9c\xa7 \xe2\x9c\xa9 \xe2\x9c\xaa \xe2\x9c\xab '
@@ -19,7 +19,7 @@ class MyUnicodeModel(IndexedRedisModel):
 
     FIELDS = [ \
         IRField('name'),
-        IRFieldChain('unicodeField', [IRUnicodeField(encoding='utf-8'), IRBase64Field()]),
+        IRFieldChain('unicodeField', [IRUnicodeField(encoding='utf-8'), IRBase64Field(encoding='utf-8')]),
     ]
 
     INDEXED_FIELDS = [ \
