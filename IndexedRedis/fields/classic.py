@@ -8,7 +8,7 @@
 
 from . import IRField, IR_NULL_STRINGS, irNull
 
-from ..compat_str import tobytes
+from ..compat_str import tobytes, encoded_str_type
 
 class IRClassicField(IRField):
 	'''
@@ -23,7 +23,7 @@ class IRClassicField(IRField):
 	CAN_INDEX = True
 
 	def __init__(self, name='', hashIndex=False):
-		IRField.__init__(self, name=name, hashIndex=hashIndex, defaultValue='')
+		IRField.__init__(self, name=name, valueType=encoded_str_type, hashIndex=hashIndex, defaultValue='')
 
 	def __new__(self, name='', hashIndex=False):
 		return IRField.__new__(self, name)
