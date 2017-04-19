@@ -32,8 +32,8 @@ if __name__ == '__main__':
     newObj = MyFixedPointModel(name='hello', value=pi)
 
     print ( "My value: <%s>%s\n\n" %(str(type(newObj.value)), repr(newObj.value)))
-    print ( "My dict (not for storage): %s\n\n" %(str(newObj.asDict(forStorage=False)),))
-    print ( "My dict (for storage): %s\n\n" %(str(newObj.asDict(forStorage=True)),))
+    print ( "My dict (not for storage): %s\n\n" %(str(newObj.asDict(forStorage=False, strKeys=True)),))
+    print ( "My dict (for storage): %s\n\n" %(str(newObj.asDict(forStorage=True, strKeys=True)),))
 
     newObj.save()
 
@@ -43,13 +43,13 @@ if __name__ == '__main__':
         print ( "No result for fetch1\n\n" )
     else:
         print ( "fetch1 value: <%s>%s\n\n" %(str(type(fetch1.value)), repr(fetch1.value)))
-        print ( "fetch1 dict (not for storage): %s\n\n" %(str(fetch1.asDict(forStorage=False)),))
-        print ( "fetch1 dict (for storage): %s\n\n" %(str(fetch1.asDict(forStorage=True)),))
+        print ( "fetch1 dict (not for storage): %s\n\n" %(str(fetch1.asDict(forStorage=False, strKeys=True)),))
+        print ( "fetch1 dict (for storage): %s\n\n" %(str(fetch1.asDict(forStorage=True, strKeys=True)),))
         
     fetch2 = MyFixedPointModel.objects.filter(value=pi).first()
     if not fetch2:
         print ( "No result for fetch2\n\n" )
     else:
         print ( "fetch2 value: <%s>%s\n\n" %(str(type(fetch2.value)), repr(fetch2.value)))
-        print ( "fetch2 dict (not for storage): %s\n\n" %(str(fetch2.asDict(forStorage=False)),))
-        print ( "fetch2 dict (for storage): %s\n\n" %(str(fetch2.asDict(forStorage=True)),))
+        print ( "fetch2 dict (not for storage): %s\n\n" %(str(fetch2.asDict(forStorage=False, strKeys=True)),))
+        print ( "fetch2 dict (for storage): %s\n\n" %(str(fetch2.asDict(forStorage=True, strKeys=True)),))

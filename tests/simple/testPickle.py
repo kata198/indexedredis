@@ -30,8 +30,8 @@ if __name__ == '__main__':
     newObj = MyPickleModel(name='hello', timestamp=datetime.datetime(1989, 6, 28, 12, 12, 0))
 
     print ( "My timestamp: <%s>%s\n\n" %(str(type(newObj.timestamp)), repr(newObj.timestamp)))
-    print ( "My dict (not for storage): %s\n\n" %(str(newObj.asDict(forStorage=False)),))
-    print ( "My dict (for storage): %s\n\n" %(str(newObj.asDict(forStorage=True)),))
+    print ( "My dict (not for storage): %s\n\n" %(str(newObj.asDict(forStorage=False, strKeys=True)),))
+    print ( "My dict (for storage): %s\n\n" %(str(newObj.asDict(forStorage=True, strKeys=True)),))
 
     newObj.save()
 
@@ -41,13 +41,13 @@ if __name__ == '__main__':
         print ( "No result for fetch1\n\n" )
     else:
         print ( "fetch1 timestamp: <%s>%s\n\n" %(str(type(fetch1.timestamp)), repr(fetch1.timestamp)))
-        print ( "fetch1 dict (not for storage): %s\n\n" %(str(fetch1.asDict(forStorage=False)),))
-        print ( "fetch1 dict (for storage): %s\n\n" %(str(fetch1.asDict(forStorage=True)),))
+        print ( "fetch1 dict (not for storage): %s\n\n" %(str(fetch1.asDict(forStorage=False, strKeys=True)),))
+        print ( "fetch1 dict (for storage): %s\n\n" %(str(fetch1.asDict(forStorage=True, strKeys=True)),))
         
 #    fetch2 = MyPickleModel.objects.filter(timestamp=datetime.datetime(1989, 6, 28, 12, 12, 0)).first()
 #    if not fetch2:
 #        print ( "No result for fetch2\n\n" )
 #    else:
 #        print ( "fetch2 timestamp: <%s>%s\n\n" %(str(type(fetch2.timestamp)), repr(fetch2.timestamp)))
-#        print ( "fetch2 dict (not for storage): %s\n\n" %(str(fetch2.asDict(forStorage=False)),))
-#        print ( "fetch2 dict (for storage): %s\n\n" %(str(fetch2.asDict(forStorage=True)),))
+#        print ( "fetch2 dict (not for storage): %s\n\n" %(str(fetch2.asDict(forStorage=False, strKeys=True)),))
+#        print ( "fetch2 dict (for storage): %s\n\n" %(str(fetch2.asDict(forStorage=True, strKeys=True)),))
