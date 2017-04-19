@@ -372,6 +372,13 @@ class IndexedRedisModel(object):
 
 
 	def __setattr__(self, keyName, value):
+		'''
+			__setattr__ - Will be used to set an attribute on this object.
+
+			  If the attribute is a field (in self.FIELDS), it will be converted via the field type's #convertFromInput method.
+
+			  Otherwise, it will just set the attribute on this object.
+		'''
 		try:
 			idx = self.FIELDS.index(keyName)
 		except:
@@ -423,6 +430,11 @@ class IndexedRedisModel(object):
 
 
 	def pprint(self, stream=None):
+		'''
+			pprint - Pretty-print a dict representation of this object.
+
+			@param stream <file/None> - Either a stream to output, or None to default to sys.stdout
+		'''
 		pprint.pprint(self.asDict(includeMeta=True, forStorage=False, strKeys=True), stream=stream)
 
 
@@ -505,6 +517,9 @@ class IndexedRedisModel(object):
 
 	@classproperty
 	def saver(cls):
+		'''
+			saver - Get an IndexedRedisSave associated with this model
+		'''
 		return IndexedRedisSave(cls)
 
 	@classproperty
@@ -518,7 +533,22 @@ class IndexedRedisModel(object):
 
 	def save(self):
 		'''
-			save - Save this object
+			save - Save this object.
+			
+			Will perform an "insert" if this object had not been saved before,
+			  otherwise will update JUST the fields changed on THIS INSTANCE of the model.
+
+			  i.e. If you have two processes fetch the same object and change different fields, they will not overwrite
+			  eachother, but only save the ones each process changed.
+
+			If you want to save multiple objects of type MyModel in a single transaction,
+			and you have those objects in a list, myObjs, you can do the following:
+
+				MyModel.saver.save(myObjs)
+
+			@see #IndexedRedisSave.save
+
+			@return <list> - Single element list, id of saved object (if successful)
 		'''
 		saver = IndexedRedisSave(self.__class__)
 		return saver.save(self)
@@ -538,7 +568,24 @@ class IndexedRedisModel(object):
 		
 	
 	@classmethod
-	def reset(cls, newValues):
+	def reset(cls, newObjs):
+		'''
+			reset - Remove all stored data associated with this model (i.e. all objects of this type),
+				and then save all the provided objects in #newObjs , all in one atomic transaction.
+
+			Use this method to move from one complete set of objects to another, where any querying applications
+			will only see the complete before or complete after.
+
+			@param newObjs list<IndexedRedisModel objs> - A list of objects that will replace the current dataset
+
+			To just replace a specific subset of objects in a single transaction, you can do MyModel.saver.save(objs)
+			  and just the objs in "objs" will be inserted/updated in one atomic step.
+
+			This method, on the other hand, will delete all previous objects and add the newly provided objects in a single atomic step,
+			  and also reset the primary key ID generator
+
+			@return list<int> - The new primary keys associated with each object (same order as provided #newObjs list)
+		'''
 		conn = cls.objects._get_new_connection()
 
 		transaction = conn.pipeline()
@@ -551,11 +598,13 @@ class IndexedRedisModel(object):
 		""" %( ''.join([INDEXED_REDIS_PREFIX, cls.KEY_NAME, ':']), ), 0)
 		saver = IndexedRedisSave(cls)
 		nextID = 1
-		for newValue in newValues:
-			saver.save(newValue, False, nextID, transaction)
+		for newObj in newObjs:
+			saver.save(newObj, False, nextID, transaction)
 			nextID += 1
 		transaction.set(saver._get_next_id_key(), nextID)
 		transaction.execute()
+
+		return list( range( 1, nextID, 1) )
 
 	def __str__(self):
 		'''
@@ -1528,7 +1577,12 @@ class IndexedRedisSave(IndexedRedisHelper):
 
 	def save(self, obj, usePipeline=True, forceID=False, conn=None):
 		'''
-			save - Save an object associated with this model. **Interal Function!!** You probably want to just do object.save() instead of this.
+			save - Save an object / objects associated with this model. 
+			
+			You probably want to just do object.save() instead of this, but to save multiple objects at once in a single transaction, 
+			   you can use:
+				
+				MyModel.saver.save(myObjs)
 
 			@param obj <IndexedRedisModel or list<IndexedRedisModel> - The object to save, or a list of objects to save
 			@param usePipeline - Use a pipeline for saving. You should always want this, unless you are calling this function from within an existing pipeline.
@@ -1610,6 +1664,20 @@ class IndexedRedisSave(IndexedRedisHelper):
 		
 
 	def _doSave(self, obj, isInsert, conn, pipeline=None):
+		'''
+			_doSave - Internal function to save a single object. Don't call this directly. 
+			            Use "save" instead.
+
+			  If a pipeline is provided, the operations (setting values, updating indexes, etc)
+			    will be queued into that pipeline.
+			  Otherwise, everything will be executed right away.
+
+			  @param obj - Object to save
+			  @param isInsert - Bool, if insert or update. Either way, obj._id is expected to be set.
+			  @param conn - Redis connection
+			  @param pipeline - Optional pipeline, if present the items will be queued onto it. Otherwise, go directly to conn.
+		'''
+
 		if pipeline is None:
 			pipeline = conn
 
