@@ -20,7 +20,7 @@ class IRFieldChain(IRField):
 	# TODO: We can probably index if all chained field types are indexable, but just disallow for now.
 	CAN_INDEX = False
 
-	def __init__(self, name, chainedFields):
+	def __init__(self, name, chainedFields, defaultValue=irNull):
 		if not name:
 			raise ValueError('IRFieldChain has empty name.')
 
@@ -37,6 +37,8 @@ class IRFieldChain(IRField):
 
 
 			self.chainedFields.append(field)
+
+		self.defaultValue = defaultValue
 
 
 
@@ -91,7 +93,7 @@ class IRFieldChain(IRField):
 		return ['chainedFields=[ %s ]' %(', '.join(chainedFieldsRepr), )]
 
 
-	def __new__(self, name, chainedFields=None):
+	def __new__(self, name, chainedFields=None, defaultValue=irNull):
 		if not name:
 			raise ValueError('IRChainedField defined without a name!')
 

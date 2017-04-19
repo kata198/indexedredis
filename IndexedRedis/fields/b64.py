@@ -36,7 +36,7 @@ class IRBase64Field(IRField):
 		'''
 		self.valueType = None
 		self.encoding = encoding
-		self.defaultValue = irNull
+		self.defaultValue = defaultValue
 
 	def convert(self, value=b''):
 		if not isStringy(value) or not value:
