@@ -297,7 +297,7 @@ class TestIRField(object):
         
         assert fetchObj.number == 15, 'Expected number to be set'
 
-        fetchObj.number = ''
+        fetchObj.number = irNull
         fetchObj.save()
 
         fetchObj2 = SimpleIRFieldModel(name='Nully')

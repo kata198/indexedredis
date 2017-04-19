@@ -344,7 +344,7 @@ class IndexedRedisModel(object):
 				elif val != irNull:
 					val = thisField.convert(val)
 
-				setattr(self, thisField, val)
+				object.__setattr__(self, thisField, val)
 				# Generally, we want to copy the value incase it is used by reference (like a list)
 				#   we will miss the update (an append will affect both).
 				try:
@@ -359,7 +359,7 @@ class IndexedRedisModel(object):
 				elif val != irNull:
 					val = thisField.convertFromInput(val)
 
-				setattr(self, thisField, val)
+				object.__setattr__(self, thisField, val)
 
 				try:
 					self._origData[thisField] = copy.copy(val)
@@ -369,6 +369,18 @@ class IndexedRedisModel(object):
 				
 
 		self._id = kwargs.get('_id', None)
+
+
+	def __setattr__(self, keyName, value):
+		try:
+			idx = self.FIELDS.index(keyName)
+		except:
+			idx = -1
+
+		if idx != -1:
+			value = self.FIELDS[idx].convertFromInput(value)
+
+		object.__setattr__(self, keyName, value)
 
 	
 	def asDict(self, includeMeta=False, forStorage=False, strKeys=False):
@@ -387,7 +399,7 @@ class IndexedRedisModel(object):
 		'''
 		ret = {}
 		for thisField in self.FIELDS:
-			val = getattr(self, thisField, irNull)
+			val = getattr(self, thisField, thisField.getDefaultValue())
 			if val == irNull or val in IR_NULL_STRINGS:
 				if forStorage is True:
 					val = IR_NULL_STR

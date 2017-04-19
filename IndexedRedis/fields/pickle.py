@@ -55,6 +55,8 @@ class IRPickleField(IRField):
 		return origData
 	
 	def convertFromInput(self, value):
+		if self._isIrNull(value):
+			return irNull
 		return value
 
 	@staticmethod

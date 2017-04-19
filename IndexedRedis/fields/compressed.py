@@ -1,4 +1,4 @@
-# Copyright (c) 2014, 2015, 2016 Timothy Savannah under LGPL version 2.1. See LICENSE for more information.
+# Copyright (c) 2014, 2015, 2016, 2017 Timothy Savannah under LGPL version 2.1. See LICENSE for more information.
 #
 # fields.compressed - Some types and objects related to compressed fields. Use in place of IRField ( in FIELDS array to activate functionality )
 #
@@ -85,6 +85,8 @@ class IRCompressedField(IRField):
 		return value
 	
 	def convertFromInput(self, value):
+		if self._isIrNull(value):
+			return irNull
 		return value
 
 	def _getReprProperties(self):

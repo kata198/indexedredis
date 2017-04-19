@@ -15,6 +15,8 @@ try:
 except NameError:
 	unicode = str
 
+# TODO: Maybe should be using _isIrNull instead of _isNullValue ?
+
 class IRFieldChain(IRField):
 
 	# TODO: We can probably index if all chained field types are indexable, but just disallow for now.

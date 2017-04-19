@@ -35,6 +35,9 @@ class IRBytesField(IRField):
 		self.encoding = encoding
 
 	def _convertBytes(self, value):
+		if self._isIrNull(value):
+			return irNull
+
 		return tobytes(value, self.encoding)
 
 	convert = _convertBytes

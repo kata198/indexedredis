@@ -63,6 +63,8 @@ class IRField(str):
 	# Start as a class variable, so "toIndex" works even if IRField constructor is not called (which really shouldn't be called on extending classes)
 	hashIndex = False
 
+
+	# TODO: Investigate changing valueType to encoded_str_type
 	def __init__(self, name='', valueType=str, defaultValue=irNull, hashIndex=False):
 		'''
 			__init__ - Create an IRField. Use this directly in the FIELDS array for advanced functionality on a field.
@@ -173,6 +175,8 @@ class IRField(str):
 			  This is intended to be used when the data is guarenteed to NOT be from storage.
 
 		'''
+		if self._isNullValue(value):
+			return irNull
 		return self.valueType(value)
 
 	def toIndex(self, value):
@@ -204,9 +208,13 @@ class IRField(str):
 		return bool(self.hashIndex)
 
 	def _convertStr(self, value):
+		if self._isIrNull(value):
+			return irNull
 		return to_unicode(value)
 
 	def _convertBytes(self, value):
+		if self._isIrNull(value):
+			return irNull
 		return tobytes(value)
 	
 
@@ -233,7 +241,11 @@ class IRField(str):
 
 			convert and toStorage should test if value is null and return null (for most types)
 		'''
-		return bool(value in (b'', '', irNull) or value in IR_NULL_STRINGS )
+		return bool(value in (b'', '', irNull, None) or value in IR_NULL_STRINGS )
+	
+	@staticmethod
+	def _isIrNull(value):
+		return bool( value == irNull or value in IR_NULL_STRINGS )
 
 	def _getReprProperties(self):
 		'''
