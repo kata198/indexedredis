@@ -1003,8 +1003,11 @@ class IndexedRedisQuery(IndexedRedisHelper):
 	def _redisResultToObj(self, theDict):
 		if '_id' in theDict:
 			theDict['_id'] = int(theDict['_id'])
-				
-		obj = self.mdl(**decodeDict(theDict), __fromRedis=True)
+
+		decodedDict = decodeDict(theDict)
+		decodedDict['__fromRedis'] = True
+
+		obj = self.mdl(**decodedDict)
 
 		return obj
 	
