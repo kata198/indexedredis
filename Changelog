@@ -85,7 +85,21 @@ IRClassicField) supports specifying a default value.
 
 - repr on FIELDS now shows the field type and any properties specific to that object. asDict now takes a new param, (strKeys, default False), which will str the keys instead of using the IRField (so if you are pretty-printing the asDict repr, you'll want to use this to prevent the field types from creeping into the printout)
 
+- Use "convertFromInput" every time a field is set on an IndexedRedisModel
+( via myModel.xfield = someVal ), same as if it were done via the constructor.
+This ensures that everything always has an expected type, and can fix some
+weird issues when folks set unconverted values.
+  ** Backwards Incompatible, if you were doing it wrong before... ;) **
+
+- Work around a strange "bug" in python that could cause some builtin types to
+be overriden within the "fields.__init__" module
+
+- Update runTests.py to the latest provided with the new version of
+GoodTests.py
+
 - Some minor cleanups/fixups/optimizations
+
+- Added many more tests
 
 
 4.1.4 - Sat Apr 15 2017
