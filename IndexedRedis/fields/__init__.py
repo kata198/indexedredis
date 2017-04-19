@@ -22,11 +22,11 @@ from .null import irNull, IR_NULL_STRINGS, IR_NULL_STR, IR_NULL_BYTES, IR_NULL_U
 
 from hashlib import md5
 
+
 try:
 	unicode
 except NameError:
 	unicode = str
-
 
 
 class IRField(str):
@@ -312,6 +312,12 @@ try:
 	del pickle
 except:
 	pass
+
+try:
+	unicode
+except NameError:
+	unicode = str
+
 from .classic import IRClassicField
 
 from .FieldValueTypes import IRDatetimeValue, IRJsonValue
