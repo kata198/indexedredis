@@ -11,7 +11,7 @@ from IndexedRedis.fields.FieldValueTypes import IRJsonValue
 class MyJsonModel(IndexedRedisModel):
 
     FIELDS = [ \
-        'name',
+        IRField('name'),
         IRField('data', valueType=IRJsonValue),
     ]
 

@@ -12,7 +12,7 @@ import datetime
 import sys
 import IndexedRedis
 import subprocess
-from IndexedRedis import IndexedRedisModel, IRField, irNull
+from IndexedRedis import IndexedRedisModel, IRField, irNull, toggleDeprecatedMessages
 from IndexedRedis.fields.FieldValueTypes import IRDatetimeValue, IRJsonValue
 
 # vim: ts=4 sw=4 expandtab
@@ -33,15 +33,26 @@ class TestIRField(object):
         self.model = None
 
         # Models should be given different names and key names so they are validated again.
-        if testMethod in (self.test_simpleIRFieldSaveAndFetch, self.test_emptyStrNotNull, self.test_updatedFieldsAfterSave):
+        if testMethod in (self.test_simpleIRFieldSaveAndFetch, self.test_updatedFieldsAfterSave):
             class SimpleIRFieldModel(IndexedRedisModel):
 
-                FIELDS = [ IRField('name', valueType=str), IRField('favColour'), 'strField' ]
+                FIELDS = [ IRField('name', valueType=str), IRField('favColour') ]
                 INDEXED_FIELDS = ['name', 'favColour']
 
                 KEY_NAME = 'Test_SimpleIRFieldModel'
 
             self.model = SimpleIRFieldModel
+        elif testMethod == self.test_emptyStrNotNull:
+            class SimpleIRFieldModel_WithClassicField(IndexedRedisModel):
+                FIELDS = [ IRField('name', valueType=str), IRField('favColour'), 'strField' ]
+                INDEXED_FIELDS = ['name', 'favColour']
+
+                KEY_NAME = 'Test_SimpleIRFieldModel_WithClassicField'
+
+            self.model = SimpleIRFieldModel_WithClassicField
+
+            toggleDeprecatedMessages(False)
+
         elif testMethod == self.test_noneFieldValue:
             class SimpleIRFieldModel_NoneField(IndexedRedisModel):
                 FIELDS = [ IRField('name'), IRField('nonefield', valueType=None)]
@@ -88,6 +99,8 @@ class TestIRField(object):
 
         if self.model and self.KEEP_DATA is False:
             self.model.objects.delete()
+        if testMethod == self.test_emptyStrNotNull:
+            toggleDeprecatedMessages(True)
 
     def test_simpleIRFieldSaveAndFetch(self):
         '''

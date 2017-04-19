@@ -11,7 +11,7 @@ from IndexedRedis.fields.FieldValueTypes import IRDatetimeValue
 class MyDatetimeModel(IndexedRedisModel):
 
     FIELDS = [ \
-        'name',
+        IRField('name'),
         IRField('timestamp', valueType=IRDatetimeValue),
     ]
 

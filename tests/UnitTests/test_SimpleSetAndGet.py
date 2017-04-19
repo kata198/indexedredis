@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 
-# Copyright (c) 2014, 2015, 2016 Timothy Savannah under LGPL version 2.1. See LICENSE for more information.
+# Copyright (c) 2014, 2015, 2016, 2017 Timothy Savannah under LGPL version 2.1. See LICENSE for more information.
 #
 # TestSimpleSetAndGet - GoodTests unit tests validating model validation
 #
@@ -10,13 +10,13 @@
 import sys
 import IndexedRedis
 import subprocess
-from IndexedRedis import IndexedRedisModel, IRField, InvalidModelException, validatedModels
+from IndexedRedis import IndexedRedisModel, IRField, IRClassicField, InvalidModelException, validatedModels
 
 # vim: ts=4 sw=4 expandtab
 
 class SimpleSetAndGetModel(IndexedRedisModel):
     
-    FIELDS = ['a', 'b', 'c']
+    FIELDS = [IRClassicField('a'), IRClassicField('b'), IRClassicField('c')]
 
     INDEXED_FIELDS = ['a']
 

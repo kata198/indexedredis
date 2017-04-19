@@ -76,7 +76,7 @@ class TestModelValidation(object):
         '''
 
         class NoKeyModel(IndexedRedisModel):
-            FIELDS = ['fielda', 'fieldb']
+            FIELDS = [IRField('fielda'), IRField('fieldb')]
 
             INDEXED_FIELDS = ['fielda']
 
@@ -98,7 +98,7 @@ class TestModelValidation(object):
         '''
 
         class InvalidIndexedField(IndexedRedisModel):
-            FIELDS = ['a', 'b']
+            FIELDS = [IRField('a'), IRField('b')]
             INDEXED_FIELDS = ['c']
             KEY_NAME = 'Test_InvalidIndexedField'
 
@@ -110,7 +110,7 @@ class TestModelValidation(object):
         '''
 
         class ValidModel(IndexedRedisModel):
-            FIELDS = ['a', 'b']
+            FIELDS = [IRField('a'), IRField('b')]
             INEXED_FIELDS = ['a']
 
             KEY_NAME='Test_ValidModel'
@@ -120,7 +120,7 @@ class TestModelValidation(object):
     def test_base64FieldsError(self):
 
         class InvalidModelBase64(IndexedRedisModel):
-            FIELDS = ['a', 'b']
+            FIELDS = [IRField('a'), IRField('b')]
             INDEXED_FIELDS = ['a']
 
             BASE64_FIELDS = ['b']
@@ -133,7 +133,7 @@ class TestModelValidation(object):
     def test_binaryFieldsError(self):
 
         class InvalidModelBase64(IndexedRedisModel):
-            FIELDS = ['a', 'b']
+            FIELDS = [IRField('a'), IRField('b')]
             INDEXED_FIELDS = ['a']
 
             BINARY_FIELDS = ['b']

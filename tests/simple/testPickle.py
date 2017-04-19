@@ -11,7 +11,7 @@ from IndexedRedis.fields import IRPickleField
 class MyPickleModel(IndexedRedisModel):
 
     FIELDS = [ \
-        'name',
+        IRField('name'),
         IRPickleField('timestamp'),
     ]
 

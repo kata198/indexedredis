@@ -13,7 +13,7 @@ import sys
 import IndexedRedis
 import subprocess
 from IndexedRedis import IndexedRedisModel
-from IndexedRedis.fields import IRPickleField
+from IndexedRedis.fields import IRPickleField, IRField
 
 # vim: ts=4 sw=4 expandtab
 
@@ -36,7 +36,7 @@ class TestIRField(object):
         if testMethod in (self.test_withStrings, self.test_withList):
             class SimpleIRFieldModel(IndexedRedisModel):
 
-                FIELDS = [ 'name', IRPickleField('data') ]
+                FIELDS = [ IRField('name'), IRPickleField('data') ]
                 INDEXED_FIELDS = ['name']
 
                 KEY_NAME = 'Test_SimpleIRPickleFieldModel'

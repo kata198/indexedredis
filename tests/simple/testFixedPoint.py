@@ -11,7 +11,7 @@ from IndexedRedis.fields import IRFixedPointField
 class MyFixedPointModel(IndexedRedisModel):
 
     FIELDS = [ \
-        'name',
+        IRField('name'),
         IRFixedPointField('value', decimalPlaces=22),
     ]
 

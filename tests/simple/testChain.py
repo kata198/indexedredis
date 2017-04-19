@@ -12,7 +12,7 @@ from IndexedRedis.fields.FieldValueTypes import IRJsonValue
 class MyChainedModel(IndexedRedisModel):
 
     FIELDS = [ \
-        'name',
+        IRField('name'),
         IRFieldChain('data', [IRField(valueType=IRJsonValue), IRCompressedField(), IRBase64Field()]) ,
     ]
 
