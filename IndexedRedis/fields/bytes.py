@@ -21,17 +21,30 @@ class IRBytesField(IRField):
 
 	CAN_INDEX = False
 
-	def __init__(self, name='', defaultValue=irNull):
+	def __init__(self, name='', defaultValue=irNull, encoding=None):
+		'''
+			__init__ - Create an IRBytesField object
+
+			@param name <str> - Field name
+			@param defaultValue <any> default irNull - Default value for this field
+			@param encoding <None/str> - If None, defaultIREncoding will be used when converting to bytes,
+			  otherwise you can provide an explicit encoding
+		'''
 		self.valueType = None
 		self.defaultValue = defaultValue
+		self.encoding = encoding
 
-	convert = IRField._convertBytes
+	def _convertBytes(self, value):
+		return tobytes(value, self.encoding)
 
-	convertFromInput = IRField._convertBytes
+	convert = _convertBytes
 
-	toStorage = IRField._convertBytes
+	convertFromInput = _convertBytes
 
-	def __new__(self, name='', defaultValue=irNull):
+	toStorage = _convertBytes
+
+
+	def __new__(self, name='', defaultValue=irNull, encoding=None):
 		return IRField.__new__(self, name)
 
 
