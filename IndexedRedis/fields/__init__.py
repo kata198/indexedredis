@@ -115,11 +115,11 @@ class IRField(str):
 		elif valueType in (dict, list, tuple):
 #			deprecatedMessage('WARNING: Implicitly converting IRField(%s, valueType=%s) to IRField(%s, valueType=IndexedRedis.fields.FieldValueTypes.IRJsonValue)\n' %(repr(name), valueType.__name__, repr(name)), printStack=True)
 			valueType = IRJsonValue
-			self.CAN_INDEX = False
+			self.CAN_INDEX = IRJsonValue.CAN_INDEX
 		elif valueType == datetime:
 #			deprecatedMessage('WARNING: Implicitly converting IRField(%s, valueType=datetime.datetime) to IRField(%s, valueType=IndexedRedis.fields.FieldValueTypes.IRDatetimeValue)\n' %(repr(name), repr(name)), printStack=True)
 			valueType = IRDatetimeValue
-			self.CAN_INDEX = True
+			self.CAN_INDEX = IRDatetimeValue.CAN_INDEX
 		else:
 			if not isinstance(valueType, type):
 				raise TypeError('valueType %s is not a type. Use int, str, etc' %(repr(valueType,)))
