@@ -1,4 +1,4 @@
-# Copyright (c) 2016 Timothy Savannah under LGPL version 2.1. See LICENSE for more information.
+# Copyright (c) 2016, 2017 Timothy Savannah under LGPL version 2.1. See LICENSE for more information.
 #
 # IRQueryableList - QueryableList with some added callbacks to IndexedRedis
 #
@@ -6,8 +6,11 @@
 
 # vim:set ts=8 shiftwidth=8 softtabstop=8 noexpandtab :
 
+import pprint
 
 from QueryableList import QueryableListObjs
+
+__all__ = ('IRQueryableList', )
 
 
 class IRQueryableList(QueryableListObjs):
@@ -144,6 +147,11 @@ class IRQueryableList(QueryableListObjs):
 		pks = [item._id for item in self if item._id]
 
 		return mdl.objects.getMultiple(pks)
+	
+	def pprint(self, stream=None):
+		dicts = [obj.asDict(includeMeta=True, forStorage=False, strKeys=True) for obj in self]
+
+		pprint.pprint(dicts, stream=stream)
 
 
 # vim:set ts=8 shiftwidth=8 softtabstop=8 noexpandtab :

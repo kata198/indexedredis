@@ -8,10 +8,11 @@
 
 import copy
 import codecs
+import pprint
 import random
+import redis
 import sys
 import uuid
-import redis
 
 from . import fields
 from .fields import IRField, IRFieldChain, IRClassicField, IRNullType, irNull, IR_NULL_STR, IR_NULL_BYTES, IR_NULL_STRINGS
@@ -407,6 +408,10 @@ class IndexedRedisModel(object):
 		return ret
 
 	toDict = asDict
+
+
+	def pprint(self, stream=None):
+		pprint.pprint(self.asDict(includeMeta=True, forStorage=False, strKeys=True), stream=stream)
 
 
 	def _convertFieldForStorage(self, thisField, val):
