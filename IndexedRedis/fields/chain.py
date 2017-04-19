@@ -70,11 +70,8 @@ class IRFieldChain(IRField):
 		if self._isNullValue(value):
 			return irNull
 
-		# XXX: Maybe just set this as a property
-		chainedFieldsReversed = self.chainedFields[:]
-		chainedFieldsReversed.reverse()
-
-		for chainedField in chainedFieldsReversed:
+		for i in range(len(self.chainedFields)-1, -1, -1):
+			chainedField = self.chainedFields[i]
 			value = chainedField.convert(value)
 
 		return value
@@ -83,11 +80,8 @@ class IRFieldChain(IRField):
 		if self._isNullValue(value):
 			return irNull
 
-		# XXX: Maybe just set this as a property
-		chainedFieldsReversed = self.chainedFields[:]
-		chainedFieldsReversed.reverse()
-
-		for chainedField in chainedFieldsReversed:
+		for i in range(len(self.chainedFields)-1, -1, -1):
+			chainedField = self.chainedFields[i]
 			value = chainedField.convertFromInput(value)
 
 		return value
