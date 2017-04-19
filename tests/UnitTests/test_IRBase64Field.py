@@ -45,6 +45,18 @@ class TestIRBase64Field(object):
                 KEY_NAME='TestIRBase64Field__ModelBase64Value'
 
             self.model = Model_Base64Value
+        elif testMethod in (self.test_defaultValue, ):
+            class Model_Base64DefaultValue(IndexedRedisModel):
+                FIELDS = [
+                    IRField('name'),
+                    IRBase64Field('value', defaultValue=b'woobley'),
+                ]
+
+                INDEXED_FIELDS = ['name']
+
+                KEY_NAME = 'TestIRBase64Field__ModelBase64DefaultValue'
+
+            self.model = Model_Base64DefaultValue
 
         # If KEEP_DATA is False (debug flag), then delete all objects before so prior test doesn't interfere
         if self.KEEP_DATA is False and self.model:
@@ -158,6 +170,37 @@ class TestIRBase64Field(object):
 
         assert updatedFields == {} , 'Expected updatedFields to be clear after saving'
 
+    def test_defaultValue(self):
+
+        Model = self.model
+
+        obj = Model()
+
+        assert obj.value == b'woobley' , 'Expected defaultValue to be applied to a base64 field.\nExpected: b"woobley"\nGot:     %s' %(repr(obj.value), )
+
+        obj.name = 'test'
+
+        obj.save()
+
+        assert obj.value == b'woobley' , 'Expected defaultValue to remain on a base64 field after saving'
+
+        objFetched = Model.objects.filter(name='test').first()
+        assert objFetched , 'Expected to be able to fetch object'
+
+        obj = objFetched
+
+        assert obj.value == b'woobley' , 'Expected defaultValue to remain on a base64 field after fetching'
+
+        obj.value = b'cheesy'
+
+        obj.save()
+
+        objFetched = Model.objects.filter(name='test').first()
+        assert objFetched , 'Expected to be able to fetch object'
+
+        obj = objFetched
+
+        assert obj.value == b'cheesy' , 'Expected to be able to change value from default.'
 
 
 if __name__ == '__main__':
