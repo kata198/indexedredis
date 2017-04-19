@@ -7,10 +7,8 @@
 
 # vim: set ts=4 sw=4 expandtab
 
-import datetime
 
 import sys
-import IndexedRedis
 import subprocess
 from IndexedRedis import IndexedRedisModel
 from IndexedRedis.fields import IRPickleField, IRField
@@ -159,6 +157,6 @@ class TestIRField(object):
 
 
 if __name__ == '__main__':
-    sys.exit(subprocess.Popen('GoodTests.py "%s"' %(sys.argv[0],), shell=True).wait())
+    sys.exit(subprocess.Popen('GoodTests.py -n1 "%s" %s' %(sys.argv[0], ' '.join(['"%s"' %(arg.replace('"', '\\"'), ) for arg in sys.argv[1:]]) ), shell=True).wait())
 
 # vim: set ts=4 sw=4 expandtab

@@ -10,8 +10,8 @@
 import datetime
 
 import sys
-import IndexedRedis
 import subprocess
+
 from IndexedRedis import IndexedRedisModel, IRField, irNull, toggleDeprecatedMessages
 from IndexedRedis.fields.FieldValueTypes import IRDatetimeValue, IRJsonValue
 
@@ -219,6 +219,9 @@ class TestIRField(object):
 
         myObj3 = SimpleIRFieldModel(name='Jim', number=44)
         ids3 = myObj3.save()
+
+        assert ids3, 'Expected to get ids returned from save, but did not.'
+        assert ids3[0] == myObj3._id , 'Expected id to be set on saved object, but was not.'
 
         fetchObj = SimpleIRFieldModel.objects.get(ids[0])
 
@@ -490,6 +493,10 @@ class TestIRField(object):
 
         fetchedObj = SimpleIRFieldModel.objects.filter(name='hello').first()
 
+        assert fetchedObj , 'Expected to be able to fetch'
+
+        obj = fetchedObj
+
         updatedFields = obj.getUpdatedFields()
         assert updatedFields == {}, 'Expected empty updatedFields after fetching'
 
@@ -511,6 +518,6 @@ class TestIRField(object):
 
 
 if __name__ == '__main__':
-    sys.exit(subprocess.Popen('GoodTests.py "%s"' %(sys.argv[0],), shell=True).wait())
+    sys.exit(subprocess.Popen('GoodTests.py -n1 "%s" %s' %(sys.argv[0], ' '.join(['"%s"' %(arg.replace('"', '\\"'), ) for arg in sys.argv[1:]]) ), shell=True).wait())
 
 # vim: set ts=4 sw=4 expandtab

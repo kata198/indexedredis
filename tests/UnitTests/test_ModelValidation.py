@@ -8,7 +8,6 @@
 # vim: set ts=4 sw=4 expandtab
 
 import sys
-import IndexedRedis
 import subprocess
 from IndexedRedis import IndexedRedisModel, IRField, InvalidModelException, validatedModels
 
@@ -41,6 +40,7 @@ class TestModelValidation(object):
         validatedModels.clear()
         try:
             myObj = model()
+            myObj # Nuke warning
         except InvalidModelException as e:
             gotException = e
         except Exception as e:
@@ -59,10 +59,12 @@ class TestModelValidation(object):
         validatedModels.clear()
         try:
             myObj = model.objects.first()
+            myObj # Nuke warning
         except InvalidModelException as e:
             gotException = e
         except Exception as e:
             gotWrongException = e
+
 
         if shouldHaveException is True:
             self.__assertExceptions(name, testMethod, gotException, gotWrongException, contains)
@@ -146,6 +148,6 @@ class TestModelValidation(object):
 
             
 if __name__ == '__main__':
-    sys.exit(subprocess.Popen('GoodTests.py "%s"' %(sys.argv[0],), shell=True).wait())
+    sys.exit(subprocess.Popen('GoodTests.py -n1 "%s" %s' %(sys.argv[0], ' '.join(['"%s"' %(arg.replace('"', '\\"'), ) for arg in sys.argv[1:]]) ), shell=True).wait())
 
 # vim: set ts=4 sw=4 expandtab

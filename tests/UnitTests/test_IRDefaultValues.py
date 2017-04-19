@@ -5,16 +5,11 @@
 # TestIRDefaultValues - Test default values for fields
 #
 
-# vim: set ts=4 sw=4 st=4 expandtab
-
-import datetime
-
 import sys
-import IndexedRedis
 import subprocess
-from IndexedRedis import IndexedRedisModel, IRField, irNull, toggleDeprecatedMessages
-from IndexedRedis.fields import IRFieldChain, IRBase64Field, IRUnicodeField, IRClassicField
-from IndexedRedis.fields.FieldValueTypes import IRDatetimeValue, IRJsonValue
+
+from IndexedRedis import IndexedRedisModel, IRField, irNull
+from IndexedRedis.fields import IRClassicField
 
 # vim: ts=4 sw=4 expandtab
 
@@ -142,6 +137,6 @@ class TestIRDefaultValues(object):
 
 
 if __name__ == '__main__':
-    sys.exit(subprocess.Popen('GoodTests.py "%s" %s' %(sys.argv[0], ' '.join(sys.argv[1:])), shell=True).wait())
+    sys.exit(subprocess.Popen('GoodTests.py -n1 "%s" %s' %(sys.argv[0], ' '.join(['"%s"' %(arg.replace('"', '\\"'), ) for arg in sys.argv[1:]]) ), shell=True).wait())
 
 # vim: set ts=4 sw=4 expandtab

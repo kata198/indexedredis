@@ -1,22 +1,18 @@
 #!/usr/bin/env python
 
-# Copyright (c) 2016 Timothy Savannah under LGPL version 2.1. See LICENSE for more information.
+# Copyright (c) 2016, 2017 Timothy Savannah under LGPL version 2.1. See LICENSE for more information.
 #
 # test_HashedIndexes - GoodTests unit tests Hashed Indexes
 #
 
 # vim: set ts=4 sw=4 expandtab
 
-import datetime
-
-import sys
-import IndexedRedis
-import subprocess
 import re
-from IndexedRedis import IndexedRedisModel, IRField, irNull
-from IndexedRedis.fields.FieldValueTypes import IRDatetimeValue, IRJsonValue
+import sys
+import subprocess
 
-# vim: ts=4 sw=4 expandtab
+from IndexedRedis import IndexedRedisModel, IRField
+
 
 # TODO: Add test for nulls and hashed indexes, and various other object types.
 #   Right now IRField directly is the only way to get a hashed index, but may open that up.
@@ -132,7 +128,7 @@ class TestHashedIndexes(object):
 
         # Test both with fetchAll=True and fetchAll=False (i.e. fetch all beforehand, fetch one-at-a-time.
         for fetchAll in (True, False):
-            prefixStr = "compat_convertHashedIndexes(fetchAll=%s)" %(str(fetchAll), )
+            prefixStr = "compat_convertHashedIndexes(fetchAll=%s) " %(str(fetchAll), )
 
             HashedIdxMdlForReindex.objects.delete()
             UnHashedIdxMdlForReindex.objects.delete()
@@ -142,9 +138,13 @@ class TestHashedIndexes(object):
             myObj = HashedIdxMdlForReindex(name='Tim', value='purple')
             ids = myObj.save()
 
-            otherObj = HashedIdxMdlForReindex(name='George', value='nurple')
-
             assert ids , 'Failed to save myObj'
+
+
+            otherObj = UnHashedIdxMdlForReindex(name='George', value='nurple')
+            
+            assert otherObj.save() , 'Failed to save otherObj'
+
 
             filterResults = HashedIdxMdlForReindex.objects.filter(value='purple').all()
             assert len(filterResults) == 1 , prefixStr + 'Expected to get object off filter, but did not'
@@ -157,6 +157,15 @@ class TestHashedIndexes(object):
 
             filterResults = HashedIdxMdlForReindex.objects.filter(name='Tim').all()
             assert len(filterResults) == 1, prefixStr + 'Expected to be able to filter using either model on field that does not change.'
+
+            numGeorge = HashedIdxMdlForReindex.objects.filter(name='George').count()
+            assert numGeorge == 1 , prefixStr + 'Expected to get saved object name="George"'
+
+            numNurpleHashed = HashedIdxMdlForReindex.objects.filter(value='nurple').count()
+            assert numNurpleHashed == 0 , prefixStr + 'Expected to not be able to fetch unhashed index using hashed index model'
+
+            numNurpleUnhashed = UnHashedIdxMdlForReindex.objects.filter(value='nurple').count()
+            assert numNurpleUnhashed == 1 , prefixStr + 'Expected to be able to fetch unhashed index using unhashed model'
 
             # Now, reindex using the unhashed model. This should flip everythng.
             UnHashedIdxMdlForReindex.objects.compat_convertHashedIndexes(fetchAll)
@@ -173,6 +182,14 @@ class TestHashedIndexes(object):
             filterResults = HashedIdxMdlForReindex.objects.filter(name='Tim').all()
             assert len(filterResults) == 1, prefixStr + 'Expected to be able to filter using either model on field that does not change.'
 
+            numGeorge = HashedIdxMdlForReindex.objects.filter(name='George').count()
+            assert numGeorge == 1 , prefixStr + 'Expected to get saved object name="George"'
+
+            numNurpleHashed = HashedIdxMdlForReindex.objects.filter(value='nurple').count()
+            assert numNurpleHashed == 0 , prefixStr + 'Expected to not be able to fetch unhashed index using hashed index model'
+
+            numNurpleUnhashed = UnHashedIdxMdlForReindex.objects.filter(value='nurple').count()
+            assert numNurpleUnhashed == 1 , prefixStr + 'Expected to be able to fetch unhashed index using unhashed model'
 
             # Now, flip back to hashed and perform same tests
 
@@ -191,7 +208,17 @@ class TestHashedIndexes(object):
             assert len(filterResults) == 1, prefixStr + 'Expected to be able to filter using either model on field that does not change.'
 
 
+            numGeorge = HashedIdxMdlForReindex.objects.filter(name='George').count()
+            assert numGeorge == 1 , prefixStr + 'Expected to get saved object name="George"'
+
+            numNurpleHashed = HashedIdxMdlForReindex.objects.filter(value='nurple').count()
+            assert numNurpleHashed == 1 , prefixStr + 'Expected to be able to fetch originally unhashed value after conversion to hashed using hashed model'
+
+            numNurpleUnhashed = UnHashedIdxMdlForReindex.objects.filter(value='nurple').count()
+            assert numNurpleUnhashed == 0 , prefixStr + 'Expected to not be able to fetch originally unhashed value after conversion to hashed using unhashed model'
+
+
 if __name__ == '__main__':
-    sys.exit(subprocess.Popen('GoodTests.py "%s"' %(sys.argv[0],), shell=True).wait())
+    sys.exit(subprocess.Popen('GoodTests.py -n1 "%s" %s' %(sys.argv[0], ' '.join(['"%s"' %(arg.replace('"', '\\"'), ) for arg in sys.argv[1:]]) ), shell=True).wait())
 
 # vim: set ts=4 sw=4 expandtab
