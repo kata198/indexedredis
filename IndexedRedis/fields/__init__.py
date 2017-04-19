@@ -113,11 +113,11 @@ class IRField(str):
 			self.CAN_INDEX = False
 		# I don't like these next two conditions, but it will train folks to use the correct types (whereas they may just try to shove dict in, and give up that it doesn't work)
 		elif valueType in (dict, list, tuple):
-			deprecatedMessage('WARNING: Implicitly converting IRField(%s, valueType=%s) to IRField(%s, valueType=IndexedRedis.fields.FieldValueTypes.IRJsonValue)\n' %(repr(name), valueType.__name__, repr(name)), printStack=True)
+#			deprecatedMessage('WARNING: Implicitly converting IRField(%s, valueType=%s) to IRField(%s, valueType=IndexedRedis.fields.FieldValueTypes.IRJsonValue)\n' %(repr(name), valueType.__name__, repr(name)), printStack=True)
 			valueType = IRJsonValue
 			self.CAN_INDEX = False
 		elif valueType == datetime:
-			deprecatedMessage('WARNING: Implicitly converting IRField(%s, valueType=datetime.datetime) to IRField(%s, valueType=IndexedRedis.fields.FieldValueTypes.IRDatetimeValue)\n' %(repr(name), repr(name)), printStack=True)
+#			deprecatedMessage('WARNING: Implicitly converting IRField(%s, valueType=datetime.datetime) to IRField(%s, valueType=IndexedRedis.fields.FieldValueTypes.IRDatetimeValue)\n' %(repr(name), repr(name)), printStack=True)
 			valueType = IRDatetimeValue
 			self.CAN_INDEX = True
 		else:
