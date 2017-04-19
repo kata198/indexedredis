@@ -1,4 +1,4 @@
-# Copyright (c) 2014, 2015, 2016 Timothy Savannah under LGPL version 2.1. See LICENSE for more information.
+# Copyright (c) 2014, 2015, 2016, 2017 Timothy Savannah under LGPL version 2.1. See LICENSE for more information.
 #
 # fields.b64 - Field type for base64 encoded/decoded fields
 #
@@ -29,22 +29,10 @@ class IRBase64Field(IRField):
 		self.defaultValue = irNull
 
 	def convert(self, value=b''):
-		if not value:
+		if not isStringy(value) or not value:
 			return value
 
-		# TODO: do this better maybe?
-		if not isStringy(value):
-			return value
-
-		try:
-			# In python2, this will return empty string if it fails sometimes
-			#  python3 always raises exception
-			return b64decode(tobytes(value)) or value
-		except Exception as e:
-			# XXX: remove this print before release
-			print ("Exception %s\n" %(str(e),))
-
-		return value
+		return b64decode(tobytes(value))
 
 	def convertFromInput(self, value=''):
 		return value
