@@ -305,6 +305,13 @@ from .chain import IRFieldChain
 from .b64 import IRBase64Field
 from .fixedpoint import IRFixedPointField
 from .bytes import IRBytesField
+# Prevent these modules from conflicting with builtin / importable types...
+try:
+	del unicode
+	del bytes
+	del pickle
+except:
+	pass
 from .classic import IRClassicField
 
 from .FieldValueTypes import IRDatetimeValue, IRJsonValue
