@@ -50,51 +50,114 @@ def getDefaultIREncoding():
 
 if bytes == str:
 	# Python 2
-	def to_unicode(x):
-		global defaultIREncoding
+	def to_unicode(x, encoding=None):
+		'''
+			to_unicode - Ensure a given value is decoded into unicode type
+
+			@param x - Value
+			@param encoding <None/str> (default None) - None to use defaultIREncoding, otherwise an explicit encoding
+
+			@return - "x" as a unicode type
+		'''
+		if encoding is None:
+			global defaultIREncoding
+			encoding = defaultIREncoding
+
 		if isinstance(x, unicode):
 			return x
 		elif isinstance(x, str):
-			return x.decode(defaultIREncoding)
+			return x.decode(encoding)
 		else:
-			return str(x).decode(defaultIREncoding)
+			return str(x).decode(encoding)
 
 
-	def tobytes(x):
-		global defaultIREncoding
+	def tobytes(x, encoding=None):
+		'''
+			tobytes - Ensure that a given value is encoded into bytes (str on python2)
+
+			@param x - Value
+			@param encoding <None/str> (default None) - None to use defaultIREncoding, otherwise an explicit encoding
+
+			@return - "x" as a bytes (str on python2) type
+		'''
+		if encoding is None:
+			global defaultIREncoding
+			encoding = defaultIREncoding
+
 		if isinstance(x, str):
 			return x
 		try:
 			return str(x)
 		except:
-			return x.encode(defaultIREncoding)
+			return x.encode(encoding)
 #	tobytes = lambda x : str(x)
 
 	def isStringy(x):
+		'''
+			isStringy - Check if a given value extends from any string-like type (basestring on python2)
+
+			@param x - Value to check
+
+			@return <bool> - True if "x" is a stringy type
+		'''
 		return issubclass(x.__class__, basestring)
 	
 	encoded_str_type = unicode
 
 else:
 	# Python 3
-	def to_unicode(x):
-		global defaultIREncoding
+	def to_unicode(x, encoding=None):
+		'''
+			to_unicode - Ensure a given value is decoded into unicode type (str on python3)
+
+			@param x - Value
+			@param encoding <None/str> (default None) - None to use defaultIREncoding, otherwise an explicit encoding
+
+			@return - "x" as a unicode (str on python3) type
+		'''
+		if encoding is None:
+			global defaultIREncoding
+			encoding = defaultIREncoding
+
 		if isinstance(x, bytes) is False:
 			return str(x)
-		return x.decode(defaultIREncoding)
+		return x.decode(encoding)
 
-	def tobytes(x):
-		global defaultIREncoding
+	def tobytes(x, encoding=None):
+		'''
+			tobytes - Ensure that a given value is encoded into bytes
+
+			@param x - Value
+			@param encoding <None/str> (default None) - None to use defaultIREncoding, otherwise an explicit encoding
+
+			@return - "x" as a bytes type
+		'''
+		if encoding is None:
+			global defaultIREncoding
+			encoding = defaultIREncoding
+
 		if isinstance(x, bytes) is True:
 			return x
-		return x.encode(defaultIREncoding)
+		return x.encode(encoding)
 
 	def isStringy(x):
+		'''
+			isStringy - Check if a given value extends from any string-like type (str or bytes on python3)
+
+			@param x - Value to check
+
+			@return <bool> - True if "x" is a stringy type
+		'''
 		return issubclass(x.__class__, (str, bytes))
 
 	encoded_str_type = str
 
 def isEncodedString(x):
+	'''
+		isEncodedString - Check if a given string is "encoded" with a codepage.
+
+		  Note this means UNICODE, not BYTES, even though python uses "decode" to apply an encoding and "encode" to get the raw bytes..
+	'''
 	return issubclass(x.__class__, encoded_str_type)
 
 # vim: set ts=8 shiftwidth=8 softtabstop=8 noexpandtab :
