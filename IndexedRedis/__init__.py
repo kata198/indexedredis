@@ -1691,10 +1691,11 @@ class IndexedRedisSave(IndexedRedisHelper):
 
 				pipeline.hset(key, thisField, fieldValue)
 
+				# Update origData with the new data
 				if fieldValue == IR_NULL_STR:
 					obj._origData[thisField] = irNull
 				else:
-					obj._origData[thisField] = fieldValue
+					obj._origData[thisField] = getattr(obj, str(thisField))
 
 			self._add_id_to_keys(obj._id, pipeline)
 
@@ -1714,6 +1715,7 @@ class IndexedRedisSave(IndexedRedisHelper):
 					self._rem_id_from_index(thisField, obj._id, oldValueForStorage, pipeline)
 					self._add_id_to_index(thisField, obj._id, newValueForStorage, pipeline)
 
+				# Update origData with the new data
 				obj._origData[thisField] = newValue
 
 
