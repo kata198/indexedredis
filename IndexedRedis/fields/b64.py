@@ -29,10 +29,22 @@ class IRBase64Field(IRField):
 		self.defaultValue = irNull
 
 	def convert(self, value=b''):
-		if not isStringy(value) or not value:
+		if not value:
 			return value
 
-		return b64decode(tobytes(value))
+		# TODO: do this better maybe?
+		if not isStringy(value):
+			return value
+
+		try:
+			# In python2, this will return empty string if it fails sometimes
+			#  python3 always raises exception
+			return b64decode(tobytes(value)) or value
+		except Exception as e:
+			# XXX: remove this print before release
+			print ("Exception %s\n" %(str(e),))
+
+		return value
 
 	def convertFromInput(self, value=''):
 		return value
