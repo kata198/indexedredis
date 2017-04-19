@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+# vim: set ts=8 sw=8 st=8 expandtab :
 
 import datetime
 import sys
@@ -6,7 +7,7 @@ import IndexedRedis
 from IndexedRedis import IndexedRedisModel, IRField
 from IndexedRedis.fields import IRCompressedField, IRFieldChain, IRRawField, IRBytesField
 
-# vim: ts=4 sw=4 expandtab
+# vim: set ts=8 sw=8 st=8 expandtab :
 
 # Define the model
 class Song(IndexedRedisModel):
@@ -112,20 +113,14 @@ if __name__ == '__main__':
 
     # Query some songs by artist
     merryMenSongs = Song.objects.filter(artist='The Merry Men').all()
-    from pprint import pprint
 
     sys.stdout.write("Merry Men Songs:\n")
-    for song in merryMenSongs:
-            pprint(song.asDict(strKeys=True))
-            sys.stdout.write('\n')
+    merryMenSongs.pprint()
 
     # Query some songs not by artist
     sys.stdout.write('\n\nNot Mega Men Songs:\n')
     notMegaMenSongs = Song.objects.filterInline(artist__ne='Mega Men').all()
-    for song in notMegaMenSongs:
-            pprint(song.asDict(strKeys=True))
-            sys.stdout.write('\n')
-
+    notMegaMenSongs.pprint()
 
 
     sys.stdout.write('\n\n')
@@ -137,7 +132,7 @@ if __name__ == '__main__':
 
     allTrackOneSongs = getTracks(Song.objects, 1)
     for song in allTrackOneSongs:
-            pprint(song.asDict(strKeys=True))
+            song.pprint()
             sys.stdout.write('\n')
 
     sys.stdout.write('\nMega Men track ones:')
@@ -146,14 +141,14 @@ if __name__ == '__main__':
 
     objs = getTracks(megaMenTracks, 1)
     for song in objs:
-            pprint(song.asDict(strKeys=True))
+            song.pprint()
             sys.stdout.write('\n')
 
     sys.stdout.write('\nMega Men track twos (should be just one entry):\n')
 
     objs = getTracks(megaMenTracks, 2)
     for song in objs:
-            pprint(song.asDict(strKeys=True))
+            song.pprint()
             sys.stdout.write('\n')
 
     pk = song.getPk()
@@ -165,7 +160,7 @@ if __name__ == '__main__':
     song.delete()
     objs = getTracks(megaMenTracks, 2)
     for song in objs:
-            pprint(song.asDict(strKeys=True))
+            song.pprint()
             sys.stdout.write('\n')
 
     sys.stdout.write('\nSong pk=%s exists? (should now be False) %s\n' %(pk, str(Song.objects.exists(pk)) ) )
@@ -362,3 +357,5 @@ if __name__ == '__main__':
 #
 #Remaining Mega Men tracks (should be blank):
 #IRQueryableList([])
+
+# vim: set ts=8 sw=8 st=8 expandtab :
