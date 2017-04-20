@@ -19,7 +19,8 @@ class IRBytesField(IRField):
 		This is replacement for BINARY_FIELDS
 	'''
 
-	CAN_INDEX = False
+	CAN_INDEX = True
+	hashIndex = True
 
 	def __init__(self, name='', defaultValue=irNull, encoding=None):
 		'''

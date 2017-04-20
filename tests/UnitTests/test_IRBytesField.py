@@ -16,6 +16,8 @@ from IndexedRedis.fields import IRBytesField, IRField
 
 # vim: ts=4 sw=4 expandtab
 
+# TODO: Add test for encoding on bytes field
+
 class TestIRBytesField(object):
     '''
         TestIRBytesField - Test IRBytesField
@@ -56,6 +58,20 @@ class TestIRBytesField(object):
                 KEY_NAME = 'TestIRBytesField__ModelBytesDefaultValue'
 
             self.model = Model_BytesDefaultValue
+
+        elif testMethod in (self.test_indexBytes, ):
+            class Model_IndexBytes(IndexedRedisModel):
+                FIELDS = [
+                    IRField('name'),
+                    IRBytesField('value', defaultValue=irNull),
+                    IRBytesField('value2', defaultValue=b'xxx'),
+                ]
+
+                INDEXED_FIELDS = ['name', 'value', 'value2']
+
+                KEY_NAME = 'TestIRBytesField__IndexBytes'
+
+            self.model = Model_IndexBytes
 
         # If KEEP_DATA is False (debug flag), then delete all objects before so prior test doesn't interfere
         if self.KEEP_DATA is False and self.model:
@@ -202,6 +218,56 @@ class TestIRBytesField(object):
         obj = objFetched
 
         assert obj.value == b'cheesy' , 'Expected to be able to change value from default.'
+
+    def test_indexBytes(self):
+
+        Model = self.model
+
+        obj = Model()
+
+        obj.name = 'test'
+
+        ids = obj.save()
+
+        assert ids and ids[0] , 'Failed to save object'
+
+        # Add a "distraction" object
+        otherObj = Model()
+        otherObj.value = 'qqq'
+        otherObj.value2 = 'zzz'
+
+        otherObj.save()
+
+        objFetched = Model.objects.filter(value=irNull).first()
+
+        assert objFetched , 'Failed to fetch an object with default value (irNull) on a bytes field'
+
+        d1 = obj.asDict(includeMeta=True, forStorage=False, strKeys=True)
+        d2 = objFetched.asDict(includeMeta=True, forStorage=False, strKeys=True)
+
+        assert objFetched == obj , 'Object fetched was not expected object.\nExpected: %s\n\nGot:     %s\n' %( 
+                obj.asDict(includeMeta=True, forStorage=False, strKeys=True),
+                objFetched.asDict(includeMeta=True, forStorage=False, strKeys=True)
+                )
+
+        objFetched = Model.objects.filter(value2=b'zzz').first()
+
+        assert objFetched , 'Failed to fetch object using a non-default value on bytes field'
+
+        assert objFetched == otherObj , 'Object fetched was not expected object.\nExpected: %s\n\nGot:     %s\n' %( 
+                otherObj.asDict(includeMeta=True, forStorage=False, strKeys=True),
+                objFetched.asDict(includeMeta=True, forStorage=False, strKeys=True)
+                )
+
+        objFetched = Model.objects.filter(value=b'qqq').first()
+
+        assert objFetched , 'Failed to fetch object using a non-default value on bytes field'
+
+        assert objFetched == otherObj , 'Object fetched was not expected object.\nExpected: %s\n\nGot:     %s\n' %( 
+                otherObj.asDict(includeMeta=True, forStorage=False, strKeys=True),
+                objFetched.asDict(includeMeta=True, forStorage=False, strKeys=True)
+                )
+
 
 
 if __name__ == '__main__':
