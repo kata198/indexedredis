@@ -1121,10 +1121,10 @@ class IndexedRedisQuery(IndexedRedisHelper):
 
 			if value == irNull:
 				value = IR_NULL_STR
-			else:
-				irField = filterObj.irFields[key]
-				if hasattr(irField, 'toIndex'):
-					value = irField.toIndex(value)
+
+			irField = filterObj.irFields[key]
+			if hasattr(irField, 'toIndex'):
+				value = irField.toIndex(value)
 
 			if notFilter is False:
 				filterObj.filters.append( (key, value) )
