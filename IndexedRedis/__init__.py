@@ -606,6 +606,56 @@ class IndexedRedisModel(object):
 
 		return list( range( 1, nextID, 1) )
 
+
+	def hasSameValues(self, other):
+		'''
+			hasSameValues - Check if this and another model have the same fields and values.
+
+			This does NOT include id, so the models can have the same values but be different objects in the database.
+
+			@param other <IndexedRedisModel> - Another model
+
+			@return <bool> - True if all fields have the same value, otherwise False
+		'''
+		if self.FIELDS != other.FIELDS:
+			return False
+
+		for field in self.FIELDS:
+			if getattr(self, field) != getattr(other, field):
+				return False
+
+		return True
+
+
+	def __eq__(self, other):
+		'''
+			__eq__ - Check if two IndexedRedisModels are equal.
+
+			They are equal if they have the same type and same field values (including id).
+
+			To check if two models have the same values (but can have different ids), use #hasSameValues method.
+		'''
+		# Check if the same type
+		if type(self) != type(other):
+			return False
+
+		if not self.hasSameValues(other):
+			return False
+
+		if getattr(self, '_id', None) != getattr(other, '_id', None):
+			return False
+
+		return True
+
+	def __ne__(self, other):
+		'''
+			__ne__ - Check if two IndexedRedisModels are NOT equal.
+
+			@see IndexedRedisModel.__eq__
+		'''
+		return not self.__eq__(other)
+
+
 	def __str__(self):
 		'''
                     __str__ - Returns a string representation of this object's state.

@@ -95,7 +95,55 @@ class TestSimpleSetAndGet(object):
             except:
                 sys.stderr.write('Failed to delete object: %s\n' %(str(obj.asDict(True),)))
 
+    def test_modelEquals(self):
 
+        myObj1 = SimpleSetAndGetModel(a='one', b='two', c='three')
+        myObj2 = SimpleSetAndGetModel(a='one', b='two', c='three')
+
+        assert myObj1 == myObj1 , 'Expected model to equal itself'
+
+        assert bool(myObj1 != myObj1) is False , 'Expected model not equaling itself to be False'
+
+        assert myObj1 == myObj2 , 'Expected same model with same field values to equal eachother'
+
+        myObj3 = SimpleSetAndGetModel(a='one', b='two', c='x')
+
+        assert myObj1 != myObj3 , 'Expected same model with different field values to not equal eachother'
+
+        class SimpleSetAndGetModel2(IndexedRedisModel):
+            
+            FIELDS = [IRClassicField('a'), IRClassicField('b'), IRClassicField('c')]
+
+            INDEXED_FIELDS = ['a']
+
+            KEY_NAME = 'Test_SimpleSetAndGet2'
+
+        myObjOtherType = SimpleSetAndGetModel2(a='one', b='two', c='three')
+
+        assert myObj1 != myObjOtherType , 'Expected different model with same field values to not equal eachother'
+
+        assert myObj1.hasSameValues(myObj2) is True , 'Expected hasSameValues to be True when values are the same'
+        assert myObj1.hasSameValues(myObj3) is False , 'Expected hasSameValues to be False when values are different'
+
+        myObj1.save()
+
+        assert myObj1 != myObj2 , 'Expected models with same values, one saved and one not to not be equal, saved-first'
+        assert myObj2 != myObj1 , 'Expected models with same values, one saved and one not to not be equal unsaved-first'
+
+        assert myObj1.hasSameValues(myObj2) is True, 'Expected hasSameValues to be True with one saved and one not, but same values.'
+
+        myObj2.save()
+
+        assert myObj1 != myObj2 , 'Expected models with same values, different ids to not be equal'
+
+        assert myObj1.hasSameValues(myObj2) is True, 'Expected hasSameValues to be True with same fields, but different ID.'
+
+
+        objsFetched = SimpleSetAndGetModel.objects.filter(a='one').all()
+
+        assert objsFetched[0] != objsFetched[1] , 'Expected after fetch, models with different ids but same values not to be equal'
+
+        assert objsFetched[0].hasSameValues(objsFetched[1]) , 'Expected after fetched, models with different ids but same values to hasSameValues'
 
             
 if __name__ == '__main__':
