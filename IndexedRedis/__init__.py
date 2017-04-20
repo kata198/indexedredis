@@ -17,7 +17,7 @@ import uuid
 from . import fields
 from .fields import IRField, IRFieldChain, IRClassicField, IRNullType, irNull, IR_NULL_STR, IR_NULL_BYTES, IR_NULL_STRINGS
 from .compat_str import to_unicode, tobytes, setDefaultIREncoding, getDefaultIREncoding
-from .utils import hashDictOneLevel
+from .utils import hashDictOneLevel, KeyList
 
 from .IRQueryableList import IRQueryableList
 
@@ -520,6 +520,7 @@ class IndexedRedisModel(object):
 		'''
 			saver - Get an IndexedRedisSave associated with this model
 		'''
+		cls.validateModel()
 		return IndexedRedisSave(cls)
 
 	@classproperty
@@ -529,6 +530,7 @@ class IndexedRedisModel(object):
 			@see IndexedRedisDelete.
 			Usually you'll probably just do Model.objects.filter(...).delete()
 		'''
+		cls.validateModel()
 		return IndexedRedisDelete(cls)
 
 	def save(self):
@@ -825,6 +827,7 @@ class IndexedRedisModel(object):
 		'''
                 pickle uses this
 		'''
+		self.__class__.validateModel()
 		for key, value in stateDict.items():
 			setattr(self, key, value)
 		self._origData = stateDict['_origData']
@@ -910,6 +913,7 @@ class IndexedRedisModel(object):
 			model.FIELDS = newFields
 			deprecatedMessage('Model "%s" contains plain-string fields. These have been converted to IRClassicField objects to retain the same functionality. plain-string fields will be removed in a future version. The converted fields are: %s' %(model.__name__, repr(updatedFields)), 'UPDATED_FIELDS_' + model.__name__)
 
+		model.FIELDS = KeyList(model.FIELDS)
 
 		if bool(indexedFieldSet - fieldSet):
 			raise InvalidModelException('%s All INDEXED_FIELDS must also be present in FIELDS. %s exist only in INDEXED_FIELDS' %(failedValidationStr, str(list(indexedFieldSet - fieldSet)), ) )
@@ -951,9 +955,7 @@ class IndexedRedisHelper(object):
 
 		self.fields = self.mdl.FIELDS
 
-		self.irFields = { irField : irField for irField in self.fields }
-
-		self.indexedFields = [self.irFields[fieldName] for fieldName in self.mdl.INDEXED_FIELDS]
+		self.indexedFields = [self.fields[fieldName] for fieldName in self.mdl.INDEXED_FIELDS]
 
 			
 		self._connection = None
@@ -1172,7 +1174,7 @@ class IndexedRedisQuery(IndexedRedisHelper):
 			if value == irNull:
 				value = IR_NULL_STR
 
-			irField = filterObj.irFields[key]
+			irField = filterObj.fields[key]
 			if hasattr(irField, 'toIndex'):
 				value = irField.toIndex(value)
 
@@ -1815,15 +1817,15 @@ class IndexedRedisSave(IndexedRedisHelper):
 		# Iterate now so we do this once instead of per-object.
 		for indexedField in self.indexedFields:
 
-			fields.append(self.irFields[indexedField])
+			fields.append(self.fields[indexedField])
 
 			# Reuse the existing field if it is set to hash, otherwise
 			#   generate one that is, but set to hash index.
 			if indexedField.hashIndex is True:
-				hashingField = self.irFields[indexedField]
+				hashingField = self.fields[indexedField]
 			else:
 				# Make one of the same type, but with hashIndex set to True
-				hashingField = self.irFields[indexedField].__class__(str(indexedField), hashIndex=True)
+				hashingField = self.fields[indexedField].__class__(str(indexedField), hashIndex=True)
 
 			hashingFields[indexedField] = hashingField
 
