@@ -27,6 +27,9 @@ else:
 #	IR_NULL_STRINGS = (IR_NULL_STR, IR_NULL_UNICODE)
 	IR_NULL_STRINGS = (IR_NULL_STR, )
 
+
+# TODO: May be indexed as empty string on types that would str the value. empty string != null
+
 # There is an odd "feature" of python 2.7 where the __eq__ method is not called when
 #  u'' == irNull
 #  however it is in all other forms (including: irNull == u'')
