@@ -19,7 +19,7 @@ from IndexedRedis.fields import IRBase64Field, IRField
 
 class TestIRBase64Field(object):
     '''
-        TestIRField - Test some basic IRField stuff
+        TestIRBase64Field - Test base64 field
     '''
 
     KEEP_DATA = False
@@ -73,16 +73,6 @@ class TestIRBase64Field(object):
             self.model.objects.delete()
 
 
-    @staticmethod
-    def _assert_fieldEquals(obj, fieldName, expectedValue, whatExpectedStr='', expectedValueReadable=None):
-        val = getattr(obj, fieldName)
-
-        if expectedValueReadable is None:
-            expectedValueReadable = repr(expectedValue)
-
-        assert val == expectedValue , 'Expected %s to be %s. Got <%s> %s' %(whatExpectedStr or fieldName, expectedValueReadable, val.__class__.__name__, repr(val))
-
-
     def test_general(self):
         
         Model = self.model
@@ -107,8 +97,11 @@ class TestIRBase64Field(object):
 
         b64Value = base64.b64encode(tobytes(obj.value))
 
-        dictConverted = obj.asDict(forStorage=False, strKeys=True)
-        dictForStorage = obj.asDict(forStorage=True, strKeys=True)
+        try:
+            dictConverted = obj.asDict(forStorage=False, strKeys=True)
+            dictForStorage = obj.asDict(forStorage=True, strKeys=True)
+        except Exception as e:
+            raise AssertionError('Expected to be able to convert to dict for both storage and non-storage. Got exception: %s %s' %(e.__class__.__name__, str(e)))
 
         assert dictConverted['value'] == 'Hello World', 'Expected asDict(forStorage=False) to contain IRBase64Field value as original string. Got: %s' %(dictConverted['value'], )
         assert dictForStorage['value'] == b64Value , 'Expected asDict(forStorage=True) to contain IRBase64Field that was base64 encoded.\nExpected: %s\nGot:     %s' %(repr(b64Value), repr(dictForStorage['value']) )
@@ -139,8 +132,11 @@ class TestIRBase64Field(object):
 
         assert updatedFields == {} , 'Expected updatedFields to be clear after fetching'
 
-        dictConverted = obj.asDict(forStorage=False, strKeys=True)
-        dictForStorage = obj.asDict(forStorage=True, strKeys=True)
+        try:
+            dictConverted = obj.asDict(forStorage=False, strKeys=True)
+            dictForStorage = obj.asDict(forStorage=True, strKeys=True)
+        except Exception as e:
+            raise AssertionError('Expected to be able to convert to dict for both storage and non-storage. Got exception: %s %s' %(e.__class__.__name__, str(e)))
 
         assert dictConverted['value'] == b'Hello World', 'After fetching, Expected asDict(forStorage=False) to contain IRBase64Field value as original string (as bytes). Got: %s' %(dictConverted['value'], )
         assert dictForStorage['value'] == b64Value , 'After fetching, Expected asDict(forStorage=True) to contain IRBase64Field that was base64 encoded.\nExpected: %s\nGot:     %s' %(repr(b64Value), repr(dictForStorage['value']) )
@@ -155,8 +151,11 @@ class TestIRBase64Field(object):
         assert updatedFields['value'][0] == b"Hello World" , 'Expected old value to be b"Hello World" in updatedFields. Got: %s' %(repr(updatedFields['value'][0]), )
         assert updatedFields['value'][1] == b'q123' , 'Expected converted value to be new value in updatedFields. Got: %s' %(repr(updatedFields['value'][1]), )
 
-        dictConverted = obj.asDict(forStorage=False, strKeys=True)
-        dictForStorage = obj.asDict(forStorage=True, strKeys=True)
+        try:
+            dictConverted = obj.asDict(forStorage=False, strKeys=True)
+            dictForStorage = obj.asDict(forStorage=True, strKeys=True)
+        except Exception as e:
+            raise AssertionError('Expected to be able to convert to dict for both storage and non-storage. Got exception: %s %s' %(e.__class__.__name__, str(e)))
 
         b64Value = base64.b64encode(tobytes(obj.value))
 
