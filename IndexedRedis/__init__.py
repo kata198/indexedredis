@@ -896,10 +896,10 @@ class IndexedRedisModel(object):
 				thisField = newField
 
 			if str(thisField) == '':
-				raise InvalidModelException('%s Field defined without a name, or name was an empty string. Type=%s' %(failedValidationStr, str(type(thisField))))
+				raise InvalidModelException('%s Field defined without a name, or name was an empty string. Type=%s  Field is:  %s' %(failedValidationStr, str(type(thisField)), repr(thisField)   ) )
 
 			if thisField in indexedFieldSet and thisField.CAN_INDEX is False:
-				raise InvalidModelException('%s Field Type %s - (%s) cannot be indexed.' %(failedValidationStr, str(thisField.__class__.__name__), to_unicode(thisField)))
+				raise InvalidModelException('%s Field Type %s - (%s) cannot be indexed.' %(failedValidationStr, str(thisField.__class__.__name__), repr(thisField)))
 
 			if hasattr(IndexedRedisModel, thisField) is True:
 				raise InvalidModelException('%s Field name %s is a reserved attribute on IndexedRedisModel.' %(failedValidationStr, str(thisField)))

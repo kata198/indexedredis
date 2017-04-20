@@ -96,6 +96,7 @@ class IRField(str):
 			NOTE: If you are extending IRField, you should probably not call this __init__ function. So long as you implement your own "convert", any fields used are set on a class-level.
 		'''
 		self.defaultValue = defaultValue
+		self.hashIndex = hashIndex
 
 		if valueType in (str, unicode):
 			valueType = str
@@ -107,6 +108,8 @@ class IRField(str):
 			self.convert = self._convertBytes
 			self.convertFromInput = self._convertBytes
 			self.toStorage = self._convertBytes
+
+			# Cannot index here, but CAN index if using IRBytesField. This is because python2 and python3 could handle it differently in certain cases.
 			self.CAN_INDEX = False
 		elif valueType in (None, type(None)):
 			self.convert = self._noConvert
@@ -145,7 +148,6 @@ class IRField(str):
 #			# Don't allow objects to index by default unless they define CAN_INDEX to be True
 #			self.CAN_INDEX = False
 
-		self.hashIndex = hashIndex
 
 	def toStorage(self, value):
 		'''
@@ -260,6 +262,8 @@ class IRField(str):
 
 		'''
 		ret = []
+		if getattr(self, 'valueType', None) is not None:
+			ret.append('valueType=%s' %(self.valueType.__name__, ))
 		if hasattr(self, 'hashIndex'):
 			ret.append('hashIndex=%s' %(self.hashIndex, ))
 
