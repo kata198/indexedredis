@@ -7,7 +7,7 @@
 
 
 from . import IRField
-from .null import irNull
+from .null import irNull, IR_NULL_STR, IR_NULL_STRINGS
 
 from ..compat_str import getDefaultIREncoding, tobytes, to_unicode
 
@@ -44,16 +44,15 @@ class IRUnicodeField(IRField):
 			return getDefaultIREncoding()
 		return self.encoding
 
-	def convert(self, value):
-		if self._isIrNull(value):
-			return irNull
-
+	def _fromStorage(self, value):
 		return to_unicode(value, encoding=self.getEncoding())
 
-	def toStorage(self, value):
+	def _toStorage(self, value):
 		return tobytes(value, encoding=self.getEncoding())
 
-	convertFromInput = convert
+	def _fromInput(self, value):
+		return to_unicode(value, encoding=self.getEncoding())
+
 
 	def toBytes(self, value):
 		if type(value) == bytes:

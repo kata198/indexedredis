@@ -8,6 +8,8 @@
 
 from . import IRField, irNull
 
+from .null import IR_NULL_STR, IR_NULL_STRINGS
+
 __all__ = ('IRFixedPointField',)
 
 class IRFixedPointField(IRField):
@@ -33,21 +35,13 @@ class IRFixedPointField(IRField):
 		self.decimalPlaces = decimalPlaces
 		self.defaultValue = defaultValue
 
-	def convert(self, value):
-		if self._isNullValue(value):
-			return irNull
-
+	def _fromStorage(self, value):
 		return float(value)
 	
-	def convertFromInput(self, value):
-		if self._isNullValue(value):
-			return irNull
+	def _fromInput(self, value):
 		return float(value)
 
-	def toStorage(self, value):
-		if self._isNullValue(value):
-			return irNull
-
+	def _toStorage(self, value):
 		if type(value) != float:
 			value = float(value)
 

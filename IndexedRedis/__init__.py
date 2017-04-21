@@ -335,37 +335,24 @@ class IndexedRedisModel(object):
 
 		self._origData = {}
 
+		# Figure out if we are convert from the database, or from direct input
 		if kwargs.get('__fromRedis', False) is True:
-			for thisField in self.FIELDS:
-				val = kwargs.get(str(thisField), thisField.getDefaultValue())
-				if val in IR_NULL_STRINGS:
-					val = irNull
-
-				elif val != irNull:
-					val = thisField.convert(val)
-
-				object.__setattr__(self, thisField, val)
-				# Generally, we want to copy the value incase it is used by reference (like a list)
-				#   we will miss the update (an append will affect both).
-				try:
-					self._origData[thisField] = copy.copy(val)
-				except:
-					self._origData[thisField] = val
+			convertFunctionName = 'fromStorage'
 		else:
-			for thisField in self.FIELDS:
-				val = kwargs.get(str(thisField), thisField.getDefaultValue())
-				if val in IR_NULL_STRINGS:
-					val = irNull
-				elif val != irNull:
-					val = thisField.convertFromInput(val)
+			convertFunctionName = 'fromInput'
 
-				object.__setattr__(self, thisField, val)
+		for thisField in self.FIELDS:
+			val = kwargs.get(str(thisField), thisField.getDefaultValue())
 
-				try:
-					self._origData[thisField] = copy.copy(val)
-				except:
-					self._origData[thisField] = val
+			val = getattr(thisField, convertFunctionName)(val)
 
+			object.__setattr__(self, thisField, val)
+			# Generally, we want to copy the value incase it is used by reference (like a list)
+			#   we will miss the update (an append will affect both).
+			try:
+				self._origData[thisField] = copy.copy(val)
+			except:
+				self._origData[thisField] = val
 				
 
 		self._id = kwargs.get('_id', None)
@@ -407,14 +394,8 @@ class IndexedRedisModel(object):
 		ret = {}
 		for thisField in self.FIELDS:
 			val = getattr(self, thisField, thisField.getDefaultValue())
-			if val == irNull or val in IR_NULL_STRINGS:
-				if forStorage is True:
-					val = IR_NULL_STR
-				else:
-					val = irNull
-			else:
-				if forStorage is True:
-					val = thisField.toStorage(val)
+			if forStorage is True:
+				val = thisField.toStorage(val)
 
 			if strKeys:
 				ret[str(thisField)] = val
@@ -436,23 +417,6 @@ class IndexedRedisModel(object):
 			@param stream <file/None> - Either a stream to output, or None to default to sys.stdout
 		'''
 		pprint.pprint(self.asDict(includeMeta=True, forStorage=False, strKeys=True), stream=stream)
-
-
-	def _convertFieldForStorage(self, thisField, val):
-		'''
-			_convertFieldForStorage - Converts a field to its storage representation
-
-			@param thisField <IRField/str> - A field on the model
-			@param val <?> - The value of that field to convert to storage representation
-
-			@return <?> - The storage representation of "val"
-		'''
-		if val == irNull:
-			return IR_NULL_STR
-
-		val = thisField.toStorage(val)
-
-		return val
 
 
 	def hasUnsavedChanges(self):
@@ -498,10 +462,11 @@ class IndexedRedisModel(object):
 
 		updatedFields = {}
 		for thisField in self.FIELDS:
-			thisVal = getattr(self, thisField, '')
-			thisVal = self._convertFieldForStorage(thisField, thisVal)
+			thisVal = getattr(self, thisField, thisField.getDefaultValue())
 
-			origVal = self._convertFieldForStorage(thisField, self._origData.get(thisField, ''))
+			thisVal = thisField.toStorage( thisVal )
+			origVal = thisField.toStorage( self._origData.get(thisField, thisField.getDefaultValue()) )
+
 			if thisVal != origVal:
 				updatedFields[thisField] = (origVal, thisVal)
 		return updatedFields
@@ -697,6 +662,8 @@ class IndexedRedisModel(object):
 		_id = myDict.pop('_id', '')
 		if _id:
 			ret += ['_id="', to_unicode(_id), '", ']
+
+		#TODO: We shouldn't need to convert here anymore...
 
 		# TODO: Note, trying to fit the type in here, but it's not perfect and may need to change when nullables are figured out
 		convertMethods = { thisField : (hasattr(thisField, 'convert') and thisField.convert or (lambda x : x)) for thisField in self.FIELDS}
@@ -1178,9 +1145,6 @@ class IndexedRedisQuery(IndexedRedisHelper):
 				notFilter = False
 			if key not in filterObj.indexedFields:
 				raise ValueError('Field "' + key + '" is not in INDEXED_FIELDS array. Filtering is only supported on indexed fields.')
-
-			if value == irNull:
-				value = IR_NULL_STR
 
 			if notFilter is False:
 				filterObj.filters.append( (key, value) )
@@ -1762,8 +1726,8 @@ class IndexedRedisSave(IndexedRedisHelper):
 			for thisField, fieldValue in updatedFields.items():
 				(oldValue, newValue) = fieldValue
 
-				oldValueForStorage = obj._convertFieldForStorage(thisField, oldValue)
-				newValueForStorage = obj._convertFieldForStorage(thisField, newValue)
+				oldValueForStorage = thisField.toStorage(oldValue)
+				newValueForStorage = thisField.toStorage(newValue)
 
 				pipeline.hset(key, thisField, newValueForStorage)
 

@@ -15,6 +15,8 @@ except ImportError:
 
 from IndexedRedis.compat_str import isStringy, isEncodedString, tobytes
 
+from .null import IR_NULL_STRINGS, IR_NULL_STR
+
 # NOTE: This pickle class originally had implcit base64 encoding and decoding so it could be used for indexes,
 #  but even with same protocol python2 and python3, and possibly even different platforms and same version
 #  create different pickles for the same objects. Can be as simple as the system supports microseconds,
@@ -39,24 +41,25 @@ class IRPickleField(IRField):
 		self.valueType = None
 		self.defaultValue = defaultValue
 
-	def toStorage(self, value):
-		if self._isNullValue(value):
-			return value
+	def _toStorage(self, value):
+		if value in ('', b'', u''):
+			return ''
 
 		return pickle.dumps(value, protocol=2)
 
-	def convert(self, value):
-		if not value:
-			return value
+	def _fromStorage(self, value):
+		if value in ('', b'', u''):
+			return ''
+
+
 		origData = value
+		# TODO: Maybe not needed anymore?
 		loadedPickle = self.__loadPickle(value)
 		if loadedPickle is not None:
 			return loadedPickle
 		return origData
 	
-	def convertFromInput(self, value):
-		if self._isIrNull(value):
-			return irNull
+	def _fromInput(self, value):
 		return value
 
 	@staticmethod

@@ -29,6 +29,8 @@ except NameError:
 	unicode = str
 
 
+# TODO: Update docstrings, deprecate old "convert" method (now fromStorage)
+
 class IRField(str):
 	'''
 		IRField - An advanced field
@@ -100,21 +102,21 @@ class IRField(str):
 
 		if valueType in (str, unicode):
 			valueType = str
-			self.convert = self._convertStr
-			self.convertFromInput = self._convertStr
-			self.toStorage = self._convertStr
+			self._fromStorage = self._convertStr
+			self._fromInput = self._convertStr
+			self._toStorage = self._convertStr
 		elif bytes != str and valueType == bytes:
 			valueType = bytes
-			self.convert = self._convertBytes
-			self.convertFromInput = self._convertBytes
-			self.toStorage = self._convertBytes
+			self._fromStorage = self._convertBytes
+			self._fromInput = self._convertBytes
+			self._toStorage = self._convertBytes
 
 			# Cannot index here, but CAN index if using IRBytesField. This is because python2 and python3 could handle it differently in certain cases.
 			self.CAN_INDEX = False
 		elif valueType in (None, type(None)):
-			self.convert = self._noConvert
-			self.convertFromInput = self._noConvert
-			self.toStorage = self._noConvert
+			self._fromStorage = self._noConvert
+			self._fromInput = self._noConvert
+			self._toStorage = self._noConvert
 			self.CAN_INDEX = False
 		# I don't like these next two conditions, but it will train folks to use the correct types (whereas they may just try to shove dict in, and give up that it doesn't work)
 		elif valueType in (dict, list, tuple):
@@ -129,7 +131,8 @@ class IRField(str):
 			if not isinstance(valueType, type):
 				raise TypeError('valueType %s is not a type. Use int, str, etc' %(repr(valueType,)))
 			if valueType == bool:
-				self.convert = self._convertBool
+				self._fromStorage = self._convertBool
+				self._fromInput = self._convertBool
 			elif isinstance(valueType, (set, frozenset, )):
 				raise TypeError('set types are not supported types. Use IRPickleField to store pickles of any type (which allow storing objects, etc), or use IRField(.. valueType=IRJsonValue) to store basic data (strings, integers) in lists.')
 		self.valueType = valueType
@@ -158,28 +161,82 @@ class IRField(str):
 			@param value - The value of the item to convert
 			@return A string value suitable for storing.
 		'''
+		if value == irNull:
+			return IR_NULL_STR
+		
+		return self._toStorage(value)
+
+	def _toStorage(self, value):
+		'''
+			_toStorage - Convert the value to a string for storage.
+
+			The default implementation works for most valueTypes within IRField, override this for extending types.
+
+			You don't need to handle null
+
+			@param value - Value of item to convert
+
+			@return - A string value suitable for storing
+		'''
 		return to_unicode(value)
 
-	def convert(self, value):
-		'''
-			convert - Convert the value from storage (string) to the value type.
 
-			@return - The converted value, or "irNull" if no value was defined (and field type is not default/string)
+	def fromStorage(self, value):
 		'''
-		if self._isNullValue(value):
+			fromStorage - Convert the value from storage to the value type.
+
+			@param value - Value to convert
+
+			@return - The converted value
+		'''
+		if value in IR_NULL_STRINGS:
 			return irNull
+
+		return self._fromStorage(value)
+
+	def _fromStorage(self, value):
+		'''
+			_fromStorage - Convert the value from storage to the value type.
+
+			  This default impl works fine for most value types, should be implemented by extending types.
+
+			  @param value - Value to convert
+
+			  @return - Converted value
+		'''
 		return self.valueType(value)
 
-	def convertFromInput(self, value):
-		'''
-			convertFromInput - Convert the value from input (constructor) to the value type.
 
-			  This is intended to be used when the data is guarenteed to NOT be from storage.
+	# TODO: Deprecate old name
+	convert = fromStorage
 
+
+	def fromInput(self, value):
 		'''
-		if self._isNullValue(value):
+			fromInput - Convert the value from input (like assigning this through constructor or as an item assignment on the object
+
+			@param value - Value to convert
+
+			@return - Converted value
+		'''
+		if value == irNull:
 			return irNull
+
+		return self._fromInput(value)
+
+	def _fromInput(self, value):
+		'''
+			_fromInput - Convert the value from input. Implement this in extending types.
+
+			@param value - Value to convert
+
+			@return converted value
+		'''
 		return self.valueType(value)
+
+	# TODO: Old name
+	convertFromInput = fromInput
+
 
 	def toIndex(self, value):
 		'''
@@ -188,9 +245,10 @@ class IRField(str):
 			By default, "toStorage" will be called. If you provide "hashIndex=True" on the constructor,
 			the field will be md5summed for indexing purposes. This is useful for large strings, etc.
 		'''
-		ret = self.toStorage(value)
-		if self._isIrNull(ret):
-			ret = repr(irNull)
+		if self._isIrNull(value):
+			ret = IR_NULL_STR
+		else:
+			ret = self.toStorage(value)
 
 		if self.isIndexHashed is False:
 			return ret
@@ -213,13 +271,9 @@ class IRField(str):
 		return bool(self.hashIndex)
 
 	def _convertStr(self, value):
-		if self._isIrNull(value):
-			return irNull
 		return to_unicode(value)
 
 	def _convertBytes(self, value):
-		if self._isIrNull(value):
-			return irNull
 		return tobytes(value)
 	
 

@@ -7,7 +7,7 @@
 # vim: set ts=8 shiftwidth=8 softtabstop=8 noexpandtab :
 
 from . import IRField
-from .null import irNull
+from .null import irNull, IR_NULL_STR, IR_NULL_STRINGS
 
 class IRRawField(IRField):
 	'''
@@ -20,13 +20,13 @@ class IRRawField(IRField):
 		self.valueType = None
 		self.defaultValue = defaultValue
 
-	def convert(self, value=b''):
+	def _fromStorage(self, value):
 		return value
 
-	def convertFromInput(self, value):
+	def _fromInput(self, value):
 		return value
 
-	def toStorage(self, value=b''):
+	def _toStorage(self, value):
 		return value
 
 	def _getReprProperties(self):

@@ -10,6 +10,8 @@ from ..compat_str import to_unicode
 
 from . import IRField, irNull
 
+from .null import IR_NULL_STR, IR_NULL_STRINGS
+
 try:
 	unicode
 except NameError:
@@ -44,31 +46,25 @@ class IRFieldChain(IRField):
 
 
 
-	def toStorage(self, value):
+	def _toStorage(self, value):
 		'''
-			toStorage - Convert the value to a string representation for storage.
-
-			  The default implementation will work here for basic types.
+			_toStorage - Convert the value to a string representation for storage.
 
 			@param value - The value of the item to convert
 			@return A string value suitable for storing.
 		'''
-		if self._isNullValue(value):
-			return irNull
 
 		for chainedField in self.chainedFields:
 			value = chainedField.toStorage(value)
 
 		return value
 
-	def convert(self, value):
+	def _fromStorage(self, value):
 		'''
-			convert - Convert the value from storage (string) to the value type.
+			_fromStorage - Convert the value from storage (string) to the value type.
 
 			@return - The converted value, or "irNull" if no value was defined (and field type is not default/string)
 		'''
-		if self._isNullValue(value):
-			return irNull
 
 		for i in range(len(self.chainedFields)-1, -1, -1):
 			chainedField = self.chainedFields[i]
@@ -76,9 +72,7 @@ class IRFieldChain(IRField):
 
 		return value
 	
-	def convertFromInput(self, value):
-		if self._isNullValue(value):
-			return irNull
+	def _fromInput(self, value):
 
 		for i in range(len(self.chainedFields)-1, -1, -1):
 			chainedField = self.chainedFields[i]

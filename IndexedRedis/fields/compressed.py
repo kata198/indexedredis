@@ -12,6 +12,8 @@ import bz2
 
 from . import IRField, irNull
 
+from .null import IR_NULL_STR, IR_NULL_STRINGS
+
 from ..compat_str import tobytes
 
 
@@ -69,24 +71,30 @@ class IRCompressedField(IRField):
 		if self.compressMode == COMPRESS_MODE_BZ2:
 			return bz2
 
-	def toStorage(self, value):
-		if self._isNullValue(value):
-			return value
+	def _toStorage(self, value):
+		if value in ('', b'', u''):
+			return ''
+
+		# TODO: I don't think this next block is needed anymore..
+		#   Check it out when IRCompressionTest is written
 		if tobytes(value[:len(self.header)]) == self.header:
 			return value
+
+
 		return self.getCompressMod().compress(tobytes(value), 9)
 
-	def convert(self, value):
-		if not value:
-			return value
+	def _fromStorage(self, value):
+
+		if value in ('', b'', u''):
+			return ''
+
+		# TODO: Check this out too, this enxt conditional probably shouldn't be here, maybe it should be an error when false..
 		if issubclass(value.__class__, (bytes, str, unicode)) and tobytes(value[:len(self.header)]) == self.header:
 			return self.getCompressMod().decompress(value)
 
 		return value
 	
-	def convertFromInput(self, value):
-		if self._isIrNull(value):
-			return irNull
+	def _fromInput(self, value):
 		return value
 
 	def _getReprProperties(self):
