@@ -87,6 +87,20 @@ class TestIRFieldChain(object):
                 KEY_NAME = 'TestIRFieldChain__ModelCompressPickle'
 
             self.model = Model_CompressPickle
+        elif testMethod == self.test_intBase64:
+            class Model_IntBase64(IndexedRedisModel):
+                
+                FIELDS = [
+                    IRField('name'),
+                    IRFieldChain('value', [IRField(valueType=int), IRBase64Field ] ),
+                    IRFieldChain('value2', [IRField(valueType=int), IRBase64Field ], defaultValue=-1 )
+                ]
+
+                INDEXED_FIELDS = ['name']
+
+                KEY_NAME = 'TestIRFieldChain__IntBase64'
+
+            self.model = Model_IntBase64
 
         # If KEEP_DATA is False (debug flag), then delete all objects before so prior test doesn't interfere
         if self.KEEP_DATA is False and self.model:
@@ -307,6 +321,50 @@ class TestIRFieldChain(object):
         updatedFields = obj.getUpdatedFields()
 
         assert updatedFields == {} , 'Expected updatedFields to be clear after saving'
+
+    def test_intBase64(self):
+        
+        Model = self.model
+
+        obj = Model()
+
+        assert obj.value == irNull , 'Expected default value to be irNull on chain when defaultValue=irNull. Got: <%s> %s' %(obj.value.__class__.__name__, repr(obj.value), )
+        assert obj.value2 == -1 , 'Expected default value to be -1 on chain when defaultValue=-1. Got: <%s> %s' %(obj.value.__class__.__name__, repr(obj.value), )
+
+        obj.name = 'one'
+
+        obj.save()
+
+        objFetched = Model.objects.filter(name='one').first()
+
+        assert objFetched , 'Expected to be able to fetch on indexed field'
+
+        obj = objFetched
+
+        assert obj.value == irNull , 'After fetch-and-save, expected default value to be irNull on chain when defaultValue=irNull. Got: <%s> %s' %(obj.value.__class__.__name__, repr(obj.value), )
+        assert obj.value2 == -1 , 'After fetch-and-save, expected default value to be -1 on chain when defaultValue=-1. Got: <%s> %s' %(obj.value.__class__.__name__, repr(obj.value), )
+
+
+        obj.value = '14'
+
+        assert obj.value == 14 , 'Expected value to be conveted to int after setting'
+
+        forStorageDict = obj.asDict(forStorage=True)
+
+
+        b64Value = base64.b64encode(b'14')
+
+        assert forStorageDict['value'] == b64Value , 'Expected value to be base64 encoded in forStorage representation'
+
+        obj.save()
+
+        objFetched = Model.objects.filter(name='one').first()
+
+        assert objFetched , 'Expected to be able to fetch on indexed field'
+
+        obj = objFetched
+
+        assert obj.value == 14 , 'Expected value to be set to 14 after fetching. Got: <%s> %s' %(obj.value.__class__.__name__, repr(obj.value))
 
 
 
