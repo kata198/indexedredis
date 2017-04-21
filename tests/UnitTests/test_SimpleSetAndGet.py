@@ -9,7 +9,7 @@
 
 import sys
 import subprocess
-from IndexedRedis import IndexedRedisModel, IRClassicField
+from IndexedRedis import IndexedRedisModel, IRClassicField, IRField, irNull
 
 # vim: ts=4 sw=4 expandtab
 
@@ -27,8 +27,11 @@ class TestSimpleSetAndGet(object):
     def __init__(self):
         self.toDelete = []
 
-    def setup_class(self):
-        SimpleSetAndGetModel.objects.delete()
+    def setup_method(self, *args, **kwargs):
+        SimpleSetAndGetModel.reset([])
+
+    def teardown_method(self, *args, **kwargs):
+        SimpleSetAndGetModel.reset([])
 
     def test_createAndFetch(self):
         myObj = SimpleSetAndGetModel(a='one', b='two', c='three')
@@ -88,14 +91,24 @@ class TestSimpleSetAndGet(object):
 
         assert getTwo[0].a == 'aplus', 'Field wrong on returned object.'
 
-    def teardown_method(self, *args, **kwargs):
-        for obj in self.toDelete:
-            try:
-                obj.delete()
-            except:
-                sys.stderr.write('Failed to delete object: %s\n' %(str(obj.asDict(True),)))
+
+
+    def setup_modelEquals(self):
+        class SimpleSetAndGetModel2(IndexedRedisModel):
+            
+            FIELDS = [IRClassicField('a'), IRClassicField('b'), IRClassicField('c')]
+
+            INDEXED_FIELDS = ['a']
+
+            KEY_NAME = 'Test_SimpleSetAndGet2'
+        self.SimpleSetAndGetModel2 = SimpleSetAndGetModel2
+
+    def teardown_modelEquals(self):
+        self.SimpleSetAndGetModel2.objects.delete()
 
     def test_modelEquals(self):
+
+        SimpleSetAndGetModel2 = self.SimpleSetAndGetModel2
 
         myObj1 = SimpleSetAndGetModel(a='one', b='two', c='three')
         myObj2 = SimpleSetAndGetModel(a='one', b='two', c='three')
@@ -110,13 +123,6 @@ class TestSimpleSetAndGet(object):
 
         assert myObj1 != myObj3 , 'Expected same model with different field values to not equal eachother'
 
-        class SimpleSetAndGetModel2(IndexedRedisModel):
-            
-            FIELDS = [IRClassicField('a'), IRClassicField('b'), IRClassicField('c')]
-
-            INDEXED_FIELDS = ['a']
-
-            KEY_NAME = 'Test_SimpleSetAndGet2'
 
         myObjOtherType = SimpleSetAndGetModel2(a='one', b='two', c='three')
 
@@ -144,6 +150,42 @@ class TestSimpleSetAndGet(object):
         assert objsFetched[0] != objsFetched[1] , 'Expected after fetch, models with different ids but same values not to be equal'
 
         assert objsFetched[0].hasSameValues(objsFetched[1]) , 'Expected after fetched, models with different ids but same values to hasSameValues'
+
+    def setup_nullNotEmptyStr(self):
+        class ModelDefaultNulls(IndexedRedisModel):
+            
+            FIELDS = [IRField('a'), IRField('b', defaultValue='')]
+
+            INDEXED_FIELDS = ['a', 'b']
+
+            KEY_NAME = 'TestSimpleSetAndGet__ModelDefaultNulls'
+
+        self.ModelDefaultNulls = ModelDefaultNulls
+
+    def teardown_nullNotEmptyStr(self):
+        self.ModelDefaultNulls.reset([])
+
+
+    def test_nullNotEmptyStr(self):
+        
+        ModelDefaultNulls = self.ModelDefaultNulls
+
+        obj1 = ModelDefaultNulls()
+
+        obj1.save()
+
+        objFetched = ModelDefaultNulls.objects.filter(a='').first()
+        assert not objFetched , 'Expected not to be able to fetch irNull by filtering empty string on index'
+
+        objFetched = ModelDefaultNulls.objects.filter(b='').first()
+        assert objFetched , 'Expected to be able to fetch empty string by filtering empty string on index'
+
+        objFetched = ModelDefaultNulls.objects.filter(a=irNull).first()
+        assert objFetched , 'Expected to be able to fetch irNull by filtering irNull on index'
+
+        objFetched = ModelDefaultNulls.objects.filter(b=irNull).first()
+        assert not objFetched , 'Expected to not be able to fetch empty string by filtering irNull on index'
+
 
             
 if __name__ == '__main__':

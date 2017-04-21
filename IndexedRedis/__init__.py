@@ -1031,7 +1031,15 @@ class IndexedRedisHelper(object):
 
 			@return - Key name string, potentially hashed.
 		'''
-		return ''.join([INDEXED_REDIS_PREFIX, self.keyName, ':idx:', indexedField, ':', getattr(indexedField, 'toIndex', to_unicode)(val)])
+		# If provided an IRField, use the toIndex from that (to support compat_ methods
+		if hasattr(indexedField, 'toIndex'):
+			val = indexedField.toIndex(val)
+		else:
+		# Otherwise, look up the indexed field from the model
+			val = self.fields[indexedField].toIndex(val)
+
+
+		return ''.join( [INDEXED_REDIS_PREFIX, self.keyName, ':idx:', indexedField, ':', val] )
 
 	def _compat_get_str_key_for_index(self, indexedField, val):
 		'''
@@ -1173,10 +1181,6 @@ class IndexedRedisQuery(IndexedRedisHelper):
 
 			if value == irNull:
 				value = IR_NULL_STR
-
-			irField = filterObj.fields[key]
-			if hasattr(irField, 'toIndex'):
-				value = irField.toIndex(value)
 
 			if notFilter is False:
 				filterObj.filters.append( (key, value) )

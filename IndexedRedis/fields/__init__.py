@@ -189,6 +189,9 @@ class IRField(str):
 			the field will be md5summed for indexing purposes. This is useful for large strings, etc.
 		'''
 		ret = self.toStorage(value)
+		if self._isIrNull(ret):
+			ret = repr(irNull)
+
 		if self.isIndexHashed is False:
 			return ret
 

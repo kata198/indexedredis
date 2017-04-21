@@ -85,7 +85,7 @@ class TestIRBytesField(object):
         '''
 
         if self.model and self.KEEP_DATA is False:
-            self.model.objects.delete()
+            self.model.reset([])
 
 
     def test_general(self):
