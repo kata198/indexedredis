@@ -15,8 +15,6 @@ try:
 except NameError:
 	unicode = str
 
-# TODO: Maybe should be using _isIrNull instead of _isNullValue ?
-
 class IRFieldChain(IRField):
 
 	# TODO: We can probably index if all chained field types are indexable, but just disallow for now.
@@ -66,7 +64,7 @@ class IRFieldChain(IRField):
 
 		for i in range(len(self.chainedFields)-1, -1, -1):
 			chainedField = self.chainedFields[i]
-			value = chainedField.convert(value)
+			value = chainedField._fromStorage(value)
 
 		return value
 	
@@ -74,7 +72,7 @@ class IRFieldChain(IRField):
 
 		for i in range(len(self.chainedFields)-1, -1, -1):
 			chainedField = self.chainedFields[i]
-			value = chainedField.convertFromInput(value)
+			value = chainedField._fromInput(value)
 
 		return value
 
