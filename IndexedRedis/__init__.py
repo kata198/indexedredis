@@ -342,9 +342,11 @@ class IndexedRedisModel(object):
 			convertFunctionName = 'fromInput'
 
 		for thisField in self.FIELDS:
-			val = kwargs.get(str(thisField), thisField.getDefaultValue())
-
-			val = getattr(thisField, convertFunctionName)(val)
+			if str(thisField) not in kwargs:
+				val = thisField.getDefaultValue()
+			else:
+				val = kwargs[str(thisField)]
+				val = getattr(thisField, convertFunctionName)(val)
 
 			object.__setattr__(self, thisField, val)
 			# Generally, we want to copy the value incase it is used by reference (like a list)
