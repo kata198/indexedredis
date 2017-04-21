@@ -1,4 +1,4 @@
-# Copyright (c) 2014, 2015, 2016 Timothy Savannah under LGPL version 2.1. See LICENSE for more information.
+# Copyright (c) 2014, 2015, 2016, 2017 Timothy Savannah under LGPL version 2.1. See LICENSE for more information.
 #
 # fields.fixedpoint - Fixed-point float to allow float values to be safely used cross-platform and for indexes and filtering.
 #    Trying to use a native float will yield different results on different architectures, python versions, etc.
@@ -7,8 +7,6 @@
 # vim: set ts=8 shiftwidth=8 softtabstop=8 noexpandtab :
 
 from . import IRField, irNull
-
-from .null import IR_NULL_STR, IR_NULL_STRINGS
 
 __all__ = ('IRFixedPointField',)
 

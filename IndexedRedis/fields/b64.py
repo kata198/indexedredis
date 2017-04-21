@@ -7,8 +7,6 @@
 
 from . import IRField, irNull
 
-from .null import IR_NULL_STR, IR_NULL_STRINGS
-
 from ..compat_str import tobytes, isStringy
 
 from base64 import b64decode, b64encode

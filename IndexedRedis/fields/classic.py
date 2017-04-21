@@ -6,7 +6,7 @@
 
 # vim: set ts=8 shiftwidth=8 softtabstop=8 noexpandtab :
 
-from . import IRField, IR_NULL_STRINGS, irNull
+from . import IRField
 
 from ..compat_str import tobytes, encoded_str_type
 

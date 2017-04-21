@@ -10,8 +10,6 @@ from ..compat_str import to_unicode
 
 from . import IRField, irNull
 
-from .null import IR_NULL_STR, IR_NULL_STRINGS
-
 try:
 	unicode
 except NameError:

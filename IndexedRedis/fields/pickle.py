@@ -15,8 +15,6 @@ except ImportError:
 
 from IndexedRedis.compat_str import isStringy, isEncodedString, tobytes
 
-from .null import IR_NULL_STRINGS, IR_NULL_STR
-
 # NOTE: This pickle class originally had implcit base64 encoding and decoding so it could be used for indexes,
 #  but even with same protocol python2 and python3, and possibly even different platforms and same version
 #  create different pickles for the same objects. Can be as simple as the system supports microseconds,

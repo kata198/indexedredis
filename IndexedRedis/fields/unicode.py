@@ -7,7 +7,7 @@
 
 
 from . import IRField
-from .null import irNull, IR_NULL_STR, IR_NULL_STRINGS
+from .null import irNull
 
 from ..compat_str import getDefaultIREncoding, tobytes, to_unicode
 

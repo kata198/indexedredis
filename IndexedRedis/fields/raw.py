@@ -1,4 +1,4 @@
-# Copyright (c) 2014, 2015, 2016 Timothy Savannah under LGPL version 2.1. See LICENSE for more information.
+# Copyright (c) 2014, 2015, 2016, 2017 Timothy Savannah under LGPL version 2.1. See LICENSE for more information.
 #
 # fields.raw - Raw field, no encoding or decoding will occur.
 #
@@ -6,8 +6,7 @@
 
 # vim: set ts=8 shiftwidth=8 softtabstop=8 noexpandtab :
 
-from . import IRField
-from .null import irNull, IR_NULL_STR, IR_NULL_STRINGS
+from . import IRField, irNull
 
 class IRRawField(IRField):
 	'''

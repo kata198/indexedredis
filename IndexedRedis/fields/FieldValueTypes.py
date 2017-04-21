@@ -1,4 +1,4 @@
-# Copyright (c) 2016 Timothy Savannah under LGPL version 2.1. See LICENSE for more information.
+# Copyright (c) 2016, 2017 Timothy Savannah under LGPL version 2.1. See LICENSE for more information.
 #
 # FieldValueTypes - Types that can be passed to "valueType" of an IRField for special implicit conversions
 #
