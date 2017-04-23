@@ -104,6 +104,17 @@ if bytes == str:
 	
 	encoded_str_type = unicode
 
+	def isEmptyString(x):
+		'''
+			isEmptyString - Check if x is an empty string
+		'''
+		if issubclass(x.__class__, str):
+			return bool(x == '')
+		elif issubclass(x.__class__, unicode):
+			return bool(x == u'')
+
+		return False
+
 else:
 	# Python 3
 	def to_unicode(x, encoding=None):
@@ -149,6 +160,16 @@ else:
 			@return <bool> - True if "x" is a stringy type
 		'''
 		return issubclass(x.__class__, (str, bytes))
+
+	def isEmptyString(x):
+		'''
+			isEmptyString - Check if x is an empty string
+		'''
+		if issubclass(x.__class__, bytes):
+			return bool(x == b'')
+		elif issubclass(x.__class__, str):
+			return bool(x == '')
+		return False
 
 	encoded_str_type = str
 
