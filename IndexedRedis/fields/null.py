@@ -73,7 +73,7 @@ class IRNullType(IrNullBaseType):
 		return False
 	
 	def __repr__(self):
-		return IR_NULL_STR
+		return 'irNull'
 
 
 # For all fields which have a type, if they have a null value this will be returned. IRNullType('') != str('') so you can
