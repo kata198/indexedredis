@@ -13,7 +13,7 @@ try:
 except ImportError:
 	import pickle
 
-from IndexedRedis.compat_str import isStringy, isEncodedString, tobytes
+from IndexedRedis.compat_str import isStringy, isEncodedString, tobytes, isEmptyString
 
 # NOTE: This pickle class originally had implcit base64 encoding and decoding so it could be used for indexes,
 #  but even with same protocol python2 and python3, and possibly even different platforms and same version
@@ -40,15 +40,14 @@ class IRPickleField(IRField):
 		self.defaultValue = defaultValue
 
 	def _toStorage(self, value):
-		if value in ('', b'', u''):
+		if isEmptyString(value):
 			return ''
 
 		return pickle.dumps(value, protocol=2)
 
 	def _fromStorage(self, value):
-		if value in ('', b'', u''):
+		if isEmptyString(value):
 			return ''
-
 
 		origData = value
 		# TODO: Maybe not needed anymore?

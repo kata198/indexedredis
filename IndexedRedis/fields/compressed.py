@@ -12,7 +12,7 @@ import bz2
 
 from . import IRField, irNull
 
-from ..compat_str import tobytes
+from ..compat_str import tobytes, isEmptyString
 
 
 __all__ = ('COMPRESS_MODE_BZ2', 'COMPRESS_MODE_ZLIB', 'IRCompressedField')
@@ -70,7 +70,7 @@ class IRCompressedField(IRField):
 			return bz2
 
 	def _toStorage(self, value):
-		if value in ('', b'', u''):
+		if isEmptyString(value):
 			return ''
 
 		# TODO: I don't think this next block is needed anymore..
@@ -83,7 +83,7 @@ class IRCompressedField(IRField):
 
 	def _fromStorage(self, value):
 
-		if value in ('', b'', u''):
+		if isEmptyString(value):
 			return ''
 
 		# TODO: Check this out too, this enxt conditional probably shouldn't be here, maybe it should be an error when false..

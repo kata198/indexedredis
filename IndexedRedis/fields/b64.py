@@ -7,7 +7,7 @@
 
 from . import IRField, irNull
 
-from ..compat_str import tobytes, isStringy
+from ..compat_str import tobytes, isStringy, isEmptyString
 
 from base64 import b64decode, b64encode
 
@@ -39,7 +39,7 @@ class IRBase64Field(IRField):
 		self.defaultValue = defaultValue
 
 	def _fromStorage(self, value):
-		if value in ('', b'', u''):
+		if isEmptyString(value):
 			return ''
 
 		return b64decode(tobytes(value, self.encoding))
@@ -48,7 +48,7 @@ class IRBase64Field(IRField):
 		return value
 
 	def _toStorage(self, value):
-		if value in ('', b'', u''):
+		if isEmptyString(value):
 			return ''
 		return b64encode(tobytes(value, self.encoding))
 
