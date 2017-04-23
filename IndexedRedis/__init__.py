@@ -128,6 +128,7 @@ except NameError:
 # Changing redis encoding into requested encoding
 decodeDict = lambda origDict : {to_unicode(key) : origDict[key] for key in origDict}
 
+global validatedModels
 validatedModels = set()
 
 def isIndexedRedisModel(model):
@@ -333,7 +334,7 @@ class IndexedRedisModel(object):
 		'''
 		self.validateModel()
 
-		self._origData = {}
+		object.__setattr__(self, '_origData', {})
 
 		# Figure out if we are convert from the database, or from direct input
 		if kwargs.get('__fromRedis', False) is True:
@@ -342,10 +343,10 @@ class IndexedRedisModel(object):
 			convertFunctionName = 'fromInput'
 
 		for thisField in self.FIELDS:
-			if str(thisField) not in kwargs:
+			if thisField not in kwargs:
 				val = thisField.getDefaultValue()
 			else:
-				val = kwargs[str(thisField)]
+				val = kwargs[thisField]
 				val = getattr(thisField, convertFunctionName)(val)
 
 			object.__setattr__(self, thisField, val)
@@ -357,7 +358,7 @@ class IndexedRedisModel(object):
 				self._origData[thisField] = val
 				
 
-		self._id = kwargs.get('_id', None)
+		object.__setattr__(self, '_id', kwargs.get('_id', None))
 
 
 	def __setattr__(self, keyName, value):
@@ -665,31 +666,10 @@ class IndexedRedisModel(object):
 		if _id:
 			ret += ['_id="', to_unicode(_id), '", ']
 
-		#TODO: We shouldn't need to convert here anymore...
-
-		# TODO: Note, trying to fit the type in here, but it's not perfect and may need to change when nullables are figured out
-		convertMethods = { thisField : (hasattr(thisField, 'convert') and thisField.convert or (lambda x : x)) for thisField in self.FIELDS}
-
 		key = None
 		for key, value in myDict.items():
-			if bytes == str or not isinstance(value, bytes):
-				if value not in (None, irNull):
-					val = convertMethods[key](value)
-				else:
-					val = irNull
-				if isinstance(val, IRNullType):
-					val = 'IRNullType()'
-				elif isinstance(val, (str, unicode)):
-					try:
-						val = "'%s'" %(to_unicode(val),)
-					except:
-						# Python 2....
-						val = repr(val)
-				else:
-					val = to_unicode(val)
-				ret += [str(key), '=', val, ', ']
-			else:
-				ret += [str(key), '=', repr(value), ', ']
+			ret += [key, '=', repr(value), ', ']
+
 		if key is not None or not _id:
 			# At least one iteration, so strip trailing comma
 			ret.pop()
@@ -925,9 +905,13 @@ class IndexedRedisHelper(object):
 		self.fields = self.mdl.FIELDS
 
 		self.indexedFields = [self.fields[fieldName] for fieldName in self.mdl.INDEXED_FIELDS]
-
 			
 		self._connection = None
+
+	def __copy__(self):
+		return self.__class__(self.mdl)
+	
+	__deepcopy__ = __copy__
 
 	def _get_new_connection(self):
 		'''
@@ -1089,10 +1073,19 @@ class IndexedRedisQuery(IndexedRedisHelper):
 	'''
 	
 	def __init__(self, *args, **kwargs):
-		IndexedRedisHelper.__init__(self, *args)
+		IndexedRedisHelper.__init__(self, *args, **kwargs)
 
 		self.filters = [] # Filters are ordered for optimization
 		self.notFilters = []
+
+	def __copy__(self):
+		ret = self.__class__(self.mdl)
+		ret.filters = self.filters[:]
+		ret.notFilters = self.notFilters[:]
+
+		return ret
+	
+	__deepcopy__ = __copy__
 
 
 	def _redisResultToObj(self, theDict):
@@ -1124,7 +1117,7 @@ class IndexedRedisQuery(IndexedRedisHelper):
 
 			@returns - A copy of this object, with the additional filters. If you want to work inline on this object instead, use the filterInline method.
 		'''
-		selfCopy = copy.deepcopy(self)
+		selfCopy = self.__copy__()
 		return IndexedRedisQuery._filter(selfCopy, **kwargs)
 
 	def filterInline(self, **kwargs):

@@ -65,6 +65,9 @@ class IRField(str):
 	# Start as a class variable, so "toIndex" works even if IRField constructor is not called (which really shouldn't be called on extending classes)
 	hashIndex = False
 
+	# The default value of this class
+	defaultValue = irNull
+
 
 	# TODO: Investigate changing valueType to encoded_str_type
 	def __init__(self, name='', valueType=str, defaultValue=irNull, hashIndex=False):
@@ -256,9 +259,6 @@ class IRField(str):
 		return md5(tobytes(ret)).hexdigest()
 
 	def getDefaultValue(self):
-		if not hasattr(self, 'defaultValue'):
-			return irNull
-
 		return self.defaultValue
 
 	@property
