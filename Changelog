@@ -120,6 +120,26 @@ be overriden within the "fields.__init__" module
 
 - Make IRBytesField able to index (by hashing the bytes)
 
+- Force IRUnicodeField to always have a hashed index, when used as an index
+  **BACKWARDS INCOMPATIBLE**
+    If you were using an IRUnicodeField as an index before, you will need to
+	reindex your data. This is because without hasing, there are issues with
+	many codecs at obtaining the index key. But it's okay, it's simple to
+	reindex and move forward.
+
+	For any model that has an index on an IRUnicodeField, you must call:
+
+	MyModel.objects.compat_convertHashedIndexes()
+
+    This existing method will take care of ensuring that ALL fields are using
+	the proper index format, be it hashed or unhashed, and even takes care of
+	if you accidently let your application run and have a mix of both hashed
+	and unhashed values within the index.
+
+	Please ensure that your application is offline before executing this
+	function, for each model that may need index conversion.
+
+
 - Update runTests.py to the latest provided with the new version of
 GoodTests.py
 
