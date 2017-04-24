@@ -186,42 +186,48 @@ For all fields (except IRClassicField), the value of this parameter defaults to 
 The following are the possible field types, for use within the FIELDS array:
 
 
-*IRField* - Standard field, takes a name and a "valueType", which is a native python type, or any type you create which implements \_\_new\_\_, taking a signle argument and returning the object. See IndexedRedis/fields/FieldValueTypes for example of how datetime and json are implemented.
+**IRField** - Standard field, takes a name and a "valueType", which is a native python type, or any type you create which implements \_\_new\_\_, taking a signle argument and returning the object. See IndexedRedis/fields/FieldValueTypes for example of how datetime and json are implemented.
 
 When no valueType is defined, str/unicode is the type (same as pre-4.0), and default encoding is used (see set/getDefaultIREncoding functions)
 
 
-*IRBase64Field* - Converts to and from Base64
+**IRBase64Field** - Converts to and from Base64
 
 
-*IRCompressedField* - Automatically compresses before storage and decompresses after retrieval. Argument "compressMode" currently supports "zlib" (default) or "bz2".
+**IRCompressedField** - Automatically compresses before storage and decompresses after retrieval. Argument "compressMode" currently supports "zlib" (default) or "bz2".
 
 
-*IRFixedPointField* - A floating-point with a fixed number of decimal places. This type supports indexing using floats, whereas IRField(...valueType=float) does not, as different platforms have different accuracies, roundings, etc. Takes a parameter, decimalPlaces (default 5), to define the precision after the decimal point.
+**IRFixedPointField** - A floating-point with a fixed number of decimal places. This type supports indexing using floats, whereas IRField(...valueType=float) does not, as different platforms have different accuracies, roundings, etc. Takes a parameter, decimalPlaces (default 5), to define the precision after the decimal point.
 
 
-*IRPickleField* - Automaticly pickles the given object before storage, and unpickles after fetch. Not indexable.
-
-*IRUnicodeField* - Field that takes a parameter, "encoding", to define an encoding to use for this field. Use this to support fields with arbitrary encodings, as IRField will use the default encoding for strings.
-
-*IRRawField* - Field that is not converted in any, to or from Redis. On fetch this will always be "bytes" type (or str in python2). On python3 this is very similar to IRField(...valueType=None), but python2 needs this to store binary data without running into encoding issues.
+**IRPickleField** - Automaticly pickles the given object before storage, and unpickles after fetch. Not indexable.
 
 
-*IRBytesField* - Field that forces the data to be "bytes", python2 and python3 compatible. If you need python3 only, you can use IRField(valueType=bytes). For no encoding/decoding at all, see IRRawField
+**IRUnicodeField** - Field that takes a parameter, "encoding", to define an encoding to use for this field. Use this to support fields with arbitrary encodings, as IRField will use the default encoding for strings.
 
 
-*IRClassicField* - Field that imitates the behaviour of a plain-string entry in FIELDS pre-5.0.0. This field has a default of empty string, and is always encoded/decoded using the defaultIREncoding
+**IRBytesField** - Field that forces the data to be "bytes", python2 and python3 compatible. If you need python3 only, you can use IRField(valueType=bytes). For no encoding/decoding at all, see IRRawField
 
-*IRFieldChain* - Chains multiple field types together. Use this, for example, to compress the base64-representation of a value, or to compress utf-16 data. See section below for more details.
+
+**IRClassicField** - Field that imitates the behaviour of a plain-string entry in FIELDS pre-5.0.0. This field has a default of empty string, and is always encoded/decoded using the defaultIREncoding
+
+
+**IRRawField** - Field that is not converted in any, to or from Redis. On fetch this will always be "bytes" type (or str in python2). On python3 this is very similar to IRField(...valueType=None), but python2 needs this to store binary data without running into encoding issues.
+
+
+
+**IRFieldChain** - Chains multiple field types together. Use this, for example, to compress the base64-representation of a value, or to compress utf-16 data. See section below for more details.
 
 
 **Chaining Multiple Types**
 
-You can chain multiple types together using IRFieldChain. Instead of specifying the name on the IRField (or subclass), you specify the name on the IRFieldChain, and list all the types as the second argument (chainedFields). For storage, all operations will be applied left-to-right, and upon fetch the object will be decoded right-to-left.
+
+"Chaining" allows you to apply multiple types on a single field. Say, for example, that you have some utf-16 data that you want to be compressed for storage:
 
 Example:
 
-	FIELDS = [ \\
+
+	FIELDS = [ \
 
 	...
 
@@ -229,11 +235,19 @@ Example:
 
 	]
 
-In the above example, you provide "longData" as a string. 
 
-For storage, that string is assumed to be utf-16, and will be compressed (left-to-right)
+An IRFieldChain works similar to a regular IRField, the first parameter is the field name, it has an optional "defaultValue" parameter.
 
-For fetching, that string is first decompressed, and then encoded using utf-16.
+The difference is that the second parameter, *chainedFields*, takes a list of other field types.
+
+When storing, the value is passed through each type in this list, left-to-right.
+
+When fetched, the value retrieved is passed backwards through these chainedFields, right-to-left.
+
+The output of the leftmost (first) element is what defines the type of data that will be found on the object when accessed.
+
+So in the above example, "myObj.longData" would be a utf-16 string. When going to the database, that utf-16 string will be decoded and then compressed for storage. When fetched, it will be decompressed and then converted back into utf-16.
+
 
 You can specify a defaultValue on an IRFieldChain by providing "defaultValue=X" as an argument to the constructor. If you provide "defaultValue" on any of the fields in the chain list, however, it will be ignored.
 
@@ -366,6 +380,8 @@ Example: matchingObjects = SomeModel.objects.filter(...).all()
 
 	allOnlyFields - Takes a list of fields and only fetches those fields, using current filterset
 
+    allByAge - Return the objects matching this filter, in order from oldest to newest
+
 	delete - Delete objects matching this filter
 
 	count  - Get the count of objects matching this filter
@@ -474,6 +490,16 @@ Some other methods on an IRQueryableList are:
 		The return of this function will be a list with the same indexes as the IRQueryableList. The items will be either a KeyError exception (if the item was deleted on the Redis-side), or a dict of fields that were updated, key as the field name, and value as a tuple of (old value, new value)
 
 	* **refetch** - Fetch again all the objects in this list, and return as a new IRQueryableList. Note, this does NOT perform the filter again, but fetches each of the items based on its internal primary key
+
+
+Sorting
+-------
+
+After fetching results, you can sort them by calling .sort_by on the IRQueryableList.
+
+Example:
+
+	myObjs = MyModel.objects.filter(blah='something').all().sort_by('startDate')
 
 
 
