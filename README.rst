@@ -58,23 +58,23 @@ This is the model you should extend.
 
 		FIELDS = [ \\
 
-			'artist',
+			IRField('artist'),
 
-			'title',
+			IRField('title'),
 
-			'album',
+			IRField('album'),
 
 			IRField('track_number', valueType=int), # Convert automatically to/from int
 
-			'duration',
+			IRField('duration', defaultValue='0:00'),
 
 			IRField('releaseDate', valueType=datetime.datetime),  # Convert automatically to/from datetime
 
-			'description',
+			IRField('description'),
 
-			'copyright',
+			IRField('copyright'),
 
-			IRField('mp3_data', valueType=None), # Do not perform any conversion on the data.
+			IRBytesField('mp3_data'), # Keep data as bytes
 
 			IRCompressedField('thumbnail', compressMode='gzip'),      # Compress this field in storage using "bz2" compression
 
@@ -99,7 +99,7 @@ This is the model you should extend.
 
 *FIELDS* - REQUIRED. A list of string or IRField objects (or their subclasses) which name the fields that can be used for storage. (see "Advanced Fields" section below)
 
-	 Example: ['Name', 'Description', 'Model', IRFixedPointField('Price', 2), IRField('timestamp', valueType=datetime), IRField('remainingStock', valueType=int)]
+	 Example: [IRField('name'), IRField('description'), IRField('model'), IRFixedPointField('Price', 2), IRField('timestamp', valueType=datetime), IRField('remainingStock', valueType=int)]
 
 *INDEXED_FIELDS* - A list of strings containing the names of fields that will be indexed. Can only filter on indexed fields. Adds insert/delete time. Entries must also be present in FIELDS.
 
@@ -120,12 +120,15 @@ Advanced Fields
 
 IndexedRedis since version 4.0 allows you to pass elements of type IRField (extends str) in the FIELDS element.
 
+Since 5.0.0, all fields must extend IRField in some way. Those that do not will generate a deprecated warning, and the field will be converted to an IRClassicField (same as IRField, but defaults to empty string instead of irNull).
+
+
 Doing so allows you to specify certain properties about the field.
 
 
 Example:
 
-	FIELDS = [ 'name', IRField('age', valueType=int), 'birthday' ]
+	FIELDS = [ IRField('name'), IRField('age', valueType=int), IRField('birthday', valueType=datetime.datetime) ]
 
 **Field Name**
 
@@ -143,11 +146,13 @@ When using floats, consider using IRFixedPointField, which supports indexing and
 
 floats to work cross-platform. Use a fixed point number as the string type ( like myFixedPoint = '%2.5f' %( 10.12345 ) )
 
+IRField supports "valueType", most other field types deal with a specific type and thus don't have such a parameter.
+
 **NULL Values**
 
-For any type except strings (including the default type, string), a null value is assigned irNull (of type IRNullType).
+Null values are represented by a static singleton, called "irNull" (of type IRNullType).
 
-If any IRField is unassigned, it holds a value of *irNull*. For classic string-fields (not IRField, just a string in FIELDS array), the default value remains empty string.
+For all types except IRClassicField (which has a default of empty string) the default (when unset) value of the field is irNull. This can be changed by passing "defaultValue=somethingElse" to the IRField constructor.
 
 irNull does not equal empty string, or anything except another irNull. This is to destinguish say, no int assigned vs int(0)
 
@@ -169,11 +174,16 @@ e.x.
 	notDangerFive = myResults.filter(dangerLevel__ne=irNull).filter(dangerLevel__ne=5)
 
 
+**defaultValue**
+
+All fields (except IRClassicField) support a parameter, given when constructing the IRField object, "defaultValue".
+
+For all fields (except IRClassicField), the value of this parameter defaults to "irNull" (see below). For an IRClassicField, the default remains empty string and cannot be changed (to be compatible with plain-string fields pre-5.0.0).
+
+
 **Advanced Types**
 
-An entry in "FIELDS" that is just a string name ( pre 4.0 style ) will be treated same as IRField('myname', valueType=str), and behaves exactly the same, so models are backwards-compatible.
-
-These objects (all importable from IndexedRedis.fields) can all be put in the FIELDS array.
+The following are the possible field types, for use within the FIELDS array:
 
 
 *IRField* - Standard field, takes a name and a "valueType", which is a native python type, or any type you create which implements \_\_new\_\_, taking a signle argument and returning the object. See IndexedRedis/fields/FieldValueTypes for example of how datetime and json are implemented.
@@ -200,6 +210,11 @@ When no valueType is defined, str/unicode is the type (same as pre-4.0), and def
 *IRBytesField* - Field that forces the data to be "bytes", python2 and python3 compatible. If you need python3 only, you can use IRField(valueType=bytes). For no encoding/decoding at all, see IRRawField
 
 
+*IRClassicField* - Field that imitates the behaviour of a plain-string entry in FIELDS pre-5.0.0. This field has a default of empty string, and is always encoded/decoded using the defaultIREncoding
+
+*IRFieldChain* - Chains multiple field types together. Use this, for example, to compress the base64-representation of a value, or to compress utf-16 data. See section below for more details.
+
+
 **Chaining Multiple Types**
 
 You can chain multiple types together using IRFieldChain. Instead of specifying the name on the IRField (or subclass), you specify the name on the IRFieldChain, and list all the types as the second argument (chainedFields). For storage, all operations will be applied left-to-right, and upon fetch the object will be decoded right-to-left.
@@ -219,6 +234,8 @@ In the above example, you provide "longData" as a string.
 For storage, that string is assumed to be utf-16, and will be compressed (left-to-right)
 
 For fetching, that string is first decompressed, and then encoded using utf-16.
+
+You can specify a defaultValue on an IRFieldChain by providing "defaultValue=X" as an argument to the constructor. If you provide "defaultValue" on any of the fields in the chain list, however, it will be ignored.
 
 
 **Hash-Lookups (performance)**
@@ -475,6 +492,7 @@ Backwards-Incompatible Changes
 
 IndexedRedis 5.0.0 introduces several backwards-incompatible changes. See Changelog for details.
 
+https://github.com/kata198/indexedredis/blob/5.0branch/Changelog
 
 Changes
 -------
