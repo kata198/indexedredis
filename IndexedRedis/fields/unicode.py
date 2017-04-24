@@ -33,6 +33,9 @@ class IRUnicodeField(IRField):
 
 	CAN_INDEX = True
 
+	# We gotta hash this to ensure it works
+	hashIndex = True
+
 	def __init__(self, name='', encoding=None, defaultValue=irNull):
 		self.valueType = None
 		self.encoding = encoding
