@@ -12,7 +12,7 @@ import sys
 import subprocess
 
 from IndexedRedis import IndexedRedisModel, irNull
-from IndexedRedis.compat_str import tobytes, to_unicode, setDefaultIREncoding
+from IndexedRedis.compat_str import tobytes, to_unicode, getDefaultIREncoding, setDefaultIREncoding
 from IndexedRedis.fields import IRBase64Field, IRField, IRUnicodeField, IRPickleField, IRCompressedField, IRFieldChain
 
 # vim: ts=4 sw=4 expandtab
@@ -50,6 +50,12 @@ class TestIRFieldChain(object):
 
     KEEP_DATA = False
 
+    def setup_class(self):
+        self.defaultIREncoding = getDefaultIREncoding()
+
+        self.utf16DataBytes = b'\xff\xfe\x01\xd8\x0f\xdc\x01\xd8-\xdc\x01\xd8;\xdc\x01\xd8+\xdc'
+        self.utf16Data = self.utf16DataBytes.decode('utf-16')
+
     def setup_method(self, testMethod):
         '''
             setup_method - Called before every method. Should set "self.model" to the model needed for the test.
@@ -58,8 +64,8 @@ class TestIRFieldChain(object):
         '''
         self.model = None
 
-        if testMethod in (self.test_base64AndUnicode, ):
-            setDefaultIREncoding('ascii')
+        if testMethod == self.test_base64AndUnicode:
+            setDefaultIREncoding('ascii') # Ensure we are using the "encoding" value provided in the field
             class Model_Base64Unicode(IndexedRedisModel):
                 
                 FIELDS = [
@@ -70,9 +76,25 @@ class TestIRFieldChain(object):
 
                 INDEXED_FIELDS = ['name']
 
-                KEY_NAME='TestIRFieldChain__ModelBase64Unicode'
+                KEY_NAME = 'TestIRFieldChain__ModelBase64Unicode'
 
             self.model = Model_Base64Unicode
+        elif testMethod == self.test_utf16Compression:
+            setDefaultIREncoding('ascii') # Ensure we are using the "encoding" value provided in the field
+
+            class Model_Utf16Compression(IndexedRedisModel):
+
+                FIELDS = [
+                    IRField('name'),
+                    IRFieldChain('value', [IRUnicodeField(encoding='utf-16'), IRCompressedField()]),
+                ]
+
+                INDEXED_FIELDS = ['name']
+
+                KEY_NAME = 'TestIRFieldChain__Utf16Compression'
+
+            self.model = Model_Utf16Compression
+            
         elif testMethod == self.test_compressPickle:
             class Model_CompressPickle(IndexedRedisModel):
 
@@ -115,8 +137,8 @@ class TestIRFieldChain(object):
         if self.model and self.KEEP_DATA is False:
             self.model.objects.delete()
 
-        if testMethod in (self.test_base64AndUnicode, ):
-            setDefaultIREncoding(sys.getdefaultencoding())
+        # Reset encoding back to original, some tests may change it.
+        setDefaultIREncoding(self.defaultIREncoding)
 
 
     def test_base64AndUnicode(self):
@@ -365,6 +387,36 @@ class TestIRFieldChain(object):
         obj = objFetched
 
         assert obj.value == 14 , 'Expected value to be set to 14 after fetching. Got: <%s> %s' %(obj.value.__class__.__name__, repr(obj.value))
+
+    def test_utf16Compression(self):
+
+        Model = self.model
+
+        obj = Model()
+
+        assert obj.value == irNull , 'Expected default value to be retained'
+
+        obj.name = 'one'
+
+        obj.save()
+
+        obj.value = self.utf16DataBytes
+
+        assert obj.value == self.utf16Data , 'Expected bytes data to be converted to unicode after setting on object'
+
+        ids = obj.save()
+
+        assert ids and ids[0] , 'Failed to save object'
+
+        fetchedObjs = Model.objects.all()
+
+        assert len(fetchedObjs) == 1 , 'Expected there to be one object saved, got: %d' %(len(fetchedObjs), )
+
+        obj = fetchedObjs[0]
+
+        assert obj.value == self.utf16Data , 'Expected data to be the utf-16 string after fetching'
+
+        import pdb; pdb.set_trace()
 
 
 
