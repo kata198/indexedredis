@@ -6,7 +6,7 @@ from setuptools import setup
 
 if __name__ == '__main__':
 
-    summary = 'A super-fast ORM backed by Redis, supporting models and indexes with O(1) searches'
+    summary = 'A super-fast ORM backed by Redis, supporting models and indexes with O(1) searches, and support for storing native/complex types and objects'
     try:
         with open('README.rst', 'rt') as f:
             long_description = f.read()
