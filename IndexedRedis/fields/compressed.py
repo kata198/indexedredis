@@ -12,7 +12,7 @@ import bz2
 
 from . import IRField, irNull
 
-from ..compat_str import tobytes, isEmptyString
+from ..compat_str import tobytes, isEmptyString, getDefaultIREncoding
 
 
 __all__ = ('COMPRESS_MODE_BZ2', 'COMPRESS_MODE_ZLIB', 'IRCompressedField')
@@ -40,6 +40,9 @@ class IRCompressedField(IRField):
 
 		like: 
 			FIELDS  = [ ..., IRCompressedField('my_compressed_field', compressMode=COMPRESS_MODE_ZLIB]
+
+		By default, after fetch the data will be encoded as "bytes". If you need it to be unicode/string, use an
+		  IRFieldChain with an IRUnicodeField and an IRCompressedField together.
 	'''
 
 	CAN_INDEX = False
@@ -72,6 +75,12 @@ class IRCompressedField(IRField):
 	def _toStorage(self, value):
 		if isEmptyString(value):
 			return ''
+
+
+		try:
+			valueBytes = tobytes(value)
+		except Exception as e:
+			raise ValueError('Failed to convert value to bytes. If this requires a different codec than the defaultIREncoding (currently %s), use an IRFieldChain with an IRBytesField or IRUnicodeField with the required encoding set (Depending on if you want the uncompressed value to be "bytes" or "unicode" type). Exception was: <%s> %s' %(getDefaultIREncoding(), e.__class__.__name__, str(e)) )
 
 		# TODO: I don't think this next block is needed anymore..
 		#   Check it out when IRCompressionTest is written
