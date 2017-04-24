@@ -7,30 +7,6 @@ bytes)
   WITHOUT CHANGES TO YOUR CODE. **DO NOT RUN THE COMPAT FUNCTION SHIPPED WITH
   4.1.3 - 4.1.4**
 
-- Default IRField's which have not been set to irNull (instead of empty string).
-Classic string fields (just a string name, not an IRField object) will retain
-the empty string.
-This allows there to be a difference from not-set and empty-string value items
-(which can be meaningful in several contexts)
-  **BACKWARDS INCOMPATIBLE**
-
-  Consider if you are testing like
-  if myObj.someField == ''
-  that this will stop working on newly created objects if you aren't setting
-  the value, and expecting that to test such a condition. You can use:
-    if not myObj.someField
-  or
-    if (myObj.someField in ('', b'', irNull)
-  to support both.
-
-  There is no "compat convert" method for this, because it's unknown if an
-  item was set to default string, or empty value. It's on you to make sure
-  your code either handles both, or you convert your datasets accordingly. 
-
-  You can override the defaultValue by passing defaultValue=X to any IRField
-  or subclass, so to retain old behaviour set defaultValue='' on your fields.
-
-
 - Remove formerly deprecated IndexedRedisModel.BASE64_FIELDS - You've been
 warned for a while now to use fields.IRField.IRBase64Field
   **BACKWARDS INCOMPATIBLE**
@@ -82,6 +58,29 @@ etc. Constructing objects is now a lot cheapear.
 - Store "was validated" result for model by the class itself. This allows models with the same keyname (like for conversion, tests, etc) to be validated for each unique class.
 
 - Add IRClassicField as a replacement for the plain-string name in FIELDS array. validateModel will automatically convert these to IRClassicField and warn you that these may go away. I have not yet decided if 5.0.0 will generate error or just warning for now.
+
+- Default IRField's which have not been set to irNull (instead of empty string).
+Classic string fields (just a string name, not an IRField object) will retain
+the empty string.
+This allows there to be a difference from not-set and empty-string value items
+(which can be meaningful in several contexts)
+  **BACKWARDS INCOMPATIBLE**
+
+  Consider if you are testing like
+  if myObj.someField == ''
+  that this will stop working on newly created objects if you aren't setting
+  the value, and expecting that to test such a condition. You can use:
+    if not myObj.someField
+  or
+    if (myObj.someField in ('', b'', irNull)
+  to support both.
+
+  There is no "compat convert" method for this, because it's unknown if an
+  item was set to default string, or empty value. It's on you to make sure
+  your code either handles both, or you convert your datasets accordingly. 
+
+  You can override the defaultValue by passing defaultValue=X to any IRField
+  or subclass, so to retain old behaviour set defaultValue='' on your fields.
 
 - Allow specifying a defaultValue on IRFields. This specifies what the default
 value will be (was not set) for each field. Every IRField type (Except
@@ -143,7 +142,28 @@ be overriden within the "fields.__init__" module
 - Update runTests.py to the latest provided with the new version of
 GoodTests.py
 
-- Some minor cleanups/fixups/optimizations
+- Some minor to moderate cleanups/fixups/optimizations
+
+- Add pprint method to both IndexedRedisModel and IRQueryableList. This will
+pretty-print a dict representation of the model/collection of models, to a
+given stream (default sys.stdout)
+
+- Add __eq__ and __ne__ to IndexedRedisModel, to test if the models are equal
+(including ID).
+
+- Add "hasSameValues" method to IndexedRedisModel, to test if two objects have
+the same field values, even if the _id primary key is different (i.e.
+different objects in the database)
+
+- Fix where on insert the forStorage data would be put in _origData instead of
+the converted data, which would cause that field to be listed as needing to be
+updated if that same object was saved again
+
+- Fix a strange bug where some builtin types could be overriden in the
+IndexedRedis.fields.__init__.py file
+
+- Allow specifying an explicit encoding on IRBytesField, to use an alternative
+than the default encoding
 
 - Added many more tests
 
