@@ -416,8 +416,6 @@ class TestIRFieldChain(object):
 
         assert obj.value == self.utf16Data , 'Expected data to be the utf-16 string after fetching'
 
-        import pdb; pdb.set_trace()
-
 
 
 if __name__ == '__main__':
