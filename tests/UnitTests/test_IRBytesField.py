@@ -10,13 +10,11 @@
 import sys
 import subprocess
 
-from IndexedRedis import IndexedRedisModel, irNull
+from IndexedRedis import IndexedRedisModel, irNull, getDefaultIREncoding, setDefaultIREncoding
 from IndexedRedis.compat_str import tobytes
 from IndexedRedis.fields import IRBytesField, IRField
 
 # vim: ts=4 sw=4 expandtab
-
-# TODO: Add test for encoding on bytes field
 
 class TestIRBytesField(object):
     '''
@@ -25,6 +23,9 @@ class TestIRBytesField(object):
 
     KEEP_DATA = False
 
+    def setup_class(self):
+        self.defaultIREncoding = getDefaultIREncoding()
+
     def setup_method(self, testMethod):
         '''
             setup_method - Called before every method. Should set "self.model" to the model needed for the test.
@@ -32,6 +33,7 @@ class TestIRBytesField(object):
             @param testMethod - Instance method of test about to be called.
         '''
         self.model = None
+
 
         if testMethod in (self.test_general, ):
             class Model_BytesValue(IndexedRedisModel):
@@ -73,6 +75,20 @@ class TestIRBytesField(object):
 
             self.model = Model_IndexBytes
 
+        elif testMethod == self.test_bytesEncoding:
+            setDefaultIREncoding('ascii')
+            class Model_BytesEncoding(IndexedRedisModel):
+                FIELDS = [
+                    IRField('name'),
+                    IRBytesField('value', encoding='utf-8'),
+                ]
+
+                INDEXED_FIELDS = ['name', 'value']
+
+                KEY_NAME = 'TestIRBytesField__BytesEncoding'
+
+            self.model = Model_BytesEncoding
+
         # If KEEP_DATA is False (debug flag), then delete all objects before so prior test doesn't interfere
         if self.KEEP_DATA is False and self.model:
             self.model.objects.delete()
@@ -86,6 +102,8 @@ class TestIRBytesField(object):
 
         if self.model and self.KEEP_DATA is False:
             self.model.reset([])
+
+        setDefaultIREncoding(self.defaultIREncoding)
 
 
     def test_general(self):
@@ -267,6 +285,40 @@ class TestIRBytesField(object):
                 otherObj.asDict(includeMeta=True, forStorage=False, strKeys=True),
                 objFetched.asDict(includeMeta=True, forStorage=False, strKeys=True)
                 )
+
+    def test_bytesEncoding(self):
+
+        Model = self.model
+
+        obj = Model()
+
+        obj.name = 'one'
+
+        prettyPicturesUtf8Bytes = b' \xe2\x9c\x8f \xe2\x9c\x90 \xe2\x9c\x91 \xe2\x9c\x92 \xe2\x9c\x93 \xe2\x9c\x94 \xe2\x9c\x95 \xe2\x9c\x96 \xe2\x9c\x97 \xe2\x9c\x98 \xe2\x9c\x99 \xe2\x9c\x9a \xe2\x9c\x9b \xe2\x9c\x9c \xe2\x9c\x9d \xe2\x9c\x9e \xe2\x9c\x9f \xe2\x9c\xa0 \xe2\x9c\xa1 \xe2\x9c\xa2 \xe2\x9c\xa3 \xe2\x9c\xa4 \xe2\x9c\xa5 \xe2\x9c\xa6 \xe2\x9c\xa7 \xe2\x9c\xa9 \xe2\x9c\xaa \xe2\x9c\xab '
+
+        prettyPicturesUtf8 = prettyPicturesUtf8Bytes.decode('utf-8')
+
+
+        obj.value = prettyPicturesUtf8
+
+        assert obj.value == prettyPicturesUtf8Bytes , 'Expected utf-8 string to be converted to bytes after setting'
+
+        ids = obj.save()
+
+        assert ids and ids[0] , 'Failed to save object'
+
+        fetchedObj = Model.objects.filter(value=prettyPicturesUtf8Bytes).first()
+
+        assert fetchedObj , 'Failed to fetch object by bytes value'
+
+
+        fetchedObj = Model.objects.filter(value=prettyPicturesUtf8).first()
+
+        assert fetchedObj , 'Failed to fetch object by unicode value'
+
+        obj = fetchedObj
+
+        assert obj.value == prettyPicturesUtf8Bytes , 'Expected after fetch that data is bytes version of utf-8 string'
 
 
 
