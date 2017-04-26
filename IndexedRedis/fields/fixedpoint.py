@@ -31,13 +31,21 @@ class IRFixedPointField(IRField):
 			  this many digits after the decimal point.
 		'''
 		self.decimalPlaces = decimalPlaces
+
+		# Make sure the defaultValue gets rounded such that it does not exceed #decimalPlaces
+		if isinstance(defaultValue, int):
+			defaultValue = float(defaultValue)
+		elif isinstance(defaultValue, float):
+			defaultValue = round(defaultValue, decimalPlaces)
+
 		self.defaultValue = defaultValue
 
 	def _fromStorage(self, value):
-		return float(value)
+		# Round here in case number of decimalPlaces changes on the field since storage
+		return round(float(value), self.decimalPlaces)
 	
 	def _fromInput(self, value):
-		return float(value)
+		return round(float(value), self.decimalPlaces)
 
 	def _toStorage(self, value):
 		if type(value) != float:
