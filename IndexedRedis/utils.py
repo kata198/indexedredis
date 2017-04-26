@@ -3,7 +3,6 @@
 # Some random utility functions
 
 
-
 # vim:set ts=8 shiftwidth=8 softtabstop=8 noexpandtab :
 
 
@@ -32,9 +31,8 @@ class KeyList(list):
 	'''
 	
 	def __getitem__(self, item):
-		if isinstance(item, int):
+		if isinstance(item, (int, slice)):
 			return list.__getitem__(self, item)
-
 		try:
 			idx = self.index(item)
 		except:
