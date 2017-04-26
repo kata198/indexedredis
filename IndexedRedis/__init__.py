@@ -1044,6 +1044,7 @@ class IndexedRedisHelper(object):
 		'''
 		return ''.join([INDEXED_REDIS_PREFIX, self.keyName, ':idx:', indexedField, ':', getattr(indexedField, 'toStorage', to_unicode)(val)])
 
+	@deprecated('_compat_rem_str_id_from_index is deprecated.')
 	def _compat_rem_str_id_from_index(self, indexedField, pk, val, conn=None):
 		'''
 			_compat_rem_str_id_from_index - Used in compat_convertHashedIndexes to remove the old string repr of a field,
@@ -1817,22 +1818,29 @@ class IndexedRedisSave(IndexedRedisHelper):
 		#  XXX: Maybe we should do the whole thing in one pipeline? 
 
 		fields = []        # A list of the indexed fields
-		hashingFields = {} # A dict of idxField : IRField obj that WILL hash
 
 		# Iterate now so we do this once instead of per-object.
 		for indexedField in self.indexedFields:
 
-			fields.append(self.fields[indexedField])
+			origField = self.fields[indexedField]
 
-			# Reuse the existing field if it is set to hash, otherwise
-			#   generate one that is, but set to hash index.
+			# Check if type supports configurable hashIndex, and if not skip it.
+			if 'hashIndex' not in origField.__class__.__new__.__code__.co_varnames:
+				continue
+
 			if indexedField.hashIndex is True:
-				hashingField = self.fields[indexedField]
-			else:
-				# Make one of the same type, but with hashIndex set to True
-				hashingField = self.fields[indexedField].__class__(str(indexedField), hashIndex=True)
+				hashingField = origField
 
-			hashingFields[indexedField] = hashingField
+				regField = origField.copy()
+				regField.hashIndex = False
+			else:
+				regField = origField
+				# Maybe copy should allow a dict of override params?
+				hashingField = origField.copy()
+				hashingField.hashIndex = True
+
+
+			fields.append ( (origField, regField, hashingField) )
 
 		objDicts = [obj.asDict(True, forStorage=True) for obj in objs]
 
@@ -1841,15 +1849,15 @@ class IndexedRedisSave(IndexedRedisHelper):
 		for objDict in objDicts:
 			pipeline = conn.pipeline()
 			pk = objDict['_id']
-			for indexedField in fields:
+			for origField, regField, hashingField in fields:
 				val = objDict[indexedField]
 
 				# Remove the possibly stringed index
-				self._compat_rem_str_id_from_index(indexedField, pk, val, pipeline)
+				self._rem_id_from_index(regField, pk, val, pipeline)
 				# Remove the possibly hashed index
-				self._rem_id_from_index(hashingFields[indexedField], pk, val, pipeline)
+				self._rem_id_from_index(hashingField, pk, val, pipeline)
 				# Add the new (hashed or unhashed) form.
-				self._add_id_to_index(indexedField, pk, val, pipeline)
+				self._add_id_to_index(origField, pk, val, pipeline)
 
 			# Launch all at once
 			pipeline.execute()
