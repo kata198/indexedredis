@@ -1,5 +1,9 @@
 #!/usr/bin/env python
-# vim: set ts=8 sw=8 st=8 expandtab :
+# vim: set ts=4 sw=4 st=4 expandtab :
+
+import time
+
+startTime = time.time()
 
 import datetime
 import sys
@@ -172,10 +176,14 @@ if __name__ == '__main__':
     sys.stdout.write('\nRemaining Mega Men tracks (should be blank):\n')
     songs = Song.objects.filter(artist='Mega Men').all()
     sys.stdout.write(str(songs) + '\n')
+
+    endTime = time.time()
+
+    sys.stderr.write("TIME: %.6f\n" %(endTime - startTime, ))
         
 
+# vim: set ts=4 sw=4 st=4 expandtab :
 
-# vim:set ts=8 shiftwidth=8 softtabstop=8 noexpandtab :
 
 
 ###############################
@@ -358,4 +366,5 @@ if __name__ == '__main__':
 #Remaining Mega Men tracks (should be blank):
 #IRQueryableList([])
 
-# vim: set ts=8 sw=8 st=8 expandtab :
+
+# vim: set ts=4 sw=4 st=4 expandtab :
