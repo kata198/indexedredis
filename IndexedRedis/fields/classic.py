@@ -22,10 +22,10 @@ class IRClassicField(IRField):
 
 	CAN_INDEX = True
 
-	def __init__(self, name='', hashIndex=False):
-		IRField.__init__(self, name=name, valueType=encoded_str_type, hashIndex=hashIndex, defaultValue='')
+	def __init__(self, name=''):
+		IRField.__init__(self, name=name, valueType=encoded_str_type, defaultValue='')
 
-	def __new__(self, name='', hashIndex=False):
+	def __new__(self, name=''):
 		return IRField.__new__(self, name)
 
 
