@@ -84,6 +84,9 @@ class IRFieldChain(IRField):
 
 		return ['chainedFields=[ %s ]' %(', '.join(chainedFieldsRepr), )]
 
+	def copy(self):
+		return self.__class__(name=str(self), chainedFields=[field.copy() for field in self.chainedFields], defaultValue=self.defaultValue)
+
 
 	def __new__(self, name, chainedFields=None, defaultValue=irNull):
 		if not name:

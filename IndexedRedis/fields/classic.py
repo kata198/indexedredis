@@ -28,5 +28,8 @@ class IRClassicField(IRField):
 	def __new__(self, name=''):
 		return IRField.__new__(self, name)
 
+	def copy(self):
+		return self.__class__(name=str(self))
+
 
 # vim: set ts=8 shiftwidth=8 softtabstop=8 noexpandtab :

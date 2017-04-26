@@ -44,6 +44,9 @@ class IRRawField(IRField):
 	def _getReprProperties(self):
 		return []
 
+	def copy(self):
+		return self.__class__(name=str(self))
+
 	def __new__(self, name=''):
 		return IRField.__new__(self, name)
 

@@ -107,6 +107,9 @@ class IRCompressedField(IRField):
 	def _getReprProperties(self):
 		return [ 'compressMode="%s"' %(self.compressMode, ) ]
 
+	def copy(self):
+		return self.__class__(name=str(self), compressMode=self.compressMode, defaultValue=self.defaultValue)
+
 	def __new__(self, name='', compressMode=COMPRESS_MODE_ZLIB, defaultValue=irNull):
 		return IRField.__new__(self, name)
 

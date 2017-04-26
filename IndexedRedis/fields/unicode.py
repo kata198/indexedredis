@@ -65,6 +65,8 @@ class IRUnicodeField(IRField):
 	def _getReprProperties(self):
 		return ['encoding=%s' %(repr(self.encoding), )]
 
+	def copy(self):
+		return self.__class__(name=str(self), encoding=self.encoding, defaultValue=self.defaultValue)
 
 	def __new__(self, name='', encoding=None, defaultValue=irNull):
 		return IRField.__new__(self, name)

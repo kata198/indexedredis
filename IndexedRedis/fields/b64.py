@@ -55,6 +55,9 @@ class IRBase64Field(IRField):
 	def _getReprProperties(self):
 		return ['encoding=%s' %(repr(self.encoding), )]
 
+	def copy(self):
+		return self.__class__(name=str(self), defaultValue=self.defaultValue, encoding=self.encoding)
+
 	def __new__(self, name='', defaultValue=irNull, encoding=None):
 		return IRField.__new__(self, name)
 

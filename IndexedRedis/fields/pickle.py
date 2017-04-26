@@ -68,6 +68,9 @@ class IRPickleField(IRField):
 	def _getReprProperties(self):
 		return []
 
+	def copy(self):
+		return self.__class__(name=str(self), defaultValue=self.defaultValue)
+
 	def __new__(self, name='', defaultValue=irNull):
 		return IRField.__new__(self, name)
 
