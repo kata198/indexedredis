@@ -86,21 +86,7 @@ class TestIRFixedPointField(object):
 
                 KEY_NAME = 'TestIRFixedPointField__DecimalPlaces'
 
-            class Model_OrigModel(IndexedRedisModel):
-                FIELDS = [
-                    IRField('name'),
-                    IRFixedPointField('value1', decimalPlaces=1),
-                    IRFixedPointField('value4', decimalPlaces=4),
-                    IRFixedPointField('value9', decimalPlaces=9),
-                    IRFixedPointField('value4MoreDef', decimalPlaces=4, defaultValue=5.123456),
-                ]
-
-                INDEXED_FIELDS = ['name', 'value1', 'value4', 'value9']
-
-                KEY_NAME = 'TestIRFixedPointField__DecimalPlaces'
-
             self.model = Model_DecimalPlaces
-            self.origModel = Model_OrigModel
 
         # If KEEP_DATA is False (debug flag), then delete all objects before so prior test doesn't interfere
         if self.KEEP_DATA is False and self.model:
@@ -383,8 +369,7 @@ class TestIRFixedPointField(object):
         objFetched = Model.objects.filter(value9=rvalFloat4).first()
         assert not objFetched , 'Expected to NOT be able to fetch object using a lower-precision value than the index, where those two are different values.'
 
-        # TODO: Support copying model. For now just a different class with same key
-        OrigModel = self.origModel
+        OrigModel = Model.copyModel()
 
         ## NOTE - model is CHANGED AFTER THIS POINT ##
 
