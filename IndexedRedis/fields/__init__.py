@@ -16,7 +16,7 @@ import sys
 from datetime import datetime
 
 from ..compat_str import to_unicode, tobytes
-from ..deprecated import deprecatedMessage
+from ..deprecated import deprecatedMessage, deprecated
 
 from .null import irNull, IR_NULL_STRINGS, IR_NULL_STR, IR_NULL_BYTES, IR_NULL_UNICODE, IRNullType
 
@@ -209,9 +209,9 @@ class IRField(str):
 		'''
 		return self.valueType(value)
 
-
-	# TODO: Deprecate old name
-	convert = fromStorage
+	@deprecated("convert is deprecated. Please use fromStorage instead. See fromStorage docstring if extending.")
+	def convert(self, value):
+		return self.fromStorage(value)
 
 
 	def fromInput(self, value):
@@ -236,9 +236,6 @@ class IRField(str):
 			@return converted value
 		'''
 		return self.valueType(value)
-
-	# TODO: Old name
-	convertFromInput = fromInput
 
 
 	def toIndex(self, value):

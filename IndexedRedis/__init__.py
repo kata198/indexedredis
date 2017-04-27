@@ -371,7 +371,7 @@ class IndexedRedisModel(object):
 		'''
 			__setattr__ - Will be used to set an attribute on this object.
 
-			  If the attribute is a field (in self.FIELDS), it will be converted via the field type's #convertFromInput method.
+			  If the attribute is a field (in self.FIELDS), it will be converted via the field type's #fromInput method.
 
 			  Otherwise, it will just set the attribute on this object.
 		'''
@@ -381,7 +381,7 @@ class IndexedRedisModel(object):
 			idx = -1
 
 		if idx != -1:
-			value = self.FIELDS[idx].convertFromInput(value)
+			value = self.FIELDS[idx].fromInput(value)
 
 		object.__setattr__(self, keyName, value)
 
