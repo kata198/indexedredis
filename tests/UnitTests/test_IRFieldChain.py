@@ -123,6 +123,19 @@ class TestIRFieldChain(object):
                 KEY_NAME = 'TestIRFieldChain__IntBase64'
 
             self.model = Model_IntBase64
+        elif testMethod == self.test_index:
+            class Model_ChainIndex(IndexedRedisModel):
+
+                FIELDS = [
+                    IRField('name'),
+                    IRFieldChain('value', [IRField(valueType=str), IRBase64Field()]),
+                ]
+
+                INDEXED_FIELDS = ['name', 'value']
+
+                KEY_NAME = 'TestIRFieldChain__ModelChainIndex'
+
+            self.model = Model_ChainIndex
 
         # If KEEP_DATA is False (debug flag), then delete all objects before so prior test doesn't interfere
         if self.KEEP_DATA is False and self.model:
@@ -415,6 +428,33 @@ class TestIRFieldChain(object):
         obj = fetchedObjs[0]
 
         assert obj.value == self.utf16Data , 'Expected data to be the utf-16 string after fetching'
+
+
+    def test_index(self):
+
+        Model = self.model
+
+        obj1 = Model(name='one')
+
+        obj1.value = 'Hello World'
+
+        obj2 = Model(name='two')
+
+        obj2.value = 'Goodbye World'
+
+        ids = obj1.save()
+        assert ids and ids[0] , 'Failed to save object'
+
+        ids = obj2.save()
+        assert ids and ids[0] , 'Failed to save object'
+
+        objFetched = Model.objects.filter(value='Hello World').all()
+
+        assert len(objFetched) == 1 , 'Failed to fetch one object. Got: %d' %(int(objFetched), )
+
+        assert objFetched[0].name == 'one' , 'Fetched wrong object'
+
+        # TODO: Clean up and test more
 
 
 

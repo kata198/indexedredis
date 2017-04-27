@@ -30,7 +30,7 @@ class IRFieldChain(IRField):
 	# TODO: We can probably index if all chained field types are indexable, but just disallow for now.
 	CAN_INDEX = False
 
-	def __init__(self, name, chainedFields, defaultValue=irNull):
+	def __init__(self, name, chainedFields, defaultValue=irNull, hashIndex=False):
 		'''
 			__init__ - Create an IRFieldChain object.
 
@@ -62,6 +62,15 @@ class IRFieldChain(IRField):
 			self.chainedFields.append(field)
 
 		self.defaultValue = defaultValue
+
+		(canIndex, mustHashIndex) = self._checkCanIndex()
+
+		if mustHashIndex is True:
+			hashIndex = mustHashIndex
+
+		self.CAN_INDEX = canIndex
+
+		self.hashIndex = hashIndex
 
 
 
@@ -99,6 +108,13 @@ class IRFieldChain(IRField):
 
 		return value
 
+	def _toIndex(self, value):
+		
+		for chainedField in self.chainedFields:
+			value = chainedField._toIndex(value)
+
+		return value
+
 	def _getReprProperties(self):
 		chainedFieldsRepr = []
 		for chainedField in self.chainedFields:
@@ -111,7 +127,26 @@ class IRFieldChain(IRField):
 		return self.__class__(name=self.name, chainedFields=[field.copy() for field in self.chainedFields], defaultValue=self.defaultValue)
 
 
-	def __new__(self, name, chainedFields=None, defaultValue=irNull):
+	def _checkCanIndex(self):
+		'''
+			_checkCanIndex - Check if we CAN index (if all fields are indexable).
+				Also checks the right-most field for "hashIndex" - if it needs to hash we will hash.
+				  Otherwise, we won't (unless hashIndex=True in constructor, TODO)
+		'''
+		# TODO: I think we can actually just check if the right-most is indexable, rather than check them all..
+		#   Since if you can index its output, you can index the whole thing.
+		if not self.chainedFields:
+			return (False, False)
+
+		for chainedField in self.chainedFields:
+			if chainedField.CAN_INDEX is False:
+				return (False, False)
+
+		return (True, self.chainedFields[-1].hashIndex)
+
+
+
+	def __new__(self, name, chainedFields=None, defaultValue=irNull, hashIndex=False):
 		if not name:
 			raise ValueError('IRChainedField defined without a name!')
 
