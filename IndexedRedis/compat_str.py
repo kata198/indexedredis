@@ -101,6 +101,16 @@ if bytes == str:
 			@return <bool> - True if "x" is a stringy type
 		'''
 		return issubclass(x.__class__, basestring)
+
+	def isBaseStringy(x):
+		'''
+			isBaseStringy - Chek if is a "basestring" extending class.
+
+			@param x - Value to chek
+
+			@return <bool> - True if "x" is a "basestring" extending type
+		'''
+		return issubclass(x.__class__, basestring)
 	
 	encoded_str_type = unicode
 
@@ -160,6 +170,17 @@ else:
 			@return <bool> - True if "x" is a stringy type
 		'''
 		return issubclass(x.__class__, (str, bytes))
+
+	def isBaseStringy(x):
+		'''
+			isBaseStringy - Chek if is a "basestring" extending class.
+
+			@param x - Value to chek
+
+			@return <bool> - True if "x" is a "basestring" extending type
+		'''
+		return issubclass(x.__class__, basestring)
+	
 
 	def isEmptyString(x):
 		'''
