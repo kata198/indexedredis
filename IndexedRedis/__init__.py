@@ -120,12 +120,6 @@ except NameError:
 
 
 
-# TODO: make this better
-try:
-	unicode
-except NameError:
-	unicode = str
-
 # This is an incrementing integer, for each copy of a model (to ensure they have a unique name)
 global _modelCopyMap
 _modelCopyMap = defaultdict(lambda : int(1))
