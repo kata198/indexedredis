@@ -264,6 +264,15 @@ class IRField(str):
 		'''
 		return bool(self.hashIndex)
 
+	@property
+	def name(self):
+		'''
+			name - Property, return this field's name
+
+			@return <str> - Field name
+		'''
+		return str(self)
+
 	def _convertStr(self, value):
 		return to_unicode(value)
 
@@ -356,7 +365,7 @@ class IRField(str):
 
 			@return <IRField (or subclass)> - Another IRField that has all the same values as this one.
 		'''
-		return self.__class__(name=str(self), valueType=self.valueType, defaultValue=self.defaultValue, hashIndex=self.hashIndex)
+		return self.__class__(name=self.name, valueType=self.valueType, defaultValue=self.defaultValue, hashIndex=self.hashIndex)
 
 	def __new__(self, name='', valueType=None, defaultValue=irNull, hashIndex=False):
 		return str.__new__(self, name)

@@ -67,7 +67,7 @@ class IRPickleField(IRField):
 		return []
 
 	def copy(self):
-		return self.__class__(name=str(self), defaultValue=self.defaultValue)
+		return self.__class__(name=self.name, defaultValue=self.defaultValue)
 
 	def __new__(self, name='', defaultValue=irNull):
 		return IRField.__new__(self, name)

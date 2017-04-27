@@ -29,7 +29,7 @@ class IRClassicField(IRField):
 		return IRField.__new__(self, name)
 
 	def copy(self):
-		return self.__class__(name=str(self))
+		return self.__class__(name=self.name)
 
 
 # vim: set ts=8 shiftwidth=8 softtabstop=8 noexpandtab :

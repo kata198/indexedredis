@@ -45,7 +45,7 @@ class IRBytesField(IRField):
 	_toStorage = _convertBytes
 
 	def copy(self):
-		return self.__class__(name=str(self), defaultValue=self.defaultValue, encoding=self.encoding)
+		return self.__class__(name=self.name, defaultValue=self.defaultValue, encoding=self.encoding)
 
 
 	def __new__(self, name='', defaultValue=irNull, encoding=None):
