@@ -28,10 +28,10 @@ class TestSimpleSetAndGet(object):
         self.toDelete = []
 
     def setup_method(self, *args, **kwargs):
-        SimpleSetAndGetModel.reset([])
+        SimpleSetAndGetModel.deleter.destroyModel()
 
     def teardown_method(self, *args, **kwargs):
-        SimpleSetAndGetModel.reset([])
+        SimpleSetAndGetModel.deleter.destroyModel()
 
     def test_createAndFetch(self):
         myObj = SimpleSetAndGetModel(a='one', b='two', c='three')
@@ -104,7 +104,7 @@ class TestSimpleSetAndGet(object):
         self.SimpleSetAndGetModel2 = SimpleSetAndGetModel2
 
     def teardown_modelEquals(self):
-        self.SimpleSetAndGetModel2.objects.delete()
+        self.SimpleSetAndGetModel2.deleter.destroyModel()
 
     def test_modelEquals(self):
 
@@ -163,7 +163,7 @@ class TestSimpleSetAndGet(object):
         self.ModelDefaultNulls = ModelDefaultNulls
 
     def teardown_nullNotEmptyStr(self):
-        self.ModelDefaultNulls.reset([])
+        self.ModelDefaultNulls.deleter.destroyModel()
 
 
     def test_nullNotEmptyStr(self):

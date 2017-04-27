@@ -43,7 +43,7 @@ class TestIRField(object):
 
         # If KEEP_DATA is False (debug flag), then delete all objects before so prior test doesn't interfere
         if self.KEEP_DATA is False and self.model:
-            self.model.objects.delete()
+            self.model.deleter.destroyModel()
 
     def teardown_method(self, testMethod):
         '''
@@ -53,7 +53,7 @@ class TestIRField(object):
         '''
 
         if self.model and self.KEEP_DATA is False:
-            self.model.objects.delete()
+            self.model.deleter.destroyModel()
 
 
     def test_withStrings(self):

@@ -126,7 +126,7 @@ class TestIRFieldChain(object):
 
         # If KEEP_DATA is False (debug flag), then delete all objects before so prior test doesn't interfere
         if self.KEEP_DATA is False and self.model:
-            self.model.objects.delete()
+            self.model.deleter.destroyModel()
 
     def teardown_method(self, testMethod):
         '''
@@ -135,7 +135,7 @@ class TestIRFieldChain(object):
                 If self.model is set, will delete all objects relating to that model. To retain objects for debugging, set TestIRField.KEEP_DATA to True.
         '''
         if self.model and self.KEEP_DATA is False:
-            self.model.objects.delete()
+            self.model.deleter.destroyModel()
 
         # Reset encoding back to original, some tests may change it.
         setDefaultIREncoding(self.defaultIREncoding)

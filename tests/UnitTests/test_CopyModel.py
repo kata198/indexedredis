@@ -15,25 +15,49 @@ from IndexedRedis import IndexedRedisModel, IRField, InvalidModelException, vali
 
 class TestCopyModel(object):
 
+    KEEP_DATA = False
+
+    def setup_method(self, testMethod):
+     
+        self.model = None
+
+        if testMethod == self.test_copyModel:
+            class TestCopyModel_CopyModel(IndexedRedisModel):
+                FIELDS = [
+                    IRField('name'),
+                    IRField('num', valueType=int, defaultValue=3),
+                ]
+
+                INDEXED_FIELDS = ['num']
+
+                KEY_NAME = 'IRTestCopyModel__CopyModel'
+            
+            self.model = TestCopyModel_CopyModel
+
+        # If KEEP_DATA is False (debug flag), then delete all objects before so prior test doesn't interfere
+        if self.KEEP_DATA is False and self.model:
+            self.model.deleter.destroyModel()
+
+    def teardown_method(self, testMethod):
+        '''
+            teardown_method - Called after every method.
+
+                If self.model is set, will delete all objects relating to that model. To retain objects for debugging, set TestIRField.KEEP_DATA to True.
+        '''
+
+        if self.model and self.KEEP_DATA is False:
+            self.model.deleter.destroyModel()
+
 
     def test_copyModel(self):
-        class CopyModel(IndexedRedisModel):
-            FIELDS = [
-                IRField('name'),
-                IRField('num', valueType=int, defaultValue=3),
-            ]
 
-            INDEXED_FIELDS = ['num']
-
-            KEY_NAME = 'IRTestCopyModel__CopyModel'
-
-        Model = CopyModel
+        Model = self.model
 
         obj = Model()
 
         assert obj.num == 3 , 'Checking that original defaultValue=3 is applied'
 
-        ModelCopy = CopyModel.copyModel()
+        ModelCopy = Model.copyModel()
 
         assert id(Model) != id(ModelCopy) , 'Expected copy of model not to have same id'
         assert Model.__name__ != ModelCopy.__name__ , 'Expected copy of model to have different name'
