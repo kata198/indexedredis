@@ -16,11 +16,34 @@ except NameError:
 	unicode = str
 
 class IRFieldChain(IRField):
+	'''
+	   IRFieldChain -
+	   
+	   These chain together the operations from multiple fields.
+
+	   toStorage is applied left-to-right,
+	   fromInput and fromStorage is applied right-to-left.
+
+	   The output of one field is the input of the next.
+	'''
 
 	# TODO: We can probably index if all chained field types are indexable, but just disallow for now.
 	CAN_INDEX = False
 
 	def __init__(self, name, chainedFields, defaultValue=irNull):
+		'''
+			__init__ - Create an IRFieldChain object.
+
+			  These chain together the operations from multiple fields.
+
+			  toStorage is applied left-to-right,
+			  fromInput and fromStorage is applied right-to-left.
+
+			  The output of one field is the input of the next.
+
+
+			@see IRField.__init__
+		'''
 		if not name:
 			raise ValueError('IRFieldChain has empty name.')
 
