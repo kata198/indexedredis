@@ -26,7 +26,8 @@ class IRBase64Field(IRField):
 		  Like, use it with an IRUnicodeField as the far left to have it be a utf-16 value, or use IRField(valueType=str) for a string, or IRField(valueType=int) for int, etc.
 	'''
 
-	CAN_INDEX = False
+	CAN_INDEX = True
+	hashIndex = True
 
 	def __init__(self, name='', defaultValue=irNull, encoding=None):
 		'''
