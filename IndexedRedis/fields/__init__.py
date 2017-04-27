@@ -29,8 +29,6 @@ except NameError:
 	unicode = str
 
 
-# TODO: Update docstrings, deprecate old "convert" method (now fromStorage)
-
 class IRField(str):
 	'''
 		IRField - An advanced field
@@ -69,7 +67,6 @@ class IRField(str):
 	defaultValue = irNull
 
 
-	# TODO: Investigate changing valueType to encoded_str_type
 	def __init__(self, name='', valueType=str, defaultValue=irNull, hashIndex=False):
 		'''
 			__init__ - Create an IRField. Use this directly in the FIELDS array for advanced functionality on a field.

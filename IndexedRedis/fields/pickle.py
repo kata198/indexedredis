@@ -28,8 +28,6 @@ except NameError:
 class IRPickleField(IRField):
 	'''
 		IRPickleField - A field which pickles its data before storage and loads after retrieval.
-
-			TODO: Does not support strings/bytes but should support all other complex object types (object, custom classes, lists, etc)
 	'''
 
 	# Sigh.... so we _can_ index on a pickle'd field, except even with the same protocol the pickling is different between python2 and python3
