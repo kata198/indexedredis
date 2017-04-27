@@ -1752,7 +1752,7 @@ class IndexedRedisSave(IndexedRedisHelper):
 			self._add_id_to_keys(obj._id, pipeline)
 
 			for indexedField in self.indexedFields:
-				self._add_id_to_index(indexedField, obj._id, newDict[indexedField], pipeline)
+				self._add_id_to_index(indexedField, obj._id, obj._origData[indexedField], pipeline)
 		else:
 			updatedFields = obj.getUpdatedFields()
 			for thisField, fieldValue in updatedFields.items():
