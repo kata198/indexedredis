@@ -235,6 +235,16 @@ class IRField(str):
 		return self.valueType(value)
 
 
+	'''
+		_toIndex - Prepare a value for index.
+
+		  Does not need to handle nulls or hasing.
+
+		  You probably won't need to implement this, but IRFieldChain for example does.
+	'''
+	_toIndex = toStorage
+
+
 	def toIndex(self, value):
 		'''
 			toIndex - An optional method which will return the value prepped for index.
@@ -245,7 +255,7 @@ class IRField(str):
 		if self._isIrNull(value):
 			ret = IR_NULL_STR
 		else:
-			ret = self.toStorage(value)
+			ret = self._toIndex(value)
 
 		if self.isIndexHashed is False:
 			return ret
