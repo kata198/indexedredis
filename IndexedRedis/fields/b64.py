@@ -19,6 +19,11 @@ except NameError:
 class IRBase64Field(IRField):
 	'''
 		IRBase64Field - Encode/Decode data automatically into base64 for storage and from for retrieval. 
+
+		Data will be found on the object in bytes format (right after assignment, after fetching, etc). To convert to another format,
+		  use an IRFieldChain.
+
+		  Like, use it with an IRUnicodeField as the far left to have it be a utf-16 value, or use IRField(valueType=str) for a string, or IRField(valueType=int) for int, etc.
 	'''
 
 	CAN_INDEX = False
@@ -45,7 +50,7 @@ class IRBase64Field(IRField):
 		return b64decode(tobytes(value, self.encoding))
 
 	def _fromInput(self, value):
-		return value
+		return tobytes(value, self.encoding)
 
 	def _toStorage(self, value):
 		if isEmptyString(value):
