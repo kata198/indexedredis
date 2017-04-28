@@ -69,12 +69,16 @@ def __ir_json__str__(self):
 
 class _IRJsonDict(dict):
     __str__ = __ir_json__str__
+
+    isIRJson = True
     def __new__(self, *args, **kwargs):
         return dict.__new__(self, *args, **kwargs)
 _IRJsonObject = _IRJsonDict
 
 class _IRJsonString(str):
     __str__ = __ir_json__str__
+
+    isIRJson = True
     def __new__(self, *args, **kwargs):
         return str.__new__(self, *args, **kwargs)
 
@@ -87,16 +91,22 @@ class _IRJsonString(str):
 
 class _IRJsonArray(list):
     __str__ = __ir_json__str__
+
+    isIRJson = True
     def __new__(self, *args, **kwargs):
         return list.__new__(self, *args, **kwargs)
 
 class _IRJsonNumber(float):
     __str__ = __ir_json__str__
+
+    isIRJson = True
     def __new__(self, *args, **kwargs):
         return float.__new__(self, *args, **kwargs)
 
 # Cannot subclass NoneType, so use IRNullType to represent null.
 class _IRJsonNull(IRNullType):
+
+    isIRJson = True
     def __str__(self):
         return 'null'
     
@@ -110,11 +120,30 @@ class IRJsonValue(type):
         "bool" is supported using a number 0.0 or 1.0 - because cannot subclass "bool"
     '''
 
-    # TODO: This probably shouldn't be indexable... although maybe when I implement hashed indexes.
+    # NOTE: Default CAN_INDEX is False, but should use typeCanIndex method to see if
+    #   that type is indexable.
     CAN_INDEX = False
+
+    isIRJson = True
 
     def __init__(self, *args, **kwargs):
         pass
+
+
+    @staticmethod
+    def typeCanIndex(typ):
+        '''
+            typeCanIndex - Check if type can index.
+
+            TODO: Don't know if this could work. For example, what if a list of dicts (keys are not ordered)?
+        '''
+        if not isinstance(typ, type):
+            typ = typ.__class__
+        
+        if typ in (tuple, list, bool, int):
+            return True
+
+        return False
 
 
     def __str__(self):
