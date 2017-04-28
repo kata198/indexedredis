@@ -3,6 +3,8 @@ IndexedRedis
 
 A redis-backed very very fast ORM-style framework that supports indexes. It performs searches with O(1) efficency!
 
+You can store and fetch native python types (lists, objects, strings, integers, etc.).
+
 IndexedRedis supports both "equals" and "not-equals" operators for comparison. It also provides full atomic support for replacing entire datasets (based on model), which is useful for providing a fast frontend for SQL. In that use-case, a task that runs on an interval would fetch/calculate datasets from the SQL backend, and do an atomic replace on the datasets the front-end would query.
 
 
@@ -26,9 +28,9 @@ Details can be found in the 5.0.0 ChangeLog, found here: https://github.com/kata
 Automatic and Native Types
 --------------------------
 
-Since 4.0, IndexedRedis supports defining fields which will automatically be converted to/from native python types (such as int, float, datetime), as well as anything that can be represented with json (dicts, lists). You just provide the type in its native format, and all the conversion happens behind the scenes. When fetched, the object returned also contains fields in their native types.
+Since 4.0, IndexedRedis supports defining fields which will automatically be converted to/from native python types (such as int, float, datetime), as well as anything that can be represented with json (dicts, lists) or objects that support pickling. You just provide the type in its native format, and all the conversion happens behind the scenes. When fetched, the object returned also contains fields in their native types.
 
-IndexedRedis also supports features such as automatically pickling/unpickling fields, compression/decompression, and supports defining your own custom field types through a standard interface.
+IndexedRedis also supports more advanced features such as automatically pickling/unpickling fields, compression/decompression, base64 encoding/decoding, and even defining your own custom field types through a standard interface.
 
 See "Advanced Fields" section below for more information.
 
@@ -42,6 +44,10 @@ For full pydoc reference, see:
 
 https://pythonhosted.org/indexedredis/
 
+or
+
+http://htmlpreview.github.io/?https://github.com/kata198/IndexedRedis/blob/master/doc/IndexedRedis.html?_cache_vers=1
+
 
 **Below is a quick highlight/overview:**
 
@@ -49,7 +55,7 @@ https://pythonhosted.org/indexedredis/
 IndexedRedisModel
 -----------------
 
-This is the model you should extend.
+This is the type you should extend to define your model.
 
 
 **Example Model:**
@@ -65,9 +71,12 @@ This is the model you should extend.
 			IRField('releaseDate', valueType=datetime.datetime),  # Convert automatically to/from datetime
 			IRField('description'),
 			IRField('copyright'),
-			IRBytesField('mp3_data'), # Keep value as bytes
-			IRCompressedField('thumbnail', compressMode='gzip'),      # Compress this field in storage using "bz2" compression
+			IRRawField('mp3_data'), # Don't try to encode/decode data
+			IRCompressedField('thumbnail', compressMode='gzip'),      # Compress this field in storage using "gzip" compression
             IRField('tags', valueType=list),
+
+            # "lyrics" will be a utf-8 unicode value on the object, and will be compressed/decompressed to/from storage
+            IRFieldChain('lyrics', [ IRUnicodeField(encoding='utf-8'), IRCompressedField() ], defaultValue='No lyrics found' ),
 		]
 
 		INDEXED_FIELDS = [ \
@@ -79,22 +88,29 @@ This is the model you should extend.
 		KEY_NAME = 'Songs'
 
 
-**Model Fields:**
+**Model Attributes:**
+
 
 *FIELDS* - REQUIRED. A list of IRField objects (or their subclasses) which name the fields that can be used for storage. (see "Advanced Fields" section below)
 
 	 Example: [IRField('name'), IRField('description'), IRField('model'), IRFixedPointField('Price', 2), IRField('timestamp', valueType=datetime), IRField('remainingStock', valueType=int)]
 
-*INDEXED_FIELDS* - A list of strings containing the names of fields that will be indexed. Can only filter on indexed fields. Adds insert/delete time. Entries must also be present in FIELDS.
 
-	 Example: ['Name', 'Model']
+*INDEXED_FIELDS* - A list of strings containing the names of fields that will be indexed. Can only filter on indexed fields. Adds insert/delete time. The names listed here must match the name of a field given in FIELDS.
+
+	 Example: ['Name', 'model']
 
 
 *KEY_NAME* - REQUIRED. A unique name name that represents this model. Think of it like a table name.
 
-	 Example: 'Items'
+	 Example: 'StoreItems'
 
-*REDIS_CONNECTION_PARAMS* - provides the arguments to pass into "redis.Redis", to construct a redis object.
+
+*REDIS_CONNECTION_PARAMS* - OPTIONAL -  provides the arguments to pass into "redis.Redis", to construct a redis object. Here you should define the host and port.
+
+Since 5.0.0, define this field ONLY for this model to use an alternate connection than the default. See "Connecting To Redis" section below for more info.
+
+If not defined or empty, the default params will be used.
 
 	 Example: {'host' : '192.168.1.1'}
 
@@ -176,33 +192,52 @@ The following are the possible field types, for use within the FIELDS array:
 
 When no valueType is defined, str/unicode is the type (same as pre-4.0), and default encoding is used (see set/getDefaultIREncoding functions)
 
+Indexable unless type is a json type or float (use IRFixedPointField to index on floats)
 
-**IRBase64Field** - Converts to and from Base64
+
+**IRBase64Field** - Converts to and from Base64.
+
+Indexable.
 
 
 **IRCompressedField** - Automatically compresses before storage and decompresses after retrieval. Argument "compressMode" currently supports "zlib" (default) or "bz2".
 
+Indexsble.
+
 
 **IRFixedPointField** - A floating-point with a fixed number of decimal places. This type supports indexing using floats, whereas IRField(...valueType=float) does not, as different platforms have different accuracies, roundings, etc. Takes a parameter, decimalPlaces (default 5), to define the precision after the decimal point.
 
+Indexable.
 
-**IRPickleField** - Automaticly pickles the given object before storage, and unpickles after fetch. Not indexable.
+
+**IRPickleField** - Automaticly pickles the given object before storage, and unpickles after fetch.
+
+Not indexable because different representation between python2 and 3, and potentially system-dependent changes repr
 
 
 **IRUnicodeField** - Field that takes a parameter, "encoding", to define an encoding to use for this field. Use this to support fields with arbitrary encodings, as IRField will use the default encoding for strings.
 
+Indexable
+
 
 **IRBytesField** - Field that forces the data to be "bytes", python2 and python3 compatible. If you need python3 only, you can use IRField(valueType=bytes). For no encoding/decoding at all, see IRRawField
+
+Indexable
 
 
 **IRClassicField** - Field that imitates the behaviour of a plain-string entry in FIELDS pre-5.0.0. This field has a default of empty string, and is always encoded/decoded using the defaultIREncoding
 
+Indexable
+
 
 **IRRawField** - Field that is not converted in any, to or from Redis. On fetch this will always be "bytes" type (or str in python2). On python3 this is very similar to IRField(...valueType=None), but python2 needs this to store binary data without running into encoding issues.
 
+Not indexable - No decoding
 
 
 **IRFieldChain** - Chains multiple field types together. Use this, for example, to compress the base64-representation of a value, or to compress utf-16 data. See section below for more details.
+
+Indexable if all chained fields are indexable.
 
 
 **Chaining Multiple Types**
@@ -270,6 +305,18 @@ This function, by default (fetchAll=True) will fetch all records of this paticul
 
 NOTHING should be using the models while this function is being called (it doesn't make sense anyway to change schema whilst using it).
 
+
+Connecting to Redis
+-------------------
+
+Your connection to Redis should be defined by calling "setDefaultRedisConnectionParams" with a dict of { 'host' : 'hostname', 'port' : 6379, 'db' : 0 }.
+
+The default connection will connect to host at 127.0.0.1, port at 6379, and db at 0. If you don't define any of these fields explicitly, the default will be used.
+
+
+These default params will be used for all models, UNLESS you define REDIS\_CONNECTION\_PARAMS on a model to something non-empty, then that model will connect using those params.
+
+If you need the same model to connect to different Redis instances, you can call "MyModel.connectAlt" (where MyModel is your model class) and pass a dict of alternate connection parameters. That function will return a copy of the class that will use the alternate provided connection.
 
 
 Model Validation
@@ -472,7 +519,7 @@ Some other methods on an IRQueryableList are:
 Sorting
 -------
 
-After fetching results, you can sort them by calling .sort_by on the IRQueryableList.
+After fetching results, you can sort them by calling .sort\_by on the IRQueryableList.
 
 Example:
 
@@ -483,11 +530,14 @@ Example:
 Encodings
 ---------
 
-IndexedRedis will use by default your system default encoding (sys.getdefaultencoding), unless it is ascii (python2) in which case it will default to utf-8.
+IndexedRedis will use by default your system default encoding (sys.getdefaultencoding), unless it is ascii in which case it will default to utf-8.
 
 You may change this via IndexedRedis.setDefaultIREncoding.
 
-Use IRRawField to not perform any encoding/decoding, or use IRUnicodeField to use a different explicit encoding at a per-field level.
+To get the current default encoding, use IndexedRedis.getDefaultIREncoding
+
+
+To use a different encoding on a per-field basis, use IRUnicodeField or IRBytesField which both take an "encoding" parameter when constructing, which allows you to have your data follow that encoding.
 
 
 Backwards-Incompatible Changes
