@@ -9,7 +9,7 @@ import datetime
 import sys
 import IndexedRedis
 from IndexedRedis import IndexedRedisModel, IRField
-from IndexedRedis.fields import IRCompressedField, IRFieldChain, IRRawField, IRBytesField
+from IndexedRedis.fields import IRCompressedField, IRFieldChain, IRRawField, IRBytesField, IRUnicodeField
 
 # vim: set ts=8 sw=8 st=8 expandtab :
 
@@ -28,6 +28,7 @@ class Song(IndexedRedisModel):
             IRRawField('mp3_data'), # Do not perform any conversion on the data.
             IRFieldChain('thumbnail', [IRBytesField(), IRCompressedField(compressMode='gzip')]),      # Compress this field in storage using "bz2" compression
             IRField('tags', valueType=list),
+            IRFieldChain('lyrics', [ IRUnicodeField(encoding='utf-8'), IRCompressedField() ], defaultValue='No lyrics found'),
     ]
 
     INDEXED_FIELDS = [ \
@@ -61,6 +62,12 @@ if __name__ == '__main__':
                             thumbnail=fakeThumbnail,
                             tags=['happy', 'guitar', 'smooth'],
                             copyright='Copyright 2012 (c) Media Mogul Incorporated')
+
+            songObj.lyrics = '''To love, to lie,
+to feel something rather than die
+A line, a fall
+I guess we can't be loved by them all..
+'''
 
             newSongs.append(songObj)
 
