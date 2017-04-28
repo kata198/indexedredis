@@ -10,3 +10,9 @@ dist/
 myenv*/
 __pycache__/
 tests/IndexedRedis
+
+*.orig
+*.rej
+*.sw[po]
+
+py?_*
