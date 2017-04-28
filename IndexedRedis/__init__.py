@@ -33,6 +33,7 @@ __all__ = ('INDEXED_REDIS_PREFIX', 'INDEXED_REDIS_VERSION', 'INDEXED_REDIS_VERSI
 	'isIndexedRedisModel', 'setIndexedRedisEncoding', 'getIndexedRedisEncoding', 'InvalidModelException',
 	'fields', 'IRField', 'IRFieldChain', 'irNull',
 	'setDefaultIREncoding', 'getDefaultIREncoding',
+	'setDefaultRedisConnectionParams', 'getDefaultRedisConnectionParams',
 	'toggleDeprecatedMessages',
 	 )
 
@@ -53,7 +54,22 @@ __version__ = INDEXED_REDIS_VERSION_STR
 #   In a network-outage scenario, python-redis can quickly leak connections and exhaust all private ports
 REDIS_DEFAULT_POOL_MAX_SIZE = 32
 
+global _defaultRedisConnectionParams
+_defaultRedisConnectionParams = { 'host' : '127.0.0.1', 'port' : 6379, 'db' : 0 }
 
+
+def setDefaultRedisConnectionParams( connectionParams ):
+	global _defaultRedisConnectionParams
+	_defaultRedisConnectionParams.clear()
+
+	for key, value in connectionParams.items():
+		_defaultRedisConnectionParams[key] = value
+
+def getDefaultRedisConnectionParams():
+	global _defaultRedisConnectionParams
+	return _defaultRedisConnectionParams
+
+global RedisPools
 RedisPools = {}
 
 def getRedisPool(params):
@@ -78,6 +94,10 @@ def getRedisPool(params):
 	'''
 	global RedisPools
 
+	if not params:
+		global _defaultRedisConnectionParams
+		params = _defaultRedisConnectionParams
+
 	if 'connection_pool' in params:
 		return params['connection_pool']
 
@@ -94,6 +114,10 @@ def getRedisPool(params):
 	if 'port' not in params:
 		params['port'] = 6379
 		checkAgain = True
+	
+	if 'db' not in params:
+		params['db'] = 0
+		checkAgain = True
 
 	if checkAgain:
 		hashValue = hashDictOneLevel(params)
@@ -106,6 +130,9 @@ def getRedisPool(params):
 	RedisPools[hashValue] = connectionPool
 
 	return connectionPool
+
+
+
 
 
 # COMPAT STUFF
@@ -163,6 +190,10 @@ class IndexedRedisModel(object):
                     Example: 'Items'
 
             *REDIS_CONNECTION_PARAMS* - provides the arguments to pass into "redis.Redis", to construct a redis object.
+	      
+	      If not defined or empty, the default params will be used.
+
+	      set/get the default via setDefaultRedisConnectionParams and getDefaultRedisConnectionParams
 
             Usage
             -----
@@ -801,7 +832,7 @@ class IndexedRedisModel(object):
 			     
 		copyNum = _modelCopyMap[mdl]
 		_modelCopyMap[mdl] += 1
-		mdlCopy = type(mdl.__name__ + '_Copy' + str(copyNum), mdl.__bases__, dict(mdl.__dict__))
+		mdlCopy = type(mdl.__name__ + '_Copy' + str(copyNum), mdl.__bases__, copy.deepcopy(dict(mdl.__dict__)))
 
 		mdlCopy.FIELDS = [field.copy() for field in mdl.FIELDS]
 		
@@ -901,20 +932,40 @@ class IndexedRedisModel(object):
 		validatedModels.add(model)
 		return True
 
+	@deprecated('IndexedRedisModel.connect is deprecated old name. Please use connectAlt instead.')
 	@classmethod
 	def connect(cls, redisConnectionParams):
 		'''
-			connect - Create a class of this model which will use an alternate connection than the one specified by REDIS_CONNECTION_PARAMS on this model.
+			connect - DEPRECATED NAME - @see connectAlt
+			  Create a class of this model which will use an alternate connection than the one specified by REDIS_CONNECTION_PARAMS on this model.
 
 			@param redisConnectionParams <dict> - Dictionary of arguments to redis.Redis, same as REDIS_CONNECTION_PARAMS.
 
 			@return - A class that can be used in all the same ways as the existing IndexedRedisModel, but that connects to a different instance.
 		'''
+		return cls.connectAlt(redisConnectionParams)
+
+	@classmethod
+	def connectAlt(cls, redisConnectionParams):
+		'''
+			connectAlt - Create a class of this model which will use an alternate connection than the one specified by REDIS_CONNECTION_PARAMS on this model.
+
+			@param redisConnectionParams <dict> - Dictionary of arguments to redis.Redis, same as REDIS_CONNECTION_PARAMS.
+
+			@return - A class that can be used in all the same ways as the existing IndexedRedisModel, but that connects to a different instance.
+
+			  The fields and key will be the same here, but the connection will be different. use #copyModel if you want an independent class for the model
+		'''
 		if not isinstance(redisConnectionParams, dict):
 			raise ValueError('redisConnectionParams must be a dictionary!')
 
-		class ConnectedIndexedRedisModel(cls):
-			REDIS_CONNECTION_PARAMS = redisConnectionParams
+		hashVal = hashDictOneLevel(redisConnectionParams)
+
+		modelDictCopy = copy.deepcopy(dict(cls.__dict__))
+		modelDictCopy['REDIS_CONNECTION_PARAMS'] = redisConnectionParams
+
+		ConnectedIndexedRedisModel = type('AltConnect' + cls.__name__ + str(hashVal), cls.__bases__, modelDictCopy)
+
 		return ConnectedIndexedRedisModel
 
 		
