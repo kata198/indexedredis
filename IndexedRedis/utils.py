@@ -20,7 +20,7 @@ def hashDictOneLevel(myDict):
 
 	lst = []
 	for key in keys:
-		lst.append(key + '__~~__')
+		lst.append(str(myDict[key]) + '__~~__')
 
 	return '+_[,'.join(lst).__hash__()
 
