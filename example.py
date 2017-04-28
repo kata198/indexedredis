@@ -38,7 +38,6 @@ class Song(IndexedRedisModel):
                 'artist',
                 'title',
                 'track_number',
-                'tags',
     ]
 
     KEY_NAME = 'Songs'

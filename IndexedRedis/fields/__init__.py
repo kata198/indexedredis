@@ -100,8 +100,6 @@ class IRField(str):
 		self.defaultValue = defaultValue
 		self.hashIndex = hashIndex
 
-		setCanIndex = False
-
 		if valueType in (str, unicode):
 			valueType = str
 			self._fromStorage = self._convertStr
@@ -115,27 +113,20 @@ class IRField(str):
 
 			# Cannot index here, but CAN index if using IRBytesField. This is because python2 and python3 could handle it differently in certain cases.
 			self.CAN_INDEX = False
-			setCanIndex = True
 		elif valueType in (None, type(None)):
 			self._fromStorage = self._noConvert
 			self._fromInput = self._noConvert
 			self._toStorage = self._noConvert
 			self.CAN_INDEX = False
-			setCanIndex = True
 		# I don't like these next two conditions, but it will train folks to use the correct types (whereas they may just try to shove dict in, and give up that it doesn't work)
 		elif valueType in (dict, list, tuple):
 #			deprecatedMessage('WARNING: Implicitly converting IRField(%s, valueType=%s) to IRField(%s, valueType=IndexedRedis.fields.FieldValueTypes.IRJsonValue)\n' %(repr(name), valueType.__name__, repr(name)), printStack=True)
-			self.CAN_INDEX = IRJsonValue.typeCanIndex(valueType)
-			setCanIndex = True
 			valueType = IRJsonValue
-
+			self.CAN_INDEX = IRJsonValue.CAN_INDEX
 		elif valueType == datetime:
 #			deprecatedMessage('WARNING: Implicitly converting IRField(%s, valueType=datetime.datetime) to IRField(%s, valueType=IndexedRedis.fields.FieldValueTypes.IRDatetimeValue)\n' %(repr(name), repr(name)), printStack=True)
-
 			valueType = IRDatetimeValue
 			self.CAN_INDEX = IRDatetimeValue.CAN_INDEX
-			setCanIndex = True
-
 		else:
 			if not isinstance(valueType, type):
 				raise TypeError('valueType %s is not a type. Use int, str, etc' %(repr(valueType,)))
@@ -146,15 +137,19 @@ class IRField(str):
 				raise TypeError('set types are not supported types. Use IRPickleField to store pickles of any type (which allow storing objects, etc), or use IRField(.. valueType=IRJsonValue) to store basic data (strings, integers) in lists.')
 		self.valueType = valueType
 
-		if not setCanIndex:
-			if valueType in (str, unicode, int, bool):
-				self.CAN_INDEX = True
-			elif hasattr(valueType, 'CAN_INDEX'):
-				self.CAN_INDEX = valueType.CAN_INDEX
-
-
-		if getattr(valueType, 'isIRJson', False) is True:
-			self._toStorage = self._toStorageJson
+		if valueType in (str, unicode, int, bool):
+			self.CAN_INDEX = True
+		elif hasattr(valueType, 'CAN_INDEX'):
+			self.CAN_INDEX = valueType.CAN_INDEX
+		# XXX: Commented because default CAN_INDEX is False.
+#		elif valueType == float:
+#			# Floats are not filterable/indexable across platforms, as they may have different rounding issues, or different number
+#			#  of points of accuracy, etc.
+#			# Use fields.IRFixedPointField if you need to index/filter on a floating point value.
+#			self.CAN_INDEX = False
+#		elif issubclass(valueType.__class__, object):
+#			# Don't allow objects to index by default unless they define CAN_INDEX to be True
+#			self.CAN_INDEX = False
 
 
 	def toStorage(self, value):
@@ -267,7 +262,6 @@ class IRField(str):
 
 		return md5(tobytes(ret)).hexdigest()
 
-
 	def getDefaultValue(self):
 		return self.defaultValue
 
@@ -310,11 +304,6 @@ class IRField(str):
 
 		# I'm not sure what to do here... Should we raise an exception because the data is invalid? Should just return True?
 		raise ValueError('Unexpected value for bool type: %s' %(value,))
-
-
-	def _toStorageJson(self, value):
-		value = self.valueType(value)
-		return to_unicode(value)
 
 
 	@staticmethod
