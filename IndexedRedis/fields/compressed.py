@@ -12,7 +12,7 @@ import bz2
 
 from . import IRField, irNull
 
-from ..compat_str import tobytes, isEmptyString, getDefaultIREncoding
+from ..compat_str import tobytes, isEmptyString, getDefaultIREncoding, isStringy
 
 
 __all__ = ('COMPRESS_MODE_BZ2', 'COMPRESS_MODE_ZLIB', 'IRCompressedField')
@@ -25,11 +25,6 @@ _COMPRESS_MODE_ALIASES_ZLIB = ('gzip', 'gz')
 
 # COMPRESS_MODE_BZ2 - Use to compress using bz2 (bz2)
 COMPRESS_MODE_BZ2 = 'bz2'
-
-try:
-	unicode
-except NameError:
-	unicode = str
 
 
 class IRCompressedField(IRField):
@@ -96,7 +91,7 @@ class IRCompressedField(IRField):
 			return ''
 
 		# TODO: Check this out too, this enxt conditional probably shouldn't be here, maybe it should be an error when false..
-		if issubclass(value.__class__, (bytes, str, unicode)) and tobytes(value[:len(self.header)]) == self.header:
+		if isStringy(value) and tobytes(value[:len(self.header)]) == self.header:
 			return self.getCompressMod().decompress(value)
 
 		return value
