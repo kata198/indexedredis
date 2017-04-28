@@ -40,10 +40,10 @@ class IRCompressedField(IRField):
 		  IRFieldChain with an IRUnicodeField and an IRCompressedField together.
 	'''
 
-	CAN_INDEX = False
+	CAN_INDEX = True
+	hashIndex = True
 
-	# TODO: maybe support other compression levels. The headers change with different levels.
-	#  These are for 9.
+	# NOTE: We don't support different compression levels, as doing so changes header and would prevent indexing.
 	def __init__(self, name='', compressMode=COMPRESS_MODE_ZLIB, defaultValue=irNull):
 		'''
 			__init__ - Create this object

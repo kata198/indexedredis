@@ -78,6 +78,19 @@ class TestIRCompressedField(object):
 
             self.model = Model_CompressedDefaultValue
 
+        elif testMethod == self.test_index:
+            class Model_CompressedIndex(IndexedRedisModel):
+                FIELDS = [
+                    IRField('name'),
+                    IRCompressedField('value')
+                ]
+
+                INDEXED_FIELDS = ['name', 'value']
+
+                KEY_NAME = 'TestIRCompressedField__CompressedIndex'
+
+            self.model = Model_CompressedIndex
+
         # If KEEP_DATA is False (debug flag), then delete all objects before so prior test doesn't interfere
         if self.KEEP_DATA is False and self.model:
             self.model.deleter.destroyModel()
@@ -270,6 +283,38 @@ class TestIRCompressedField(object):
 
         assert obj.value == someStrBytes , 'Expected fetched object to contain the uncompressed value. Got: %s' %(repr(obj.value), )
 
+    def test_index(self):
+
+        Model = self.model
+
+        obj1 = Model(name='one', value='Hello World')
+        obj2 = Model(name='two', value='Goodbye World')
+
+        ids = obj1.save()
+        assert ids and ids[0] , 'Failed to save model'
+
+        ids = obj2.save()
+        assert ids and ids[0] , 'Failed to save model'
+
+
+        fetchedObjs = Model.objects.filter(value='Hello World').all()
+
+        assert fetchedObjs , 'Failed to fetch on IRCompressedField index'
+        assert len(fetchedObjs) == 1 , 'Fetched wrong number of objects.'
+
+        assert fetchedObjs[0].name == 'one' , 'Fetched wrong object'
+
+        obj3 = Model(name='three', value='Hello World')
+        
+        ids = obj3.save()
+        assert ids and ids[0] , 'Failed to save model'
+
+        fetchedObjs = Model.objects.filter(value='Hello World').all()
+
+        assert fetchedObjs , 'Failed to fetch on IRCompressedField index'
+        assert len(fetchedObjs) == 2 , 'Fetched wrong number of objects.'
+
+        assert list(sorted( [obj.name for obj in fetchedObjs] ) ) == ['one', 'three'] , 'Fetched wrong objects'
 
 
 if __name__ == '__main__':
