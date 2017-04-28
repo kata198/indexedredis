@@ -14,7 +14,7 @@ import base64
 import sys
 import subprocess
 
-from IndexedRedis import IndexedRedisModel, irNull
+from IndexedRedis import IndexedRedisModel, irNull, InvalidModelException
 from IndexedRedis.compat_str import tobytes, to_unicode, getDefaultIREncoding, setDefaultIREncoding
 from IndexedRedis.fields import IRBase64Field, IRField, IRUnicodeField, IRPickleField, IRCompressedField, IRFieldChain
 
@@ -459,6 +459,47 @@ class TestIRFieldChain(object):
 
         # TODO: Clean up and test more
 
+        class BadModel1(IndexedRedisModel):
+            
+            FIELDS = [
+                IRField('name'),
+                IRFieldChain('value', [IRPickleField(), IRCompressedField()])
+            ]
+
+            INDEXED_FIELDS = ['name', 'value']
+
+            KEY_NAME = 'TestIRFieldChain__BadModel1'
+
+        gotInvalidModelException = False
+        try:
+            BadModel1.validateModel()
+        except InvalidModelException:
+            gotInvalidModelException = True
+
+        assert gotInvalidModelException , 'Expected to get an invalid model exception trying to index on an IRFieldChain which contains a non-indexable field'
+
+
+        class AutoHashIndexModel1(IndexedRedisModel):
+            FIELDS = [
+                IRField('name'),
+                IRFieldChain('value', [IRField(), IRBase64Field()] ),
+            ]
+
+            INDEXED_FIELDS = ['name', 'value']
+
+            KEY_NAME = 'TestIRFieldChain__AutoHashIndexModel1'
+
+        gotInvalidModelException = False
+        ie = None
+        try:
+            AutoHashIndexModel1.validateModel()
+        except InvalidModelException as _ie:
+            gotInvalidModelException = True
+            ie = _ie
+
+        assert not gotInvalidModelException , 'Expected to be able to index on a field chain containing two indexable IRField types. ' + str(ie)
+
+        assert AutoHashIndexModel1.FIELDS['value'].hashIndex is True , 'Expected hashIndex to be automatically set to True when an IRCompressedField is right-most, as it forces hashIndex=True'
 
 
 if __name__ == '__main__':
