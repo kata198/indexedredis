@@ -5,6 +5,9 @@
 # TestIRField - GoodTests unit tests validating model validation
 #
 
+# Import and apply the properties (like Redis connection parameters) for this test.
+import TestProperties
+
 # vim: set ts=4 sw=4 expandtab
 
 import datetime

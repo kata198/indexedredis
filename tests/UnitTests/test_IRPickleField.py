@@ -5,6 +5,9 @@
 # TestIRPickle - GoodTests unit tests validating IRPickleField
 #
 
+# Import and apply the properties (like Redis connection parameters) for this test.
+import TestProperties
+
 # vim: set ts=4 sw=4 expandtab
 
 

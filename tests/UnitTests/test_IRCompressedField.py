@@ -7,6 +7,9 @@
 
 # vim: set ts=4 sw=4 st=4 expandtab
 
+# Import and apply the properties (like Redis connection parameters) for this test.
+import TestProperties
+
 import sys
 import subprocess
 

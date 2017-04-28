@@ -5,6 +5,9 @@
 # TestIRDefaultValues - Test default values for fields
 #
 
+# Import and apply the properties (like Redis connection parameters) for this test.
+import TestProperties
+
 import sys
 import subprocess
 

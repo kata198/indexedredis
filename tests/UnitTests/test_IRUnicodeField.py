@@ -13,6 +13,9 @@
 # TestIRUnicodeField - Test the IRUnicodeField
 #
 
+# Import and apply the properties (like Redis connection parameters) for this test.
+import TestProperties
+
 # vim: set ts=4 sw=4 st=4 expandtab
 
 import sys

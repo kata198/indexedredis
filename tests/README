@@ -1,0 +1,8 @@
+To run unit tests, execute "./runTests.py".  If GoodTests is not installed, it will ask you if you want to install it to the current directory.
+
+Executing tests this way will NOT use the site-packages install, but will use the local version (good for development).
+
+See GoodTests.py --help for all options.
+
+
+If you are not running Redis on the local server, you will need to edit "UnitTests/TestProperties.py" and set the values in REDIS_CONNECTION_PARAMS with the info to reach your Redis server.

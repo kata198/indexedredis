@@ -13,3 +13,4 @@ recursive-include tests/simple *.py
 recursive-include tests/UnitTests *.py
 recursive-include docs *.html
 include tests/simple/README
+include tests/README
