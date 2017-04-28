@@ -382,25 +382,13 @@ class IRField(str):
 
 
 from .compressed import IRCompressedField
-from .pickle import IRPickleField
-from .unicode import IRUnicodeField
+from .pickle_field import IRPickleField
+from .unicode_field import IRUnicodeField
 from .raw import IRRawField
 from .chain import IRFieldChain
 from .b64 import IRBase64Field
 from .fixedpoint import IRFixedPointField
-from .bytes import IRBytesField
-# Prevent these modules from conflicting with builtin / importable types...
-try:
-	del unicode
-	del bytes
-	del pickle
-except:
-	pass
-
-try:
-	unicode
-except NameError:
-	unicode = str
+from .bytes_field import IRBytesField
 
 from .classic import IRClassicField
 
