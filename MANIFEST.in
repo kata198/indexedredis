@@ -6,7 +6,6 @@ include README.rst
 include example.py
 include setup.py
 include requirements.txt
-include IndexedRedis.html
 recursive-include IndexedRedis *.py
 recursive-include tests *.py
 recursive-include tests/simple *.py
