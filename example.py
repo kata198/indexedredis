@@ -8,10 +8,13 @@ startTime = time.time()
 import datetime
 import sys
 import IndexedRedis
-from IndexedRedis import IndexedRedisModel, IRField
+from IndexedRedis import IndexedRedisModel, IRField, setDefaultRedisConnectionParams
 from IndexedRedis.fields import IRCompressedField, IRFieldChain, IRRawField, IRBytesField, IRUnicodeField
 
 # vim: set ts=8 sw=8 st=8 expandtab :
+
+#  Change this to match your Redis server info
+REDIS_CONNECTION_PARAMS = { 'host' : '127.0.0.1', 'port' : 6379, 'db' : 0 }
 
 # Define the model
 class Song(IndexedRedisModel):
@@ -37,14 +40,14 @@ class Song(IndexedRedisModel):
                 'track_number',
     ]
 
-#    BINARY_FIELDS = [ 'mp3_data', ]
-
     KEY_NAME = 'Songs'
 
 if __name__ == '__main__':
 
+    setDefaultRedisConnectionParams(REDIS_CONNECTION_PARAMS)
+
     fakeMp3 = b"\x99\x12\x14"
-#    fakeThumbnail = b"\x12\x55\x12\x15\x12\x15\x99"
+
     fakeThumbnail = b"\x15\x1A\x1A\x1A\x1A\x1A\x1A\x1B\x1A\x1A\x1A\x1B" + (b"\x1A" * 30) # Compressable data
 
     sys.stdout.write('Testing IndexedRedis version %s\n' %(IndexedRedis.__version__,))
