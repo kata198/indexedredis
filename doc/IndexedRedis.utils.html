@@ -1,29 +1,143 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
-<html><head><title>Python: module IndexedRedis.utils</title>
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-</head><body bgcolor="#f0f0f8">
+<html ><head ><title >Python: module IndexedRedis.utils</title>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+</head><body bgcolor="#f0f0f8" >
 
-<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="heading">
-<tr bgcolor="#7799ee">
-<td valign=bottom>&nbsp;<br>
-<font color="#ffffff" face="helvetica, arial">&nbsp;<br><big><big><strong><a href="IndexedRedis.html"><font color="#ffffff">IndexedRedis</font></a>.utils</strong></big></big></font></td
-><td align=right valign=bottom
-><font color="#ffffff" face="helvetica, arial"><a href=".">index</a><br></font></td></tr></table>
-    <p><tt>#&nbsp;Copyright&nbsp;(c)&nbsp;2016&nbsp;Timothy&nbsp;Savannah&nbsp;under&nbsp;LGPL&nbsp;version&nbsp;2.1.&nbsp;See&nbsp;LICENSE&nbsp;for&nbsp;more&nbsp;information.<br>
-#&nbsp;&nbsp;<br>
+<table width="100%" cellspacing="0" cellpadding="2" border="0" summary="heading" >
+<tr bgcolor="#7799ee" >
+<td valign="bottom" >&nbsp;<br />
+<font color="#ffffff" face="helvetica, arial" >&nbsp;<br /><big ><big ><strong ><a href="IndexedRedis.html" ><font color="#ffffff" >IndexedRedis</font></a>.utils</strong></big></big></font></td><td align="right" valign="bottom" ><font color="#ffffff" face="helvetica, arial" ><a href="IndexedRedis.html" >index</a></font></td></tr></table>
+    <p ><tt >#&nbsp;Copyright&nbsp;(c)&nbsp;2016&nbsp;Timothy&nbsp;Savannah&nbsp;under&nbsp;LGPL&nbsp;version&nbsp;2.1.&nbsp;See&nbsp;LICENSE&nbsp;for&nbsp;more&nbsp;information.<br />
+#&nbsp;&nbsp;<br />
 #&nbsp;Some&nbsp;random&nbsp;utility&nbsp;functions</tt></p>
-<p>
-<table width="100%" cellspacing=0 cellpadding=2 border=0 summary="section">
-<tr bgcolor="#eeaa77">
-<td colspan=3 valign=bottom>&nbsp;<br>
-<font color="#ffffff" face="helvetica, arial"><big><strong>Functions</strong></big></font></td></tr>
+<p >
+<table width="100%" cellspacing="0" cellpadding="2" border="0" summary="section" >
+<tr bgcolor="#ee77aa" >
+<td colspan="3" valign="bottom" >&nbsp;<br />
+<font color="#ffffff" face="helvetica, arial" ><big ><strong >Classes</strong></big></font></td></tr>
     
-<tr><td bgcolor="#eeaa77"><tt>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td>&nbsp;</td>
-<td width="100%"><dl><dt><a name="-hashDictOneLevel"><strong>hashDictOneLevel</strong></a>(myDict)</dt><dd><tt>A&nbsp;function&nbsp;which&nbsp;can&nbsp;generate&nbsp;a&nbsp;hash&nbsp;of&nbsp;a&nbsp;one-level&nbsp;<br>
-&nbsp;&nbsp;dict&nbsp;containing&nbsp;strings&nbsp;(like&nbsp;REDIS_CONNECTION_PARAMS)<br>
-&nbsp;<br>
-@param&nbsp;myDict&nbsp;&lt;dict&gt;&nbsp;-&nbsp;Dict&nbsp;with&nbsp;string&nbsp;keys&nbsp;and&nbsp;values<br>
-&nbsp;<br>
+<tr ><td bgcolor="#ee77aa" ><tt >&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td >&nbsp;</td>
+<td width="100%" ><dl >
+<dt ><font face="helvetica, arial" ><a href="builtins.html#list" >builtins.list</a>(<a href="builtins.html#object" >builtins.object</a>)
+</font></dt><dd >
+<dl >
+<dt ><font face="helvetica, arial" ><a href="IndexedRedis.utils.html#KeyList" >KeyList</a>
+</font></dt></dl>
+</dd>
+</dl>
+ <p >
+<table width="100%" cellspacing="0" cellpadding="2" border="0" summary="section" >
+<tr bgcolor="#ffc8d8" >
+<td colspan="3" valign="bottom" >&nbsp;<br />
+<font color="#000000" face="helvetica, arial" ><a name="KeyList" >class <strong >KeyList</strong></a>(<a href="builtins.html#list" >builtins.list</a>)</font></td></tr>
+    
+<tr bgcolor="#ffc8d8" ><td rowspan="2" ><tt >&nbsp;&nbsp;&nbsp;</tt></td>
+<td colspan="2" ><tt ><a href="#KeyList" >KeyList</a>&nbsp;-&nbsp;A&nbsp;<a href="builtins.html#list" >list</a>&nbsp;which&nbsp;is&nbsp;indexable&nbsp;by&nbsp;both&nbsp;values&nbsp;and&nbsp;integer&nbsp;indexes.<br />&nbsp;</tt></td></tr>
+<tr ><td >&nbsp;</td>
+<td width="100%" ><dl ><dt >Method resolution order:</dt>
+<dd ><a href="IndexedRedis.utils.html#KeyList" >KeyList</a></dd>
+<dd ><a href="builtins.html#list" >builtins.list</a></dd>
+<dd ><a href="builtins.html#object" >builtins.object</a></dd>
+</dl>
+<hr />
+Methods defined here:<br />
+<dl ><dt ><a name="KeyList-__getitem__" ><strong >__getitem__</strong></a>(self, item)</dt><dd ><tt >x.<a href="#KeyList-__getitem__" >__getitem__</a>(y)&nbsp;&lt;==&gt;&nbsp;x[y]</tt></dd></dl>
+
+<hr />
+Data descriptors defined here:<br />
+<dl ><dt ><strong >__dict__</strong></dt>
+<dd ><tt >dictionary&nbsp;for&nbsp;instance&nbsp;variables&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<dl ><dt ><strong >__weakref__</strong></dt>
+<dd ><tt >list&nbsp;of&nbsp;weak&nbsp;references&nbsp;to&nbsp;the&nbsp;object&nbsp;(if&nbsp;defined)</tt></dd>
+</dl>
+<hr />
+Methods inherited from <a href="builtins.html#list" >builtins.list</a>:<br />
+<dl ><dt ><a name="KeyList-__add__" ><strong >__add__</strong></a>(self, value, /)</dt><dd ><tt >Return&nbsp;self+value.</tt></dd></dl>
+
+<dl ><dt ><a name="KeyList-__contains__" ><strong >__contains__</strong></a>(self, key, /)</dt><dd ><tt >Return&nbsp;key&nbsp;in&nbsp;self.</tt></dd></dl>
+
+<dl ><dt ><a name="KeyList-__delitem__" ><strong >__delitem__</strong></a>(self, key, /)</dt><dd ><tt >Delete&nbsp;self[key].</tt></dd></dl>
+
+<dl ><dt ><a name="KeyList-__eq__" ><strong >__eq__</strong></a>(self, value, /)</dt><dd ><tt >Return&nbsp;self==value.</tt></dd></dl>
+
+<dl ><dt ><a name="KeyList-__ge__" ><strong >__ge__</strong></a>(self, value, /)</dt><dd ><tt >Return&nbsp;self&gt;=value.</tt></dd></dl>
+
+<dl ><dt ><a name="KeyList-__getattribute__" ><strong >__getattribute__</strong></a>(self, name, /)</dt><dd ><tt >Return&nbsp;getattr(self,&nbsp;name).</tt></dd></dl>
+
+<dl ><dt ><a name="KeyList-__gt__" ><strong >__gt__</strong></a>(self, value, /)</dt><dd ><tt >Return&nbsp;self&gt;value.</tt></dd></dl>
+
+<dl ><dt ><a name="KeyList-__iadd__" ><strong >__iadd__</strong></a>(self, value, /)</dt><dd ><tt >Implement&nbsp;self+=value.</tt></dd></dl>
+
+<dl ><dt ><a name="KeyList-__imul__" ><strong >__imul__</strong></a>(self, value, /)</dt><dd ><tt >Implement&nbsp;self*=value.</tt></dd></dl>
+
+<dl ><dt ><a name="KeyList-__init__" ><strong >__init__</strong></a>(self, /, *args, **kwargs)</dt><dd ><tt >Initialize&nbsp;self.&nbsp;&nbsp;See&nbsp;help(type(self))&nbsp;for&nbsp;accurate&nbsp;signature.</tt></dd></dl>
+
+<dl ><dt ><a name="KeyList-__iter__" ><strong >__iter__</strong></a>(self, /)</dt><dd ><tt >Implement&nbsp;iter(self).</tt></dd></dl>
+
+<dl ><dt ><a name="KeyList-__le__" ><strong >__le__</strong></a>(self, value, /)</dt><dd ><tt >Return&nbsp;self&lt;=value.</tt></dd></dl>
+
+<dl ><dt ><a name="KeyList-__len__" ><strong >__len__</strong></a>(self, /)</dt><dd ><tt >Return&nbsp;len(self).</tt></dd></dl>
+
+<dl ><dt ><a name="KeyList-__lt__" ><strong >__lt__</strong></a>(self, value, /)</dt><dd ><tt >Return&nbsp;self&lt;value.</tt></dd></dl>
+
+<dl ><dt ><a name="KeyList-__mul__" ><strong >__mul__</strong></a>(self, value, /)</dt><dd ><tt >Return&nbsp;self*value.n</tt></dd></dl>
+
+<dl ><dt ><a name="KeyList-__ne__" ><strong >__ne__</strong></a>(self, value, /)</dt><dd ><tt >Return&nbsp;self!=value.</tt></dd></dl>
+
+<dl ><dt ><a name="KeyList-__new__" ><strong >__new__</strong></a>(*args, **kwargs)<font color="#909090" ><font face="helvetica, arial" > from <a href="builtins.html#type" >builtins.type</a></font></font></dt><dd ><tt >Create&nbsp;and&nbsp;return&nbsp;a&nbsp;new&nbsp;object.&nbsp;&nbsp;See&nbsp;help(type)&nbsp;for&nbsp;accurate&nbsp;signature.</tt></dd></dl>
+
+<dl ><dt ><a name="KeyList-__repr__" ><strong >__repr__</strong></a>(self, /)</dt><dd ><tt >Return&nbsp;repr(self).</tt></dd></dl>
+
+<dl ><dt ><a name="KeyList-__reversed__" ><strong >__reversed__</strong></a>(...)</dt><dd ><tt >L.<a href="#KeyList-__reversed__" >__reversed__</a>()&nbsp;--&nbsp;return&nbsp;a&nbsp;reverse&nbsp;iterator&nbsp;over&nbsp;the&nbsp;<a href="builtins.html#list" >list</a></tt></dd></dl>
+
+<dl ><dt ><a name="KeyList-__rmul__" ><strong >__rmul__</strong></a>(self, value, /)</dt><dd ><tt >Return&nbsp;self*value.</tt></dd></dl>
+
+<dl ><dt ><a name="KeyList-__setitem__" ><strong >__setitem__</strong></a>(self, key, value, /)</dt><dd ><tt >Set&nbsp;self[key]&nbsp;to&nbsp;value.</tt></dd></dl>
+
+<dl ><dt ><a name="KeyList-__sizeof__" ><strong >__sizeof__</strong></a>(...)</dt><dd ><tt >L.<a href="#KeyList-__sizeof__" >__sizeof__</a>()&nbsp;--&nbsp;size&nbsp;of&nbsp;L&nbsp;in&nbsp;memory,&nbsp;in&nbsp;bytes</tt></dd></dl>
+
+<dl ><dt ><a name="KeyList-append" ><strong >append</strong></a>(...)</dt><dd ><tt >L.<a href="#KeyList-append" >append</a>(object)&nbsp;-&gt;&nbsp;None&nbsp;--&nbsp;append&nbsp;object&nbsp;to&nbsp;end</tt></dd></dl>
+
+<dl ><dt ><a name="KeyList-clear" ><strong >clear</strong></a>(...)</dt><dd ><tt >L.<a href="#KeyList-clear" >clear</a>()&nbsp;-&gt;&nbsp;None&nbsp;--&nbsp;remove&nbsp;all&nbsp;items&nbsp;from&nbsp;L</tt></dd></dl>
+
+<dl ><dt ><a name="KeyList-copy" ><strong >copy</strong></a>(...)</dt><dd ><tt >L.<a href="#KeyList-copy" >copy</a>()&nbsp;-&gt;&nbsp;<a href="builtins.html#list" >list</a>&nbsp;--&nbsp;a&nbsp;shallow&nbsp;copy&nbsp;of&nbsp;L</tt></dd></dl>
+
+<dl ><dt ><a name="KeyList-count" ><strong >count</strong></a>(...)</dt><dd ><tt >L.<a href="#KeyList-count" >count</a>(value)&nbsp;-&gt;&nbsp;integer&nbsp;--&nbsp;return&nbsp;number&nbsp;of&nbsp;occurrences&nbsp;of&nbsp;value</tt></dd></dl>
+
+<dl ><dt ><a name="KeyList-extend" ><strong >extend</strong></a>(...)</dt><dd ><tt >L.<a href="#KeyList-extend" >extend</a>(iterable)&nbsp;-&gt;&nbsp;None&nbsp;--&nbsp;extend&nbsp;<a href="builtins.html#list" >list</a>&nbsp;by&nbsp;appending&nbsp;elements&nbsp;from&nbsp;the&nbsp;iterable</tt></dd></dl>
+
+<dl ><dt ><a name="KeyList-index" ><strong >index</strong></a>(...)</dt><dd ><tt >L.<a href="#KeyList-index" >index</a>(value,&nbsp;[start,&nbsp;[stop]])&nbsp;-&gt;&nbsp;integer&nbsp;--&nbsp;return&nbsp;first&nbsp;index&nbsp;of&nbsp;value.<br />
+Raises&nbsp;ValueError&nbsp;if&nbsp;the&nbsp;value&nbsp;is&nbsp;not&nbsp;present.</tt></dd></dl>
+
+<dl ><dt ><a name="KeyList-insert" ><strong >insert</strong></a>(...)</dt><dd ><tt >L.<a href="#KeyList-insert" >insert</a>(index,&nbsp;object)&nbsp;--&nbsp;insert&nbsp;object&nbsp;before&nbsp;index</tt></dd></dl>
+
+<dl ><dt ><a name="KeyList-pop" ><strong >pop</strong></a>(...)</dt><dd ><tt >L.<a href="#KeyList-pop" >pop</a>([index])&nbsp;-&gt;&nbsp;item&nbsp;--&nbsp;remove&nbsp;and&nbsp;return&nbsp;item&nbsp;at&nbsp;index&nbsp;(default&nbsp;last).<br />
+Raises&nbsp;IndexError&nbsp;if&nbsp;<a href="builtins.html#list" >list</a>&nbsp;is&nbsp;empty&nbsp;or&nbsp;index&nbsp;is&nbsp;out&nbsp;of&nbsp;range.</tt></dd></dl>
+
+<dl ><dt ><a name="KeyList-remove" ><strong >remove</strong></a>(...)</dt><dd ><tt >L.<a href="#KeyList-remove" >remove</a>(value)&nbsp;-&gt;&nbsp;None&nbsp;--&nbsp;remove&nbsp;first&nbsp;occurrence&nbsp;of&nbsp;value.<br />
+Raises&nbsp;ValueError&nbsp;if&nbsp;the&nbsp;value&nbsp;is&nbsp;not&nbsp;present.</tt></dd></dl>
+
+<dl ><dt ><a name="KeyList-reverse" ><strong >reverse</strong></a>(...)</dt><dd ><tt >L.<a href="#KeyList-reverse" >reverse</a>()&nbsp;--&nbsp;reverse&nbsp;*IN&nbsp;PLACE*</tt></dd></dl>
+
+<dl ><dt ><a name="KeyList-sort" ><strong >sort</strong></a>(...)</dt><dd ><tt >L.<a href="#KeyList-sort" >sort</a>(key=None,&nbsp;reverse=False)&nbsp;-&gt;&nbsp;None&nbsp;--&nbsp;stable&nbsp;sort&nbsp;*IN&nbsp;PLACE*</tt></dd></dl>
+
+<hr />
+Data and other attributes inherited from <a href="builtins.html#list" >builtins.list</a>:<br />
+<dl ><dt ><strong >__hash__</strong> = None</dt></dl>
+
+</td></tr></table></p></td></tr></table><p >
+<table width="100%" cellspacing="0" cellpadding="2" border="0" summary="section" >
+<tr bgcolor="#eeaa77" >
+<td colspan="3" valign="bottom" >&nbsp;<br />
+<font color="#ffffff" face="helvetica, arial" ><big ><strong >Functions</strong></big></font></td></tr>
+    
+<tr ><td bgcolor="#eeaa77" ><tt >&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td >&nbsp;</td>
+<td width="100%" ><dl ><dt ><a name="-hashDictOneLevel" ><strong >hashDictOneLevel</strong></a>(myDict)</dt><dd ><tt >A&nbsp;function&nbsp;which&nbsp;can&nbsp;generate&nbsp;a&nbsp;hash&nbsp;of&nbsp;a&nbsp;one-level&nbsp;<br />
+&nbsp;&nbsp;dict&nbsp;containing&nbsp;strings&nbsp;(like&nbsp;REDIS_CONNECTION_PARAMS)<br />
+&nbsp;<br />
+@param&nbsp;myDict&nbsp;&lt;dict&gt;&nbsp;-&nbsp;Dict&nbsp;with&nbsp;string&nbsp;keys&nbsp;and&nbsp;values<br />
+&nbsp;<br />
 @return&nbsp;&lt;long&gt;&nbsp;-&nbsp;Hash&nbsp;of&nbsp;myDict</tt></dd></dl>
 </td></tr></table>
-</body></html>
+</p></p></body></html>
