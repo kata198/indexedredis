@@ -27,7 +27,8 @@ class IRFieldChain(IRField):
 	   The output of one field is the input of the next.
 	'''
 
-	# TODO: We can probably index if all chained field types are indexable, but just disallow for now.
+	# CAN_INDEX will be determined if the right-most field in chainedFields is indeable.
+	#   hashIndex will also be forced if the right-most field forces it.
 	CAN_INDEX = False
 
 	def __init__(self, name, chainedFields, defaultValue=irNull, hashIndex=False):
@@ -49,6 +50,9 @@ class IRFieldChain(IRField):
 
 		self.chainedFields = []
 
+		if not chainedFields:
+			raise ValueError('IRFieldChain has no chained fields defined!')
+
 		for field in chainedFields:
 			# If we got jsut a class, construct it.
 			if type(field) == type:
@@ -63,15 +67,14 @@ class IRFieldChain(IRField):
 
 		self.defaultValue = defaultValue
 
-		(canIndex, mustHashIndex) = self._checkCanIndex()
-
-		if mustHashIndex is True:
-			hashIndex = mustHashIndex
+		(canIndex, forceHashIndex) = self._checkCanIndex()
 
 		self.CAN_INDEX = canIndex
 
-		self.hashIndex = hashIndex
+		if hashIndex is False:
+			hashIndex = forceHashIndex
 
+		self.hashIndex = hashIndex
 
 
 	def _toStorage(self, value):
@@ -94,16 +97,14 @@ class IRFieldChain(IRField):
 			@return - The converted value, or "irNull" if no value was defined (and field type is not default/string)
 		'''
 
-		for i in range(len(self.chainedFields)-1, -1, -1):
-			chainedField = self.chainedFields[i]
+		for chainedField in reversed(self.chainedFields):
 			value = chainedField._fromStorage(value)
 
 		return value
 	
 	def _fromInput(self, value):
 
-		for i in range(len(self.chainedFields)-1, -1, -1):
-			chainedField = self.chainedFields[i]
+		for chainedField in reversed(self.chainedFields):
 			value = chainedField._fromInput(value)
 
 		return value
@@ -121,11 +122,10 @@ class IRFieldChain(IRField):
 			fieldRepr = chainedField.__class__.__name__ + '( ' + ', '.join(chainedField._getReprProperties()) + ' )'
 			chainedFieldsRepr.append(fieldRepr)
 
-		return ['chainedFields=[ %s ]' %(', '.join(chainedFieldsRepr), )]
-
-	def copy(self):
-		return self.__class__(name=self.name, chainedFields=[field.copy() for field in self.chainedFields], defaultValue=self.defaultValue)
-
+		return [
+			'chainedFields=[ %s ]' %(', '.join(chainedFieldsRepr), ),
+			'hashIndex=%s' %(str(self.hashIndex),)
+		]
 
 	def _checkCanIndex(self):
 		'''
@@ -133,8 +133,10 @@ class IRFieldChain(IRField):
 				Also checks the right-most field for "hashIndex" - if it needs to hash we will hash.
 				  Otherwise, we won't (unless hashIndex=True in constructor, TODO)
 		'''
-		# TODO: I think we can actually just check if the right-most is indexable, rather than check them all..
-		#   Since if you can index its output, you can index the whole thing.
+
+		# NOTE: We can't just check the right-most field. For types like pickle that don't support indexing, they don't
+		#   support it because python2 and python3 have different results for pickle.dumps on the same object.
+		#   So if we have a field chain like Pickle, Compressed   then we will have two different results.
 		if not self.chainedFields:
 			return (False, False)
 
@@ -144,6 +146,8 @@ class IRFieldChain(IRField):
 
 		return (True, self.chainedFields[-1].hashIndex)
 
+	def copy(self):
+		return self.__class__(name=self.name, chainedFields=[field.copy() for field in self.chainedFields], defaultValue=self.defaultValue)
 
 
 	def __new__(self, name, chainedFields=None, defaultValue=irNull, hashIndex=False):
