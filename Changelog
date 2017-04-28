@@ -7,6 +7,17 @@ bytes)
   WITHOUT CHANGES TO YOUR CODE. **DO NOT RUN THE COMPAT FUNCTION SHIPPED WITH
   4.1.3 - 4.1.4**
 
+
+- Fixup the way connecting to Redis works. Now, instead of having to define
+REDIS_CONNECTION_PARAMS on each model, you can call
+"setDefaultRedisConnectionParams" to set a default connection configuration.
+This configuration will be used on all models unless REDIS_CONNECTION_PARAMS has been
+defined and is not empty.
+
+- Rename "connect" method to "connectAlt" on IndexedRedisModel (to better
+convey what it does). Also fix it up to better support multiple alternate
+connection models
+
 - Remove formerly deprecated IndexedRedisModel.BASE64_FIELDS - You've been
 warned for a while now to use fields.IRField.IRBase64Field
   **BACKWARDS INCOMPATIBLE**
@@ -51,8 +62,6 @@ defaultIREncoding. Also, removed deprecated getEncoding and setEncoding, use get
 "convert", but is used when the input is guarenteed to NOT come from storage.
 This will simplify a lot of things, remove some conditional and weird garbage,
 etc. Constructing objects is now a lot cheapear.
-  TODO: Go through and audit all fields, write lots of tests, clean up code to
-  take full advantage of this change
 
 
 - Store "was validated" result for model by the class itself. This allows models with the same keyname (like for conversion, tests, etc) to be validated for each unique class.
@@ -165,7 +174,48 @@ IndexedRedis.fields.__init__.py file
 - Allow specifying an explicit encoding on IRBytesField, to use an alternative
 than the default encoding
 
-- Added many more tests
+- Make IRField's copyable
+
+- Add "copyModel" method to IndexedRedisModel as a class method which will
+return a copy of the model class. This way when converting field types etc you
+can easily have the same model, copy it, and change one.
+
+- Add "name" property to IRField to make it more obvious how to access ( you
+can still use str(fieldObj) )
+
+- Improve compat_convertHashedIndexes method to work with all field types, and
+to only touch fields which can both hash and not hash
+
+- Update IRFixedPointField to ensure the value is always rounded to
+#decimalPlaces property, not just after fetch from storage.
+
+- Ensure IRRawField always actually does no encoding/decoding, does not support
+irNull (well, it just treats it same as empty string)
+
+- Ensure that IRBytesField always encodes to bytes as soon as you set the
+value on the object
+
+- Fix bug where toIndex could be calling toStorage twice on a value (which
+affected things like base64 fields, which could be base64-of-base64 on index).
+Didn't matter before because base64 fields couldn't index before, but maybe
+some case hit this bug.
+
+- Allow IRFieldChain to index if the right-most field in the chain supports
+indexing
+
+- Added many more tests, like for each field type, lots more usage scenarios,
+etc.
+
+- Make IRCompressedField indexable.
+
+The only non-indexable fields now are
+IRPickleField (Different py2 vs py3 repr), IRRawField (because, no
+encoding/decoding), and IRField(valueType= (float or dict or json) ) (float because
+floats are machine-dependent, use IRFixedPointField to define a precision and
+support indexes. And dicts are not ordered. And json has too many nesting
+issues. )
+
+- Some cleanups, refactoring, optimizations, simplifications
 
 
 4.1.4 - Sat Apr 15 2017
