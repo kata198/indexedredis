@@ -138,7 +138,7 @@ The first argument is the string of the field name.
 
 **Type**
 
-You can have a value automatically cast to a certain type (which saves a step if you need to filter further through the QueryableList results, like age\_\_gt=15)
+You can have a value automatically converted to a certain type on IRField (or use one of the several extending fields)
 
 by passing that type as "valueType". (e.x.  IRField('age', valueType=int))
 
@@ -202,9 +202,9 @@ Indexable unless type is a json type or float (use IRFixedPointField to index on
 Indexable.
 
 
-**IRCompressedField** - Automatically compresses before storage and decompresses after retrieval. Argument "compressMode" currently supports "zlib" (default) or "bz2".
+**IRCompressedField** - Automatically compresses before storage and decompresses after retrieval. Argument "compressMode" currently supports "zlib" (default), "bz2", or "lzma".
 
-Indexsble.
+Indexable.
 
 
 **IRFixedPointField** - A floating-point with a fixed number of decimal places. This type supports indexing using floats, whereas IRField(...valueType=float) does not, as different platforms have different accuracies, roundings, etc. Takes a parameter, decimalPlaces (default 5), to define the precision after the decimal point.
@@ -463,13 +463,20 @@ As your model changes, you may need to add a field to the INDEXED\_FIELDS array.
 	MyModel.objects.reindex()
 
 
-**Connecting to other Redis instances**
+If, however, you change a field type of an indexable field, you should use the "reset" method.
 
-You may want to use the same model on multiple Redis instances. To do so, use the .connect method on IndexedRedisModel.
+	MyModel.objects.reset( MyModel.objects.all() )
 
-	AltConnectionMyModel = MyModel.connect({'host' : 'althost', 'db' : 4})
 
-Then, use AltConnectionMyModel just as you would use MyModel.
+**Connecting to multiple Redis instances**
+
+You may want to use the same model on multiple Redis instances. To do so, use the .connectAlt method on IndexedRedisModel.
+
+	AltConnectionMyModel = MyModel.connectAlt({'host' : 'althost', 'db' : 4})
+
+The "connectAlt" method takes a dict of Redis connection params, and returns a copy of the Model which will point to the alternate Redis.
+
+You use AltConnectionMyModel just as you would use MyModel.
 
 
 Client-Side Filtering/Methods
@@ -555,7 +562,9 @@ See https://raw.githubusercontent.com/kata198/indexedredis/master/example.py
 
 Also check out
 
-https://github.com/kata198/indexedredis/tree/master/tests/simple
+https://github.com/kata198/indexedredis/tree/master/tests
+
+for various standalone and unit tests which will show various usage patterns
 
 
 Contact Me
