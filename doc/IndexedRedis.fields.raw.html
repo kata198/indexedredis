@@ -37,7 +37,9 @@
 &nbsp;<br />
 NOTE:&nbsp;This&nbsp;type&nbsp;does&nbsp;NOT&nbsp;support&nbsp;irNull,&nbsp;nor&nbsp;default&nbsp;values&nbsp;(because&nbsp;no&nbsp;encoding/decoding).<br />
 &nbsp;<br />
-After&nbsp;fetch,&nbsp;the&nbsp;value&nbsp;will&nbsp;always&nbsp;be&nbsp;bytes&nbsp;(Again,&nbsp;no&nbsp;translation).<br />&nbsp;</tt></td></tr>
+After&nbsp;fetch,&nbsp;the&nbsp;value&nbsp;will&nbsp;always&nbsp;be&nbsp;bytes&nbsp;(Again,&nbsp;no&nbsp;translation).<br />
+&nbsp;<br />
+This&nbsp;field&nbsp;type&nbsp;does&nbsp;not&nbsp;support&nbsp;indexing.<br />&nbsp;</tt></td></tr>
 <tr ><td >&nbsp;</td>
 <td width="100%" ><dl ><dt >Method resolution order:</dt>
 <dd ><a href="IndexedRedis.fields.raw.html#IRRawField" >IRRawField</a></dd>
@@ -47,7 +49,11 @@ After&nbsp;fetch,&nbsp;the&nbsp;value&nbsp;will&nbsp;always&nbsp;be&nbsp;bytes&n
 </dl>
 <hr />
 Methods defined here:<br />
-<dl ><dt ><a name="IRRawField-__init__" ><strong >__init__</strong></a>(self, name='')</dt><dd ><tt >__init__&nbsp;-&nbsp;Create&nbsp;an&nbsp;<a href="#IRRawField" >IRRawField</a>.&nbsp;Only&nbsp;takes&nbsp;a&nbsp;name</tt></dd></dl>
+<dl ><dt ><a name="IRRawField-__init__" ><strong >__init__</strong></a>(self, name='')</dt><dd ><tt >__init__&nbsp;-&nbsp;Create&nbsp;an&nbsp;<a href="#IRRawField" >IRRawField</a>.&nbsp;Only&nbsp;takes&nbsp;a&nbsp;name<br />
+&nbsp;<br />
+@param&nbsp;name&nbsp;&lt;str&gt;&nbsp;-&nbsp;Field&nbsp;name<br />
+&nbsp;<br />
+This&nbsp;field&nbsp;type&nbsp;does&nbsp;not&nbsp;support&nbsp;indexing.</tt></dd></dl>
 
 <dl ><dt ><a name="IRRawField-copy" ><strong >copy</strong></a>(self)</dt><dd ><tt >copy&nbsp;-&nbsp;Create&nbsp;a&nbsp;copy&nbsp;of&nbsp;this&nbsp;<a href="IndexedRedis.fields.html#IRField" >IRField</a>.<br />
 &nbsp;<br />

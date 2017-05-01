@@ -38,7 +38,9 @@
 Data&nbsp;will&nbsp;be&nbsp;found&nbsp;on&nbsp;the&nbsp;object&nbsp;in&nbsp;bytes&nbsp;format&nbsp;(right&nbsp;after&nbsp;assignment,&nbsp;after&nbsp;fetching,&nbsp;etc).&nbsp;To&nbsp;convert&nbsp;to&nbsp;another&nbsp;format,<br />
 &nbsp;&nbsp;use&nbsp;an&nbsp;IRFieldChain.<br />
 &nbsp;<br />
-&nbsp;&nbsp;Like,&nbsp;use&nbsp;it&nbsp;with&nbsp;an&nbsp;IRUnicodeField&nbsp;as&nbsp;the&nbsp;far&nbsp;left&nbsp;to&nbsp;have&nbsp;it&nbsp;be&nbsp;a&nbsp;utf-16&nbsp;value,&nbsp;or&nbsp;use&nbsp;<a href="IndexedRedis.fields.html#IRField" >IRField</a>(valueType=str)&nbsp;for&nbsp;a&nbsp;string,&nbsp;or&nbsp;<a href="IndexedRedis.fields.html#IRField" >IRField</a>(valueType=int)&nbsp;for&nbsp;int,&nbsp;etc.<br />&nbsp;</tt></td></tr>
+&nbsp;&nbsp;Like,&nbsp;use&nbsp;it&nbsp;with&nbsp;an&nbsp;IRUnicodeField&nbsp;as&nbsp;the&nbsp;far&nbsp;left&nbsp;to&nbsp;have&nbsp;it&nbsp;be&nbsp;a&nbsp;utf-16&nbsp;value,&nbsp;or&nbsp;use&nbsp;<a href="IndexedRedis.fields.html#IRField" >IRField</a>(valueType=str)&nbsp;for&nbsp;a&nbsp;string,&nbsp;or&nbsp;<a href="IndexedRedis.fields.html#IRField" >IRField</a>(valueType=int)&nbsp;for&nbsp;int,&nbsp;etc.<br />
+&nbsp;<br />
+&nbsp;&nbsp;An&nbsp;IRBytesField&nbsp;is&nbsp;indexable&nbsp;and&nbsp;the&nbsp;index&nbsp;is&nbsp;forced&nbsp;to&nbsp;be&nbsp;hashed<br />&nbsp;</tt></td></tr>
 <tr ><td >&nbsp;</td>
 <td width="100%" ><dl ><dt >Method resolution order:</dt>
 <dd ><a href="IndexedRedis.fields.b64.html#IRBase64Field" >IRBase64Field</a></dd>
@@ -54,7 +56,10 @@ Methods defined here:<br />
 &nbsp;<br />
 @param&nbsp;defaultValue&nbsp;&lt;any&gt;&nbsp;(Default&nbsp;irNull)&nbsp;-&nbsp;Default&nbsp;value&nbsp;of&nbsp;field<br />
 &nbsp;<br />
-@param&nbsp;encoding&nbsp;&lt;None/str&gt;&nbsp;(default&nbsp;None)&nbsp;-&nbsp;An&nbsp;explicit&nbsp;encoding&nbsp;to&nbsp;use&nbsp;when&nbsp;converting&nbsp;to&nbsp;bytes.&nbsp;If&nbsp;None,&nbsp;the&nbsp;global&nbsp;defaultIREncoding&nbsp;will&nbsp;be&nbsp;used.</tt></dd></dl>
+@param&nbsp;encoding&nbsp;&lt;None/str&gt;&nbsp;(default&nbsp;None)&nbsp;-&nbsp;An&nbsp;explicit&nbsp;encoding&nbsp;to&nbsp;use&nbsp;when&nbsp;converting&nbsp;to&nbsp;bytes.&nbsp;If&nbsp;None,&nbsp;the&nbsp;global&nbsp;defaultIREncoding&nbsp;will&nbsp;be&nbsp;used.<br />
+&nbsp;<br />
+&nbsp;<br />
+An&nbsp;IRBytesField&nbsp;is&nbsp;indexable&nbsp;and&nbsp;the&nbsp;index&nbsp;is&nbsp;forced&nbsp;to&nbsp;be&nbsp;hashed</tt></dd></dl>
 
 <dl ><dt ><a name="IRBase64Field-copy" ><strong >copy</strong></a>(self)</dt><dd ><tt >copy&nbsp;-&nbsp;Create&nbsp;a&nbsp;copy&nbsp;of&nbsp;this&nbsp;<a href="IndexedRedis.fields.html#IRField" >IRField</a>.<br />
 &nbsp;<br />

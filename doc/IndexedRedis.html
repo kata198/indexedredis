@@ -73,21 +73,13 @@
 <tr bgcolor="#ffc8d8" ><td rowspan="2" ><tt >&nbsp;&nbsp;&nbsp;</tt></td>
 <td colspan="2" ><tt ><a href="#IRField" >IRField</a>&nbsp;-&nbsp;An&nbsp;advanced&nbsp;field<br />
 &nbsp;<br />
-@param&nbsp;name&nbsp;&lt;<a href="builtins.html#str" >str</a>&gt;&nbsp;-&nbsp;The&nbsp;field&nbsp;name<br />
-&nbsp;<br />
-@param&nbsp;valueType&nbsp;&lt;None/type&gt;&nbsp;-&nbsp;The&nbsp;type&nbsp;to&nbsp;use&nbsp;for&nbsp;the&nbsp;value&nbsp;of&nbsp;this&nbsp;field.&nbsp;Default&nbsp;is&nbsp;<a href="builtins.html#str" >str</a>&nbsp;(<a href="builtins.html#str" >str</a>/unicode&nbsp;will&nbsp;both&nbsp;be&nbsp;unicode).&nbsp;If&nbsp;on&nbsp;python3&nbsp;and&nbsp;bytes&nbsp;are&nbsp;passed,&nbsp;will&nbsp;be&nbsp;decoded&nbsp;to&nbsp;bytes&nbsp;using&nbsp;default&nbsp;encoding.<br />
-&nbsp;&nbsp;Using&nbsp;None,&nbsp;the&nbsp;raw&nbsp;data&nbsp;will&nbsp;be&nbsp;used&nbsp;(bytes)&nbsp;on&nbsp;retrieval&nbsp;and&nbsp;for&nbsp;storage.<br />
-&nbsp;&nbsp;Can&nbsp;be&nbsp;a&nbsp;basic&nbsp;type&nbsp;(like&nbsp;int).&nbsp;Use&nbsp;BINARY_FIELDS&nbsp;array&nbsp;on&nbsp;the&nbsp;model&nbsp;to&nbsp;have&nbsp;value&nbsp;be&nbsp;"bytes"<br />
-&nbsp;<br />
-@param&nbsp;hashIndex&nbsp;&lt;bool&gt;&nbsp;(default&nbsp;False)&nbsp;-&nbsp;If&nbsp;True,&nbsp;the&nbsp;value&nbsp;will&nbsp;be&nbsp;hashed&nbsp;for&nbsp;use&nbsp;in&nbsp;the&nbsp;index.&nbsp;This&nbsp;is&nbsp;useful&nbsp;on&nbsp;fields&nbsp;where&nbsp;the&nbsp;value&nbsp;may&nbsp;be&nbsp;very&nbsp;large.&nbsp;For&nbsp;smaller&nbsp;fields,&nbsp;can&nbsp;keep&nbsp;this&nbsp;as&nbsp;False.<br />
-&nbsp;<br />
-@param&nbsp;defaultValue&nbsp;&lt;any&gt;&nbsp;(default&nbsp;irNull)&nbsp;-&nbsp;The&nbsp;value&nbsp;assigned&nbsp;to&nbsp;this&nbsp;field&nbsp;as&nbsp;a&nbsp;"default",&nbsp;i.e.&nbsp;when&nbsp;no&nbsp;value&nbsp;has&nbsp;yet&nbsp;been&nbsp;set.&nbsp;Generally,&nbsp;it&nbsp;makes&nbsp;sense&nbsp;to&nbsp;keep&nbsp;this&nbsp;as&nbsp;irNull,&nbsp;but&nbsp;you&nbsp;may&nbsp;want&nbsp;a&nbsp;different&nbsp;default.<br />
-&nbsp;<br />
 If&nbsp;a&nbsp;type&nbsp;is&nbsp;defined&nbsp;other&nbsp;than&nbsp;default/<a href="builtins.html#str" >str</a>/bytes/None&nbsp;,&nbsp;an&nbsp;empty&nbsp;value&nbsp;(empty&nbsp;string&nbsp;in&nbsp;Redis)&nbsp;will&nbsp;be&nbsp;assigned&nbsp;to&nbsp;the&nbsp;IRNullType&nbsp;instance&nbsp;provided&nbsp;in&nbsp;this&nbsp;module,&nbsp;irNull.<br />
 irNull&nbsp;does&nbsp;not&nbsp;equal&nbsp;anything&nbsp;except&nbsp;irNull&nbsp;(or&nbsp;another&nbsp;IRNullType).&nbsp;Use&nbsp;this&nbsp;to&nbsp;check&nbsp;if&nbsp;a&nbsp;value&nbsp;has&nbsp;been&nbsp;assigned&nbsp;for&nbsp;other&nbsp;types.<br />
 &nbsp;<br />
 BE&nbsp;VERY&nbsp;CAREFUL&nbsp;ABOUT&nbsp;USING&nbsp;"float"&nbsp;as&nbsp;a&nbsp;type!&nbsp;It&nbsp;is&nbsp;an&nbsp;inprecise&nbsp;field&nbsp;and&nbsp;can&nbsp;vary&nbsp;from&nbsp;system&nbsp;to&nbsp;system.&nbsp;Instead&nbsp;of&nbsp;using&nbsp;a&nbsp;float,<br />
-consider&nbsp;using&nbsp;fields.IRFixedPointField,&nbsp;which&nbsp;is&nbsp;indexable.<br />&nbsp;</tt></td></tr>
+consider&nbsp;using&nbsp;fields.IRFixedPointField,&nbsp;which&nbsp;is&nbsp;indexable.<br />
+&nbsp;<br />
+An&nbsp;<a href="#IRField" >IRField</a>&nbsp;may&nbsp;be&nbsp;indexable&nbsp;(depending&nbsp;on&nbsp;the&nbsp;type),&nbsp;and&nbsp;has&nbsp;the&nbsp;option&nbsp;to&nbsp;hash&nbsp;the&nbsp;index<br />&nbsp;</tt></td></tr>
 <tr ><td >&nbsp;</td>
 <td width="100%" ><dl ><dt >Method resolution order:</dt>
 <dd ><a href="IndexedRedis.fields.html#IRField" >IRField</a></dd>
@@ -99,6 +91,7 @@ Methods defined here:<br />
 <dl ><dt ><a name="IRField-__init__" ><strong >__init__</strong></a>(self, name='', valueType=&lt;class 'str'&gt;, defaultValue=irNull, hashIndex=False)</dt><dd ><tt >__init__&nbsp;-&nbsp;Create&nbsp;an&nbsp;<a href="#IRField" >IRField</a>.&nbsp;Use&nbsp;this&nbsp;directly&nbsp;in&nbsp;the&nbsp;FIELDS&nbsp;array&nbsp;for&nbsp;advanced&nbsp;functionality&nbsp;on&nbsp;a&nbsp;field.<br />
 &nbsp;<br />
 @param&nbsp;name&nbsp;&lt;<a href="builtins.html#str" >str</a>&gt;&nbsp;-&nbsp;The&nbsp;name&nbsp;of&nbsp;this&nbsp;field<br />
+&nbsp;<br />
 @param&nbsp;valueType&nbsp;&lt;type&gt;&nbsp;-&nbsp;The&nbsp;type&nbsp;that&nbsp;will&nbsp;be&nbsp;used&nbsp;for&nbsp;this&nbsp;field.&nbsp;Default&nbsp;<a href="builtins.html#str" >str</a>/unicode&nbsp;(and&nbsp;bytes&nbsp;on&nbsp;python2)<br />
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;act&nbsp;the&nbsp;same&nbsp;as&nbsp;non-<a href="#IRField" >IRField</a>&nbsp;FIELDS&nbsp;entries&nbsp;(just&nbsp;plain&nbsp;string),&nbsp;i.e.&nbsp;they&nbsp;are&nbsp;encoded&nbsp;to&nbsp;unicode&nbsp;to&nbsp;and&nbsp;from&nbsp;Redis.<br />
 &nbsp;<br />
@@ -121,6 +114,7 @@ Methods defined here:<br />
 &nbsp;<br />
 @param&nbsp;hashIndex&nbsp;&lt;bool&gt;&nbsp;(default&nbsp;False)&nbsp;-&nbsp;If&nbsp;true,&nbsp;the&nbsp;md5&nbsp;hash&nbsp;of&nbsp;the&nbsp;value&nbsp;will&nbsp;be&nbsp;used&nbsp;for&nbsp;indexing&nbsp;and&nbsp;filtering.&nbsp;This&nbsp;may&nbsp;be&nbsp;useful&nbsp;for&nbsp;very&nbsp;long&nbsp;fields.<br />
 &nbsp;<br />
+An&nbsp;<a href="#IRField" >IRField</a>&nbsp;may&nbsp;be&nbsp;indexable&nbsp;(depending&nbsp;on&nbsp;the&nbsp;type),&nbsp;and&nbsp;has&nbsp;the&nbsp;option&nbsp;to&nbsp;hash&nbsp;the&nbsp;index<br />
 &nbsp;<br />
 NOTE:&nbsp;If&nbsp;you&nbsp;are&nbsp;extending&nbsp;<a href="#IRField" >IRField</a>,&nbsp;you&nbsp;should&nbsp;probably&nbsp;not&nbsp;call&nbsp;this&nbsp;__init__&nbsp;function.&nbsp;So&nbsp;long&nbsp;as&nbsp;you&nbsp;implement&nbsp;your&nbsp;own&nbsp;"convert",&nbsp;any&nbsp;fields&nbsp;used&nbsp;are&nbsp;set&nbsp;on&nbsp;a&nbsp;class-level.</tt></dd></dl>
 
@@ -513,7 +507,11 @@ These&nbsp;chain&nbsp;together&nbsp;the&nbsp;operations&nbsp;from&nbsp;multiple&
 toStorage&nbsp;is&nbsp;applied&nbsp;left-to-right,<br />
 fromInput&nbsp;and&nbsp;fromStorage&nbsp;is&nbsp;applied&nbsp;right-to-left.<br />
 &nbsp;<br />
-The&nbsp;output&nbsp;of&nbsp;one&nbsp;field&nbsp;is&nbsp;the&nbsp;input&nbsp;of&nbsp;the&nbsp;next.<br />&nbsp;</tt></td></tr>
+The&nbsp;output&nbsp;of&nbsp;one&nbsp;field&nbsp;is&nbsp;the&nbsp;input&nbsp;of&nbsp;the&nbsp;next.<br />
+&nbsp;<br />
+An&nbsp;<a href="#IRFieldChain" >IRFieldChain</a>&nbsp;is&nbsp;indexable&nbsp;so&nbsp;long&nbsp;as&nbsp;ALL&nbsp;of&nbsp;its&nbsp;contained&nbsp;fields&nbsp;are&nbsp;indexable.<br />
+An&nbsp;<a href="#IRFieldChain" >IRFieldChain</a>&nbsp;is&nbsp;forced&nbsp;to&nbsp;be&nbsp;a&nbsp;hashed&nbsp;index&nbsp;if&nbsp;the&nbsp;rightmost&nbsp;field&nbsp;forces&nbsp;it&nbsp;(as&nbsp;some&nbsp;types&nbsp;do),<br />
+&nbsp;&nbsp;otherwise&nbsp;hashIndex&nbsp;will&nbsp;determine&nbsp;if&nbsp;it&nbsp;is&nbsp;hashed.<br />&nbsp;</tt></td></tr>
 <tr ><td >&nbsp;</td>
 <td width="100%" ><dl ><dt >Method resolution order:</dt>
 <dd ><a href="IndexedRedis.fields.chain.html#IRFieldChain" >IRFieldChain</a></dd>
@@ -532,6 +530,9 @@ Methods defined here:<br />
 &nbsp;<br />
 &nbsp;&nbsp;The&nbsp;output&nbsp;of&nbsp;one&nbsp;field&nbsp;is&nbsp;the&nbsp;input&nbsp;of&nbsp;the&nbsp;next.<br />
 &nbsp;<br />
+&nbsp;&nbsp;&nbsp;An&nbsp;<a href="#IRFieldChain" >IRFieldChain</a>&nbsp;is&nbsp;indexable&nbsp;so&nbsp;long&nbsp;as&nbsp;ALL&nbsp;of&nbsp;its&nbsp;contained&nbsp;fields&nbsp;are&nbsp;indexable.<br />
+&nbsp;&nbsp;&nbsp;An&nbsp;<a href="#IRFieldChain" >IRFieldChain</a>&nbsp;is&nbsp;forced&nbsp;to&nbsp;be&nbsp;a&nbsp;hashed&nbsp;index&nbsp;if&nbsp;the&nbsp;rightmost&nbsp;field&nbsp;forces&nbsp;it&nbsp;(as&nbsp;some&nbsp;types&nbsp;do),<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;otherwise&nbsp;hashIndex&nbsp;will&nbsp;determine&nbsp;if&nbsp;it&nbsp;is&nbsp;hashed.<br />
 &nbsp;<br />
 @see&nbsp;<a href="#IRField" >IRField</a>.__init__</tt></dd></dl>
 

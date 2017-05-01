@@ -81,7 +81,9 @@
 Data&nbsp;will&nbsp;be&nbsp;found&nbsp;on&nbsp;the&nbsp;object&nbsp;in&nbsp;bytes&nbsp;format&nbsp;(right&nbsp;after&nbsp;assignment,&nbsp;after&nbsp;fetching,&nbsp;etc).&nbsp;To&nbsp;convert&nbsp;to&nbsp;another&nbsp;format,<br />
 &nbsp;&nbsp;use&nbsp;an&nbsp;IRFieldChain.<br />
 &nbsp;<br />
-&nbsp;&nbsp;Like,&nbsp;use&nbsp;it&nbsp;with&nbsp;an&nbsp;<a href="#IRUnicodeField" >IRUnicodeField</a>&nbsp;as&nbsp;the&nbsp;far&nbsp;left&nbsp;to&nbsp;have&nbsp;it&nbsp;be&nbsp;a&nbsp;utf-16&nbsp;value,&nbsp;or&nbsp;use&nbsp;<a href="#IRField" >IRField</a>(valueType=<a href="builtins.html#str" >str</a>)&nbsp;for&nbsp;a&nbsp;string,&nbsp;or&nbsp;<a href="#IRField" >IRField</a>(valueType=int)&nbsp;for&nbsp;int,&nbsp;etc.<br />&nbsp;</tt></td></tr>
+&nbsp;&nbsp;Like,&nbsp;use&nbsp;it&nbsp;with&nbsp;an&nbsp;<a href="#IRUnicodeField" >IRUnicodeField</a>&nbsp;as&nbsp;the&nbsp;far&nbsp;left&nbsp;to&nbsp;have&nbsp;it&nbsp;be&nbsp;a&nbsp;utf-16&nbsp;value,&nbsp;or&nbsp;use&nbsp;<a href="#IRField" >IRField</a>(valueType=<a href="builtins.html#str" >str</a>)&nbsp;for&nbsp;a&nbsp;string,&nbsp;or&nbsp;<a href="#IRField" >IRField</a>(valueType=int)&nbsp;for&nbsp;int,&nbsp;etc.<br />
+&nbsp;<br />
+&nbsp;&nbsp;An&nbsp;<a href="#IRBytesField" >IRBytesField</a>&nbsp;is&nbsp;indexable&nbsp;and&nbsp;the&nbsp;index&nbsp;is&nbsp;forced&nbsp;to&nbsp;be&nbsp;hashed<br />&nbsp;</tt></td></tr>
 <tr ><td >&nbsp;</td>
 <td width="100%" ><dl ><dt >Method resolution order:</dt>
 <dd ><a href="IndexedRedis.fields.b64.html#IRBase64Field" >IRBase64Field</a></dd>
@@ -97,7 +99,10 @@ Methods defined here:<br />
 &nbsp;<br />
 @param&nbsp;defaultValue&nbsp;&lt;any&gt;&nbsp;(Default&nbsp;irNull)&nbsp;-&nbsp;Default&nbsp;value&nbsp;of&nbsp;field<br />
 &nbsp;<br />
-@param&nbsp;encoding&nbsp;&lt;None/<a href="builtins.html#str" >str</a>&gt;&nbsp;(default&nbsp;None)&nbsp;-&nbsp;An&nbsp;explicit&nbsp;encoding&nbsp;to&nbsp;use&nbsp;when&nbsp;converting&nbsp;to&nbsp;bytes.&nbsp;If&nbsp;None,&nbsp;the&nbsp;global&nbsp;defaultIREncoding&nbsp;will&nbsp;be&nbsp;used.</tt></dd></dl>
+@param&nbsp;encoding&nbsp;&lt;None/<a href="builtins.html#str" >str</a>&gt;&nbsp;(default&nbsp;None)&nbsp;-&nbsp;An&nbsp;explicit&nbsp;encoding&nbsp;to&nbsp;use&nbsp;when&nbsp;converting&nbsp;to&nbsp;bytes.&nbsp;If&nbsp;None,&nbsp;the&nbsp;global&nbsp;defaultIREncoding&nbsp;will&nbsp;be&nbsp;used.<br />
+&nbsp;<br />
+&nbsp;<br />
+An&nbsp;<a href="#IRBytesField" >IRBytesField</a>&nbsp;is&nbsp;indexable&nbsp;and&nbsp;the&nbsp;index&nbsp;is&nbsp;forced&nbsp;to&nbsp;be&nbsp;hashed</tt></dd></dl>
 
 <dl ><dt ><a name="IRBase64Field-copy" ><strong >copy</strong></a>(self)</dt><dd ><tt >copy&nbsp;-&nbsp;Create&nbsp;a&nbsp;copy&nbsp;of&nbsp;this&nbsp;<a href="#IRField" >IRField</a>.<br />
 &nbsp;<br />
@@ -489,7 +494,9 @@ must&nbsp;be&nbsp;a&nbsp;string,&nbsp;whose&nbsp;characters&nbsp;will&nbsp;be&nb
 &nbsp;<br />
 Similar&nbsp;to&nbsp;<a href="#IRRawField" >IRRawField</a>,&nbsp;except&nbsp;<a href="#IRRawField" >IRRawField</a>&nbsp;does&nbsp;not&nbsp;touch&nbsp;encoding,&nbsp;this&nbsp;forces&nbsp;to&nbsp;bytes.<br />
 &nbsp;<br />
-This&nbsp;is&nbsp;replacement&nbsp;for&nbsp;BINARY_FIELDS<br />&nbsp;</tt></td></tr>
+This&nbsp;is&nbsp;replacement&nbsp;for&nbsp;BINARY_FIELDS<br />
+&nbsp;<br />
+An&nbsp;<a href="#IRBytesField" >IRBytesField</a>&nbsp;is&nbsp;indexable,&nbsp;and&nbsp;the&nbsp;index&nbsp;is&nbsp;forced&nbsp;to&nbsp;be&nbsp;hashed.<br />&nbsp;</tt></td></tr>
 <tr ><td >&nbsp;</td>
 <td width="100%" ><dl ><dt >Method resolution order:</dt>
 <dd ><a href="IndexedRedis.fields.bytes_field.html#IRBytesField" >IRBytesField</a></dd>
@@ -502,9 +509,13 @@ Methods defined here:<br />
 <dl ><dt ><a name="IRBytesField-__init__" ><strong >__init__</strong></a>(self, name='', defaultValue=irNull, encoding=None)</dt><dd ><tt >__init__&nbsp;-&nbsp;Create&nbsp;an&nbsp;<a href="#IRBytesField" >IRBytesField</a>&nbsp;object<br />
 &nbsp;<br />
 @param&nbsp;name&nbsp;&lt;<a href="builtins.html#str" >str</a>&gt;&nbsp;-&nbsp;Field&nbsp;name<br />
+&nbsp;<br />
 @param&nbsp;defaultValue&nbsp;&lt;any&gt;&nbsp;default&nbsp;irNull&nbsp;-&nbsp;Default&nbsp;value&nbsp;for&nbsp;this&nbsp;field<br />
+&nbsp;<br />
 @param&nbsp;encoding&nbsp;&lt;None/<a href="builtins.html#str" >str</a>&gt;&nbsp;-&nbsp;If&nbsp;None,&nbsp;defaultIREncoding&nbsp;will&nbsp;be&nbsp;used&nbsp;when&nbsp;converting&nbsp;to&nbsp;bytes,<br />
-&nbsp;&nbsp;otherwise&nbsp;you&nbsp;can&nbsp;provide&nbsp;an&nbsp;explicit&nbsp;encoding</tt></dd></dl>
+&nbsp;&nbsp;otherwise&nbsp;you&nbsp;can&nbsp;provide&nbsp;an&nbsp;explicit&nbsp;encoding<br />
+&nbsp;<br />
+An&nbsp;<a href="#IRBytesField" >IRBytesField</a>&nbsp;is&nbsp;indexable,&nbsp;and&nbsp;the&nbsp;index&nbsp;is&nbsp;forced&nbsp;to&nbsp;be&nbsp;hashed.</tt></dd></dl>
 
 <dl ><dt ><a name="IRBytesField-copy" ><strong >copy</strong></a>(self)</dt><dd ><tt >copy&nbsp;-&nbsp;Create&nbsp;a&nbsp;copy&nbsp;of&nbsp;this&nbsp;<a href="#IRField" >IRField</a>.<br />
 &nbsp;<br />
@@ -897,7 +908,9 @@ must&nbsp;be&nbsp;a&nbsp;string,&nbsp;whose&nbsp;characters&nbsp;will&nbsp;be&nb
 &nbsp;<br />
 This&nbsp;will&nbsp;store&nbsp;and&nbsp;retrieve&nbsp;data&nbsp;encoding&nbsp;into&nbsp;the&nbsp;default&nbsp;encoding&nbsp;(@see&nbsp;IndexedRedis.compat_str.setDefaultIREncoding)<br />
 &nbsp;<br />
-and&nbsp;have&nbsp;a&nbsp;default&nbsp;value&nbsp;of&nbsp;empty&nbsp;string.<br />&nbsp;</tt></td></tr>
+and&nbsp;have&nbsp;a&nbsp;default&nbsp;value&nbsp;of&nbsp;empty&nbsp;string.<br />
+&nbsp;<br />
+An&nbsp;<a href="#IRClassicField" >IRClassicField</a>&nbsp;is&nbsp;indexable,&nbsp;but&nbsp;there&nbsp;is&nbsp;no&nbsp;option&nbsp;to&nbsp;hash&nbsp;the&nbsp;index.<br />&nbsp;</tt></td></tr>
 <tr ><td >&nbsp;</td>
 <td width="100%" ><dl ><dt >Method resolution order:</dt>
 <dd ><a href="IndexedRedis.fields.classic.html#IRClassicField" >IRClassicField</a></dd>
@@ -907,33 +920,14 @@ and&nbsp;have&nbsp;a&nbsp;default&nbsp;value&nbsp;of&nbsp;empty&nbsp;string.<br 
 </dl>
 <hr />
 Methods defined here:<br />
-<dl ><dt ><a name="IRClassicField-__init__" ><strong >__init__</strong></a>(self, name='')</dt><dd ><tt >__init__&nbsp;-&nbsp;Create&nbsp;an&nbsp;<a href="#IRField" >IRField</a>.&nbsp;Use&nbsp;this&nbsp;directly&nbsp;in&nbsp;the&nbsp;FIELDS&nbsp;array&nbsp;for&nbsp;advanced&nbsp;functionality&nbsp;on&nbsp;a&nbsp;field.<br />
+<dl ><dt ><a name="IRClassicField-__init__" ><strong >__init__</strong></a>(self, name='')</dt><dd ><tt >__init__&nbsp;-&nbsp;Create&nbsp;an&nbsp;<a href="#IRClassicField" >IRClassicField</a>.<br />
+&nbsp;&nbsp;This&nbsp;field&nbsp;behaves&nbsp;as&nbsp;a&nbsp;plain&nbsp;string&nbsp;entry&nbsp;in&nbsp;FIELDS&nbsp;did&nbsp;prior&nbsp;to&nbsp;5.0.0.<br />
 &nbsp;<br />
-@param&nbsp;name&nbsp;&lt;<a href="builtins.html#str" >str</a>&gt;&nbsp;-&nbsp;The&nbsp;name&nbsp;of&nbsp;this&nbsp;field<br />
-@param&nbsp;valueType&nbsp;&lt;<a href="builtins.html#type" >type</a>&gt;&nbsp;-&nbsp;The&nbsp;<a href="builtins.html#type" >type</a>&nbsp;that&nbsp;will&nbsp;be&nbsp;used&nbsp;for&nbsp;this&nbsp;field.&nbsp;Default&nbsp;<a href="builtins.html#str" >str</a>/unicode&nbsp;(and&nbsp;bytes&nbsp;on&nbsp;python2)<br />
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;act&nbsp;the&nbsp;same&nbsp;as&nbsp;non-<a href="#IRField" >IRField</a>&nbsp;FIELDS&nbsp;entries&nbsp;(just&nbsp;plain&nbsp;string),&nbsp;i.e.&nbsp;they&nbsp;are&nbsp;encoded&nbsp;to&nbsp;unicode&nbsp;to&nbsp;and&nbsp;from&nbsp;Redis.<br />
+&nbsp;&nbsp;The&nbsp;default&nbsp;value&nbsp;is&nbsp;empty&nbsp;string,&nbsp;and&nbsp;it&nbsp;stores&nbsp;strings&nbsp;using&nbsp;defaultIREncoding.<br />
 &nbsp;<br />
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;If&nbsp;you&nbsp;pass&nbsp;in&nbsp;None,&nbsp;then&nbsp;no&nbsp;decoding&nbsp;will&nbsp;take&nbsp;place&nbsp;(so&nbsp;whatever&nbsp;you&nbsp;provide&nbsp;goes&nbsp;in,&nbsp;and&nbsp;bytes&nbsp;come&nbsp;out&nbsp;of&nbsp;Redis).<br />
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;This&nbsp;is&nbsp;similar&nbsp;to&nbsp;IRFieldRaw<br />
+&nbsp;&nbsp;Consider&nbsp;changing&nbsp;to&nbsp;an&nbsp;<a href="#IRField" >IRField</a>&nbsp;or&nbsp;one&nbsp;of&nbsp;the&nbsp;other&nbsp;many&nbsp;types.<br />
 &nbsp;<br />
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;On&nbsp;python3,&nbsp;if&nbsp;you&nbsp;pass&nbsp;bytes,&nbsp;than&nbsp;the&nbsp;field&nbsp;will&nbsp;be&nbsp;left&nbsp;as&nbsp;bytes.<br />
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;To&nbsp;be&nbsp;both&nbsp;python2&nbsp;and&nbsp;python3&nbsp;compatible,&nbsp;however,&nbsp;you&nbsp;can&nbsp;use&nbsp;<a href="#IRBytesField" >IRBytesField</a><br />
-&nbsp;<br />
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;If&nbsp;bool&nbsp;is&nbsp;used,&nbsp;then&nbsp;"1"&nbsp;and&nbsp;"true"&nbsp;are&nbsp;True,&nbsp;"0"&nbsp;and&nbsp;"false"&nbsp;are&nbsp;False,&nbsp;any&nbsp;other&nbsp;value&nbsp;is&nbsp;an&nbsp;exception.<br />
-&nbsp;<br />
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;You&nbsp;can&nbsp;also&nbsp;pass&nbsp;an&nbsp;advanced&nbsp;<a href="builtins.html#type" >type</a>&nbsp;(see&nbsp;IndexedRedis.fields.FieldValueTypes)&nbsp;like&nbsp;<a href="datetime.html#datetime" >datetime</a>&nbsp;and&nbsp;json.<br />
-&nbsp;<br />
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;All&nbsp;types&nbsp;other&nbsp;than&nbsp;string/unicode/bytes/None&nbsp;will&nbsp;be&nbsp;assigned&nbsp;'irNull'&nbsp;if&nbsp;they&nbsp;were&nbsp;not&nbsp;provided&nbsp;a&nbsp;value.<br />
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;@see&nbsp;irNull&nbsp;-&nbsp;Equals&nbsp;only&nbsp;irNull&nbsp;(or&nbsp;other&nbsp;<a href="#IRNullType" >IRNullType</a>&nbsp;instances).&nbsp;You&nbsp;can&nbsp;use&nbsp;this&nbsp;to&nbsp;check&nbsp;if&nbsp;an&nbsp;integer&nbsp;is&nbsp;defined&nbsp;versus&nbsp;0,&nbsp;for&nbsp;example.<br />
-&nbsp;<br />
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;While&nbsp;this&nbsp;class&nbsp;is&nbsp;create&nbsp;for&nbsp;primitive&nbsp;types&nbsp;(like&nbsp;int's&nbsp;and&nbsp;datetimes),&nbsp;more&nbsp;complex&nbsp;types&nbsp;extend&nbsp;<a href="#IRField" >IRField</a>&nbsp;(such&nbsp;as&nbsp;pickle,&nbsp;compressed,&nbsp;or&nbsp;unicode&nbsp;with&nbsp;a&nbsp;specific&nbsp;encoding).<br />
-&nbsp;<br />
-@param&nbsp;defaultValue&nbsp;&lt;any&gt;&nbsp;(default&nbsp;irNull)&nbsp;-&nbsp;The&nbsp;value&nbsp;assigned&nbsp;to&nbsp;this&nbsp;field&nbsp;as&nbsp;a&nbsp;"default",&nbsp;i.e.&nbsp;when&nbsp;no&nbsp;value&nbsp;has&nbsp;yet&nbsp;been&nbsp;set.&nbsp;Generally,&nbsp;it&nbsp;makes&nbsp;sense&nbsp;to&nbsp;keep&nbsp;this&nbsp;as&nbsp;irNull,&nbsp;but&nbsp;you&nbsp;may&nbsp;want&nbsp;a&nbsp;different&nbsp;default.<br />
-&nbsp;<br />
-@param&nbsp;hashIndex&nbsp;&lt;bool&gt;&nbsp;(default&nbsp;False)&nbsp;-&nbsp;If&nbsp;true,&nbsp;the&nbsp;md5&nbsp;hash&nbsp;of&nbsp;the&nbsp;value&nbsp;will&nbsp;be&nbsp;used&nbsp;for&nbsp;indexing&nbsp;and&nbsp;filtering.&nbsp;This&nbsp;may&nbsp;be&nbsp;useful&nbsp;for&nbsp;very&nbsp;long&nbsp;fields.<br />
-&nbsp;<br />
-&nbsp;<br />
-NOTE:&nbsp;If&nbsp;you&nbsp;are&nbsp;extending&nbsp;<a href="#IRField" >IRField</a>,&nbsp;you&nbsp;should&nbsp;probably&nbsp;not&nbsp;call&nbsp;this&nbsp;__init__&nbsp;function.&nbsp;So&nbsp;long&nbsp;as&nbsp;you&nbsp;implement&nbsp;your&nbsp;own&nbsp;"convert",&nbsp;any&nbsp;fields&nbsp;used&nbsp;are&nbsp;set&nbsp;on&nbsp;a&nbsp;class-level.</tt></dd></dl>
+&nbsp;&nbsp;@param&nbsp;name&nbsp;&lt;<a href="builtins.html#str" >str</a>&gt;&nbsp;-&nbsp;Field&nbsp;name</tt></dd></dl>
 
 <dl ><dt ><a name="IRClassicField-copy" ><strong >copy</strong></a>(self)</dt><dd ><tt >copy&nbsp;-&nbsp;Create&nbsp;a&nbsp;copy&nbsp;of&nbsp;this&nbsp;<a href="#IRField" >IRField</a>.<br />
 &nbsp;<br />
@@ -1329,7 +1323,9 @@ like:&nbsp;<br />
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;FIELDS&nbsp;&nbsp;=&nbsp;[&nbsp;...,&nbsp;<a href="#IRCompressedField" >IRCompressedField</a>('my_compressed_field',&nbsp;compressMode=COMPRESS_MODE_ZLIB]<br />
 &nbsp;<br />
 By&nbsp;default,&nbsp;after&nbsp;fetch&nbsp;the&nbsp;data&nbsp;will&nbsp;be&nbsp;encoded&nbsp;as&nbsp;"bytes".&nbsp;If&nbsp;you&nbsp;need&nbsp;it&nbsp;to&nbsp;be&nbsp;unicode/string,&nbsp;use&nbsp;an<br />
-&nbsp;&nbsp;IRFieldChain&nbsp;with&nbsp;an&nbsp;<a href="#IRUnicodeField" >IRUnicodeField</a>&nbsp;and&nbsp;an&nbsp;<a href="#IRCompressedField" >IRCompressedField</a>&nbsp;together.<br />&nbsp;</tt></td></tr>
+&nbsp;&nbsp;IRFieldChain&nbsp;with&nbsp;an&nbsp;<a href="#IRUnicodeField" >IRUnicodeField</a>&nbsp;and&nbsp;an&nbsp;<a href="#IRCompressedField" >IRCompressedField</a>&nbsp;together.<br />
+&nbsp;<br />
+An&nbsp;<a href="#IRCompressedField" >IRCompressedField</a>&nbsp;is&nbsp;indexable,&nbsp;and&nbsp;forces&nbsp;the&nbsp;index&nbsp;to&nbsp;be&nbsp;hashed.<br />&nbsp;</tt></td></tr>
 <tr ><td >&nbsp;</td>
 <td width="100%" ><dl ><dt >Method resolution order:</dt>
 <dd ><a href="IndexedRedis.fields.compressed.html#IRCompressedField" >IRCompressedField</a></dd>
@@ -1339,7 +1335,26 @@ By&nbsp;default,&nbsp;after&nbsp;fetch&nbsp;the&nbsp;data&nbsp;will&nbsp;be&nbsp
 </dl>
 <hr />
 Methods defined here:<br />
-<dl ><dt ><a name="IRCompressedField-__init__" ><strong >__init__</strong></a>(self, name='', compressMode='zlib', defaultValue=irNull)</dt><dd ><tt >__init__&nbsp;-&nbsp;Create&nbsp;this&nbsp;object</tt></dd></dl>
+<dl ><dt ><a name="IRCompressedField-__init__" ><strong >__init__</strong></a>(self, name='', compressMode='zlib', defaultValue=irNull)</dt><dd ><tt >__init__&nbsp;-&nbsp;Create&nbsp;this&nbsp;object<br />
+&nbsp;<br />
+@param&nbsp;name&nbsp;&lt;<a href="builtins.html#str" >str</a>&gt;&nbsp;-&nbsp;Field&nbsp;name<br />
+@param&nbsp;compressMode&nbsp;&lt;<a href="builtins.html#str" >str</a>&gt;,&nbsp;default&nbsp;"zlib".&nbsp;Determines&nbsp;the&nbsp;compression&nbsp;module&nbsp;to&nbsp;use<br />
+&nbsp;&nbsp;for&nbsp;this&nbsp;field.&nbsp;See&nbsp;COMPRESS_MODE_*&nbsp;variables&nbsp;in&nbsp;this&nbsp;module.<br />
+&nbsp;<br />
+&nbsp;&nbsp;Supported&nbsp;values&nbsp;as&nbsp;of&nbsp;5.0.0&nbsp;are:<br />
+&nbsp;<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"zlib"&nbsp;/&nbsp;"gz"&nbsp;/&nbsp;"gzip"&nbsp;-&nbsp;zlib&nbsp;compression<br />
+&nbsp;<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"bz2"&nbsp;&nbsp;/&nbsp;"bzip2"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;bzip2&nbsp;compression<br />
+&nbsp;<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"lzma"&nbsp;/&nbsp;"xz"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;LZMA&nbsp;compression.<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;NOTE:&nbsp;This&nbsp;is&nbsp;provided&nbsp;in&nbsp;python3&nbsp;by&nbsp;default,&nbsp;but&nbsp;in&nbsp;python2&nbsp;you&nbsp;will&nbsp;need&nbsp;an&nbsp;external&nbsp;module.<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;IndexedRedis&nbsp;will&nbsp;automatically&nbsp;detect&nbsp;if&nbsp;"backports.lzma"&nbsp;or&nbsp;"lzmaffi"&nbsp;are&nbsp;installed,&nbsp;and&nbsp;use&nbsp;them<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if&nbsp;the&nbsp;core&nbsp;"lzma"&nbsp;module&nbsp;is&nbsp;not&nbsp;available.<br />
+&nbsp;<br />
+@param&nbsp;defaultValue&nbsp;-&nbsp;The&nbsp;default&nbsp;value&nbsp;for&nbsp;this&nbsp;field<br />
+&nbsp;<br />
+An&nbsp;<a href="#IRCompressedField" >IRCompressedField</a>&nbsp;is&nbsp;indexable,&nbsp;and&nbsp;forces&nbsp;the&nbsp;index&nbsp;to&nbsp;be&nbsp;hashed.</tt></dd></dl>
 
 <dl ><dt ><a name="IRCompressedField-copy" ><strong >copy</strong></a>(self)</dt><dd ><tt >copy&nbsp;-&nbsp;Create&nbsp;a&nbsp;copy&nbsp;of&nbsp;this&nbsp;<a href="#IRField" >IRField</a>.<br />
 &nbsp;<br />
@@ -1347,7 +1362,9 @@ Methods defined here:<br />
 &nbsp;<br />
 @return&nbsp;&lt;<a href="#IRField" >IRField</a>&nbsp;(or&nbsp;subclass)&gt;&nbsp;-&nbsp;Another&nbsp;<a href="#IRField" >IRField</a>&nbsp;that&nbsp;has&nbsp;all&nbsp;the&nbsp;same&nbsp;values&nbsp;as&nbsp;this&nbsp;one.</tt></dd></dl>
 
-<dl ><dt ><a name="IRCompressedField-getCompressMod" ><strong >getCompressMod</strong></a>(self)</dt></dl>
+<dl ><dt ><a name="IRCompressedField-getCompressMod" ><strong >getCompressMod</strong></a>(self)</dt><dd ><tt >getCompressMod&nbsp;-&nbsp;Return&nbsp;the&nbsp;module&nbsp;used&nbsp;for&nbsp;compression&nbsp;on&nbsp;this&nbsp;field<br />
+&nbsp;<br />
+@return&nbsp;&lt;module&gt;&nbsp;-&nbsp;The&nbsp;module&nbsp;for&nbsp;compression</tt></dd></dl>
 
 <hr />
 Static methods defined here:<br />
@@ -1891,21 +1908,13 @@ Data descriptors inherited from <a href="datetime.html#date" >datetime.date</a>:
 <tr bgcolor="#ffc8d8" ><td rowspan="2" ><tt >&nbsp;&nbsp;&nbsp;</tt></td>
 <td colspan="2" ><tt ><a href="#IRField" >IRField</a>&nbsp;-&nbsp;An&nbsp;advanced&nbsp;field<br />
 &nbsp;<br />
-@param&nbsp;name&nbsp;&lt;<a href="builtins.html#str" >str</a>&gt;&nbsp;-&nbsp;The&nbsp;field&nbsp;name<br />
-&nbsp;<br />
-@param&nbsp;valueType&nbsp;&lt;None/<a href="builtins.html#type" >type</a>&gt;&nbsp;-&nbsp;The&nbsp;<a href="builtins.html#type" >type</a>&nbsp;to&nbsp;use&nbsp;for&nbsp;the&nbsp;value&nbsp;of&nbsp;this&nbsp;field.&nbsp;Default&nbsp;is&nbsp;<a href="builtins.html#str" >str</a>&nbsp;(<a href="builtins.html#str" >str</a>/unicode&nbsp;will&nbsp;both&nbsp;be&nbsp;unicode).&nbsp;If&nbsp;on&nbsp;python3&nbsp;and&nbsp;bytes&nbsp;are&nbsp;passed,&nbsp;will&nbsp;be&nbsp;decoded&nbsp;to&nbsp;bytes&nbsp;using&nbsp;default&nbsp;encoding.<br />
-&nbsp;&nbsp;Using&nbsp;None,&nbsp;the&nbsp;raw&nbsp;data&nbsp;will&nbsp;be&nbsp;used&nbsp;(bytes)&nbsp;on&nbsp;retrieval&nbsp;and&nbsp;for&nbsp;storage.<br />
-&nbsp;&nbsp;Can&nbsp;be&nbsp;a&nbsp;basic&nbsp;<a href="builtins.html#type" >type</a>&nbsp;(like&nbsp;int).&nbsp;Use&nbsp;BINARY_FIELDS&nbsp;array&nbsp;on&nbsp;the&nbsp;model&nbsp;to&nbsp;have&nbsp;value&nbsp;be&nbsp;"bytes"<br />
-&nbsp;<br />
-@param&nbsp;hashIndex&nbsp;&lt;bool&gt;&nbsp;(default&nbsp;False)&nbsp;-&nbsp;If&nbsp;True,&nbsp;the&nbsp;value&nbsp;will&nbsp;be&nbsp;hashed&nbsp;for&nbsp;use&nbsp;in&nbsp;the&nbsp;index.&nbsp;This&nbsp;is&nbsp;useful&nbsp;on&nbsp;fields&nbsp;where&nbsp;the&nbsp;value&nbsp;may&nbsp;be&nbsp;very&nbsp;large.&nbsp;For&nbsp;smaller&nbsp;fields,&nbsp;can&nbsp;keep&nbsp;this&nbsp;as&nbsp;False.<br />
-&nbsp;<br />
-@param&nbsp;defaultValue&nbsp;&lt;any&gt;&nbsp;(default&nbsp;irNull)&nbsp;-&nbsp;The&nbsp;value&nbsp;assigned&nbsp;to&nbsp;this&nbsp;field&nbsp;as&nbsp;a&nbsp;"default",&nbsp;i.e.&nbsp;when&nbsp;no&nbsp;value&nbsp;has&nbsp;yet&nbsp;been&nbsp;set.&nbsp;Generally,&nbsp;it&nbsp;makes&nbsp;sense&nbsp;to&nbsp;keep&nbsp;this&nbsp;as&nbsp;irNull,&nbsp;but&nbsp;you&nbsp;may&nbsp;want&nbsp;a&nbsp;different&nbsp;default.<br />
-&nbsp;<br />
 If&nbsp;a&nbsp;<a href="builtins.html#type" >type</a>&nbsp;is&nbsp;defined&nbsp;other&nbsp;than&nbsp;default/<a href="builtins.html#str" >str</a>/bytes/None&nbsp;,&nbsp;an&nbsp;empty&nbsp;value&nbsp;(empty&nbsp;string&nbsp;in&nbsp;Redis)&nbsp;will&nbsp;be&nbsp;assigned&nbsp;to&nbsp;the&nbsp;<a href="#IRNullType" >IRNullType</a>&nbsp;instance&nbsp;provided&nbsp;in&nbsp;this&nbsp;module,&nbsp;irNull.<br />
 irNull&nbsp;does&nbsp;not&nbsp;equal&nbsp;anything&nbsp;except&nbsp;irNull&nbsp;(or&nbsp;another&nbsp;<a href="#IRNullType" >IRNullType</a>).&nbsp;Use&nbsp;this&nbsp;to&nbsp;check&nbsp;if&nbsp;a&nbsp;value&nbsp;has&nbsp;been&nbsp;assigned&nbsp;for&nbsp;other&nbsp;types.<br />
 &nbsp;<br />
 BE&nbsp;VERY&nbsp;CAREFUL&nbsp;ABOUT&nbsp;USING&nbsp;"float"&nbsp;as&nbsp;a&nbsp;<a href="builtins.html#type" >type</a>!&nbsp;It&nbsp;is&nbsp;an&nbsp;inprecise&nbsp;field&nbsp;and&nbsp;can&nbsp;vary&nbsp;from&nbsp;system&nbsp;to&nbsp;system.&nbsp;Instead&nbsp;of&nbsp;using&nbsp;a&nbsp;float,<br />
-consider&nbsp;using&nbsp;fields.<a href="#IRFixedPointField" >IRFixedPointField</a>,&nbsp;which&nbsp;is&nbsp;indexable.<br />&nbsp;</tt></td></tr>
+consider&nbsp;using&nbsp;fields.<a href="#IRFixedPointField" >IRFixedPointField</a>,&nbsp;which&nbsp;is&nbsp;indexable.<br />
+&nbsp;<br />
+An&nbsp;<a href="#IRField" >IRField</a>&nbsp;may&nbsp;be&nbsp;indexable&nbsp;(depending&nbsp;on&nbsp;the&nbsp;<a href="builtins.html#type" >type</a>),&nbsp;and&nbsp;has&nbsp;the&nbsp;option&nbsp;to&nbsp;hash&nbsp;the&nbsp;index<br />&nbsp;</tt></td></tr>
 <tr ><td >&nbsp;</td>
 <td width="100%" ><dl ><dt >Method resolution order:</dt>
 <dd ><a href="IndexedRedis.fields.html#IRField" >IRField</a></dd>
@@ -1917,6 +1926,7 @@ Methods defined here:<br />
 <dl ><dt ><a name="IRField-__init__" ><strong >__init__</strong></a>(self, name='', valueType=&lt;class 'str'&gt;, defaultValue=irNull, hashIndex=False)</dt><dd ><tt >__init__&nbsp;-&nbsp;Create&nbsp;an&nbsp;<a href="#IRField" >IRField</a>.&nbsp;Use&nbsp;this&nbsp;directly&nbsp;in&nbsp;the&nbsp;FIELDS&nbsp;array&nbsp;for&nbsp;advanced&nbsp;functionality&nbsp;on&nbsp;a&nbsp;field.<br />
 &nbsp;<br />
 @param&nbsp;name&nbsp;&lt;<a href="builtins.html#str" >str</a>&gt;&nbsp;-&nbsp;The&nbsp;name&nbsp;of&nbsp;this&nbsp;field<br />
+&nbsp;<br />
 @param&nbsp;valueType&nbsp;&lt;<a href="builtins.html#type" >type</a>&gt;&nbsp;-&nbsp;The&nbsp;<a href="builtins.html#type" >type</a>&nbsp;that&nbsp;will&nbsp;be&nbsp;used&nbsp;for&nbsp;this&nbsp;field.&nbsp;Default&nbsp;<a href="builtins.html#str" >str</a>/unicode&nbsp;(and&nbsp;bytes&nbsp;on&nbsp;python2)<br />
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;act&nbsp;the&nbsp;same&nbsp;as&nbsp;non-<a href="#IRField" >IRField</a>&nbsp;FIELDS&nbsp;entries&nbsp;(just&nbsp;plain&nbsp;string),&nbsp;i.e.&nbsp;they&nbsp;are&nbsp;encoded&nbsp;to&nbsp;unicode&nbsp;to&nbsp;and&nbsp;from&nbsp;Redis.<br />
 &nbsp;<br />
@@ -1939,6 +1949,7 @@ Methods defined here:<br />
 &nbsp;<br />
 @param&nbsp;hashIndex&nbsp;&lt;bool&gt;&nbsp;(default&nbsp;False)&nbsp;-&nbsp;If&nbsp;true,&nbsp;the&nbsp;md5&nbsp;hash&nbsp;of&nbsp;the&nbsp;value&nbsp;will&nbsp;be&nbsp;used&nbsp;for&nbsp;indexing&nbsp;and&nbsp;filtering.&nbsp;This&nbsp;may&nbsp;be&nbsp;useful&nbsp;for&nbsp;very&nbsp;long&nbsp;fields.<br />
 &nbsp;<br />
+An&nbsp;<a href="#IRField" >IRField</a>&nbsp;may&nbsp;be&nbsp;indexable&nbsp;(depending&nbsp;on&nbsp;the&nbsp;<a href="builtins.html#type" >type</a>),&nbsp;and&nbsp;has&nbsp;the&nbsp;option&nbsp;to&nbsp;hash&nbsp;the&nbsp;index<br />
 &nbsp;<br />
 NOTE:&nbsp;If&nbsp;you&nbsp;are&nbsp;extending&nbsp;<a href="#IRField" >IRField</a>,&nbsp;you&nbsp;should&nbsp;probably&nbsp;not&nbsp;call&nbsp;this&nbsp;__init__&nbsp;function.&nbsp;So&nbsp;long&nbsp;as&nbsp;you&nbsp;implement&nbsp;your&nbsp;own&nbsp;"convert",&nbsp;any&nbsp;fields&nbsp;used&nbsp;are&nbsp;set&nbsp;on&nbsp;a&nbsp;class-level.</tt></dd></dl>
 
@@ -2326,7 +2337,9 @@ must&nbsp;be&nbsp;a&nbsp;string,&nbsp;whose&nbsp;characters&nbsp;will&nbsp;be&nb
 <tr bgcolor="#ffc8d8" ><td rowspan="2" ><tt >&nbsp;&nbsp;&nbsp;</tt></td>
 <td colspan="2" ><tt ><a href="#IRFixedPointField" >IRFixedPointField</a>&nbsp;-&nbsp;A&nbsp;field&nbsp;which&nbsp;represents&nbsp;a&nbsp;real&nbsp;number&nbsp;(a&nbsp;whole&nbsp;part&nbsp;and&nbsp;a&nbsp;fractional&nbsp;part),&nbsp;such&nbsp;as&nbsp;3.7&nbsp;or&nbsp;3.14159).<br />
 &nbsp;<br />
-Use&nbsp;this&nbsp;instead&nbsp;of&nbsp;an&nbsp;<a href="#IRField" >IRField</a>(...valueType=float)&nbsp;to&nbsp;get&nbsp;accurate&nbsp;results&nbsp;across&nbsp;platforms,&nbsp;systems,&nbsp;and&nbsp;python&nbsp;versions,&nbsp;and&nbsp;to&nbsp;use&nbsp;for&nbsp;indexing.<br />&nbsp;</tt></td></tr>
+Use&nbsp;this&nbsp;instead&nbsp;of&nbsp;an&nbsp;<a href="#IRField" >IRField</a>(...valueType=float)&nbsp;to&nbsp;get&nbsp;accurate&nbsp;results&nbsp;across&nbsp;platforms,&nbsp;systems,&nbsp;and&nbsp;python&nbsp;versions,&nbsp;and&nbsp;to&nbsp;use&nbsp;for&nbsp;indexing.<br />
+&nbsp;<br />
+An&nbsp;<a href="#IRFixedPointField" >IRFixedPointField</a>&nbsp;is&nbsp;indexable,&nbsp;and&nbsp;has&nbsp;no&nbsp;option&nbsp;to&nbsp;hash&nbsp;the&nbsp;index.<br />&nbsp;</tt></td></tr>
 <tr ><td >&nbsp;</td>
 <td width="100%" ><dl ><dt >Method resolution order:</dt>
 <dd ><a href="IndexedRedis.fields.fixedpoint.html#IRFixedPointField" >IRFixedPointField</a></dd>
@@ -2339,8 +2352,13 @@ Methods defined here:<br />
 <dl ><dt ><a name="IRFixedPointField-__init__" ><strong >__init__</strong></a>(self, name='', decimalPlaces=5, defaultValue=irNull)</dt><dd ><tt >__init__&nbsp;-&nbsp;Create&nbsp;this&nbsp;object.<br />
 &nbsp;<br />
 @param&nbsp;name&nbsp;&lt;<a href="builtins.html#str" >str</a>&gt;&nbsp;-&nbsp;Field&nbsp;name&nbsp;(or&nbsp;blank&nbsp;if&nbsp;used&nbsp;in&nbsp;an&nbsp;IRFieldChain)<br />
+&nbsp;<br />
 @param&nbsp;decimalPlaces&nbsp;&lt;int&gt;&nbsp;-&nbsp;The&nbsp;number&nbsp;of&nbsp;decimal&nbsp;places&nbsp;to&nbsp;use&nbsp;(precision).&nbsp;Values&nbsp;will&nbsp;be&nbsp;rounded&nbsp;to&nbsp;this&nbsp;many&nbsp;places,&nbsp;and&nbsp;always&nbsp;have<br />
-&nbsp;&nbsp;this&nbsp;many&nbsp;digits&nbsp;after&nbsp;the&nbsp;decimal&nbsp;point.</tt></dd></dl>
+&nbsp;&nbsp;this&nbsp;many&nbsp;digits&nbsp;after&nbsp;the&nbsp;decimal&nbsp;point.<br />
+&nbsp;<br />
+@param&nbsp;defaultValue&nbsp;-&nbsp;The&nbsp;default&nbsp;value&nbsp;for&nbsp;this&nbsp;field<br />
+&nbsp;<br />
+An&nbsp;<a href="#IRFixedPointField" >IRFixedPointField</a>&nbsp;is&nbsp;indexable,&nbsp;and&nbsp;has&nbsp;no&nbsp;option&nbsp;to&nbsp;hash&nbsp;the&nbsp;index.</tt></dd></dl>
 
 <dl ><dt ><a name="IRFixedPointField-copy" ><strong >copy</strong></a>(self)</dt><dd ><tt >copy&nbsp;-&nbsp;Create&nbsp;a&nbsp;copy&nbsp;of&nbsp;this&nbsp;<a href="#IRField" >IRField</a>.<br />
 &nbsp;<br />
@@ -3164,7 +3182,12 @@ must&nbsp;be&nbsp;a&nbsp;string,&nbsp;whose&nbsp;characters&nbsp;will&nbsp;be&nb
 <font color="#000000" face="helvetica, arial" ><a name="IRPickleField" >class <strong >IRPickleField</strong></a>(<a href="IndexedRedis.fields.html#IRField" >IndexedRedis.fields.IRField</a>)</font></td></tr>
     
 <tr bgcolor="#ffc8d8" ><td rowspan="2" ><tt >&nbsp;&nbsp;&nbsp;</tt></td>
-<td colspan="2" ><tt ><a href="#IRPickleField" >IRPickleField</a>&nbsp;-&nbsp;A&nbsp;field&nbsp;which&nbsp;pickles&nbsp;its&nbsp;data&nbsp;before&nbsp;storage&nbsp;and&nbsp;loads&nbsp;after&nbsp;retrieval.<br />&nbsp;</tt></td></tr>
+<td colspan="2" ><tt ><a href="#IRPickleField" >IRPickleField</a>&nbsp;-&nbsp;A&nbsp;field&nbsp;which&nbsp;pickles&nbsp;its&nbsp;data&nbsp;before&nbsp;storage&nbsp;and&nbsp;loads&nbsp;after&nbsp;retrieval.<br />
+&nbsp;<br />
+This&nbsp;uses&nbsp;the&nbsp;python2&nbsp;format,&nbsp;so&nbsp;is&nbsp;safe&nbsp;to&nbsp;use&nbsp;between&nbsp;python2&nbsp;and&nbsp;python3.<br />
+&nbsp;<br />
+Because&nbsp;even&nbsp;with&nbsp;the&nbsp;same&nbsp;format,&nbsp;python2&nbsp;and&nbsp;python3&nbsp;can&nbsp;output&nbsp;different&nbsp;pickle&nbsp;strings&nbsp;for&nbsp;the&nbsp;same&nbsp;object,<br />
+&nbsp;&nbsp;as&nbsp;well&nbsp;as&nbsp;different&nbsp;host&nbsp;configurations&nbsp;may&nbsp;lead&nbsp;to&nbsp;different&nbsp;output,&nbsp;this&nbsp;field&nbsp;<a href="builtins.html#type" >type</a>&nbsp;is&nbsp;not&nbsp;indexable.<br />&nbsp;</tt></td></tr>
 <tr ><td >&nbsp;</td>
 <td width="100%" ><dl ><dt >Method resolution order:</dt>
 <dd ><a href="IndexedRedis.fields.pickle_field.html#IRPickleField" >IRPickleField</a></dd>
@@ -3174,33 +3197,14 @@ must&nbsp;be&nbsp;a&nbsp;string,&nbsp;whose&nbsp;characters&nbsp;will&nbsp;be&nb
 </dl>
 <hr />
 Methods defined here:<br />
-<dl ><dt ><a name="IRPickleField-__init__" ><strong >__init__</strong></a>(self, name='', defaultValue=irNull)</dt><dd ><tt >__init__&nbsp;-&nbsp;Create&nbsp;an&nbsp;<a href="#IRField" >IRField</a>.&nbsp;Use&nbsp;this&nbsp;directly&nbsp;in&nbsp;the&nbsp;FIELDS&nbsp;array&nbsp;for&nbsp;advanced&nbsp;functionality&nbsp;on&nbsp;a&nbsp;field.<br />
+<dl ><dt ><a name="IRPickleField-__init__" ><strong >__init__</strong></a>(self, name='', defaultValue=irNull)</dt><dd ><tt >__init__&nbsp;-&nbsp;Create&nbsp;an&nbsp;<a href="#IRPickleField" >IRPickleField</a><br />
 &nbsp;<br />
-@param&nbsp;name&nbsp;&lt;<a href="builtins.html#str" >str</a>&gt;&nbsp;-&nbsp;The&nbsp;name&nbsp;of&nbsp;this&nbsp;field<br />
-@param&nbsp;valueType&nbsp;&lt;<a href="builtins.html#type" >type</a>&gt;&nbsp;-&nbsp;The&nbsp;<a href="builtins.html#type" >type</a>&nbsp;that&nbsp;will&nbsp;be&nbsp;used&nbsp;for&nbsp;this&nbsp;field.&nbsp;Default&nbsp;<a href="builtins.html#str" >str</a>/unicode&nbsp;(and&nbsp;bytes&nbsp;on&nbsp;python2)<br />
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;act&nbsp;the&nbsp;same&nbsp;as&nbsp;non-<a href="#IRField" >IRField</a>&nbsp;FIELDS&nbsp;entries&nbsp;(just&nbsp;plain&nbsp;string),&nbsp;i.e.&nbsp;they&nbsp;are&nbsp;encoded&nbsp;to&nbsp;unicode&nbsp;to&nbsp;and&nbsp;from&nbsp;Redis.<br />
+@param&nbsp;name&nbsp;&lt;<a href="builtins.html#str" >str</a>&gt;&nbsp;-&nbsp;Field&nbsp;name<br />
 &nbsp;<br />
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;If&nbsp;you&nbsp;pass&nbsp;in&nbsp;None,&nbsp;then&nbsp;no&nbsp;decoding&nbsp;will&nbsp;take&nbsp;place&nbsp;(so&nbsp;whatever&nbsp;you&nbsp;provide&nbsp;goes&nbsp;in,&nbsp;and&nbsp;bytes&nbsp;come&nbsp;out&nbsp;of&nbsp;Redis).<br />
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;This&nbsp;is&nbsp;similar&nbsp;to&nbsp;IRFieldRaw<br />
+@param&nbsp;defaultValue&nbsp;-&nbsp;The&nbsp;default&nbsp;value&nbsp;of&nbsp;this&nbsp;field<br />
 &nbsp;<br />
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;On&nbsp;python3,&nbsp;if&nbsp;you&nbsp;pass&nbsp;bytes,&nbsp;than&nbsp;the&nbsp;field&nbsp;will&nbsp;be&nbsp;left&nbsp;as&nbsp;bytes.<br />
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;To&nbsp;be&nbsp;both&nbsp;python2&nbsp;and&nbsp;python3&nbsp;compatible,&nbsp;however,&nbsp;you&nbsp;can&nbsp;use&nbsp;<a href="#IRBytesField" >IRBytesField</a><br />
-&nbsp;<br />
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;If&nbsp;bool&nbsp;is&nbsp;used,&nbsp;then&nbsp;"1"&nbsp;and&nbsp;"true"&nbsp;are&nbsp;True,&nbsp;"0"&nbsp;and&nbsp;"false"&nbsp;are&nbsp;False,&nbsp;any&nbsp;other&nbsp;value&nbsp;is&nbsp;an&nbsp;exception.<br />
-&nbsp;<br />
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;You&nbsp;can&nbsp;also&nbsp;pass&nbsp;an&nbsp;advanced&nbsp;<a href="builtins.html#type" >type</a>&nbsp;(see&nbsp;IndexedRedis.fields.FieldValueTypes)&nbsp;like&nbsp;<a href="datetime.html#datetime" >datetime</a>&nbsp;and&nbsp;json.<br />
-&nbsp;<br />
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;All&nbsp;types&nbsp;other&nbsp;than&nbsp;string/unicode/bytes/None&nbsp;will&nbsp;be&nbsp;assigned&nbsp;'irNull'&nbsp;if&nbsp;they&nbsp;were&nbsp;not&nbsp;provided&nbsp;a&nbsp;value.<br />
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;@see&nbsp;irNull&nbsp;-&nbsp;Equals&nbsp;only&nbsp;irNull&nbsp;(or&nbsp;other&nbsp;<a href="#IRNullType" >IRNullType</a>&nbsp;instances).&nbsp;You&nbsp;can&nbsp;use&nbsp;this&nbsp;to&nbsp;check&nbsp;if&nbsp;an&nbsp;integer&nbsp;is&nbsp;defined&nbsp;versus&nbsp;0,&nbsp;for&nbsp;example.<br />
-&nbsp;<br />
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;While&nbsp;this&nbsp;class&nbsp;is&nbsp;create&nbsp;for&nbsp;primitive&nbsp;types&nbsp;(like&nbsp;int's&nbsp;and&nbsp;datetimes),&nbsp;more&nbsp;complex&nbsp;types&nbsp;extend&nbsp;<a href="#IRField" >IRField</a>&nbsp;(such&nbsp;as&nbsp;pickle,&nbsp;compressed,&nbsp;or&nbsp;unicode&nbsp;with&nbsp;a&nbsp;specific&nbsp;encoding).<br />
-&nbsp;<br />
-@param&nbsp;defaultValue&nbsp;&lt;any&gt;&nbsp;(default&nbsp;irNull)&nbsp;-&nbsp;The&nbsp;value&nbsp;assigned&nbsp;to&nbsp;this&nbsp;field&nbsp;as&nbsp;a&nbsp;"default",&nbsp;i.e.&nbsp;when&nbsp;no&nbsp;value&nbsp;has&nbsp;yet&nbsp;been&nbsp;set.&nbsp;Generally,&nbsp;it&nbsp;makes&nbsp;sense&nbsp;to&nbsp;keep&nbsp;this&nbsp;as&nbsp;irNull,&nbsp;but&nbsp;you&nbsp;may&nbsp;want&nbsp;a&nbsp;different&nbsp;default.<br />
-&nbsp;<br />
-@param&nbsp;hashIndex&nbsp;&lt;bool&gt;&nbsp;(default&nbsp;False)&nbsp;-&nbsp;If&nbsp;true,&nbsp;the&nbsp;md5&nbsp;hash&nbsp;of&nbsp;the&nbsp;value&nbsp;will&nbsp;be&nbsp;used&nbsp;for&nbsp;indexing&nbsp;and&nbsp;filtering.&nbsp;This&nbsp;may&nbsp;be&nbsp;useful&nbsp;for&nbsp;very&nbsp;long&nbsp;fields.<br />
-&nbsp;<br />
-&nbsp;<br />
-NOTE:&nbsp;If&nbsp;you&nbsp;are&nbsp;extending&nbsp;<a href="#IRField" >IRField</a>,&nbsp;you&nbsp;should&nbsp;probably&nbsp;not&nbsp;call&nbsp;this&nbsp;__init__&nbsp;function.&nbsp;So&nbsp;long&nbsp;as&nbsp;you&nbsp;implement&nbsp;your&nbsp;own&nbsp;"convert",&nbsp;any&nbsp;fields&nbsp;used&nbsp;are&nbsp;set&nbsp;on&nbsp;a&nbsp;class-level.</tt></dd></dl>
+Because&nbsp;even&nbsp;with&nbsp;the&nbsp;same&nbsp;format,&nbsp;python2&nbsp;and&nbsp;python3&nbsp;can&nbsp;output&nbsp;different&nbsp;pickle&nbsp;strings&nbsp;for&nbsp;the&nbsp;same&nbsp;object,<br />
+&nbsp;&nbsp;as&nbsp;well&nbsp;as&nbsp;different&nbsp;host&nbsp;configurations&nbsp;may&nbsp;lead&nbsp;to&nbsp;different&nbsp;output,&nbsp;this&nbsp;field&nbsp;<a href="builtins.html#type" >type</a>&nbsp;is&nbsp;not&nbsp;indexable.</tt></dd></dl>
 
 <dl ><dt ><a name="IRPickleField-copy" ><strong >copy</strong></a>(self)</dt><dd ><tt >copy&nbsp;-&nbsp;Create&nbsp;a&nbsp;copy&nbsp;of&nbsp;this&nbsp;<a href="#IRField" >IRField</a>.<br />
 &nbsp;<br />
@@ -3592,7 +3596,9 @@ must&nbsp;be&nbsp;a&nbsp;string,&nbsp;whose&nbsp;characters&nbsp;will&nbsp;be&nb
 &nbsp;<br />
 NOTE:&nbsp;This&nbsp;<a href="builtins.html#type" >type</a>&nbsp;does&nbsp;NOT&nbsp;support&nbsp;irNull,&nbsp;nor&nbsp;default&nbsp;values&nbsp;(because&nbsp;no&nbsp;encoding/decoding).<br />
 &nbsp;<br />
-After&nbsp;fetch,&nbsp;the&nbsp;value&nbsp;will&nbsp;always&nbsp;be&nbsp;bytes&nbsp;(Again,&nbsp;no&nbsp;translation).<br />&nbsp;</tt></td></tr>
+After&nbsp;fetch,&nbsp;the&nbsp;value&nbsp;will&nbsp;always&nbsp;be&nbsp;bytes&nbsp;(Again,&nbsp;no&nbsp;translation).<br />
+&nbsp;<br />
+This&nbsp;field&nbsp;<a href="builtins.html#type" >type</a>&nbsp;does&nbsp;not&nbsp;support&nbsp;indexing.<br />&nbsp;</tt></td></tr>
 <tr ><td >&nbsp;</td>
 <td width="100%" ><dl ><dt >Method resolution order:</dt>
 <dd ><a href="IndexedRedis.fields.raw.html#IRRawField" >IRRawField</a></dd>
@@ -3602,7 +3608,11 @@ After&nbsp;fetch,&nbsp;the&nbsp;value&nbsp;will&nbsp;always&nbsp;be&nbsp;bytes&n
 </dl>
 <hr />
 Methods defined here:<br />
-<dl ><dt ><a name="IRRawField-__init__" ><strong >__init__</strong></a>(self, name='')</dt><dd ><tt >__init__&nbsp;-&nbsp;Create&nbsp;an&nbsp;<a href="#IRRawField" >IRRawField</a>.&nbsp;Only&nbsp;takes&nbsp;a&nbsp;name</tt></dd></dl>
+<dl ><dt ><a name="IRRawField-__init__" ><strong >__init__</strong></a>(self, name='')</dt><dd ><tt >__init__&nbsp;-&nbsp;Create&nbsp;an&nbsp;<a href="#IRRawField" >IRRawField</a>.&nbsp;Only&nbsp;takes&nbsp;a&nbsp;name<br />
+&nbsp;<br />
+@param&nbsp;name&nbsp;&lt;<a href="builtins.html#str" >str</a>&gt;&nbsp;-&nbsp;Field&nbsp;name<br />
+&nbsp;<br />
+This&nbsp;field&nbsp;<a href="builtins.html#type" >type</a>&nbsp;does&nbsp;not&nbsp;support&nbsp;indexing.</tt></dd></dl>
 
 <dl ><dt ><a name="IRRawField-copy" ><strong >copy</strong></a>(self)</dt><dd ><tt >copy&nbsp;-&nbsp;Create&nbsp;a&nbsp;copy&nbsp;of&nbsp;this&nbsp;<a href="#IRField" >IRField</a>.<br />
 &nbsp;<br />
@@ -3982,7 +3992,9 @@ must&nbsp;be&nbsp;a&nbsp;string,&nbsp;whose&nbsp;characters&nbsp;will&nbsp;be&nb
 If&nbsp;"encoding"&nbsp;is&nbsp;None&nbsp;(default)&nbsp;-&nbsp;each&nbsp;time&nbsp;the&nbsp;value&nbsp;is&nbsp;converted&nbsp;<a href="#IRUnicodeField-getEncoding" >getEncoding</a>()&nbsp;will&nbsp;be&nbsp;called&nbsp;to&nbsp;get&nbsp;the&nbsp;encoding.&nbsp;This&nbsp;makes&nbsp;it&nbsp;roughly&nbsp;the&nbsp;same&nbsp;as<br />
 a&nbsp;regular&nbsp;<a href="#IRField" >IRField</a>.<br />
 &nbsp;<br />
-In&nbsp;practice,&nbsp;you&nbsp;may&nbsp;have&nbsp;fields&nbsp;with&nbsp;different&nbsp;encodings&nbsp;(different&nbsp;languages&nbsp;maybe,&nbsp;different&nbsp;platforms,&nbsp;etc),&nbsp;and&nbsp;through&nbsp;this&nbsp;you&nbsp;can&nbsp;support&nbsp;those&nbsp;cases.<br />&nbsp;</tt></td></tr>
+In&nbsp;practice,&nbsp;you&nbsp;may&nbsp;have&nbsp;fields&nbsp;with&nbsp;different&nbsp;encodings&nbsp;(different&nbsp;languages&nbsp;maybe,&nbsp;different&nbsp;platforms,&nbsp;etc),&nbsp;and&nbsp;through&nbsp;this&nbsp;you&nbsp;can&nbsp;support&nbsp;those&nbsp;cases.<br />
+&nbsp;<br />
+This&nbsp;field&nbsp;<a href="builtins.html#type" >type</a>&nbsp;is&nbsp;indeaxble,&nbsp;and&nbsp;the&nbsp;index&nbsp;is&nbsp;forced&nbsp;to&nbsp;be&nbsp;hashed.<br />&nbsp;</tt></td></tr>
 <tr ><td >&nbsp;</td>
 <td width="100%" ><dl ><dt >Method resolution order:</dt>
 <dd ><a href="IndexedRedis.fields.unicode_field.html#IRUnicodeField" >IRUnicodeField</a></dd>
@@ -3992,33 +4004,15 @@ In&nbsp;practice,&nbsp;you&nbsp;may&nbsp;have&nbsp;fields&nbsp;with&nbsp;differe
 </dl>
 <hr />
 Methods defined here:<br />
-<dl ><dt ><a name="IRUnicodeField-__init__" ><strong >__init__</strong></a>(self, name='', encoding=None, defaultValue=irNull)</dt><dd ><tt >__init__&nbsp;-&nbsp;Create&nbsp;an&nbsp;<a href="#IRField" >IRField</a>.&nbsp;Use&nbsp;this&nbsp;directly&nbsp;in&nbsp;the&nbsp;FIELDS&nbsp;array&nbsp;for&nbsp;advanced&nbsp;functionality&nbsp;on&nbsp;a&nbsp;field.<br />
+<dl ><dt ><a name="IRUnicodeField-__init__" ><strong >__init__</strong></a>(self, name='', encoding=None, defaultValue=irNull)</dt><dd ><tt >__init__&nbsp;-&nbsp;Create&nbsp;an&nbsp;<a href="#IRUnicodeField" >IRUnicodeField</a><br />
 &nbsp;<br />
-@param&nbsp;name&nbsp;&lt;<a href="builtins.html#str" >str</a>&gt;&nbsp;-&nbsp;The&nbsp;name&nbsp;of&nbsp;this&nbsp;field<br />
-@param&nbsp;valueType&nbsp;&lt;<a href="builtins.html#type" >type</a>&gt;&nbsp;-&nbsp;The&nbsp;<a href="builtins.html#type" >type</a>&nbsp;that&nbsp;will&nbsp;be&nbsp;used&nbsp;for&nbsp;this&nbsp;field.&nbsp;Default&nbsp;<a href="builtins.html#str" >str</a>/unicode&nbsp;(and&nbsp;bytes&nbsp;on&nbsp;python2)<br />
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;act&nbsp;the&nbsp;same&nbsp;as&nbsp;non-<a href="#IRField" >IRField</a>&nbsp;FIELDS&nbsp;entries&nbsp;(just&nbsp;plain&nbsp;string),&nbsp;i.e.&nbsp;they&nbsp;are&nbsp;encoded&nbsp;to&nbsp;unicode&nbsp;to&nbsp;and&nbsp;from&nbsp;Redis.<br />
+@param&nbsp;name&nbsp;&lt;<a href="builtins.html#str" >str</a>&gt;&nbsp;-&nbsp;The&nbsp;field&nbsp;name<br />
 &nbsp;<br />
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;If&nbsp;you&nbsp;pass&nbsp;in&nbsp;None,&nbsp;then&nbsp;no&nbsp;decoding&nbsp;will&nbsp;take&nbsp;place&nbsp;(so&nbsp;whatever&nbsp;you&nbsp;provide&nbsp;goes&nbsp;in,&nbsp;and&nbsp;bytes&nbsp;come&nbsp;out&nbsp;of&nbsp;Redis).<br />
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;This&nbsp;is&nbsp;similar&nbsp;to&nbsp;IRFieldRaw<br />
+@param&nbsp;encoding&nbsp;&lt;None/<a href="builtins.html#str" >str</a>&gt;&nbsp;-&nbsp;A&nbsp;specific&nbsp;encoding&nbsp;to&nbsp;use.&nbsp;If&nbsp;None,&nbsp;defaultIREncoding&nbsp;will&nbsp;be&nbsp;used.<br />
 &nbsp;<br />
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;On&nbsp;python3,&nbsp;if&nbsp;you&nbsp;pass&nbsp;bytes,&nbsp;than&nbsp;the&nbsp;field&nbsp;will&nbsp;be&nbsp;left&nbsp;as&nbsp;bytes.<br />
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;To&nbsp;be&nbsp;both&nbsp;python2&nbsp;and&nbsp;python3&nbsp;compatible,&nbsp;however,&nbsp;you&nbsp;can&nbsp;use&nbsp;<a href="#IRBytesField" >IRBytesField</a><br />
+@param&nbsp;defaultValue&nbsp;-&nbsp;The&nbsp;default&nbsp;value&nbsp;for&nbsp;this&nbsp;field<br />
 &nbsp;<br />
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;If&nbsp;bool&nbsp;is&nbsp;used,&nbsp;then&nbsp;"1"&nbsp;and&nbsp;"true"&nbsp;are&nbsp;True,&nbsp;"0"&nbsp;and&nbsp;"false"&nbsp;are&nbsp;False,&nbsp;any&nbsp;other&nbsp;value&nbsp;is&nbsp;an&nbsp;exception.<br />
-&nbsp;<br />
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;You&nbsp;can&nbsp;also&nbsp;pass&nbsp;an&nbsp;advanced&nbsp;<a href="builtins.html#type" >type</a>&nbsp;(see&nbsp;IndexedRedis.fields.FieldValueTypes)&nbsp;like&nbsp;<a href="datetime.html#datetime" >datetime</a>&nbsp;and&nbsp;json.<br />
-&nbsp;<br />
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;All&nbsp;types&nbsp;other&nbsp;than&nbsp;string/unicode/bytes/None&nbsp;will&nbsp;be&nbsp;assigned&nbsp;'irNull'&nbsp;if&nbsp;they&nbsp;were&nbsp;not&nbsp;provided&nbsp;a&nbsp;value.<br />
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;@see&nbsp;irNull&nbsp;-&nbsp;Equals&nbsp;only&nbsp;irNull&nbsp;(or&nbsp;other&nbsp;<a href="#IRNullType" >IRNullType</a>&nbsp;instances).&nbsp;You&nbsp;can&nbsp;use&nbsp;this&nbsp;to&nbsp;check&nbsp;if&nbsp;an&nbsp;integer&nbsp;is&nbsp;defined&nbsp;versus&nbsp;0,&nbsp;for&nbsp;example.<br />
-&nbsp;<br />
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;While&nbsp;this&nbsp;class&nbsp;is&nbsp;create&nbsp;for&nbsp;primitive&nbsp;types&nbsp;(like&nbsp;int's&nbsp;and&nbsp;datetimes),&nbsp;more&nbsp;complex&nbsp;types&nbsp;extend&nbsp;<a href="#IRField" >IRField</a>&nbsp;(such&nbsp;as&nbsp;pickle,&nbsp;compressed,&nbsp;or&nbsp;unicode&nbsp;with&nbsp;a&nbsp;specific&nbsp;encoding).<br />
-&nbsp;<br />
-@param&nbsp;defaultValue&nbsp;&lt;any&gt;&nbsp;(default&nbsp;irNull)&nbsp;-&nbsp;The&nbsp;value&nbsp;assigned&nbsp;to&nbsp;this&nbsp;field&nbsp;as&nbsp;a&nbsp;"default",&nbsp;i.e.&nbsp;when&nbsp;no&nbsp;value&nbsp;has&nbsp;yet&nbsp;been&nbsp;set.&nbsp;Generally,&nbsp;it&nbsp;makes&nbsp;sense&nbsp;to&nbsp;keep&nbsp;this&nbsp;as&nbsp;irNull,&nbsp;but&nbsp;you&nbsp;may&nbsp;want&nbsp;a&nbsp;different&nbsp;default.<br />
-&nbsp;<br />
-@param&nbsp;hashIndex&nbsp;&lt;bool&gt;&nbsp;(default&nbsp;False)&nbsp;-&nbsp;If&nbsp;true,&nbsp;the&nbsp;md5&nbsp;hash&nbsp;of&nbsp;the&nbsp;value&nbsp;will&nbsp;be&nbsp;used&nbsp;for&nbsp;indexing&nbsp;and&nbsp;filtering.&nbsp;This&nbsp;may&nbsp;be&nbsp;useful&nbsp;for&nbsp;very&nbsp;long&nbsp;fields.<br />
-&nbsp;<br />
-&nbsp;<br />
-NOTE:&nbsp;If&nbsp;you&nbsp;are&nbsp;extending&nbsp;<a href="#IRField" >IRField</a>,&nbsp;you&nbsp;should&nbsp;probably&nbsp;not&nbsp;call&nbsp;this&nbsp;__init__&nbsp;function.&nbsp;So&nbsp;long&nbsp;as&nbsp;you&nbsp;implement&nbsp;your&nbsp;own&nbsp;"convert",&nbsp;any&nbsp;fields&nbsp;used&nbsp;are&nbsp;set&nbsp;on&nbsp;a&nbsp;class-level.</tt></dd></dl>
+This&nbsp;field&nbsp;<a href="builtins.html#type" >type</a>&nbsp;is&nbsp;indeaxble,&nbsp;and&nbsp;the&nbsp;index&nbsp;is&nbsp;forced&nbsp;to&nbsp;be&nbsp;hashed.</tt></dd></dl>
 
 <dl ><dt ><a name="IRUnicodeField-copy" ><strong >copy</strong></a>(self)</dt><dd ><tt >copy&nbsp;-&nbsp;Create&nbsp;a&nbsp;copy&nbsp;of&nbsp;this&nbsp;<a href="#IRField" >IRField</a>.<br />
 &nbsp;<br />
@@ -4026,9 +4020,19 @@ NOTE:&nbsp;If&nbsp;you&nbsp;are&nbsp;extending&nbsp;<a href="#IRField" >IRField<
 &nbsp;<br />
 @return&nbsp;&lt;<a href="#IRField" >IRField</a>&nbsp;(or&nbsp;subclass)&gt;&nbsp;-&nbsp;Another&nbsp;<a href="#IRField" >IRField</a>&nbsp;that&nbsp;has&nbsp;all&nbsp;the&nbsp;same&nbsp;values&nbsp;as&nbsp;this&nbsp;one.</tt></dd></dl>
 
-<dl ><dt ><a name="IRUnicodeField-getEncoding" ><strong >getEncoding</strong></a>(self)</dt></dl>
+<dl ><dt ><a name="IRUnicodeField-getEncoding" ><strong >getEncoding</strong></a>(self)</dt><dd ><tt >getEncoding&nbsp;-&nbsp;Get&nbsp;the&nbsp;encoding&nbsp;codec&nbsp;associated&nbsp;with&nbsp;this&nbsp;field.<br />
+&nbsp;<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;If&nbsp;you&nbsp;provided&nbsp;None,&nbsp;this&nbsp;will&nbsp;return&nbsp;the&nbsp;defaultIREncoding<br />
+&nbsp;<br />
+@return&nbsp;&lt;<a href="builtins.html#str" >str</a>&gt;&nbsp;-&nbsp;Encoding</tt></dd></dl>
 
-<dl ><dt ><a name="IRUnicodeField-toBytes" ><strong >toBytes</strong></a>(self, value)</dt></dl>
+<dl ><dt ><a name="IRUnicodeField-toBytes" ><strong >toBytes</strong></a>(self, value)</dt><dd ><tt >toBytes&nbsp;-&nbsp;Convert&nbsp;a&nbsp;value&nbsp;to&nbsp;bytes&nbsp;using&nbsp;the&nbsp;encoding&nbsp;specified&nbsp;on&nbsp;this&nbsp;field<br />
+&nbsp;<br />
+@param&nbsp;value&nbsp;&lt;<a href="builtins.html#str" >str</a>&gt;&nbsp;-&nbsp;The&nbsp;field&nbsp;to&nbsp;convert&nbsp;to&nbsp;bytes<br />
+&nbsp;<br />
+@return&nbsp;&lt;bytes&gt;&nbsp;-&nbsp;The&nbsp;object&nbsp;encoded&nbsp;using&nbsp;the&nbsp;codec&nbsp;specified&nbsp;on&nbsp;this&nbsp;field.<br />
+&nbsp;<br />
+NOTE:&nbsp;This&nbsp;method&nbsp;may&nbsp;go&nbsp;away.</tt></dd></dl>
 
 <hr />
 Static methods defined here:<br />

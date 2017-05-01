@@ -50,7 +50,9 @@ like:&nbsp;<br />
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;FIELDS&nbsp;&nbsp;=&nbsp;[&nbsp;...,&nbsp;<a href="#IRCompressedField" >IRCompressedField</a>('my_compressed_field',&nbsp;compressMode=COMPRESS_MODE_ZLIB]<br />
 &nbsp;<br />
 By&nbsp;default,&nbsp;after&nbsp;fetch&nbsp;the&nbsp;data&nbsp;will&nbsp;be&nbsp;encoded&nbsp;as&nbsp;"bytes".&nbsp;If&nbsp;you&nbsp;need&nbsp;it&nbsp;to&nbsp;be&nbsp;unicode/string,&nbsp;use&nbsp;an<br />
-&nbsp;&nbsp;IRFieldChain&nbsp;with&nbsp;an&nbsp;IRUnicodeField&nbsp;and&nbsp;an&nbsp;<a href="#IRCompressedField" >IRCompressedField</a>&nbsp;together.<br />&nbsp;</tt></td></tr>
+&nbsp;&nbsp;IRFieldChain&nbsp;with&nbsp;an&nbsp;IRUnicodeField&nbsp;and&nbsp;an&nbsp;<a href="#IRCompressedField" >IRCompressedField</a>&nbsp;together.<br />
+&nbsp;<br />
+An&nbsp;<a href="#IRCompressedField" >IRCompressedField</a>&nbsp;is&nbsp;indexable,&nbsp;and&nbsp;forces&nbsp;the&nbsp;index&nbsp;to&nbsp;be&nbsp;hashed.<br />&nbsp;</tt></td></tr>
 <tr ><td >&nbsp;</td>
 <td width="100%" ><dl ><dt >Method resolution order:</dt>
 <dd ><a href="IndexedRedis.fields.compressed.html#IRCompressedField" >IRCompressedField</a></dd>
@@ -60,7 +62,26 @@ By&nbsp;default,&nbsp;after&nbsp;fetch&nbsp;the&nbsp;data&nbsp;will&nbsp;be&nbsp
 </dl>
 <hr />
 Methods defined here:<br />
-<dl ><dt ><a name="IRCompressedField-__init__" ><strong >__init__</strong></a>(self, name='', compressMode='zlib', defaultValue=irNull)</dt><dd ><tt >__init__&nbsp;-&nbsp;Create&nbsp;this&nbsp;object</tt></dd></dl>
+<dl ><dt ><a name="IRCompressedField-__init__" ><strong >__init__</strong></a>(self, name='', compressMode='zlib', defaultValue=irNull)</dt><dd ><tt >__init__&nbsp;-&nbsp;Create&nbsp;this&nbsp;object<br />
+&nbsp;<br />
+@param&nbsp;name&nbsp;&lt;str&gt;&nbsp;-&nbsp;Field&nbsp;name<br />
+@param&nbsp;compressMode&nbsp;&lt;str&gt;,&nbsp;default&nbsp;"zlib".&nbsp;Determines&nbsp;the&nbsp;compression&nbsp;module&nbsp;to&nbsp;use<br />
+&nbsp;&nbsp;for&nbsp;this&nbsp;field.&nbsp;See&nbsp;COMPRESS_MODE_*&nbsp;variables&nbsp;in&nbsp;this&nbsp;module.<br />
+&nbsp;<br />
+&nbsp;&nbsp;Supported&nbsp;values&nbsp;as&nbsp;of&nbsp;5.0.0&nbsp;are:<br />
+&nbsp;<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"zlib"&nbsp;/&nbsp;"gz"&nbsp;/&nbsp;"gzip"&nbsp;-&nbsp;zlib&nbsp;compression<br />
+&nbsp;<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"bz2"&nbsp;&nbsp;/&nbsp;"bzip2"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;bzip2&nbsp;compression<br />
+&nbsp;<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"lzma"&nbsp;/&nbsp;"xz"&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-&nbsp;LZMA&nbsp;compression.<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;NOTE:&nbsp;This&nbsp;is&nbsp;provided&nbsp;in&nbsp;python3&nbsp;by&nbsp;default,&nbsp;but&nbsp;in&nbsp;python2&nbsp;you&nbsp;will&nbsp;need&nbsp;an&nbsp;external&nbsp;module.<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;IndexedRedis&nbsp;will&nbsp;automatically&nbsp;detect&nbsp;if&nbsp;"backports.lzma"&nbsp;or&nbsp;"lzmaffi"&nbsp;are&nbsp;installed,&nbsp;and&nbsp;use&nbsp;them<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;if&nbsp;the&nbsp;core&nbsp;"lzma"&nbsp;module&nbsp;is&nbsp;not&nbsp;available.<br />
+&nbsp;<br />
+@param&nbsp;defaultValue&nbsp;-&nbsp;The&nbsp;default&nbsp;value&nbsp;for&nbsp;this&nbsp;field<br />
+&nbsp;<br />
+An&nbsp;<a href="#IRCompressedField" >IRCompressedField</a>&nbsp;is&nbsp;indexable,&nbsp;and&nbsp;forces&nbsp;the&nbsp;index&nbsp;to&nbsp;be&nbsp;hashed.</tt></dd></dl>
 
 <dl ><dt ><a name="IRCompressedField-copy" ><strong >copy</strong></a>(self)</dt><dd ><tt >copy&nbsp;-&nbsp;Create&nbsp;a&nbsp;copy&nbsp;of&nbsp;this&nbsp;<a href="IndexedRedis.fields.html#IRField" >IRField</a>.<br />
 &nbsp;<br />
@@ -68,7 +89,9 @@ Methods defined here:<br />
 &nbsp;<br />
 @return&nbsp;&lt;<a href="IndexedRedis.fields.html#IRField" >IRField</a>&nbsp;(or&nbsp;subclass)&gt;&nbsp;-&nbsp;Another&nbsp;<a href="IndexedRedis.fields.html#IRField" >IRField</a>&nbsp;that&nbsp;has&nbsp;all&nbsp;the&nbsp;same&nbsp;values&nbsp;as&nbsp;this&nbsp;one.</tt></dd></dl>
 
-<dl ><dt ><a name="IRCompressedField-getCompressMod" ><strong >getCompressMod</strong></a>(self)</dt></dl>
+<dl ><dt ><a name="IRCompressedField-getCompressMod" ><strong >getCompressMod</strong></a>(self)</dt><dd ><tt >getCompressMod&nbsp;-&nbsp;Return&nbsp;the&nbsp;module&nbsp;used&nbsp;for&nbsp;compression&nbsp;on&nbsp;this&nbsp;field<br />
+&nbsp;<br />
+@return&nbsp;&lt;module&gt;&nbsp;-&nbsp;The&nbsp;module&nbsp;for&nbsp;compression</tt></dd></dl>
 
 <hr />
 Static methods defined here:<br />

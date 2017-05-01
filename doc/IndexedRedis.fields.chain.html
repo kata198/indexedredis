@@ -40,7 +40,11 @@ These&nbsp;chain&nbsp;together&nbsp;the&nbsp;operations&nbsp;from&nbsp;multiple&
 toStorage&nbsp;is&nbsp;applied&nbsp;left-to-right,<br />
 fromInput&nbsp;and&nbsp;fromStorage&nbsp;is&nbsp;applied&nbsp;right-to-left.<br />
 &nbsp;<br />
-The&nbsp;output&nbsp;of&nbsp;one&nbsp;field&nbsp;is&nbsp;the&nbsp;input&nbsp;of&nbsp;the&nbsp;next.<br />&nbsp;</tt></td></tr>
+The&nbsp;output&nbsp;of&nbsp;one&nbsp;field&nbsp;is&nbsp;the&nbsp;input&nbsp;of&nbsp;the&nbsp;next.<br />
+&nbsp;<br />
+An&nbsp;<a href="#IRFieldChain" >IRFieldChain</a>&nbsp;is&nbsp;indexable&nbsp;so&nbsp;long&nbsp;as&nbsp;ALL&nbsp;of&nbsp;its&nbsp;contained&nbsp;fields&nbsp;are&nbsp;indexable.<br />
+An&nbsp;<a href="#IRFieldChain" >IRFieldChain</a>&nbsp;is&nbsp;forced&nbsp;to&nbsp;be&nbsp;a&nbsp;hashed&nbsp;index&nbsp;if&nbsp;the&nbsp;rightmost&nbsp;field&nbsp;forces&nbsp;it&nbsp;(as&nbsp;some&nbsp;types&nbsp;do),<br />
+&nbsp;&nbsp;otherwise&nbsp;hashIndex&nbsp;will&nbsp;determine&nbsp;if&nbsp;it&nbsp;is&nbsp;hashed.<br />&nbsp;</tt></td></tr>
 <tr ><td >&nbsp;</td>
 <td width="100%" ><dl ><dt >Method resolution order:</dt>
 <dd ><a href="IndexedRedis.fields.chain.html#IRFieldChain" >IRFieldChain</a></dd>
@@ -59,6 +63,9 @@ Methods defined here:<br />
 &nbsp;<br />
 &nbsp;&nbsp;The&nbsp;output&nbsp;of&nbsp;one&nbsp;field&nbsp;is&nbsp;the&nbsp;input&nbsp;of&nbsp;the&nbsp;next.<br />
 &nbsp;<br />
+&nbsp;&nbsp;&nbsp;An&nbsp;<a href="#IRFieldChain" >IRFieldChain</a>&nbsp;is&nbsp;indexable&nbsp;so&nbsp;long&nbsp;as&nbsp;ALL&nbsp;of&nbsp;its&nbsp;contained&nbsp;fields&nbsp;are&nbsp;indexable.<br />
+&nbsp;&nbsp;&nbsp;An&nbsp;<a href="#IRFieldChain" >IRFieldChain</a>&nbsp;is&nbsp;forced&nbsp;to&nbsp;be&nbsp;a&nbsp;hashed&nbsp;index&nbsp;if&nbsp;the&nbsp;rightmost&nbsp;field&nbsp;forces&nbsp;it&nbsp;(as&nbsp;some&nbsp;types&nbsp;do),<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;otherwise&nbsp;hashIndex&nbsp;will&nbsp;determine&nbsp;if&nbsp;it&nbsp;is&nbsp;hashed.<br />
 &nbsp;<br />
 @see&nbsp;<a href="IndexedRedis.fields.html#IRField" >IRField</a>.__init__</tt></dd></dl>
 

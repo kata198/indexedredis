@@ -36,7 +36,9 @@
 <tr bgcolor="#ffc8d8" ><td rowspan="2" ><tt >&nbsp;&nbsp;&nbsp;</tt></td>
 <td colspan="2" ><tt ><a href="#IRFixedPointField" >IRFixedPointField</a>&nbsp;-&nbsp;A&nbsp;field&nbsp;which&nbsp;represents&nbsp;a&nbsp;real&nbsp;number&nbsp;(a&nbsp;whole&nbsp;part&nbsp;and&nbsp;a&nbsp;fractional&nbsp;part),&nbsp;such&nbsp;as&nbsp;3.7&nbsp;or&nbsp;3.14159).<br />
 &nbsp;<br />
-Use&nbsp;this&nbsp;instead&nbsp;of&nbsp;an&nbsp;<a href="IndexedRedis.fields.html#IRField" >IRField</a>(...valueType=float)&nbsp;to&nbsp;get&nbsp;accurate&nbsp;results&nbsp;across&nbsp;platforms,&nbsp;systems,&nbsp;and&nbsp;python&nbsp;versions,&nbsp;and&nbsp;to&nbsp;use&nbsp;for&nbsp;indexing.<br />&nbsp;</tt></td></tr>
+Use&nbsp;this&nbsp;instead&nbsp;of&nbsp;an&nbsp;<a href="IndexedRedis.fields.html#IRField" >IRField</a>(...valueType=float)&nbsp;to&nbsp;get&nbsp;accurate&nbsp;results&nbsp;across&nbsp;platforms,&nbsp;systems,&nbsp;and&nbsp;python&nbsp;versions,&nbsp;and&nbsp;to&nbsp;use&nbsp;for&nbsp;indexing.<br />
+&nbsp;<br />
+An&nbsp;<a href="#IRFixedPointField" >IRFixedPointField</a>&nbsp;is&nbsp;indexable,&nbsp;and&nbsp;has&nbsp;no&nbsp;option&nbsp;to&nbsp;hash&nbsp;the&nbsp;index.<br />&nbsp;</tt></td></tr>
 <tr ><td >&nbsp;</td>
 <td width="100%" ><dl ><dt >Method resolution order:</dt>
 <dd ><a href="IndexedRedis.fields.fixedpoint.html#IRFixedPointField" >IRFixedPointField</a></dd>
@@ -49,8 +51,13 @@ Methods defined here:<br />
 <dl ><dt ><a name="IRFixedPointField-__init__" ><strong >__init__</strong></a>(self, name='', decimalPlaces=5, defaultValue=irNull)</dt><dd ><tt >__init__&nbsp;-&nbsp;Create&nbsp;this&nbsp;object.<br />
 &nbsp;<br />
 @param&nbsp;name&nbsp;&lt;str&gt;&nbsp;-&nbsp;Field&nbsp;name&nbsp;(or&nbsp;blank&nbsp;if&nbsp;used&nbsp;in&nbsp;an&nbsp;IRFieldChain)<br />
+&nbsp;<br />
 @param&nbsp;decimalPlaces&nbsp;&lt;int&gt;&nbsp;-&nbsp;The&nbsp;number&nbsp;of&nbsp;decimal&nbsp;places&nbsp;to&nbsp;use&nbsp;(precision).&nbsp;Values&nbsp;will&nbsp;be&nbsp;rounded&nbsp;to&nbsp;this&nbsp;many&nbsp;places,&nbsp;and&nbsp;always&nbsp;have<br />
-&nbsp;&nbsp;this&nbsp;many&nbsp;digits&nbsp;after&nbsp;the&nbsp;decimal&nbsp;point.</tt></dd></dl>
+&nbsp;&nbsp;this&nbsp;many&nbsp;digits&nbsp;after&nbsp;the&nbsp;decimal&nbsp;point.<br />
+&nbsp;<br />
+@param&nbsp;defaultValue&nbsp;-&nbsp;The&nbsp;default&nbsp;value&nbsp;for&nbsp;this&nbsp;field<br />
+&nbsp;<br />
+An&nbsp;<a href="#IRFixedPointField" >IRFixedPointField</a>&nbsp;is&nbsp;indexable,&nbsp;and&nbsp;has&nbsp;no&nbsp;option&nbsp;to&nbsp;hash&nbsp;the&nbsp;index.</tt></dd></dl>
 
 <dl ><dt ><a name="IRFixedPointField-copy" ><strong >copy</strong></a>(self)</dt><dd ><tt >copy&nbsp;-&nbsp;Create&nbsp;a&nbsp;copy&nbsp;of&nbsp;this&nbsp;<a href="IndexedRedis.fields.html#IRField" >IRField</a>.<br />
 &nbsp;<br />

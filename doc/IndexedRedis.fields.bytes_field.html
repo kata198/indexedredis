@@ -37,7 +37,9 @@
 &nbsp;<br />
 Similar&nbsp;to&nbsp;IRRawField,&nbsp;except&nbsp;IRRawField&nbsp;does&nbsp;not&nbsp;touch&nbsp;encoding,&nbsp;this&nbsp;forces&nbsp;to&nbsp;bytes.<br />
 &nbsp;<br />
-This&nbsp;is&nbsp;replacement&nbsp;for&nbsp;BINARY_FIELDS<br />&nbsp;</tt></td></tr>
+This&nbsp;is&nbsp;replacement&nbsp;for&nbsp;BINARY_FIELDS<br />
+&nbsp;<br />
+An&nbsp;<a href="#IRBytesField" >IRBytesField</a>&nbsp;is&nbsp;indexable,&nbsp;and&nbsp;the&nbsp;index&nbsp;is&nbsp;forced&nbsp;to&nbsp;be&nbsp;hashed.<br />&nbsp;</tt></td></tr>
 <tr ><td >&nbsp;</td>
 <td width="100%" ><dl ><dt >Method resolution order:</dt>
 <dd ><a href="IndexedRedis.fields.bytes_field.html#IRBytesField" >IRBytesField</a></dd>
@@ -50,9 +52,13 @@ Methods defined here:<br />
 <dl ><dt ><a name="IRBytesField-__init__" ><strong >__init__</strong></a>(self, name='', defaultValue=irNull, encoding=None)</dt><dd ><tt >__init__&nbsp;-&nbsp;Create&nbsp;an&nbsp;<a href="#IRBytesField" >IRBytesField</a>&nbsp;object<br />
 &nbsp;<br />
 @param&nbsp;name&nbsp;&lt;str&gt;&nbsp;-&nbsp;Field&nbsp;name<br />
+&nbsp;<br />
 @param&nbsp;defaultValue&nbsp;&lt;any&gt;&nbsp;default&nbsp;irNull&nbsp;-&nbsp;Default&nbsp;value&nbsp;for&nbsp;this&nbsp;field<br />
+&nbsp;<br />
 @param&nbsp;encoding&nbsp;&lt;None/str&gt;&nbsp;-&nbsp;If&nbsp;None,&nbsp;defaultIREncoding&nbsp;will&nbsp;be&nbsp;used&nbsp;when&nbsp;converting&nbsp;to&nbsp;bytes,<br />
-&nbsp;&nbsp;otherwise&nbsp;you&nbsp;can&nbsp;provide&nbsp;an&nbsp;explicit&nbsp;encoding</tt></dd></dl>
+&nbsp;&nbsp;otherwise&nbsp;you&nbsp;can&nbsp;provide&nbsp;an&nbsp;explicit&nbsp;encoding<br />
+&nbsp;<br />
+An&nbsp;<a href="#IRBytesField" >IRBytesField</a>&nbsp;is&nbsp;indexable,&nbsp;and&nbsp;the&nbsp;index&nbsp;is&nbsp;forced&nbsp;to&nbsp;be&nbsp;hashed.</tt></dd></dl>
 
 <dl ><dt ><a name="IRBytesField-copy" ><strong >copy</strong></a>(self)</dt><dd ><tt >copy&nbsp;-&nbsp;Create&nbsp;a&nbsp;copy&nbsp;of&nbsp;this&nbsp;<a href="IndexedRedis.fields.html#IRField" >IRField</a>.<br />
 &nbsp;<br />
