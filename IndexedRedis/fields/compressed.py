@@ -26,6 +26,8 @@ _COMPRESS_MODE_ALIASES_ZLIB = ('gzip', 'gz')
 # COMPRESS_MODE_BZ2 - Use to compress using bz2 (bz2)
 COMPRESS_MODE_BZ2 = 'bz2'
 
+_COMPRESS_MODE_ALIASES_BZ2 = ('bzip2', )
+
 
 class IRCompressedField(IRField):
 	'''
@@ -38,6 +40,8 @@ class IRCompressedField(IRField):
 
 		By default, after fetch the data will be encoded as "bytes". If you need it to be unicode/string, use an
 		  IRFieldChain with an IRUnicodeField and an IRCompressedField together.
+
+		An IRCompressedField is indexable, and forces the index to be hashed.
 	'''
 
 	CAN_INDEX = True
@@ -47,6 +51,19 @@ class IRCompressedField(IRField):
 	def __init__(self, name='', compressMode=COMPRESS_MODE_ZLIB, defaultValue=irNull):
 		'''
 			__init__ - Create this object
+
+			@param name <str> - Field name
+			@param compressMode <str>, default "zlib". Determines the compression module to use
+			  for this field. See COMPRESS_MODE_* variables in this module.
+
+			  Supported values as of 5.0.0 are:
+
+			     "zlib" / "gz" / "gzip" - zlib compression
+			     "bz2"  / "bzip2"       - bzip2 compression
+			
+			@param defaultValue - The default value for this field
+
+			An IRCompressedField is indexable, and forces the index to be hashed.
 		'''
 		self.valueType = None
 		self.defaultValue = defaultValue
@@ -54,7 +71,7 @@ class IRCompressedField(IRField):
 		if compressMode == COMPRESS_MODE_ZLIB or compressMode in _COMPRESS_MODE_ALIASES_ZLIB:
 			self.compressMode = COMPRESS_MODE_ZLIB
 			self.header = b'x\xda'
-		elif compressMode == COMPRESS_MODE_BZ2:
+		elif compressMode == COMPRESS_MODE_BZ2 or compressMode in _COMPRESS_MODE_ALIASES_BZ2:
 			self.compressMode = COMPRESS_MODE_BZ2
 			self.header = b'BZh9'
 		else:
@@ -62,6 +79,11 @@ class IRCompressedField(IRField):
 
 
 	def getCompressMod(self):
+		'''
+			getCompressMod - Return the module used for compression on this field
+
+			@return <module> - The module for compression
+		'''
 		if self.compressMode == COMPRESS_MODE_ZLIB:
 			return zlib
 		if self.compressMode == COMPRESS_MODE_BZ2:
