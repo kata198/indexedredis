@@ -11,14 +11,6 @@ from .null import irNull
 
 from ..compat_str import getDefaultIREncoding, tobytes, to_unicode
 
-import sys
-
-# Don't actually need this, but it silences pyflakes
-try:
-	unicode
-except NameError:
-	unicode = str
-
 # Note for this class, if encoding=None we fetch getDefaultIREncoding on every convert,
 #   because some usage scenario somewhere may need to use a global and have it change depending on operation
 class IRUnicodeField(IRField):

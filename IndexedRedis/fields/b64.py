@@ -7,14 +7,9 @@
 
 from . import IRField, irNull
 
-from ..compat_str import tobytes, isStringy, isEmptyString
+from ..compat_str import tobytes, isEmptyString
 
 from base64 import b64decode, b64encode
-
-try:
-	unicode
-except NameError:
-	unicode = str
 
 class IRBase64Field(IRField):
 	'''

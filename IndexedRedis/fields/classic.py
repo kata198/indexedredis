@@ -8,8 +8,6 @@
 
 from . import IRField
 
-from ..compat_str import tobytes, encoded_str_type
-
 class IRClassicField(IRField):
 	'''
 		IRClassicField - The IRField type which behaves like the "classic" IndexedRedis string-named fields.
@@ -23,7 +21,7 @@ class IRClassicField(IRField):
 	CAN_INDEX = True
 
 	def __init__(self, name=''):
-		IRField.__init__(self, name=name, valueType=encoded_str_type, defaultValue='')
+		IRField.__init__(self, name=name, valueType=str, defaultValue='')
 
 	def __new__(self, name=''):
 		return IRField.__new__(self, name)

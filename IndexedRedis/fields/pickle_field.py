@@ -5,25 +5,18 @@
 
 # vim:set ts=8 shiftwidth=8 softtabstop=8 noexpandtab :
 
-import sys
-
 from . import IRField, irNull
 try:
 	import cPickle as pickle
 except ImportError:
 	import pickle
 
-from IndexedRedis.compat_str import isStringy, isEncodedString, tobytes, isEmptyString
+from IndexedRedis.compat_str import isStringy, isEncodedString, isEmptyString
 
 # NOTE: This pickle class originally had implcit base64 encoding and decoding so it could be used for indexes,
 #  but even with same protocol python2 and python3, and possibly even different platforms and same version
 #  create different pickles for the same objects. Can be as simple as the system supports microseconds,
 #  or has additional methods, or whatever, but it's not reliable so don't allow it.
-
-try:
-	unicode
-except NameError:
-	unicode = str
 
 class IRPickleField(IRField):
 	'''

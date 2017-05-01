@@ -117,7 +117,6 @@ class IRQueryableList(QueryableListObjs):
 		'''
 		if len(self) == 0:
 			return []
-		mdl = self.getModel()
 
 		ret = []
 		for obj in self:

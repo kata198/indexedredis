@@ -17,7 +17,7 @@ import uuid
 from collections import defaultdict
 
 from . import fields
-from .fields import IRField, IRFieldChain, IRClassicField, IRNullType, irNull, IR_NULL_STR, IR_NULL_BYTES, IR_NULL_STRINGS
+from .fields import IRField, IRFieldChain, IRClassicField, IRNullType, irNull, IR_NULL_STR
 from .compat_str import to_unicode, tobytes, setDefaultIREncoding, getDefaultIREncoding
 from .utils import hashDictOneLevel, KeyList
 

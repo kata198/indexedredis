@@ -6,14 +6,8 @@
 
 # vim:set ts=8 shiftwidth=8 softtabstop=8 noexpandtab :
 
-from ..compat_str import to_unicode
-
 from . import IRField, irNull
 
-try:
-	unicode
-except NameError:
-	unicode = str
 
 class IRFieldChain(IRField):
 	'''
