@@ -1,5 +1,13 @@
 5.0.0 - ??? ??? ? ????
 
+A conversion document has been created, CONVERTING_TO_5.0.0 in the main
+directory of this package. Also available online, at 
+  https://github.com/kata198/indexedredis/blob/5.0branch/CONVERTING_TO_5.0.0
+
+Use this document to prepare your code for the changes in IndexedRedis 5.0.0.
+Also please review this Changelog to see new features, bug fixes, etc which
+will not be listed in the conversion document.
+
 - Improve IRPickleField to work with ALL types (including now, strings and
 bytes)
 
@@ -72,7 +80,11 @@ etc. Constructing objects is now a lot cheapear.
 Classic string fields (just a string name, not an IRField object) will retain
 the empty string.
 This allows there to be a difference from not-set and empty-string value items
-(which can be meaningful in several contexts)
+(which can be meaningful in several contexts).
+
+You can override this by setting defaultValue='something else' (like empty
+string for previous default on some types, irNull was previous default on
+others)
   **BACKWARDS INCOMPATIBLE**
 
   Consider if you are testing like
@@ -195,6 +207,10 @@ irNull (well, it just treats it same as empty string)
 - Ensure that IRBytesField always encodes to bytes as soon as you set the
 value on the object
 
+- Ensure that every field type converts the value to its consumable form (so
+same before-save and after-fetch) when setting the attribute through the
+dot-operator (myobj.value = X ) or constructor.
+
 - Fix bug where toIndex could be calling toStorage twice on a value (which
 affected things like base64 fields, which could be base64-of-base64 on index).
 Didn't matter before because base64 fields couldn't index before, but maybe
@@ -215,8 +231,71 @@ floats are machine-dependent, use IRFixedPointField to define a precision and
 support indexes. And dicts are not ordered. And json has too many nesting
 issues. )
 
+- Support "lzma" ( aka "xz" ) compression in IRCompressedField. This is
+provided by the core in python3. For python2, IndexedRedis also supports
+backports.lzma and lzmaffi as alternative implementations. You can also
+explicitly set IndexedRedis.fields.compressed._lzmaMod if you have some other
+external implementation for python2
+
 - Some cleanups, refactoring, optimizations, simplifications
 
+- Rename the fields.bytes fields.unicode and fields.pickle module names to not
+conflict with builtins. You should be inheriting all your fields like:
+
+   from IndexedRedis.fields import IRPickleField
+anyway, so should not notice this change.
+
+- More updates on the way Redis connection parameters work.
+    
+    Now -- instead of using the "fixed" defaults of host="127.0.0.1",
+    port=6379, db=0 for connections, IndexedRedis will use what you set
+    through setDefaultRedisConnectionParams. The old defaults remain the
+    initial version of the defaultRedisConnectionParams, so existing code
+    will not break.
+    
+    This means now that models that define their own REDIS_CONNECTION_PARAMS
+    are filled in by the defaultRedisConnectionParams for any missing slots,
+    rather than the aforementioned hard defaults.
+    
+    So for example, for the following:
+    
+        setDefaultRedisConnectionParams( { 'host' : '192.168.1.1' , 'port' :
+        15000, 'db' : 0 } )
+    
+        class MySpecialModel(IndexedRedisModel):
+            ...
+    
+            REDIS_CONNECTION_PARAMS = { 'db' : 1 }
+    
+    The default connection for everything will use the first dict
+    (host='192.168.1.1', port=15000, db=0 ).
+    
+    MySpecialModel will override the db portion, but inherit host and port,
+    so MySpecialModel will use (host='192.168.1.1', port=15000, db=1)
+    
+    This only affects connection pools that IndexedRedis manages. If you
+    define your own (by setting the 'connection_pool' key on your connection
+    params), as before you will not get any of the inheritance,
+    connect/disconnect, size management, etc that IndexedRedis would
+    otherwise provide.
+    
+    Some other changes because of this:
+    
+    - getDefaultRedisConnectionParams will return a COPY of the default
+    params, to prevent updates (such that IndexedRedis can track and apply
+    them properly). setDefaultRedisConnectionParams already made copies of
+    the values and set them on the global instance.
+    
+    - Introduce as "clearRedisPools" method which will disconnect and clear
+    the connection_pool ConnectionPools off of all non-managed connections.
+    
+    - Calling setDefaultRedisConnectionParams will now call clearRedisPools,
+    disconnecting any active managed connections and clearing the cached
+    connection_pool associated with each model (except managed pools). This
+    allows inheritance to happen again with the new properties, for example
+    on the above example code, if 'host' was changed in the global,
+    MySpecialModel on next connection will inherit that value (and cache the
+    inherited settings and connection pool).
 
 4.1.4 - Sat Apr 15 2017
 
@@ -547,3 +626,4 @@ all()) by
 	- add asDict method for representation as a dictionary
 	- Change example to use asDict to not print original data
 	- Move module to a standard package setup 
+
