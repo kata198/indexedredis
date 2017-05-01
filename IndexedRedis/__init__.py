@@ -57,20 +57,94 @@ REDIS_DEFAULT_POOL_MAX_SIZE = 32
 global _defaultRedisConnectionParams
 _defaultRedisConnectionParams = { 'host' : '127.0.0.1', 'port' : 6379, 'db' : 0 }
 
+global RedisPools
+RedisPools = {}
+
+global _redisManagedConnectionParams
+_redisManagedConnectionParams = {}
 
 def setDefaultRedisConnectionParams( connectionParams ):
+	'''
+		setDefaultRedisConnectionParams - Sets the default parameters used when connecting to Redis.
+
+		  This should be the args to redis.Redis in dict (kwargs) form.
+
+		  @param connectionParams <dict> - A dict of connection parameters.
+		    Common keys are:
+
+		       host <str> - hostname/ip of Redis server (default '127.0.0.1')
+		       port <int> - Port number			(default 6379)
+		       db  <int>  - Redis DB number		(default 0)
+
+		   Omitting any of those keys will ensure the default value listed is used.
+
+		  This connection info will be used by default for all connections to Redis, unless explicitly set otherwise.
+		  The common way to override is to define REDIS_CONNECTION_PARAMS on a model, or use AltConnectedModel = MyModel.connectAlt( PARAMS )
+
+		  Any omitted fields in these connection overrides will inherit the value from the global default.
+
+		  For example, if your global default connection params define host = 'example.com', port=15000, and db=0, 
+		    and then one of your models has
+		       
+		       REDIS_CONNECTION_PARAMS = { 'db' : 1 }
+		    
+		    as an attribute, then that model's connection will inherit host='example.com" and port=15000 but override db and use db=1
+
+
+		    NOTE: Calling this function will clear the connection_pool attribute of all stored managed connections, disconnect all managed connections,
+		      and close-out the connection pool.
+		     It may not be safe to call this function while other threads are potentially hitting Redis (not that it would make sense anyway...)
+
+		     @see clearRedisPools   for more info
+	'''
 	global _defaultRedisConnectionParams
 	_defaultRedisConnectionParams.clear()
 
 	for key, value in connectionParams.items():
 		_defaultRedisConnectionParams[key] = value
+	
+	clearRedisPools()
 
 def getDefaultRedisConnectionParams():
-	global _defaultRedisConnectionParams
-	return _defaultRedisConnectionParams
+	'''
+		getDefaultRedisConnectionParams - Gets A COPY OF the default Redis connection params.
 
-global RedisPools
-RedisPools = {}
+		@see setDefaultRedisConnectionParams for more info
+
+		@return <dict> - copy of default Redis connection parameters
+	'''
+	global _defaultRedisConnectionParams
+	return copy.copy(_defaultRedisConnectionParams)
+
+def clearRedisPools():
+	'''
+		clearRedisPools - Disconnect all managed connection pools, 
+		   and clear the connectiobn_pool attribute on all stored managed connection pools.
+
+		   A "managed" connection pool is one where REDIS_CONNECTION_PARAMS does not define the "connection_pool" attribute.
+		   If you define your own pools, IndexedRedis will use them and leave them alone.
+
+		  This method will be called automatically after calling setDefaultRedisConnectionParams.
+
+		  Otherwise, you shouldn't have to call it.. Maybe as some sort of disaster-recovery call..
+	'''
+	global RedisPools
+	global _redisManagedConnectionParams
+
+	for pool in RedisPools.values():
+		try:
+			pool.disconnect()
+		except:
+			pass
+	
+	for paramsList in _redisManagedConnectionParams.values():
+		for params in paramsList:
+			if 'connection_pool' in params:
+				del params['connection_pool']
+	
+	RedisPools.clear()
+	_redisManagedConnectionParams.clear()
+		
 
 def getRedisPool(params):
 	'''
@@ -93,10 +167,14 @@ def getRedisPool(params):
 			@return redis.ConnectionPool corrosponding to this unique server.
 	'''
 	global RedisPools
+	global _defaultRedisConnectionParams
+	global _redisManagedConnectionParams
 
 	if not params:
-		global _defaultRedisConnectionParams
 		params = _defaultRedisConnectionParams
+		isDefaultParams = True
+	else:
+		isDefaultParams = bool(params is _defaultRedisConnectionParams)
 
 	if 'connection_pool' in params:
 		return params['connection_pool']
@@ -107,17 +185,42 @@ def getRedisPool(params):
 		params['connection_pool'] = RedisPools[hashValue]
 		return RedisPools[hashValue]
 	
+	# Copy the params, so that we don't modify the original dict
+	if not isDefaultParams:
+		origParams = params
+		params = copy.copy(params)
+	else:
+		origParams = params
+
 	checkAgain = False
 	if 'host' not in params:
-		params['host'] = '127.0.0.1'
+		if not isDefaultParams and 'host' in _defaultRedisConnectionParams:
+			params['host'] = _defaultRedisConnectionParams['host']
+		else:
+			params['host'] = '127.0.0.1'
 		checkAgain = True
 	if 'port' not in params:
-		params['port'] = 6379
+		if not isDefaultParams and 'port' in _defaultRedisConnectionParams:
+			params['port'] = _defaultRedisConnectionParams['port']
+		else:
+			params['port'] = 6379
 		checkAgain = True
 	
 	if 'db' not in params:
-		params['db'] = 0
+		if not isDefaultParams and 'db' in _defaultRedisConnectionParams:
+			params['db'] = _defaultRedisConnectionParams['db']
+		else:
+			params['db'] = 0
 		checkAgain = True
+
+
+	if not isDefaultParams:
+		otherGlobalKeys = set(_defaultRedisConnectionParams.keys()) - set(params.keys())
+		for otherKey in otherGlobalKeys:
+			if otherKey == 'connection_pool':
+				continue
+			params[otherKey] = _defaultRedisConnectionParams[otherKey]
+			checkAgain = True
 
 	if checkAgain:
 		hashValue = hashDictOneLevel(params)
@@ -126,12 +229,20 @@ def getRedisPool(params):
 			return RedisPools[hashValue]
 
 	connectionPool = redis.ConnectionPool(**params)
-	params['connection_pool'] = connectionPool
+	origParams['connection_pool'] = params['connection_pool'] = connectionPool
 	RedisPools[hashValue] = connectionPool
 
+	# Add the original as a "managed" redis connection (they did not provide their own pool)
+	#   such that if the defaults change, we make sure to re-inherit any keys, and can disconnect
+	#   from clearRedisPools
+	origParamsHash = hashDictOneLevel(origParams)
+	if origParamsHash not in _redisManagedConnectionParams:
+		_redisManagedConnectionParams[origParamsHash] = [origParams]
+	elif origParams not in _redisManagedConnectionParams[origParamsHash]:
+		_redisManagedConnectionParams[origParamsHash].append(origParams)
+
+
 	return connectionPool
-
-
 
 
 
