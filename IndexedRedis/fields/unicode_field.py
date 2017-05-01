@@ -21,6 +21,8 @@ class IRUnicodeField(IRField):
 		a regular IRField.
 
 		In practice, you may have fields with different encodings (different languages maybe, different platforms, etc), and through this you can support those cases.
+
+		This field type is indeaxble, and the index is forced to be hashed.
 	'''
 
 	CAN_INDEX = True
@@ -29,12 +31,30 @@ class IRUnicodeField(IRField):
 	hashIndex = True
 
 	def __init__(self, name='', encoding=None, defaultValue=irNull):
+		'''
+			__init__ - Create an IRUnicodeField
+
+			@param name <str> - The field name
+			
+			@param encoding <None/str> - A specific encoding to use. If None, defaultIREncoding will be used.
+
+			@param defaultValue - The default value for this field
+
+			This field type is indeaxble, and the index is forced to be hashed.
+		'''
 		self.valueType = None
 		self.encoding = encoding
 		self.defaultValue = defaultValue
 
 
 	def getEncoding(self):
+		'''
+			getEncoding - Get the encoding codec associated with this field.
+
+				If you provided None, this will return the defaultIREncoding
+
+			@return <str> - Encoding
+		'''
 		if not self.encoding:
 			return getDefaultIREncoding()
 		return self.encoding
@@ -50,6 +70,15 @@ class IRUnicodeField(IRField):
 
 
 	def toBytes(self, value):
+		'''
+			toBytes - Convert a value to bytes using the encoding specified on this field
+
+			@param value <str> - The field to convert to bytes
+
+			@return <bytes> - The object encoded using the codec specified on this field.
+
+			NOTE: This method may go away.
+		'''
 		if type(value) == bytes:
 			return value
 		return value.encode(self.getEncoding())

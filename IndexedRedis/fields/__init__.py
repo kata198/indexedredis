@@ -33,21 +33,13 @@ class IRField(str):
 	'''
 		IRField - An advanced field
 
-		@param name <str> - The field name
-
-		@param valueType <None/type> - The type to use for the value of this field. Default is str (str/unicode will both be unicode). If on python3 and bytes are passed, will be decoded to bytes using default encoding.
-		  Using None, the raw data will be used (bytes) on retrieval and for storage.
-		  Can be a basic type (like int). Use BINARY_FIELDS array on the model to have value be "bytes"
-
-		@param hashIndex <bool> (default False) - If True, the value will be hashed for use in the index. This is useful on fields where the value may be very large. For smaller fields, can keep this as False.
-
-		@param defaultValue <any> (default irNull) - The value assigned to this field as a "default", i.e. when no value has yet been set. Generally, it makes sense to keep this as irNull, but you may want a different default.
-
 		If a type is defined other than default/str/bytes/None , an empty value (empty string in Redis) will be assigned to the IRNullType instance provided in this module, irNull.
 		irNull does not equal anything except irNull (or another IRNullType). Use this to check if a value has been assigned for other types.
 
 		BE VERY CAREFUL ABOUT USING "float" as a type! It is an inprecise field and can vary from system to system. Instead of using a float,
 		consider using fields.IRFixedPointField, which is indexable.
+
+		An IRField may be indexable (depending on the type), and has the option to hash the index
 		
 	'''
 
@@ -72,6 +64,7 @@ class IRField(str):
 			__init__ - Create an IRField. Use this directly in the FIELDS array for advanced functionality on a field.
 
 			@param name <str> - The name of this field
+
 			@param valueType <type> - The type that will be used for this field. Default str/unicode (and bytes on python2)
 				act the same as non-IRField FIELDS entries (just plain string), i.e. they are encoded to unicode to and from Redis.
 
@@ -94,6 +87,7 @@ class IRField(str):
 
 			@param hashIndex <bool> (default False) - If true, the md5 hash of the value will be used for indexing and filtering. This may be useful for very long fields.
 
+			An IRField may be indexable (depending on the type), and has the option to hash the index
 
 			NOTE: If you are extending IRField, you should probably not call this __init__ function. So long as you implement your own "convert", any fields used are set on a class-level.
 		'''

@@ -17,6 +17,8 @@ class IRBytesField(IRField):
 		Similar to IRRawField, except IRRawField does not touch encoding, this forces to bytes.
 
 		This is replacement for BINARY_FIELDS
+
+		An IRBytesField is indexable, and the index is forced to be hashed.
 	'''
 
 	CAN_INDEX = True
@@ -27,9 +29,13 @@ class IRBytesField(IRField):
 			__init__ - Create an IRBytesField object
 
 			@param name <str> - Field name
+
 			@param defaultValue <any> default irNull - Default value for this field
+
 			@param encoding <None/str> - If None, defaultIREncoding will be used when converting to bytes,
 			  otherwise you can provide an explicit encoding
+
+			An IRBytesField is indexable, and the index is forced to be hashed.
 		'''
 		self.valueType = None
 		self.defaultValue = defaultValue

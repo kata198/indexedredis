@@ -19,6 +19,10 @@ class IRFieldChain(IRField):
 	   fromInput and fromStorage is applied right-to-left.
 
 	   The output of one field is the input of the next.
+
+	   An IRFieldChain is indexable so long as ALL of its contained fields are indexable.
+	   An IRFieldChain is forced to be a hashed index if the rightmost field forces it (as some types do),
+	     otherwise hashIndex will determine if it is hashed.
 	'''
 
 	# CAN_INDEX will be determined if the right-most field in chainedFields is indeable.
@@ -36,6 +40,9 @@ class IRFieldChain(IRField):
 
 			  The output of one field is the input of the next.
 
+			   An IRFieldChain is indexable so long as ALL of its contained fields are indexable.
+			   An IRFieldChain is forced to be a hashed index if the rightmost field forces it (as some types do),
+			     otherwise hashIndex will determine if it is hashed.
 
 			@see IRField.__init__
 		'''
@@ -125,7 +132,6 @@ class IRFieldChain(IRField):
 		'''
 			_checkCanIndex - Check if we CAN index (if all fields are indexable).
 				Also checks the right-most field for "hashIndex" - if it needs to hash we will hash.
-				  Otherwise, we won't (unless hashIndex=True in constructor, TODO)
 		'''
 
 		# NOTE: We can't just check the right-most field. For types like pickle that don't support indexing, they don't

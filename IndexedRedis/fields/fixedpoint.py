@@ -16,8 +16,7 @@ class IRFixedPointField(IRField):
 
 	        Use this instead of an IRField(...valueType=float) to get accurate results across platforms, systems, and python versions, and to use for indexing.
 
-
-
+		An IRFixedPointField is indexable, and has no option to hash the index.
 	'''
 
 	CAN_INDEX = True
@@ -27,8 +26,13 @@ class IRFixedPointField(IRField):
 			__init__ - Create this object.
 
 			@param name <str> - Field name (or blank if used in an IRFieldChain)
+
 			@param decimalPlaces <int> - The number of decimal places to use (precision). Values will be rounded to this many places, and always have
 			  this many digits after the decimal point.
+
+			@param defaultValue - The default value for this field
+
+			An IRFixedPointField is indexable, and has no option to hash the index.
 		'''
 		self.decimalPlaces = decimalPlaces
 

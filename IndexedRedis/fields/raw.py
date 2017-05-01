@@ -15,6 +15,8 @@ class IRRawField(IRField):
 		NOTE: This type does NOT support irNull, nor default values (because no encoding/decoding).
 
 		After fetch, the value will always be bytes (Again, no translation).
+
+		This field type does not support indexing.
 	'''
 
 	CAN_INDEX = False
@@ -22,6 +24,10 @@ class IRRawField(IRField):
 	def __init__(self, name=''):
 		'''
 			__init__ - Create an IRRawField. Only takes a name
+
+			@param name <str> - Field name
+
+			This field type does not support indexing.
 		'''
 		self.valueType = None
 		self.defaultValue = ''

@@ -21,12 +21,27 @@ from IndexedRedis.compat_str import isStringy, isEncodedString, isEmptyString
 class IRPickleField(IRField):
 	'''
 		IRPickleField - A field which pickles its data before storage and loads after retrieval.
+
+		This uses the python2 format, so is safe to use between python2 and python3.
+
+		Because even with the same format, python2 and python3 can output different pickle strings for the same object,
+		  as well as different host configurations may lead to different output, this field type is not indexable.
 	'''
 
 	# Sigh.... so we _can_ index on a pickle'd field, except even with the same protocol the pickling is different between python2 and python3
 	CAN_INDEX = False
 
 	def __init__(self, name='', defaultValue=irNull):
+		'''
+			__init__ - Create an IRPickleField
+
+			@param name <str> - Field name
+
+			@param defaultValue - The default value of this field
+
+			Because even with the same format, python2 and python3 can output different pickle strings for the same object,
+			  as well as different host configurations may lead to different output, this field type is not indexable.
+		'''
 		self.valueType = None
 		self.defaultValue = defaultValue
 

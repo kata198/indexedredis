@@ -19,6 +19,8 @@ class IRBase64Field(IRField):
 		  use an IRFieldChain.
 
 		  Like, use it with an IRUnicodeField as the far left to have it be a utf-16 value, or use IRField(valueType=str) for a string, or IRField(valueType=int) for int, etc.
+
+		  An IRBytesField is indexable and the index is forced to be hashed
 	'''
 
 	CAN_INDEX = True
@@ -34,6 +36,8 @@ class IRBase64Field(IRField):
 
 			@param encoding <None/str> (default None) - An explicit encoding to use when converting to bytes. If None, the global defaultIREncoding will be used.
 
+
+			An IRBytesField is indexable and the index is forced to be hashed
 		'''
 		self.valueType = None
 		self.encoding = encoding

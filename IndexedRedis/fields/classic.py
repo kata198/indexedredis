@@ -16,11 +16,23 @@ class IRClassicField(IRField):
 		This will store and retrieve data encoding into the default encoding (@see IndexedRedis.compat_str.setDefaultIREncoding)
 
 		and have a default value of empty string.
+
+		An IRClassicField is indexable, but there is no option to hash the index.
 	'''
 
 	CAN_INDEX = True
 
 	def __init__(self, name=''):
+		'''
+			__init__ - Create an IRClassicField.
+			  This field behaves as a plain string entry in FIELDS did prior to 5.0.0.
+
+			  The default value is empty string, and it stores strings using defaultIREncoding.
+
+			  Consider changing to an IRField or one of the other many types.
+
+			  @param name <str> - Field name
+		'''
 		IRField.__init__(self, name=name, valueType=str, defaultValue='')
 
 	def __new__(self, name=''):

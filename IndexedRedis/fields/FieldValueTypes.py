@@ -110,7 +110,9 @@ class IRJsonValue(type):
         "bool" is supported using a number 0.0 or 1.0 - because cannot subclass "bool"
     '''
 
-    # TODO: This probably shouldn't be indexable... although maybe when I implement hashed indexes.
+    # TODO: This generally can't be indexable, because while the outer may be fixed-order for some
+    #   types, inner elements (like elements in a list) might not be. So it'd be dependent on the
+    #   value itself, not the value type each time, which makes it not 100% yes or no, which means no.
     CAN_INDEX = False
 
     def __init__(self, *args, **kwargs):
