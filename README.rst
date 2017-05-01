@@ -18,11 +18,11 @@ It is compatible with python 2.7 and python 3. It has been tested with python 2.
 5.0 Status
 ----------
 
-Version 5.0.0 will be backwards incompatible with previous versions by removing some old legacy stuff, and changing some behaviour.
+Version 5.0.0 will be somewhat **backwards incompatible with previous versions** by removing some old legacy stuff, improving a lot of existing things, and changing some behaviour.
 
-Most of these changes can be made using version 4.1.4 or greater in the 4.1 series, so when 5.0.0 comes around, you can be as close as possible and may not need to update any code.
+You can get an overview of the steps needed to convert your code with the conversion guide, found at https://github.com/kata198/indexedredis/blob/5.0branch/CONVERTING_TO_5.0.0
 
-Details can be found in the 5.0.0 ChangeLog, found here: https://github.com/kata198/indexedredis/blob/5.0branch/Changelog
+Full details of changes, as well as enhancements and bug fixes omitted from the conversion guide can be found in the 5.0.0 Changelog: https://github.com/kata198/indexedredis/blob/5.0branch/Changelog
 
 
 Automatic and Native Types
@@ -121,12 +121,13 @@ This is the type you should extend to define your model.
 	 Example: 'StoreItems'
 
 
-*REDIS_CONNECTION_PARAMS* - OPTIONAL -  provides the arguments to pass into "redis.Redis", to construct a redis object. Here you should define the host and port.
+*REDIS_CONNECTION_PARAMS* - OPTIONAL -  provides the arguments to pass into "redis.Redis", to construct a redis object. Here you can define overrides per-model from the default connection params.
 
-Since 5.0.0, define this field ONLY for this model to use an alternate connection than the default. See "Connecting To Redis" section below for more info.
+Since 5.0.0, define this field ONLY for this model to use an alternate connection than the default. You no longer need to set this on every model.
 
-If not defined or empty, the default params will be used.
+See "Connecting To Redis" section below for more info.
 
+If not defined or empty, the default params will be used. If any fields are present, they will override the inherited default connection params.
 
 	 Example: {'host' : '192.168.1.1'}
 
@@ -199,7 +200,7 @@ For all fields (except IRClassicField), the value of this parameter defaults to 
 
 **Advanced Types**
 
-The following are the possible field types, for use within the FIELDS array:
+The following are the possible field types, for use within the FIELDS array, and can be imported like "from IndexedRedis.fields import NAME":
 
 
 **IRField** - Standard field, takes a name and a "valueType", which is a native python type, or any type you create which implements \_\_new\_\_, taking a signle argument and returning the object. See IndexedRedis/fields/FieldValueTypes for example of how datetime and json are implemented.
@@ -330,10 +331,10 @@ Connecting to Redis
 
 Your connection to Redis should be defined by calling "setDefaultRedisConnectionParams" with a dict of { 'host' : 'hostname', 'port' : 6379, 'db' : 0 }.
 
-The default connection will connect to host at 127.0.0.1, port at 6379, and db at 0. If you don't define any of these fields explicitly, the default will be used.
+The default connection will connect to host at 127.0.0.1, port at 6379, and db at 0. If you don't define any of these fields explicitly, those values will be used for the respective field.
 
 
-These default params will be used for all models, UNLESS you define REDIS\_CONNECTION\_PARAMS on a model to something non-empty, then that model will connect using those params.
+These default params will be used for all models, UNLESS you define REDIS\_CONNECTION\_PARAMS on a model to something non-empty, then that model will inherit the default connection parameters, overriding any values with those defined on the model.
 
 If you need the same model to connect to different Redis instances, you can call "MyModel.connectAlt" (where MyModel is your model class) and pass a dict of alternate connection parameters. That function will return a copy of the class that will use the alternate provided connection.
 
@@ -562,13 +563,6 @@ To get the current default encoding, use IndexedRedis.getDefaultIREncoding
 
 To use a different encoding on a per-field basis, use IRUnicodeField or IRBytesField which both take an "encoding" parameter when constructing, which allows you to have your data follow that encoding.
 
-
-Backwards-Incompatible Changes
-------------------------------
-
-IndexedRedis 5.0.0 introduces several backwards-incompatible changes. See Changelog for details.
-
-https://github.com/kata198/indexedredis/blob/5.0branch/Changelog
 
 Changes
 -------
