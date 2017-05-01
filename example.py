@@ -29,7 +29,7 @@ class Song(IndexedRedisModel):
             IRField('description'),
             IRField('copyright'),
             IRRawField('mp3_data'), # Do not perform any conversion on the data.
-            IRFieldChain('thumbnail', [IRBytesField(), IRCompressedField(compressMode='gzip')]),      # Compress this field in storage using "bz2" compression
+            IRFieldChain('thumbnail', [IRBytesField(), IRCompressedField(compressMode='gzip')]),      # Compress this field in storage using "gzip" compression
             IRField('tags', valueType=list),
             IRFieldChain('lyrics', [ IRUnicodeField(encoding='utf-8'), IRCompressedField() ], defaultValue='No lyrics found'),
     ]
