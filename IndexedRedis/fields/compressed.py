@@ -26,8 +26,17 @@ _COMPRESS_MODE_ALIASES_ZLIB = ('gzip', 'gz')
 # COMPRESS_MODE_BZ2 - Use to compress using bz2 (bz2)
 COMPRESS_MODE_BZ2 = 'bz2'
 
+# All aliases for bz2 compression
 _COMPRESS_MODE_ALIASES_BZ2 = ('bzip2', )
 
+# COMPRESS_MODE_LZMA - Use to compress using lzma
+COMPRESS_MODE_LZMA = 'lzma'
+
+# All aliases for lzma compression
+_COMPRESS_MODE_ALIASES_LZMA = ('xz', )
+
+global _lzmaMod
+_lzmaMod = None
 
 class IRCompressedField(IRField):
 	'''
@@ -59,7 +68,13 @@ class IRCompressedField(IRField):
 			  Supported values as of 5.0.0 are:
 
 			     "zlib" / "gz" / "gzip" - zlib compression
+
 			     "bz2"  / "bzip2"       - bzip2 compression
+
+			     "lzma" / "xz"          - LZMA compression.
+			       NOTE: This is provided in python3 by default, but in python2 you will need an external module.
+			        IndexedRedis will automatically detect if "backports.lzma" or "lzmaffi" are installed, and use them
+				if the core "lzma" module is not available.
 			
 			@param defaultValue - The default value for this field
 
@@ -71,9 +86,16 @@ class IRCompressedField(IRField):
 		if compressMode == COMPRESS_MODE_ZLIB or compressMode in _COMPRESS_MODE_ALIASES_ZLIB:
 			self.compressMode = COMPRESS_MODE_ZLIB
 			self.header = b'x\xda'
+			self.extraCompressArgs = (9, )
 		elif compressMode == COMPRESS_MODE_BZ2 or compressMode in _COMPRESS_MODE_ALIASES_BZ2:
 			self.compressMode = COMPRESS_MODE_BZ2
 			self.header = b'BZh9'
+			self.extraCompressArgs = (9, )
+		elif compressMode == COMPRESS_MODE_LZMA or compressMode in _COMPRESS_MODE_ALIASES_LZMA:
+			self.compressMode = COMPRESS_MODE_LZMA
+			self.header = b'\xfd7zXZ'
+			self.extraCompressArgs = tuple()
+			self.getCompressMod() # Die early if LZMA compression is not available
 		else:
 			raise ValueError('Invalid compressMode, "%s", for field "%s". Should be one of the IndexedRedis.fields.compressed.COMPRESS_MODE_* constants.' %(str(compressMode), name))
 
@@ -88,6 +110,31 @@ class IRCompressedField(IRField):
 			return zlib
 		if self.compressMode == COMPRESS_MODE_BZ2:
 			return bz2
+		if self.compressMode == COMPRESS_MODE_LZMA:
+			# Since lzma is not provided by python core in python2, search out some common alternatives.
+			#  Throw exception if we can find no lzma implementation.
+			global _lzmaMod
+			if _lzmaMod is not None:
+				return _lzmaMod
+			try:
+				import lzma
+				_lzmaMod = lzma
+				return _lzmaMod
+			except:
+				# Python2 does not provide "lzma" module, search for common alternatives
+				try:
+					from backports import lzma
+					_lzmaMod = lzma
+					return _lzmaMod
+				except:
+					pass
+				try:
+					import lzmaffi as lzma
+					_lzmaMod = lzma
+					return _lzmaMod
+				except:
+					pass
+				raise ImportError("Requested compress mode is lzma and could not find a module providing lzma support. Tried: 'lzma', 'backports.lzma', 'lzmaffi' and none of these were available. Please install one of these, or to use an unlisted implementation, set IndexedRedis.fields.compressed._lzmaMod to the module (must implement standard python compression interface)")
 
 	def _toStorage(self, value):
 		if isEmptyString(value):
@@ -105,7 +152,7 @@ class IRCompressedField(IRField):
 			return value
 
 
-		return self.getCompressMod().compress(tobytes(value), 9)
+		return self.getCompressMod().compress(tobytes(value), *self.extraCompressArgs)
 
 	def _fromStorage(self, value):
 

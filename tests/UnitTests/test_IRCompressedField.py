@@ -64,6 +64,20 @@ class TestIRCompressedField(object):
                 KEY_NAME = 'TestIRCompressedField__CompressBz2'
 
             self.model = Model_CompressBz2
+        elif testMethod == self.test_compressLzma:
+            try:
+                class Model_CompressLzma(IndexedRedisModel):
+                    FIELDS = [
+                        IRField('name'),
+                        IRCompressedField('value', compressMode='lzma', defaultValue=irNull),
+                    ]
+
+                    INDEXED_FIELDS = ['name']
+
+                    KEY_NAME = 'TestIRCompressedField__CompressLzma'
+                self.model = Model_CompressLzma
+            except ImportError:
+                pass
 
         elif testMethod == self.test_defaultValue:
             class Model_CompressedDefaultValue(IndexedRedisModel):
@@ -315,6 +329,57 @@ class TestIRCompressedField(object):
         assert len(fetchedObjs) == 2 , 'Fetched wrong number of objects.'
 
         assert list(sorted( [obj.name for obj in fetchedObjs] ) ) == ['one', 'three'] , 'Fetched wrong objects'
+
+    def test_compressLzma(self):
+        if not self.model:
+            sys.stderr.write('NOTE: lzma compression is not available in this installation (python2 and missing an external lzma module). Cannot run test_compressLzma.\n')
+            return
+
+        
+        Model = self.model
+
+        Model.validateModel()
+
+        lzma = Model.FIELDS['value'].getCompressMod()
+
+        someStr = "The quick brown fox jumped over the lazy dog.\n" * 5
+        someStrBytes = tobytes(someStr)
+
+        someStrLzma = lzma.compress(tobytes(someStr))
+
+
+        obj = Model()
+
+        obj.name = 'one'
+
+        assert obj.value == irNull , 'Expected default value (irNull) to be taken seriously.'
+
+        obj.value = someStr
+
+        assert obj.value == someStr
+
+        try:
+            dictConverted = obj.asDict(forStorage=False, strKeys=True)
+            dictForStorage = obj.asDict(forStorage=True, strKeys=True)
+        except Exception as e:
+            raise AssertionError('Expected to be able to convert to dict for both storage and non-storage. Got exception: %s %s' %(e.__class__.__name__, str(e)))
+
+        assert dictConverted['value'] == someStr , 'Expected original string to be retained on forStorage=False dict. Got: %s' %(repr(dictConverted['value']), )
+
+        assert dictForStorage['value'] == someStrLzma , 'Expected lzma compressed value to be set on forStorage=True dict.\nExpected: %s\nGot:     %s' %(repr(someStrLzma), repr(dictForStorage['value']) )
+
+        ids = obj.save()
+
+        assert ids and ids[0] , 'Failed to save object with lzma compression'
+
+        objFetched = Model.objects.filter(name='one').first()
+
+        assert objFetched , 'Failed to fetch object'
+
+        obj = objFetched
+
+        assert obj.value == someStrBytes , 'Expected fetched object to contain the uncompressed value. Got: %s' %(repr(obj.value), )
+
 
 
 if __name__ == '__main__':
