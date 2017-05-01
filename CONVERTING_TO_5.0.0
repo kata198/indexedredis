@@ -1,0 +1,157 @@
+This is a document that provides a quick overview of updating your code such that it works with 5.0.0.
+
+It does not cover all the new features and additions, etc, see Changelog, pydoc, and tests to see all those.
+  The intention of this document is as a checklist for you to update your code to work the same way it did before 5.0.0 and after.
+
+
+1. Connecting to Redis
+
+  Previously, to connect to Redis, each model had to define an attribute, REDIS_CONNECTION_PARAMS, a dict of connection parameters.
+  If not provided, you would connect to localhost:6379 and use db=0. This was obtuse, cumbersome, and didn't scale very well with multiple-environment setups.
+
+  Starting in IndexedRedis 5.0.0, this has been cleaned up such that you can define a global connection configuration, which will be used by default
+  on all models, unless the model defines REDIS_CONNECTION_PARAMS to a non-empty dict, in which case the model's specific connection will be used (see "Connection Inheritance" below for more info)
+
+
+  So, if you're like most configurations that connect to a single Redis server (or cluster) for all models, you should remove the REDIS_CONNECTION_PARAMS entry from each model, and rely on the single default.
+
+  To set the default connection params:
+
+      from IndexedRedis import setDefaultRedisConnectionParams
+
+      setDefaultRedisConnectionParams( {'host' : '192.168.1.100', 'port' : 6379, 'db' : 0 } )
+
+  If you do not provide any of those fields, the default will be used ( host="127.0.0.1", port=6379, db=0 ) for that field.
+
+  Connection Inheritance:
+
+    IndexedRedis 5.0.0 now supports connection inheritance! The default connection params (set with setDefaultRedisConnectionParams) will be used as the base for inheritance from individual models. This allows you to store primary connection info in a config file based on the running environment, while allowing models to use different namespaces by changing "db" property, for example.
+
+    So if your default params are:    { 'host' : '192.168.1.100', 'port' : 6379, 'db' : 0 }
+
+    and you have a model like this:
+
+      class MyModel(IndexedRedisModel):
+        
+        ...
+
+        REDIS_CONNECTION_PARAMS = { 'db' : 1 }
+
+   Then MyModel's connections will inherit host="192.168.1.100" and port=6379  from your default, but instead of db=0 will override with db=1.
+
+
+2. Removing string entries in FIELDS
+
+   - FIELDS have seen a major overhaul in IndexedRedis 5.0.0.
+
+     No longer are plain-string fields allowed, e.x.:
+
+        FIELDS = [ 'name', 'title' ]
+
+     IndexedRedis 5.0.0 will give you a deprecated warning if your model uses this, and automatically convert those entries to a new field type, IRClassicField.
+
+     IRClassicField works just like the old string fields, they default to empty string, encode in unicode given the defaultIREncoding.
+
+     To get past behaviour on your models and remove that pesky deprecated warning (as well as prepare for when it goes from deprecated to error), convert all existing fields to IRClassicField. e.x.:
+
+        FIELDS = [ IRClassicField('name'),  IRClassicField('title')  ]
+
+     I would, however, recommend that you use a more specific type and take advantage of the new features and ease they provide. See below sections for more info.
+
+3. FIELDS - Default Values
+
+  A long time ago, all fields had the same default value: empty string. Starting in IndexedRedis 4.0, some fields (which did not store string values) had a different default, irNull, a special type that is only equal to another irNull object, and represents "never set".
+
+  In IndexedRedis 5.0, the default (unset) value for ALL field types has been changed to irNull. Similar to a SQL database, this provides a different meaning for "was never set" and "is set to empty string." The exception to this is IRClassicField (which retains the former 'empty string' default value), and IRRawField (which performs no encoding, and treats irNull same as empty string).
+
+  All field types, including IRFieldChain, but excepting IRClassicField and IRRawField, now support an additional property, "defaultValue" which can be used to override this default value. Again, the default value for an IRClassicField is empty string (like old fields).
+
+  For example:
+
+    FIELDS = [
+        IRField('name', defaultValue='no name')
+        IRField('number', defaultValue=-1),
+        IRFieldChain( 'data', [IRBytesField(), IRCompressedField()], defaultValue=b'no data')
+    ]
+
+  The above would define two fields, "name" which has a default of "no name", and "number" which has a default of -1, and a field chain "data" which will have a default value of bytes("no data"). These defaults will be used instead of the default defaultValue, which would have been irNull for all three.
+
+4. No more BASE64_FIELDS
+
+  BASE64_FIELDS have been deprecated in the 4.0 series, and their support has been removed. This was a class attribute you could set on the model, and it would encode/decode the value into base64 before storage. Defining BASE64_FIELDS on a model will now generate an error.
+
+  You can have the same behaviour by using a field type, IRBase64Field.
+
+  So change:
+
+      FIELDS = [
+        IRField('name'),
+        IRField('data'),
+      ]
+
+      BASE64_FIELDS = ['data']
+
+  To:
+
+      FIELDS = [
+        IRField('name'),
+        IRBase64Field('data'),
+      ]
+
+  IRBase64Field has an optional parameter, "encoding", which if defined will specify an alternate encoding than the defaultIREncoding to use when translating data.
+
+5. No more BINARY_FIELDS
+
+  BINARY_FIELDS used to be another class attribute you could set which would ensure that when saving, the value would be converted into bytes using the defaultIREncoding, and upon fetch would also remain bytes. Defining BINARY_FIELDS on a model will now generate an error.
+
+  You can have the same behaviour by using a field type, IRBytesField.
+
+  So change:
+
+      FIELDS = [
+        IRField('name'),
+        IRField('data'),
+      ]
+
+      BINARY_FIELDS = ['data']
+
+  To:
+
+      FIELDS = [
+        IRField('name'),
+        IRBytesField('data'),
+      ]
+
+  IRBytesField has an optional parameter, "encoding", which if defined will specify an alternate encoding than the defaultIREncoding to use when translating data.
+
+6. Pickle field now supports all types
+
+  Prior to 5.0.0, IRPickleField only supported saving/fetching objects. Now it supports strings, lists, objects, and any other pickleable type.
+  
+  Any hacks or whatever that you used before if you needed to store such data in an IRPickleField are no longer required.
+
+7. Setting field values on an IndexedRedisModel will automatically convert them into the intended type (except IRRawField), to ensure that after-fetch matches before-fetch. Review if you have any code that is relying on this NOT happening, and consider using a temp variable until getting it to a saveable state (after which, safe to set on object).
+
+8. Models are now copyable. There is a .copy method, with "copyPrimaryKey" (if True, returned object will be associated with the database, otherwise it will not, default False), and "copyValues" (which will ensure that all values are copied, where they might otherwise be used by reference in constructing the new object. Default False).
+
+They also now support the copy.copy and copy.deepcopy interfaces, which both will create unlinked models.
+If you used other hacks before, you can remove them and use these new api calls.
+
+9. Custom field interface has changed
+
+   If you have implemented any custom field types ( and didn't submit them back to me for inclusion for whatever reason! ), the interface for those has changed.
+
+     convert - Do not implement this anymore. Method removed.
+
+     _fromStorage - Implement this to convert FROM storage TO converted data. This is always from storage (whereas before "convert" could be called from input OR storage).
+                     This method does NOT need to be aware of irNull, that is handled for you now.
+
+     _fromInput    - Implement this to convert FROM input (set on object like myObj.field = value  OR through constructor) to its intended consumable form. For example, IRBytesField will convert values set to bytes using this method
+                     This method does NOT need to be aware of irNull, that is handled for you now.
+
+     toStorage - Do not implement this anymore. Implement _toStorage instead
+
+     _toStorage - Convert the consumable data into the value which will be stored.
+                     This method does NOT need to be aware of irNull, that is handled for you now.
+
+

@@ -6,6 +6,7 @@ include README.rst
 include example.py
 include setup.py
 include requirements.txt
+include CONVERTING_TO_5.0.0
 recursive-include IndexedRedis *.py
 recursive-include tests *.py
 recursive-include tests/simple *.py
