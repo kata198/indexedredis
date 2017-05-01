@@ -820,27 +820,59 @@ class IndexedRedisModel(object):
 		return ''.join(ret)
 
 
-	def copy(self, copyPrimaryKey=False):
+	def copy(self, copyPrimaryKey=False, copyValues=False):
 		'''
                     copy - Copies this object.
 
                     @param copyPrimaryKey <bool> default False - If True, any changes to the copy will save over-top the existing entry in Redis.
                         If False, only the data is copied, and nothing is saved.
+
+		    @param copyValues <bool> default False - If True, every field value on this object will be explicitly copied. If False,
+		      an object will be created with the same values, and depending on the type may share the same reference.
+		      
+		      This is the difference between a copy and a deepcopy.
+
+	            @return <IndexedRedisModel> - Copy of this object, per above
+
+		    If you need a copy that IS linked, @see IndexedRedisModel.copy
 		'''
-		return self.__class__(**self.asDict(copyPrimaryKey, forStorage=False))
+		cpy = self.__class__(**self.asDict(copyPrimaryKey, forStorage=False))
+		if copyValues is True:
+			for fieldName in cpy.FIELDS:
+				setattr(cpy, fieldName, copy.deepcopy(getattr(cpy, fieldName)))
+		return cpy
 
 	def __copy__(self):
 		'''
 			__copy__ - Used by the "copy" module to make a copy,
 			  which will NOT be linked to the original entry in the database, but will contain the same data
-		'''
-		return self.copy(False)
 
-	# TODO:
-#	def __deepcopy__(self, *args, **kwargs):
-#		ret = self.copy(False)
-#
-#		return ret
+		       @return <IndexedRedisModel> - Copy of this object, per above
+		'''
+		return self.copy(copyPrimaryKey=False, copyValues=False)
+
+	def __deepcopy__(self, *args, **kwargs):
+		'''
+			__deepcopy__ - Used by the "copy" module to make a deepcopy.
+
+			  Will perform a deepcopy of all attributes, which will NOT be linked to the original entry in the database.
+
+
+			  If you need a copy that IS linked, @see IndexedRedisModel.copy
+
+		       @return <IndexedRedisModel> - Deep copy of this object, per above
+		'''
+		# Generate an unlinked model with explicit copies of all values
+		cpy = self.copy(copyPrimaryKey=False, copyValues=True)
+
+		# Also make copies of FIELDS and INDEXED_FIELDS
+		cpy.FIELDS = cpy.FIELDS[:]
+		cpy.INDEXED_FIELDS = cpy.INDEXED_FIELDS[:]
+
+		# Copy all data
+
+		return cpy
+
 
 
 	def saveToExternal(self, redisCon):
