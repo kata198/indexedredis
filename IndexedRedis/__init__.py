@@ -283,172 +283,38 @@ class IndexedRedisModel(object):
 	'''
            IndexedRedisModel - This is the model you should extend.
 
+		See: https://github.com/kata198/indexedredis/blob/master/README.md for documentation
 
-            **Required Fields:**
 
-            *FIELDS* - REQUIRED. a list of strings which name the fields that can be used for storage. Can also be IRField or an implementing type (see AdvancedFields below)
+            **Attributes**
 
-                    Example: ['Name', 'Description', 'Model', 'Price']
+		FIELDS - An array of IRField objects, which define the fields on this model.
 
+		INDEXED_FIELDS - The field names on which to index
 
-            *INDEXED_FIELDS* -  a list of strings containing the names of fields that will be indexed. Can only filter on indexed fields. Adds insert/delete time. Contents must also be in FIELDS.
+		KEY_NAME - A string of the "key" name which will be used for this model
 
-                    Example: ['Name', 'Model']
+	        REDIS_CONNECTION_PARAMS - A dict which provides fields to override over the inherited default Redis connection
 
+	     
+	     **Basic Usage**
 
-            *KEY_NAME* - REQUIRED. A unique name name that represents this model. Think of it like a table name. 
+	       The basic model for usage is,
 
-                    Example: 'Items'
+		# Filtering
 
-            *REDIS_CONNECTION_PARAMS* - provides the arguments to pass into "redis.Redis", to construct a redis object.
-	      
-	      If not defined or empty, the default params will be used.
+	       MyModel.objects.filter(field1='value1', field2__ne='notvalue2').all()   # Fetch all objects where field1 is "value1" and field2 is not "notvalue2"
 
-	      set/get the default via setDefaultRedisConnectionParams and getDefaultRedisConnectionParams
+		# Creating / Saving object
 
-            Usage
-            -----
+	       myObj = MyModel()
 
-            Usage is very similar to Django or Flask.
+	       myObj.field1 = 'value1'
 
-            **Query:**
+	       myObj.save()
 
-            Calling .filter or .filterInline builds a query/filter set. Use one of the *Fetch* methods described below to execute a query.
-
-                   objects = SomeModel.objects.filter(param1=val).filter(param2=val).all()
-
-            **Save:**
-
-                   obj = SomeModel(field1='value', field2='value')
-                   obj.save()
-
-            **Delete Using Filters:**
-
-                   SomeModel.objects.filter(name='Bad Man').delete()
-
-            **Delete Individual Objects:**
-
-                   obj.delete()
-
-            **Atomic Dataset Replacement:**
-
-            There is also a powerful method called "reset" which will **atomically** replace all elements belonging to a model. This is useful for cache-replacement, etc.
-
-                   lst = [SomeModel(...), SomeModel(..)]
-
-                   SomeModel.reset(lst)
-
-            For example, you could have a SQL backend and a cron job that does complex queries (or just fetches the same models) and does an atomic replace every 5 minutes to get massive performance boosts in your application.
-
-
-            Filter objects by SomeModel.objects.filter(key=val, key2=val2) and get objects with .all
-
-            Example: SomeModel.objects.filter(name='Tim', colour='purple').filter(number=5).all()
-
-
-            **Fetch Functions**:
-
-            Building filtersets do not actually fetch any data until one of these are called (see API for a complete list). All of these functions act on current filterset.
-
-            Example: matchingObjects = SomeModel.objects.filter(...).all()
-
-                   all    - Return all objects matching this filter
-
-                   allOnlyFields - Takes a list of fields and only fetches those fields, using current filterset
-
-                   delete - Delete objects matching this filter
-
-                   count  - Get the count of objects matching this filter
-
-                   first  - Get the oldest record with current filters
-
-                   last   - Get the newest record with current filters
-
-                   random - Get a random element with current filters
-
-                   getPrimaryKeys - Gets primary keys associated with current filters
-
-
-            **Filter Functions**
-
-            These functions add filters to the current set. "filter" returns a copy, "filterInline" acts on that object.
-
-                   filter - Add additional filters, returning a copy of the filter object (moreFiltered = filtered.filter(key2=val2))
-
-                   filterInline - Add additional filters to current filter object. 
-
-
-            **Global Fetch functions**
-
-            These functions are available on SomeModel.objects and don't use any filters (they get specific objects):
-
-                   get - Get a single object by pk
-
-                   getMultiple - Get multiple objects by a list of pks
-
-
-            **Model Functions**
-
-            Actual objects contain methods including:
-
-                   save   - Save this object (create if not exist, otherwise update)
-
-                   delete - Delete this object
-
-                   getUpdatedFields - See changes since last fetch
-
-
-            Advanced Fields
-	    ---------------
-
-	    IndexedRedis since version 4.0 allows you to pass elements of type IRField (extends str) in the FIELDS element.
-
-	    Doing so allows you to specify certain properties about the field.
-
-
-	    Example:
-
-		FIELDS = [ 'name', IRField('age', valueType=int), 'birthday' ]
-
-	   **Field Name**
-
-	   The first argument is the string of the field name.
-
-	    **Type**
-
-	    You can have a value automatically cast to a certain type (which saves a step if you need to filter further through the QueryableList results, like age__gt=15)
-
-	    by passing that type as "valueType". (e.x.  IRField('age', valueType=int))
-
-	    If you use "bool", the values 0 and case insensitive string 'false' will result in False, and 1 or 'true' will result in True.
-
-	    Be careful using floats, different hosts will have different floating point representations for the same value. Don't expect
-
-	    floats to work cross-platform. Use a fixed point number as the string type ( like myFixedPoint = '%2.5f' %( 10.12345 ) )
-
-	    ** Null Values **
-
-            For any type except strings (including the default type, string), a null value is assigned irNull (of type IRNullType).
-
-	    irNull does not equal empty string, or anything except another irNull. This is to destinguish say, no int assigned vs int(0)
-
-	    You can check a typed field against the "irNull" variable found in the IndexedRedis or IndexedRedis.fields.
-
-	    from IndexedRedis import irNull
-	    ..
-	    e.x. notDangerFive = myResults.filter(dangerLevel__ne=irNull).filter(dangerLevel__ne=5)
-
-	    or even
-
-	    notDangerFive = MyModel.objects.filter(dangerLevel__ne=irNull).filter(dangerLevel__ne=5).all()
-
-
-            Encodings
-            ---------
-
-            IndexedRedis will use by default your system default encoding (sys.getdefaultencoding), unless it is ascii (python2) in which case it will default to utf-8.
-
-            You may change this via IndexedRedis.setDefaultIREncoding
+	       
+	       There are many more methods and usage, etc, see pydoc or README for more information.
 
 	'''
 	
