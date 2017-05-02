@@ -1,3 +1,12 @@
+6.0.0 - ??? ??? ? ????
+
+- Add an IRForeignLinkField which allows linking another object by primary
+key. You can assign it an instance of another model or a primary key, and upon
+access if not already fetched the parent model will fetch the foreign object
+and return it.
+
+
+
 5.0.1 - Mon May 1 2017
 
 A conversion document has been created, CONVERTING_TO_5.0.0 in the main
