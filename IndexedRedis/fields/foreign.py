@@ -10,7 +10,7 @@ import weakref
 
 from . import IRField, irNull
 
-from ..compat_str import isStringy
+from ..compat_str import isStringy, to_unicode
 
 
 # NOTE: Current status, works to link already-saved objects, by integer id or model itself.
@@ -21,11 +21,17 @@ from ..compat_str import isStringy
 # TODO: Work out cascading saves (like if linked to unsaved object, save that object as well as current object. May get hairy in some places.)
 # TODO: Maybe work out a way to fetch all sub objects in one swoop with the original objects
 # TODO: Provide some sort of "reload child" mechanism
-# TODO: Other relations. One-to-one, one-to-many. Many to one is free.
 # TODO: Possibly have child object saved when parent is saved, if changes are present?
+# TODO: Handle deleting fields
+# TODO: Cleanup and reuse code
 
 
 class ForeignLinkData(object):
+	'''
+		ForeignLinkData - Link data for storing information about a foreign object (id and maybe object itself).
+
+		Can fetch object if not already fetched
+	'''
 
 	__slots__ = ('pk', 'obj', '_foreignModel')
 
@@ -47,6 +53,9 @@ class ForeignLinkData(object):
 			self._foreignModel = weakref.ref(foreignModel)
 		else:
 			self._foreignModel = None
+
+
+					
 	
 	def __getitem__(self, name):
 		if not isStringy(name):
@@ -71,6 +80,61 @@ class ForeignLinkData(object):
 	
 	def getPk(self):
 		return self.pk
+
+
+# TODO: Maybe create a base which both of these extend,
+#   As having multiple in a singular field name can get confusing
+class ForeignLinkMultiData(ForeignLinkData):
+	'''
+		ForeignLinkMultiData - Link data with multiple links.
+
+		@see ForeignLinkData
+	'''
+
+	def __init__(self, pk=None, foreignModel=None, obj=None):
+		'''
+			__init__ - Create a ForeignLinkMultiData
+
+			@see ForeignLinkData
+		'''
+		ForeignLinkData.__init__(self, pk, foreignModel, obj)
+		
+		pk = self.pk
+		obj = self.obj
+		if pk and not obj:
+			self.obj = [None for i in range(len(pk))]
+
+		elif obj and not pk:
+			self.pk = []
+			for thisObj in obj:
+				if thisObj._id:
+					self.pk.append(thisObj._id)
+				else:
+					raise ValueError('Unset id')
+		elif len(obj) != len(pk):
+			if len(pk) > len(obj):
+				self.obj += [None for i in range( len(pk) - len(obj) ) ]
+			else:
+				for thisObj in obj[len(pk):]:
+					if thisObj._id:
+						self.pk.append(thisObj._id)
+					else:
+						raise ValueError('unset id')
+	def getObj(self):
+		if self.obj:
+			needPks = [ (i, self.pk[i]) for i in range(len(self.obj)) if self.obj[i] is None]
+
+			if not needPks:
+				return self.obj
+
+			fetched = list(self.foreignModel.objects.getMultiple([needPk[1] for needPk in needPks]))
+			
+			i = 0
+			for objIdx, pk in needPks:
+				self.obj[objIdx] = fetched[i]
+				i += 1
+
+		return self.obj
 
 
 class IRForeignLinkField(IRField):
@@ -153,6 +217,75 @@ class IRForeignLinkField(IRField):
 
 	def __new__(self, name='', foreignModel=None):
 		return IRField.__new__(self, name)
+
+class IRForeignMultiLinkField(IRForeignLinkField):
+	'''
+		IRForeignMultiLinkField - A field which links to a list of foreign objects
+	'''
+
+	CAN_INDEX = False
+
+	def _fromStorage(self, value):
+		if not value:
+			value = ''
+		else:
+			value = to_unicode(value)
+
+		try:
+			pks = [int(x) for x in value.split(',')]
+		except Exception as e:
+			pass
+			# TODO:
+
+		return ForeignLinkMultiData(pk=pks, foreignModel=self.foreignModel)
+
+	def _fromInput(self, values):
+		if issubclass(values.__class__, (tuple, list, set)):
+			pks = []
+			objs = []
+			for value in values:
+				if hasattr(value, '_is_ir_model'):
+					pks.append(value._id)
+					objs.append(value)
+				elif isinstance(value, int):
+					pks.append(value)
+					objs.append(None)
+				else:
+					raise ValueError('Unknown element in list:  <%s>  %s' %(value.__class__.__name__, repr(value)) )
+
+			return ForeignLinkMultiData( pk=pks, foreignModel=self.foreignModel, obj=objs)
+
+		# TODO: Temp exception
+		raise ValueError('Unknown input: <%s>   %s' %(values.__class__.__name__, repr(values)) )
+	
+	def _toStorage(self, value):
+		if isinstance(value, ForeignLinkMultiData):
+			return ','.join([str(eachPk) for eachPk in value.pk])
+
+		elif issubclass(value.__class__, (list, tuple, set)):
+			ret = []
+			for val in value:
+				if hasattr(val, '_is_ir_model'):
+					ret.append(str(val._id))
+				elif isinstance(val, int):
+					ret.append(str(val))
+				elif isStringy(val):
+					ret.append(str(int(val)))
+				else:
+					raise ValueError('Unknown element in list:  <%s>  %s' %(value.__class__.__name__, repr(value)) )
+			return ','.join(ret)
+
+		# TODO: Temp print
+		sys.stderr.write('XXX: Unknown type to storage.... %s     %s\n' %(value.__class__.__name__, repr(value)))
+		 
+		return value
+	
+#	def _toIndex(self, value):
+#		# Support passing either an integer or the model itself
+#		if issubclass(value.__class__, IRForeignLinkField):
+#			return value.pk
+#
+#		return super(IRForeignLinkField, self)._toIndex(value)
 
 
 # vim: set ts=8 shiftwidth=8 softtabstop=8 noexpandtab :

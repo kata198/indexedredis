@@ -383,7 +383,7 @@ from .chain import IRFieldChain
 from .b64 import IRBase64Field
 from .fixedpoint import IRFixedPointField
 from .bytes_field import IRBytesField
-from .foreign import IRForeignLinkField
+from .foreign import IRForeignLinkField, IRForeignMultiLinkField
 
 from .classic import IRClassicField
 
