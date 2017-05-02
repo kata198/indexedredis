@@ -17,7 +17,7 @@ import uuid
 from collections import defaultdict
 
 from . import fields
-from .fields import IRField, IRFieldChain, IRClassicField, IRNullType, irNull, IR_NULL_STR
+from .fields import IRField, IRFieldChain, IRClassicField, IRNullType, irNull, IR_NULL_STR, IRForeignLinkField
 from .compat_str import to_unicode, tobytes, setDefaultIREncoding, getDefaultIREncoding
 from .utils import hashDictOneLevel, KeyList
 
@@ -31,7 +31,7 @@ from .deprecated import deprecated, toggleDeprecatedMessages, deprecatedMessage
 __all__ = ('INDEXED_REDIS_PREFIX', 'INDEXED_REDIS_VERSION', 'INDEXED_REDIS_VERSION_STR', 
 	'IndexedRedisDelete', 'IndexedRedisHelper', 'IndexedRedisModel', 'IndexedRedisQuery', 'IndexedRedisSave',
 	'isIndexedRedisModel', 'setIndexedRedisEncoding', 'getIndexedRedisEncoding', 'InvalidModelException',
-	'fields', 'IRField', 'IRFieldChain', 'irNull',
+	'fields', 'IRField', 'IRFieldChain', 'IRForeignLinkField', 'irNull',
 	'setDefaultIREncoding', 'getDefaultIREncoding',
 	'setDefaultRedisConnectionParams', 'getDefaultRedisConnectionParams',
 	'toggleDeprecatedMessages',
@@ -386,6 +386,36 @@ class IndexedRedisModel(object):
 			value = self.FIELDS[idx].fromInput(value)
 
 		object.__setattr__(self, keyName, value)
+	
+	def __getattribute__(self, keyName):
+		if keyName.endswith('__id'):
+			isIdKey = True
+			keyName = keyName[:-4]
+		else:
+			isIdKey = False
+
+		oga = object.__getattribute__
+
+		val = oga(self, keyName)
+
+		fields = oga(self, 'FIELDS')
+
+		if keyName not in fields:
+			return oga(self, keyName)
+
+		if not isinstance( fields, KeyList):
+			fields = KeyList(fields)
+			object.__setattr__(self, 'FIELDS', fields)
+
+		thisField = fields[keyName]
+
+		if not issubclass(thisField.__class__, IRForeignLinkField):
+			return val
+
+		if isIdKey:
+			return val.getPk()
+		else:
+			return val.getObj()
 
 	
 	def asDict(self, includeMeta=False, forStorage=False, strKeys=False):
