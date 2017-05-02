@@ -5,7 +5,8 @@ key. You can assign it an instance of another model or a primary key, and upon
 access if not already fetched the parent model will fetch the foreign object
 and return it.
 
-
+- Add IRForeignMultiLinkField which links one object to a list of other
+objects
 
 5.0.1 - Mon May 1 2017
 
