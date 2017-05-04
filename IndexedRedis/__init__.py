@@ -1766,11 +1766,18 @@ class IndexedRedisSave(IndexedRedisHelper):
 			objs = [obj]
 
 
+		if usePipeline is True:
+			pipeline = conn.pipeline()
+		else:
+			pipeline = conn
+
 		oga = object.__getattribute__
 
 		if cascadeSave is True:
 
-			foreignPipelines = OrderedDict()
+			# TODO: Confirm that this pipeline logic works even when doPipeline is False
+			#   (i.e. that cascading works through calls to reset)
+#			foreignPipelines = OrderedDict()
 			foreignSavers = {}
 
 			for thisObj in objs:
@@ -1795,18 +1802,23 @@ class IndexedRedisSave(IndexedRedisHelper):
 						else:
 							doSaveForeign = True
 
+						# OLD:
 						# Assemble each level of Foreign fields into an ordered pipeline. Based on semi-recursion,
 						#   we will save the deepest level first in a pipeline, then the next up, on until we complete any subs
+
+						# NEW:
+						#   Assemble all foreign fields into current pipeline and execute all in one block
 						if doSaveForeign is True:
-							if foreignField not in foreignPipelines:
-								foreignPipelines[foreignField] = self._get_new_connection().pipeline()
+							if foreignField not in foreignSavers:
+#								foreignPipelines[foreignField] = self._get_new_connection().pipeline()
 								foreignSavers[foreignField] = IndexedRedisSave(foreignObject.__class__)
 
-							foreignSavers[foreignField].save(foreignObject, usePipeline=False, cascadeSave=True, conn=foreignPipelines[foreignField])
+							#foreignSavers[foreignField].save(foreignObject, usePipeline=False, cascadeSave=True, conn=foreignPipelines[foreignField])
+							foreignSavers[foreignField].save(foreignObject, usePipeline=False, cascadeSave=True, conn=pipeline)
 
-			if foreignPipelines:
-				for foreignPipeline in foreignPipelines.values():
-					foreignPipeline.execute()
+#			if foreignPipelines:
+#				for foreignPipeline in foreignPipelines.values():
+#					foreignPipeline.execute()
 
 				
 
@@ -1838,11 +1850,6 @@ class IndexedRedisSave(IndexedRedisHelper):
 					obj._id = self._getNextID(idConn)
 				isInserts.append(isInsert)
 				
-
-		if usePipeline is True:
-			pipeline = conn.pipeline()
-		else:
-			pipeline = conn
 
 		ids = [] # Note ids can be derived with all information above..
 		i = 0
