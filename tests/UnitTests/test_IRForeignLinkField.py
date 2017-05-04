@@ -115,12 +115,12 @@ class TestIRForeignLinkField(object):
         RefedModel = self.models['RefedModel']
 
         refObj = RefedModel(name='rone', strVal='hello', intVal=1)
-        ids = refObj.save()
+        ids = refObj.save(cascadeSave=False)
         assert ids and ids[0]
 
         mainObj = MainModel(name='one', value='cheese', other=ids[0])
 
-        mainObj.save()
+        mainObj.save(cascadeSave=False)
 
         assert isinstance(mainObj.other, RefedModel) , 'Expected access of object to return object'
 
@@ -143,10 +143,10 @@ class TestIRForeignLinkField(object):
         refObj1 = RefedModel(name='rone', strVal='hello', intVal=1)
         refObj2 = RefedModel(name='rtwo', strVal='world', intVal=2)
 
-        ids1 = refObj1.save()
+        ids1 = refObj1.save(cascadeSave=False)
         assert ids1 and ids1[0] , 'Failed to save object'
 
-        ids2 = refObj2.save()
+        ids2 = refObj2.save(cascadeSave=False)
         assert ids2 and ids2[0] , 'Failed to save object'
 
         mainObj = MainModel(name='one', value='cheese', other=ids1[0])
@@ -157,7 +157,7 @@ class TestIRForeignLinkField(object):
 
         assert mainObj.other.hasSameValues(refObj2) , 'Expected other with id of refObj2 to link to refObj2'
 
-        ids = mainObj.save()
+        ids = mainObj.save(cascadeSave=False)
         assert ids and ids[0] , 'Failed to save object'
 
         fetchedObj = mainObj.objects.filter(name='one').first()
@@ -175,7 +175,7 @@ class TestIRForeignLinkField(object):
 
         mainObj.other = firstRefObj
 
-        ids = mainObj.save()
+        ids = mainObj.save(cascadeSave=False)
         assert ids and ids[0] , 'Failed to save'
 
         fetchedObj = mainObj.objects.filter(name='one').first()
@@ -191,10 +191,10 @@ class TestIRForeignLinkField(object):
         refObj1 = RefedModel(name='rone', strVal='hello', intVal=1)
         refObj2 = RefedModel(name='rtwo', strVal='world', intVal=2)
 
-        ids1 = refObj1.save()
+        ids1 = refObj1.save(cascadeSave=False)
         assert ids1 and ids1[0] , 'Failed to save object'
 
-        ids2 = refObj2.save()
+        ids2 = refObj2.save(cascadeSave=False)
         assert ids2 and ids2[0] , 'Failed to save object'
 
         mainObj = MainModel(name='one', value='cheese', other=ids1[0])
@@ -208,7 +208,7 @@ class TestIRForeignLinkField(object):
 
         assert mainObj.other.hasSameValues(refObj2) , 'Expected other with id of refObj2 to link to refObj2'
 
-        ids = mainObj.save()
+        ids = mainObj.save(cascadeSave=False)
 
         fetchedObjs = MainModel.objects.filter(other=ids2[0]).all()
 
