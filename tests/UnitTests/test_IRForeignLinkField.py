@@ -230,6 +230,8 @@ class TestIRForeignLinkField(object):
 
         assert ids and ids[0] , 'Failed to save object'
 
+        assert mainObj.other._id , 'Failed to set id on other object'
+
         obj = MainModel.objects.filter(name='one').first()
 
         assert obj , 'Failed to fetch object by name'

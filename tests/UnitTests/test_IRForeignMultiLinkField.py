@@ -199,6 +199,8 @@ class TestIRForeignMultiLinkField(object):
 
         assert ids and ids[0] , 'Failed to save object'
 
+        assert mainObj.other[0]._id , 'Failed to set _id on other'
+
         obj = MainModel.objects.filter(name='one').first()
 
         assert obj , 'Failed to fetch object by name'
@@ -211,9 +213,10 @@ class TestIRForeignMultiLinkField(object):
         MainModel.deleter.destroyModel()
 
         refObj1 = RefedModel(name='rone', strVal='hello', intVal=1)
+        refObj2 = RefedModel(name='rtwo', strVal='goodbye', intVal=1)
         mainObj = MainModel(name='one', value='cheese')
 
-        mainObj.other = [ refObj1 ]
+        mainObj.other = [ refObj1, refObj2 ]
 
         preMainObj = PreMainModel(name='pone', value='bologna')
 
@@ -232,7 +235,8 @@ class TestIRForeignMultiLinkField(object):
         assert obj.main[0].name == 'one' , 'Did not save values one level down'
 
         assert obj.main[0].other , 'Failed to link two levels down'
-        assert obj.main[0].other[0].name == 'rone' , 'Failed to save values two levels down'
+        assert obj.main[0].other[0].name == 'rone' , 'Failed to save values two levels down or out of order'
+        assert obj.main[0].other[1].name == 'rtwo' , 'Failed to save values two levels down or out of order'
 
 
 

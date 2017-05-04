@@ -14,7 +14,7 @@ import redis
 import sys
 import uuid
 
-from collections import defaultdict
+from collections import defaultdict, OrderedDict
 
 from . import fields
 from .fields import IRField, IRFieldChain, IRClassicField, IRNullType, irNull, IR_NULL_STR, IRForeignLinkFieldBase
@@ -1769,7 +1769,10 @@ class IndexedRedisSave(IndexedRedisHelper):
 		oga = object.__getattribute__
 
 		if cascadeSave is True:
-			# TODO: Make this use a pipeline instead of individuals
+
+			foreignPipelines = OrderedDict()
+			foreignSavers = {}
+
 			for thisObj in objs:
 				if not thisObj.foreignFields:
 					continue
@@ -1785,11 +1788,25 @@ class IndexedRedisSave(IndexedRedisHelper):
 					else:
 						foreignObjects = foreignObject
 					for foreignObject in foreignObjects:
+						doSaveForeign = False
 						if getattr(foreignObject, '_id', None):
 							if foreignObject.hasUnsavedChanges():
-								foreignObject.save(cascadeSave=True)
+								doSaveForeign = True
 						else:
-							foreignObject.save(cascadeSave=True)
+							doSaveForeign = True
+
+						# Assemble each level of Foreign fields into an ordered pipeline. Based on semi-recursion,
+						#   we will save the deepest level first in a pipeline, then the next up, on until we complete any subs
+						if doSaveForeign is True:
+							if foreignField not in foreignPipelines:
+								foreignPipelines[foreignField] = self._get_new_connection().pipeline()
+								foreignSavers[foreignField] = IndexedRedisSave(foreignObject.__class__)
+
+							foreignSavers[foreignField].save(foreignObject, usePipeline=False, cascadeSave=True, conn=foreignPipelines[foreignField])
+
+			if foreignPipelines:
+				for foreignPipeline in foreignPipelines.values():
+					foreignPipeline.execute()
 
 				
 
