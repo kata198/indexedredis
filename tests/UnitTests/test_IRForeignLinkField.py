@@ -77,7 +77,7 @@ class TestIRForeignLinkField(object):
 
             self.models['MainModel'] = Model_MainModelIndexed
 
-        if testMethod == self.test_cascadeSave:
+        if testMethod in (self.test_cascadeSave, self.test_cascadeFetch):
             class Model_PreMainModel(IndexedRedisModel):
                 FIELDS = [
                     IRField('name'),
@@ -133,6 +133,96 @@ class TestIRForeignLinkField(object):
         assert isinstance(fetchedObj.other, RefedModel) , 'After save-and-fetch, expected access of object to return object'
 
         assert fetchedObj.other__id == ids[0] , 'After save-and-fetch, expected __id access to return the object\'s id.'
+
+    def test_cascadeFetch(self):
+        
+        MainModel = self.models['MainModel']
+        RefedModel = self.models['RefedModel']
+        PreMainModel = self.models['PreMainModel']
+
+        refObj = RefedModel(name='rone', strVal='hello', intVal=1)
+        ids = refObj.save(cascadeSave=False)
+        assert ids and ids[0]
+
+        mainObj = MainModel(name='one', value='cheese', other=ids[0])
+
+        ids = mainObj.save(cascadeSave=False)
+        assert ids and ids[0] , 'Failed to save object'
+
+        preMainObj = PreMainModel(name='pone', value='bologna')
+        preMainObj.main = mainObj
+
+        ids = preMainObj.save(cascadeSave=False)
+        assert ids and ids[0], 'Failed to save object'
+
+        objs = PreMainModel.objects.filter(name='pone').all(cascadeFetch=True)
+
+        assert objs and len(objs) == 1 , 'Failed to fetch single PreMainModel object'
+
+        obj = objs[0]
+
+        oga = object.__getattribute__
+
+        assert oga(obj, 'main').isFetched() is True , 'Expected cascadeFetch to fetch sub object. Failed one level down (not marked isFetched)'
+
+        assert oga(obj, 'main').obj , 'Expected cascadeFetch to fetch sub object. Failed one level down (object not present)'
+
+        mainObj = oga(obj, 'main').obj
+
+        assert oga(mainObj, 'other').isFetched() is True , 'Expected cascadeFetch to fetch sub object. Failed two levels down (not marked isFetched)'
+        assert oga(mainObj, 'other').obj , 'Expected cascadeFetch to fetch sub object. Failed to levels down (object not present)'
+
+        assert oga(mainObj, 'other').obj.name == 'rone' , 'Missing values on two-level-down fetched object.'
+
+        MainModel.deleter.destroyModel()
+        RefedModel.deleter.destroyModel()
+        PreMainModel.deleter.destroyModel()
+
+        # Now test that cascadeFetch=False does NOT fetch the subs.
+        refObj = RefedModel(name='rone', strVal='hello', intVal=1)
+        ids = refObj.save(cascadeSave=False)
+        assert ids and ids[0]
+
+        mainObj = MainModel(name='one', value='cheese', other=ids[0])
+
+        ids = mainObj.save(cascadeSave=False)
+        assert ids and ids[0] , 'Failed to save object'
+
+        preMainObj = PreMainModel(name='pone', value='bologna')
+        preMainObj.main = mainObj
+
+        ids = preMainObj.save(cascadeSave=False)
+        assert ids and ids[0], 'Failed to save object'
+
+        objs = PreMainModel.objects.filter(name='pone').all(cascadeFetch=False)
+
+        assert objs and len(objs) == 1 , 'Failed to fetch objects'
+
+        obj = objs[0]
+
+        assert oga(obj, 'main').isFetched() is False , 'Expected cascadeFetch=False to NOT automatically fetch sub object. isFetched is marked True one level down.'
+        assert not bool(oga(obj, 'main').obj) , 'Expected cascadeFetch=False to NOT automatically fetch sub object. Object was found on sub object one level down.'
+
+
+        # Now try the IndexedRedisModel.cascadeFetch function to perform the fetch.
+        objs = PreMainModel.objects.filter(name='pone').all(cascadeFetch=False)
+
+        assert objs and len(objs) == 1 , 'Failed to fetch objects'
+
+        obj = objs[0]
+        obj.cascadeFetch()
+
+        assert oga(obj, 'main').isFetched() is True , 'Expected Model.cascadeFetch to fetch sub object. Failed one level down (not marked isFetched)'
+
+        assert oga(obj, 'main').obj , 'Expected Model.cascadeFetch to fetch sub object. Failed one level down (object not present)'
+
+        mainObj = oga(obj, 'main').obj
+
+        assert oga(mainObj, 'other').isFetched() is True , 'Expected Model.cascadeFetch to fetch sub object. Failed two levels down (not marked isFetched)'
+        assert oga(mainObj, 'other').obj , 'Expected Model.cascadeFetch to fetch sub object. Failed to levels down (object not present)'
+
+        assert oga(mainObj, 'other').obj.name == 'rone' , 'Missing values on two-level-down fetched object.'
+
 
 
 

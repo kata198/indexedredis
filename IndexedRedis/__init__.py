@@ -841,6 +841,18 @@ class IndexedRedisModel(object):
 		return updatedFields
 
 
+	def cascadeFetch(self):
+		'''
+			cascadeFetch - Immediately fetch all foreign links on this field, and all their links, etc.
+
+			  Normally, this would be done on access of the foreign members, or at .all() time by passing cascadeFetch=True into
+			   the fetch function
+			   
+			   e.x.    MyModel.objects.filter(...).all(cascadeFetch=True)
+		'''
+		self.validateModel()
+		IndexedRedisQuery._doCascadeFetch(self)
+
 
 	def __getstate__(self):
 		'''
@@ -1393,44 +1405,55 @@ class IndexedRedisQuery(IndexedRedisHelper):
 			return matchedKeys
 
 
-	def all(self):
+	def all(self, cascadeFetch=False):
 		'''
 			all - Get the underlying objects which match the filter criteria.
 
 			Example:   objs = Model.objects.filter(field1='value', field2='value2').all()
 
+			@param cascadeFetch <bool> Default False, If True, all Foreign objects associated with this model
+			   will be fetched immediately. If False, foreign objects will be fetched on-access.
+
 			@return - Objects of the Model instance associated with this query.
 		'''
 		matchedKeys = self.getPrimaryKeys()
 		if matchedKeys:
-			return self.getMultiple(matchedKeys)
+			return self.getMultiple(matchedKeys, cascadeFetch=cascadeFetch)
 
 		return IRQueryableList([], mdl=self.mdl)
 
-	def allByAge(self):
+	def allByAge(self, cascadeFetch=False):
 		'''
 			allByAge - Get the underlying objects which match the filter criteria, ordered oldest -> newest
 				If you are doing a queue or just need the head/tail, consider .first() and .last() instead.
+
+
+			@param cascadeFetch <bool> Default False, If True, all Foreign objects associated with this model
+			   will be fetched immediately. If False, foreign objects will be fetched on-access.
 
 			@return - Objects of the Model instance associated with this query, sorted oldest->newest
 		'''
 		matchedKeys = self.getPrimaryKeys(sortByAge=True)
 		if matchedKeys:
-			return self.getMultiple(matchedKeys)
+			return self.getMultiple(matchedKeys, cascadeFetch=cascadeFetch)
 
 		return IRQueryableList([], mdl=self.mdl)
 
-	def allOnlyFields(self, fields):
+	def allOnlyFields(self, fields, cascadeFetch=False):
 		'''
 			allOnlyFields - Get the objects which match the filter criteria, only fetching given fields.
 
 			@param fields - List of fields to fetch
 
+			@param cascadeFetch <bool> Default False, If True, all Foreign objects associated with this model
+			   will be fetched immediately. If False, foreign objects will be fetched on-access.
+
+
 			@return - Partial objects with only the given fields fetched
 		'''
 		matchedKeys = self.getPrimaryKeys()
 		if matchedKeys:
-			return self.getMultipleOnlyFields(matchedKeys, fields)
+			return self.getMultipleOnlyFields(matchedKeys, fields, cascadeFetch=cascadeFetch)
 
 		return IRQueryableList([], mdl=self.mdl)
 
@@ -1447,11 +1470,15 @@ class IndexedRedisQuery(IndexedRedisHelper):
 		return IRQueryableList([], mdl=self.mdl)
 		
 	
-	def first(self):
+	def first(self, cascadeFetch=False):
 		'''
 			First - Returns the oldest record (lowerst primary key) with current filters.
 				This makes an efficient queue, as it only fetches a single object.
 		
+
+			@param cascadeFetch <bool> Default False, If True, all Foreign objects associated with this model
+			   will be fetched immediately. If False, foreign objects will be fetched on-access.
+
 			@return - Instance of Model object, or None if no items match current filters
 		'''
 		obj = None
@@ -1460,15 +1487,19 @@ class IndexedRedisQuery(IndexedRedisHelper):
 		if matchedKeys:
 			# Loop so we don't return None when there are items, if item is deleted between getting key and getting obj
 			while matchedKeys and obj is None:
-				obj = self.get(matchedKeys.pop(0))
+				obj = self.get(matchedKeys.pop(0), cascadeFetch=cascadeFetch)
 
 		return obj
 
-	def last(self):
+	def last(self, cascadeFetch=False):
 		'''
 			Last - Returns the newest record (highest primary key) with current filters.
 				This makes an efficient queue, as it only fetches a single object.
 		
+
+			@param cascadeFetch <bool> Default False, If True, all Foreign objects associated with this model
+			   will be fetched immediately. If False, foreign objects will be fetched on-access.
+
 			@return - Instance of Model object, or None if no items match current filters
 		'''
 		obj = None
@@ -1477,13 +1508,17 @@ class IndexedRedisQuery(IndexedRedisHelper):
 		if matchedKeys:
 			# Loop so we don't return None when there are items, if item is deleted between getting key and getting obj
 			while matchedKeys and obj is None:
-				obj = self.get(matchedKeys.pop())
+				obj = self.get(matchedKeys.pop(), cascadeFetch=cascadeFetch)
 
 		return obj
 
-	def random(self):
+	def random(self, cascadeFetch=False):
 		'''
 			Random - Returns a random record in current filterset.
+
+
+			@param cascadeFetch <bool> Default False, If True, all Foreign objects associated with this model
+			   will be fetched immediately. If False, foreign objects will be fetched on-access.
 
 			@return - Instance of Model object, or None if no items math current filters
 		'''
@@ -1492,7 +1527,7 @@ class IndexedRedisQuery(IndexedRedisHelper):
 		# Loop so we don't return None when there are items, if item is deleted between getting key and getting obj
 		while matchedKeys and not obj:
 			key = matchedKeys.pop(random.randint(0, len(matchedKeys)-1))
-			obj = self.get(key)
+			obj = self.get(key, cascadeFetch=cascadeFetch)
 
 		return obj
 		
@@ -1506,9 +1541,13 @@ class IndexedRedisQuery(IndexedRedisHelper):
 			return self.mdl.deleter.deleteMultiple(self.allOnlyIndexedFields())
 		return self.mdl.deleter.destroyModel()
 
-	def get(self, pk):
+	def get(self, pk, cascadeFetch=False):
 		'''
 			get - Get a single value with the internal primary key.
+
+
+			@param cascadeFetch <bool> Default False, If True, all Foreign objects associated with this model
+			   will be fetched immediately. If False, foreign objects will be fetched on-access.
 
 			@param pk - internal primary key (can be found via .getPk() on an item)
 		'''
@@ -1518,11 +1557,45 @@ class IndexedRedisQuery(IndexedRedisHelper):
 		if type(res) != dict or not len(res.keys()):
 			return None
 		res['_id'] = pk
-		return self._redisResultToObj(res)
+
+		ret = self._redisResultToObj(res)
+		if cascadeFetch is True:
+			self._doCascadeFetch(ret)
+		return ret
+
 	
-	def getMultiple(self, pks):
+	@staticmethod
+	def _doCascadeFetch(obj):
+		'''
+			_doCascadeFetch - Takes an object and performs a cascading fetch on all foreign links, and all theirs, and so on.
+
+			@param obj <IndexedRedisModel> - A fetched model
+		'''
+		if not obj.foreignFields:
+			return
+
+		  # NOTE: Currently this fetches using one transaction per object. Implementation for actual resolution is in
+		  #   IndexedRedisModel.__getattribute__ 
+
+		for foreignField in obj.foreignFields:
+			subObj = getattr(obj, foreignField) # Perform the fetch
+			if issubclass(subObj.__class__, (tuple, list)):
+				subObjs = subObj
+			else:
+				subObjs = [subObj]
+			
+			for _subObj in subObjs:
+				if isIndexedRedisModel(_subObj):
+					_subObj.validateModel() # Ensure sub model is validated so "foreignFields" property is set.
+					IndexedRedisQuery._doCascadeFetch(_subObj)
+
+	def getMultiple(self, pks, cascadeFetch=False):
 		'''
 			getMultiple - Gets multiple objects with a single atomic operation
+
+
+			@param cascadeFetch <bool> Default False, If True, all Foreign objects associated with this model
+			   will be fetched immediately. If False, foreign objects will be fetched on-access.
 
 			@param pks - list of internal keys
 		'''
@@ -1530,9 +1603,9 @@ class IndexedRedisQuery(IndexedRedisHelper):
 		if type(pks) == set:
 			pks = list(pks)
 
-		if len(pks) == 1:
+		if len(pks) == 1:  # TODO: Hack for cascadeFetch. Remove when get implements cascadeFetch
 			# Optimization to not pipeline on 1 id
-			return IRQueryableList([self.get(pks[0])], mdl=self.mdl)
+			return IRQueryableList([self.get(pks[0], cascadeFetch=cascadeFetch)], mdl=self.mdl)
 
 		conn = self._get_connection()
 		pipeline = conn.pipeline()
@@ -1554,15 +1627,26 @@ class IndexedRedisQuery(IndexedRedisHelper):
 			obj = self._redisResultToObj(res[i])
 			ret.append(obj)
 			i += 1
+
+		if cascadeFetch is True:
+			for obj in ret:
+				if not obj:
+					continue
+				self._doCascadeFetch(obj)
 			
 		return ret
 
-	def getOnlyFields(self, pk, fields):
+	def getOnlyFields(self, pk, fields, cascadeFetch=False):
 		'''
 			getOnlyFields - Gets only certain fields from a paticular primary key. For working on entire filter set, see allOnlyFields
 
-			pk - Primary Key
-			fields list<str> - List of fields
+			@param pk <int> - Primary Key
+
+			@param fields list<str> - List of fields
+
+			@param cascadeFetch <bool> Default False, If True, all Foreign objects associated with this model
+			   will be fetched immediately. If False, foreign objects will be fetched on-access.
+
 
 			return - Partial objects with only fields applied
 		'''
@@ -1587,14 +1671,23 @@ class IndexedRedisQuery(IndexedRedisHelper):
 			return None
 			
 		objDict['_id'] = pk
-		return self._redisResultToObj(objDict)
+		ret = self._redisResultToObj(objDict)
+		if cascadeFetch is True:
+			self._doCascadeFetch(ret)
 
-	def getMultipleOnlyFields(self, pks, fields):
+		return ret
+
+	def getMultipleOnlyFields(self, pks, fields, cascadeFetch=False):
 		'''
 			getMultipleOnlyFields - Gets only certain fields from a list of  primary keys. For working on entire filter set, see allOnlyFields
 
-			pks list<str> - Primary Keys
-			fields list<str> - List of fields
+			@param pks list<str> - Primary Keys
+
+			@param fields list<str> - List of fields
+
+
+			@param cascadeFetch <bool> Default False, If True, all Foreign objects associated with this model
+			   will be fetched immediately. If False, foreign objects will be fetched on-access.
 
 			return - List of partial objects with only fields applied
 		'''
@@ -1602,7 +1695,8 @@ class IndexedRedisQuery(IndexedRedisHelper):
 			pks = list(pks)
 
 		if len(pks) == 1:
-			return IRQueryableList([self.getOnlyFields(pks[0], fields)], mdl=self.mdl)
+			return IRQueryableList([self.getOnlyFields(pks[0], fields, cascadeFetch=cascadeFetch)], mdl=self.mdl)
+
 		conn = self._get_connection()
 		pipeline = conn.pipeline()
 
@@ -1640,6 +1734,10 @@ class IndexedRedisQuery(IndexedRedisHelper):
 			obj = self._redisResultToObj(objDict)
 			ret.append(obj)
 			i += 1
+
+		if cascadeFetch is True:
+			for obj in ret:
+				self._doCascadeFetch(obj)
 			
 		return ret
 
