@@ -8,6 +8,14 @@ and return it.
 - Add IRForeignMultiLinkField which links one object to a list of other
 objects
 
+- Add "cascadeSave" option to saving functions. This flag (default True) will
+cause all foreign link objects to be saved (inserted or updated), recursively.
+
+- Add "cascadeFetch" option to fetching functions. This flag (default False)
+will cause all foreign link objects to be fetched right away, recursively. By
+default, they are fetched on first-access.
+
+
 5.0.1 - Mon May 1 2017
 
 A conversion document has been created, CONVERTING_TO_5.0.0 in the main
