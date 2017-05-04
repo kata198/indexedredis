@@ -14,15 +14,17 @@ from . import IRField, irNull
 from ..compat_str import isStringy, to_unicode
 
 
-# NOTE: Current status, works to link already-saved objects, by integer id or model itself.
+# NOTE: Current status, works to link objects, cascade save works, cascade fetch works.
+#   Resolution happens on member access, unless it is already fetched or cascadeFetch=True on calling the fetching method.
 
 # Remaining work:
 
 # TODO: Need to think about linking not-saved objects. You can set the model, and so long as sub is saved first it will work, but if main then ref get saved, the link will not be created.
-# TODO: Work out cascading saves (like if linked to unsaved object, save that object as well as current object. May get hairy in some places.)
-# TODO: Maybe work out a way to fetch all sub objects in one swoop with the original objects
+
+
 # TODO: Provide some sort of "reload child" mechanism
-# TODO: Possibly have child object saved when parent is saved, if changes are present?
+# TODO: Related, look into the "reload" method and add option to reload foreign links or leave them alone.
+
 # TODO: Handle deleting fields
 # TODO: Cleanup and reuse code
 
@@ -254,6 +256,7 @@ class IRForeignMultiLinkField(IRForeignLinkField):
 		try:
 			pks = [int(x) for x in value.split(',')]
 		except Exception as e:
+			sys.stderr.write('Got exception pulling multi link field from storage:  %s:   %s\n' %(e.__class__.__name__, str(e)))
 			pass
 			# TODO:
 
