@@ -6,6 +6,7 @@
 
 # vim: set ts=8 shiftwidth=8 softtabstop=8 noexpandtab :
 
+import sys
 import weakref
 
 from . import IRField, irNull
@@ -195,10 +196,12 @@ class IRForeignLinkField(IRForeignLinkFieldBase):
 
 	def _fromInput(self, value):
 		if hasattr(value, '_is_ir_model'):
-			return ForeignLinkData(value._id, self.foreignModel)
+			return ForeignLinkData(value._id, self.foreignModel, value)
 
 		elif isinstance(value, int):
 			return ForeignLinkData(int(value), self.foreignModel)
+		elif value == None:
+			return irNull
 
 		# TODO: Temp exception
 		raise ValueError('Unknown input: <%s>   %s' %(value.__class__.__name__, repr(value)) )
@@ -271,6 +274,8 @@ class IRForeignMultiLinkField(IRForeignLinkField):
 					raise ValueError('Unknown element in list:  <%s>  %s' %(value.__class__.__name__, repr(value)) )
 
 			return ForeignLinkMultiData( pk=pks, foreignModel=self.foreignModel, obj=objs)
+		elif values == None:
+			return irNull
 
 		# TODO: Temp exception
 		raise ValueError('Unknown input: <%s>   %s' %(values.__class__.__name__, repr(values)) )
