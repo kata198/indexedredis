@@ -17,7 +17,7 @@ import uuid
 from collections import defaultdict
 
 from . import fields
-from .fields import IRField, IRFieldChain, IRClassicField, IRNullType, irNull, IR_NULL_STR, IRForeignLinkField
+from .fields import IRField, IRFieldChain, IRClassicField, IRNullType, irNull, IR_NULL_STR, IRForeignLinkFieldBase
 from .compat_str import to_unicode, tobytes, setDefaultIREncoding, getDefaultIREncoding
 from .utils import hashDictOneLevel, KeyList
 
@@ -31,7 +31,7 @@ from .deprecated import deprecated, toggleDeprecatedMessages, deprecatedMessage
 __all__ = ('INDEXED_REDIS_PREFIX', 'INDEXED_REDIS_VERSION', 'INDEXED_REDIS_VERSION_STR', 
 	'IndexedRedisDelete', 'IndexedRedisHelper', 'IndexedRedisModel', 'IndexedRedisQuery', 'IndexedRedisSave',
 	'isIndexedRedisModel', 'setIndexedRedisEncoding', 'getIndexedRedisEncoding', 'InvalidModelException',
-	'fields', 'IRField', 'IRFieldChain', 'IRForeignLinkField', 'irNull',
+	'fields', 'IRField', 'IRFieldChain', 'IRForeignLinkFieldBase', 'irNull',
 	'setDefaultIREncoding', 'getDefaultIREncoding',
 	'setDefaultRedisConnectionParams', 'getDefaultRedisConnectionParams',
 	'toggleDeprecatedMessages',
@@ -409,7 +409,7 @@ class IndexedRedisModel(object):
 
 		thisField = fields[keyName]
 
-		if not issubclass(thisField.__class__, IRForeignLinkField):
+		if not issubclass(thisField.__class__, IRForeignLinkFieldBase):
 			return val
 
 		if isIdKey:

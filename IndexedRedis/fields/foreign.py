@@ -26,7 +26,10 @@ from ..compat_str import isStringy, to_unicode
 # TODO: Cleanup and reuse code
 
 
-class ForeignLinkData(object):
+class ForeignLinkDataBase(object):
+	pass
+
+class ForeignLinkData(ForeignLinkDataBase):
 	'''
 		ForeignLinkData - Link data for storing information about a foreign object (id and maybe object itself).
 
@@ -137,7 +140,10 @@ class ForeignLinkMultiData(ForeignLinkData):
 		return self.obj
 
 
-class IRForeignLinkField(IRField):
+class IRForeignLinkFieldBase(IRField):
+	pass
+
+class IRForeignLinkField(IRForeignLinkFieldBase):
 	'''
 		IRForeignLinkField - A field which provides a one-to-one mapping to another IndexedRedisModel object.
 
