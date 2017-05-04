@@ -148,6 +148,13 @@ class TestIRForeignMultiLinkField(object):
 
         mainObj = fetchedObj
 
+        assert object.__getattribute__(mainObj, 'other').isFetched() is False , 'Expected isFetched to be False before fetch'
+
+        mainObj.other
+
+
+        assert object.__getattribute__(mainObj, 'other').isFetched() is True , 'Expected isFetched to be True after fetch'
+
         firstRefObj = RefedModel.objects.filter(name='rone').first()
 
         assert firstRefObj , 'Failed to fetch object'

@@ -185,8 +185,11 @@ class TestIRForeignLinkField(object):
 
         mainObj = MainModel(name='one', value='cheese', other=ids1[0])
 
+        assert object.__getattribute__(mainObj, 'other').isFetched() is False , 'Expected object not to be fetched before access'
+
         assert mainObj.other.hasSameValues(refObj1) , 'Expected other with id of refObj1 to link to refObj1'
 
+        assert object.__getattribute__(mainObj, 'other').isFetched() is True, 'Expected object to be fetched after access'
         mainObj.other = ids2[0]
 
         assert mainObj.other.hasSameValues(refObj2) , 'Expected other with id of refObj2 to link to refObj2'

@@ -84,6 +84,9 @@ class ForeignLinkData(ForeignLinkDataBase):
 	def getPk(self):
 		return self.pk
 
+	def isFetched(self):
+		return not bool(self.obj is None)
+
 
 # TODO: Maybe create a base which both of these extend,
 #   As having multiple in a singular field name can get confusing
@@ -138,6 +141,14 @@ class ForeignLinkMultiData(ForeignLinkData):
 				i += 1
 
 		return self.obj
+
+	def isFetched(self):
+		if not self.obj:
+			return False
+
+		if not self.pk or None in self.obj:
+			return False
+		return not bool(self.obj is None)
 
 
 class IRForeignLinkFieldBase(IRField):
