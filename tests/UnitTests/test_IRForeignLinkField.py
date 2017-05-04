@@ -77,6 +77,20 @@ class TestIRForeignLinkField(object):
 
             self.models['MainModel'] = Model_MainModelIndexed
 
+        if testMethod == self.test_cascadeSave:
+            class Model_PreMainModel(IndexedRedisModel):
+                FIELDS = [
+                    IRField('name'),
+                    IRField('value'),
+                    IRForeignLinkField('main', Model_MainModel),
+                ]
+
+                INDEXED_FIELDS = ['name']
+
+                KEY_NAME = 'TestIRForeignLinkField__PreMainModel1'
+
+            self.models['PreMainModel'] = Model_PreMainModel
+
 
         # If KEEP_DATA is False (debug flag), then delete all objects before so prior test doesn't interfere
         if self.KEEP_DATA is False and self.models:
@@ -200,6 +214,56 @@ class TestIRForeignLinkField(object):
 
         assert fetchedObjs and len(fetchedObjs) == 1 , 'Expected to be able to filter on numeric pk'
 
+
+    def test_cascadeSave(self):
+        MainModel = self.models['MainModel']
+        RefedModel = self.models['RefedModel']
+        PreMainModel = self.models['PreMainModel']
+
+        refObj1 = RefedModel(name='rone', strVal='hello', intVal=1)
+
+        mainObj = MainModel(name='one', value='cheese')
+
+        mainObj.other = refObj1
+
+        ids = mainObj.save(cascadeSave=True)
+
+        assert ids and ids[0] , 'Failed to save object'
+
+        obj = MainModel.objects.filter(name='one').first()
+
+        assert obj , 'Failed to fetch object by name'
+
+        assert obj.other , 'Did not cascade save second object and link to parent'
+
+        assert obj.other.name == 'rone' , 'Did save values on cascaded object'
+
+        RefedModel.deleter.destroyModel()
+        MainModel.deleter.destroyModel()
+
+        refObj1 = RefedModel(name='rone', strVal='hello', intVal=1)
+        mainObj = MainModel(name='one', value='cheese')
+
+        mainObj.other = refObj1
+
+        preMainObj = PreMainModel(name='pone', value='bologna')
+
+        preMainObj.main = mainObj
+
+        ids = preMainObj.save(cascadeSave=True)
+
+        assert ids and ids[0] , 'Failed to save object'
+
+
+        obj = PreMainModel.objects.filter(name='pone').first()
+
+        assert obj , 'Failed to fetch object by name'
+
+        assert obj.main , 'Failed to link one level down'
+        assert obj.main.name == 'one' , 'Did not save values one level down'
+
+        assert obj.main.other , 'Failed to link two levels down'
+        assert obj.main.other.name == 'rone' , 'Failed to save values two levels down'
 
 
 

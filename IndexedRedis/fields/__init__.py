@@ -155,7 +155,7 @@ class IRField(str):
 			@param value - The value of the item to convert
 			@return A string value suitable for storing.
 		'''
-		if value == irNull:
+		if value == irNull or None:
 			return IR_NULL_STR
 		
 		return self._toStorage(value)

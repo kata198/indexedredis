@@ -539,7 +539,7 @@ class IndexedRedisModel(object):
 		cls.validateModel()
 		return IndexedRedisDelete(cls)
 
-	def save(self):
+	def save(self, cascadeSave=True):
 		'''
 			save - Save this object.
 			
@@ -554,12 +554,15 @@ class IndexedRedisModel(object):
 
 				MyModel.saver.save(myObjs)
 
+			@param cascadeSave <bool> Default True - If True, any Foreign models linked as attributes that have been altered
+			   or created will be saved with this object. If False, only this object (and the reference to an already-saved foreign model) will be saved.
+
 			@see #IndexedRedisSave.save
 
 			@return <list> - Single element list, id of saved object (if successful)
 		'''
 		saver = IndexedRedisSave(self.__class__)
-		return saver.save(self)
+		return saver.save(self, cascadeSave=cascadeSave)
 	
 	def delete(self):
 		'''
@@ -607,7 +610,7 @@ class IndexedRedisModel(object):
 		saver = IndexedRedisSave(cls)
 		nextID = 1
 		for newObj in newObjs:
-			saver.save(newObj, False, nextID, transaction)
+			saver.save(newObj, False, forceID=nextID, conn=transaction)
 			nextID += 1
 		transaction.set(saver._get_next_id_key(), nextID)
 		transaction.execute()
@@ -928,6 +931,8 @@ class IndexedRedisModel(object):
 		updatedFields = []
 		mustUpdateFields = False
 
+		foreignFields = []
+
 		for thisField in fieldSet:
 			if thisField == '_id':
 				raise InvalidModelException('%s You cannot have a field named _id, it is reserved for the primary key.' %(failedValidationStr,))
@@ -937,6 +942,10 @@ class IndexedRedisModel(object):
 				codecs.ascii_encode(thisField)
 			except UnicodeDecodeError as e:
 				raise InvalidModelException('%s All field names must be ascii-encodable. "%s" was not. Error was: %s' %(failedValidationStr, to_unicode(thisField), str(e)))
+
+			if issubclass(thisField.__class__, IRForeignLinkFieldBase):
+				foreignFields.append(thisField)
+
 			# If a classic string field, convert to IRClassicField
 			if issubclass(thisField.__class__, IRField):
 				newFields.append(thisField)
@@ -967,6 +976,8 @@ class IndexedRedisModel(object):
 
 		if bool(indexedFieldSet - fieldSet):
 			raise InvalidModelException('%s All INDEXED_FIELDS must also be present in FIELDS. %s exist only in INDEXED_FIELDS' %(failedValidationStr, str(list(indexedFieldSet - fieldSet)), ) )
+
+		model.foreignFields = foreignFields
 		
 		validatedModels.add(model)
 		return True
@@ -1717,7 +1728,7 @@ class IndexedRedisSave(IndexedRedisHelper):
 			Except for advanced usage, this is probably for internal only.
 	'''
 
-	def save(self, obj, usePipeline=True, forceID=False, conn=None):
+	def save(self, obj, usePipeline=True, forceID=False, cascadeSave=True, conn=None):
 		'''
 			save - Save an object / objects associated with this model. 
 			
@@ -1727,8 +1738,13 @@ class IndexedRedisSave(IndexedRedisHelper):
 				MyModel.saver.save(myObjs)
 
 			@param obj <IndexedRedisModel or list<IndexedRedisModel> - The object to save, or a list of objects to save
+
 			@param usePipeline - Use a pipeline for saving. You should always want this, unless you are calling this function from within an existing pipeline.
+
 			@param forceID - if not False, force ID to this. If obj is list, this is also list. Forcing IDs also forces insert. Up to you to ensure ID will not clash.
+			@param cascadeSave <bool> Default True - If True, any Foreign models linked as attributes that have been altered
+			   or created will be saved with this object. If False, only this object (and the reference to an already-saved foreign model) will be saved.
+
 			@param conn - A connection or None
 
 			@note - if no ID is specified
@@ -1748,6 +1764,34 @@ class IndexedRedisSave(IndexedRedisHelper):
 			objs = obj
 		else:
 			objs = [obj]
+
+
+		oga = object.__getattribute__
+
+		if cascadeSave is True:
+			# TODO: Make this use a pipeline instead of individuals
+			for thisObj in objs:
+				if not thisObj.foreignFields:
+					continue
+
+				foreignFields = thisObj.foreignFields
+				for foreignField in foreignFields:
+					if not oga(thisObj, str(foreignField)).isFetched():
+						continue
+
+					foreignObject = getattr(thisObj, str(foreignField))
+					if not isinstance(foreignObject, (list, tuple)):
+						foreignObjects = [foreignObject]
+					else:
+						foreignObjects = foreignObject
+					for foreignObject in foreignObjects:
+						if getattr(foreignObject, '_id', None):
+							if foreignObject.hasUnsavedChanges():
+								foreignObject.save(cascadeSave=True)
+						else:
+							foreignObject.save(cascadeSave=True)
+
+				
 
 		objsLen = len(objs)
 
