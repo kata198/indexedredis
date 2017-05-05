@@ -19,15 +19,18 @@ from ..compat_str import isStringy, to_unicode
 
 # Remaining work:
 
-# TODO: Need to think about linking not-saved objects. You can set the model, and so long as sub is saved first it will work, but if main then ref get saved, the link will not be created.
-
 
 # TODO: Provide some sort of "reload child" mechanism
 # TODO: Related, look into the "reload" method and add option to reload foreign links or leave them alone.
 
-# TODO: Handle deleting fields
+# TODO: Better handle deleting fields
 # TODO: Cleanup and reuse code
 
+
+__all__ = ( 
+	'ForeignLinkDataBase', 'ForeignLinkData', 'ForeignLinkMultiData',
+	'IRForeignLinkFieldBase', 'IRForeignLinkFieldBase', 'IRForeignMultiLinkField'
+)
 
 class ForeignLinkDataBase(object):
 	pass
