@@ -134,6 +134,39 @@ class TestIRForeignLinkField(object):
 
         assert fetchedObj.other__id == ids[0] , 'After save-and-fetch, expected __id access to return the object\'s id.'
 
+    
+    def test_disconnectAssociation(self):
+
+        MainModel = self.models['MainModel']
+        RefedModel = self.models['RefedModel']
+
+        refObj = RefedModel(name='rone', strVal='hello', intVal=1)
+        ids = refObj.save(cascadeSave=False)
+        assert ids and ids[0]
+
+        mainObj = MainModel(name='one', value='cheese', other=ids[0])
+
+        mainObj.save(cascadeSave=False)
+
+        assert isinstance(mainObj.other, RefedModel) , 'Expected access of object to return object'
+
+        assert mainObj.other__id == ids[0] , 'Expected __id access to return the object\'s id.'
+
+        mainObj.other = None
+
+        assert not mainObj.other , 'After setting to None, other should be False.'
+
+        ids = mainObj.save()
+        assert ids and ids[0] , 'Failed to update'
+
+        fetchedObj = MainModel.objects.filter(name='one').first()
+
+        assert fetchedObj , 'Failed to fetch object'
+
+        assert fetchedObj.other == irNull , 'Expected "other" to go back to irNull'
+
+
+
     def test_cascadeFetch(self):
         
         MainModel = self.models['MainModel']

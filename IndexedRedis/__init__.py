@@ -403,6 +403,9 @@ class IndexedRedisModel(object):
 		if keyName not in fields:
 			return oga(self, keyName)
 
+		if val in (None, irNull):
+			return irNull
+
 		if not isinstance( fields, KeyList):
 			fields = KeyList(fields)
 			object.__setattr__(self, 'FIELDS', fields)
@@ -411,6 +414,7 @@ class IndexedRedisModel(object):
 
 		if not issubclass(thisField.__class__, IRForeignLinkFieldBase):
 			return val
+
 
 		if isIdKey:
 			return val.getPk()
@@ -1884,7 +1888,10 @@ class IndexedRedisSave(IndexedRedisHelper):
 
 				foreignFields = thisObj.foreignFields
 				for foreignField in foreignFields:
-					if not oga(thisObj, str(foreignField)).isFetched():
+
+					rawObj = oga(thisObj, str(foreignField))
+
+					if rawObj in (None, irNull) or not rawObj.isFetched():
 						continue
 
 					foreignObject = getattr(thisObj, str(foreignField))

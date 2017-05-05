@@ -126,6 +126,69 @@ class TestIRForeignMultiLinkField(object):
         assert isinstance(otherObj, RefedModel ) , 'After save-and-fetch, expected access of object to return object'
 
 
+    def test_disconnectAssociation(self):
+        MainModel = self.models['MainModel']
+        RefedModel = self.models['RefedModel']
+
+        refObj1 = refObj = RefedModel(name='rone', strVal='hello', intVal=1)
+        refObj2 = RefedModel(name='rtwo', strVal='goodbye', intVal=2)
+        refObj3 = RefedModel(name='rthree', strVal='buh bai', intVal=3)
+        
+        ids = refObj.save(cascadeSave=False)
+        assert ids and ids[0]
+
+        refObj2.save()
+        refObj3.save()
+
+        mainObj = MainModel(name='one', value='cheese', other=[ids[0]])
+
+        for nullType in (None, irNull):
+            mainObj.other = [ids[0]]
+            mainObj.save()
+            mainObj = MainModel.objects.filter(name='one').first()
+
+            assert mainObj.other , 'Expected bool(other) to be evaluated as True after setting as an item'
+
+            mainObj = MainModel.objects.filter(name='one').first()
+            mainObj.other = nullType
+            assert not mainObj.other , 'Expected bool(other) to be False after setting to ' + str(nullType)
+            mainObj.save(cascadeSave=False)
+
+            mainObj = MainModel.objects.filter(name='one').first()
+
+            assert not mainObj.other , 'Expected other to be False after saving as ' + str(nullType)
+
+
+        mainObj.other = [refObj3, refObj1, refObj2._id]
+
+        assert refObj2.hasSameValues(mainObj.other[2]) , 'Expected after setting to an integer, access would fetch.'
+
+        mainObj.save()
+
+        mainObj.other = mainObj.other[ : 1] + mainObj.other[2 : ]
+
+        mainObj.save()
+
+        mainObj = MainModel.objects.filter(name='one').first()
+
+        assert len(mainObj.other) == 2 , 'Expected  only two items after removing middle item in 3-item list. Got:  %s' %(repr(mainObj.other), )
+
+        assert refObj3.hasSameValues(mainObj.other[0]) , 'Expected order to be retained when one item removed from list'
+        assert refObj2.hasSameValues(mainObj.other[1]) , 'Expected order to be retained when one item removed from list'
+
+
+#        mainObj.other = [refObj3, refObj1, refObj2._id]
+#        mainObj.save()
+#
+#        mainObj = MainModel.objects.filter(name='one').first()
+#
+#        mainObj.other[1] = None
+#
+#        assert True
+#        assert True
+        
+
+
     def test_cascadeFetch(self):
         
         MainModel = self.models['MainModel']

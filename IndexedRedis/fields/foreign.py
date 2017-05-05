@@ -202,7 +202,7 @@ class IRForeignLinkField(IRForeignLinkFieldBase):
 
 		elif isinstance(value, int):
 			return ForeignLinkData(int(value), self.foreignModel)
-		elif value == None:
+		elif value in (None, irNull):
 			return irNull
 
 		# TODO: Temp exception
@@ -273,11 +273,13 @@ class IRForeignMultiLinkField(IRForeignLinkField):
 				elif isinstance(value, int):
 					pks.append(value)
 					objs.append(None)
+				elif value in (irNull, None):
+					continue
 				else:
 					raise ValueError('Unknown element in list:  <%s>  %s' %(value.__class__.__name__, repr(value)) )
 
 			return ForeignLinkMultiData( pk=pks, foreignModel=self.foreignModel, obj=objs)
-		elif values == None:
+		elif values in (None, irNull):
 			return irNull
 
 		# TODO: Temp exception
