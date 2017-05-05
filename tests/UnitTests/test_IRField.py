@@ -119,7 +119,12 @@ class TestIRField(object):
         assert ids[0] == myObj._id , 'Expected id to be set on saved object, but was not.'
 
         myObj2 = SimpleIRFieldModel(name='Joe', favColour='blue')
+
+        assert myObj2.hasUnsavedChanges() is True , 'Expected unsaved object to have unsaved changes'
+
         ids2 = myObj2.save()
+
+        assert myObj2.hasUnsavedChanges() is False , 'Expected saved object to not have unsaved changes'
 
         assert ids2, 'Expected to get ids returned from save, but did not.'
         assert ids2[0] == myObj2._id , 'Expected id to be set on saved object, but was not.'
