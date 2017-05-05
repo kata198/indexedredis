@@ -486,19 +486,13 @@ class IndexedRedisModel(object):
 			return True
 
 		for thisField in self.FIELDS:
-			if not issubclass(thisField.__class__, IRForeignLinkFieldBase):
-				thisVal = getattr(self, thisField, '')
+			thisVal = object.__getattribute__(self, thisField)
+			if self._origData.get(thisField, '') != thisVal:
+				return True
 
-				if self._origData.get(thisField, '') != thisVal:
+			if cascadeObjects is True and issubclass(thisField.__class__, IRForeignLinkFieldBase):
+				if thisVal.objHasUnsavedChanges():
 					return True
-			else:
-				thisVal = object.__getattribute__(self, thisField)
-				if self._origData.get(thisField, '') != thisVal:
-					return True
-
-				if cascadeObjects is True:
-					if thisVal.objHasUnsavedChanges():
-						return True
 
 		return False
 	
@@ -515,17 +509,12 @@ class IndexedRedisModel(object):
 		'''
 		updatedFields = {}
 		for thisField in self.FIELDS:
+			thisVal = object.__getattribute__(self, thisField)
+			if self._origData.get(thisField, '') != thisVal:
+				updatedFields[thisField] = (self._origData[thisField], thisVal)
 
-			if not issubclass(thisField.__class__, IRForeignLinkFieldBase):
-				thisVal = getattr(self, thisField, '')
-				if self._origData.get(thisField, '') != thisVal:
-					updatedFields[thisField] = (self._origData[thisField], thisVal)
-			else:
-				thisVal = object.__getattribute__(self, thisField)
-				if self._origData.get(thisField, '') != thisVal:
-					updatedFields[thisField] = (self._origData[thisField], thisVal)
-				elif cascadeObjects is True and thisVal.objHasUnsavedChanges():
-					updatedFields[thisField] = (self._origData[thisField], thisVal)
+			if cascadeObjects is True and issubclass(thisField.__class__, IRForeignLinkFieldBase) and thisVal.objHasUnsavedChanges():
+				updatedFields[thisField] = (self._origData[thisField], thisVal)
 					
 		return updatedFields
 
