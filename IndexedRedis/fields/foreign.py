@@ -94,6 +94,31 @@ class ForeignLinkData(ForeignLinkDataBase):
 		return not bool(self.obj is None)
 
 
+	def __repr__(self):
+		foreignModelName = self._foreignModel and self._foreignModel().__name__ or 'None'
+
+		return self.__class__.__name__ + '(pk=%s , foreignModel=%s , obj=%s)' %(self.pk, foreignModelName, self.obj)
+
+	def __eq__(self, other):
+		if self.__class__ != other.__class__:
+			return False
+		
+		if other.getPk() == self.getPk():
+			return True
+
+		return False
+		
+	def __ne__(self, other):
+		return not self.__eq__(other)
+
+	def objHasUnsavedChanges(self):
+		if not self.obj:
+			return False
+
+		return self.obj.hasUnsavedChanges(cascadeObjects=True)
+			
+
+
 # TODO: Maybe create a base which both of these extend,
 #   As having multiple in a singular field name can get confusing
 class ForeignLinkMultiData(ForeignLinkData):
@@ -155,6 +180,19 @@ class ForeignLinkMultiData(ForeignLinkData):
 		if not self.pk or None in self.obj:
 			return False
 		return not bool(self.obj is None)
+
+
+	def objHasUnsavedChanges(self):
+		if not self.obj:
+			return False
+
+		for thisObj in self.obj:
+			if not thisObj:
+				continue
+			if thisObj.hasUnsavedChanges(cascadeObjects=True):
+				return True
+
+		return False
 
 
 class IRForeignLinkFieldBase(IRField):

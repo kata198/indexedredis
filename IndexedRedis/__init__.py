@@ -422,6 +422,7 @@ class IndexedRedisModel(object):
 			return val.getObj()
 
 	
+	# TODO: This function will cause foreign fields to be fetched. Refactor that part.
 	def asDict(self, includeMeta=False, forStorage=False, strKeys=False):
 		'''
 			toDict / asDict - Get a dictionary representation of this model.
@@ -439,6 +440,7 @@ class IndexedRedisModel(object):
 		ret = {}
 		for thisField in self.FIELDS:
 			val = getattr(self, thisField, thisField.getDefaultValue())
+
 			if forStorage is True:
 				val = thisField.toStorage(val)
 
@@ -464,9 +466,12 @@ class IndexedRedisModel(object):
 		pprint.pprint(self.asDict(includeMeta=True, forStorage=False, strKeys=True), stream=stream)
 
 
-	def hasUnsavedChanges(self):
+	def hasUnsavedChanges(self, cascadeObjects=False):
 		'''
 			hasUnsavedChanges - Check if any unsaved changes are present in this model, or if it has never been saved.
+
+			@param cascadeObjects <bool> default False, if True will check if any foreign linked objects themselves have unsaved changes (recursively).
+				Otherwise, will just check if the pk has changed.
 
 			@return <bool> - True if any fields have changed since last fetch, or if never saved. Otherwise, False
 		'''
@@ -474,26 +479,47 @@ class IndexedRedisModel(object):
 			return True
 
 		for thisField in self.FIELDS:
-			thisVal = getattr(self, thisField, '')
+			if not issubclass(thisField.__class__, IRForeignLinkFieldBase):
+				thisVal = getattr(self, thisField, '')
 
-			if self._origData.get(thisField, '') != thisVal:
-				return True
+				if self._origData.get(thisField, '') != thisVal:
+					return True
+			else:
+				thisVal = object.__getattribute__(self, thisField)
+				if self._origData.get(thisField, '') != thisVal:
+					return True
+
+				if cascadeObjects is True:
+					if thisVal.objHasUnsavedChanges():
+						return True
+
 		return False
 	
-	def getUpdatedFields(self):
+	def getUpdatedFields(self, cascadeObjects=False):
 		'''
 			getUpdatedFields - See changed fields.
 			
+			@param cascadeObjects <bool> default False, if True will check if any foreign linked objects themselves have unsaved changes (recursively).
+				Otherwise, will just check if the pk has changed.
+
 			@return - a dictionary of fieldName : tuple(old, new).
 
 			fieldName may be a string or may implement IRField (which implements string, and can be used just like a string)
 		'''
 		updatedFields = {}
 		for thisField in self.FIELDS:
-			thisVal = getattr(self, thisField, '')
 
-			if self._origData.get(thisField, '') != thisVal:
-				updatedFields[thisField] = (self._origData[thisField], thisVal)
+			if not issubclass(thisField.__class__, IRForeignLinkFieldBase):
+				thisVal = getattr(self, thisField, '')
+				if self._origData.get(thisField, '') != thisVal:
+					updatedFields[thisField] = (self._origData[thisField], thisVal)
+			else:
+				thisVal = object.__getattribute__(self, thisField)
+				if self._origData.get(thisField, '') != thisVal:
+					updatedFields[thisField] = (self._origData[thisField], thisVal)
+				elif cascadeObjects is True and thisVal.objHasUnsavedChanges():
+					updatedFields[thisField] = (self._origData[thisField], thisVal)
+					
 		return updatedFields
 
 	def _getUpdatedFieldsForStorage(self):
@@ -814,6 +840,8 @@ class IndexedRedisModel(object):
                     @return - Dict with the keys that were updated. Key is field name that was updated,
 		       and value is tuple of (old value, new value). 
 
+		    NOTE: Currently, this will cause a fetch of all Foreign Link objects, one level
+
 		'''
 		_id = self._id
 		if not _id:
@@ -835,6 +863,7 @@ class IndexedRedisModel(object):
 		updatedFields = {}
 		for thisField, newValue in newData.items():
 			defaultValue = thisField.getDefaultValue()
+
 			currentValue = currentData.get(thisField, defaultValue)
 			if currentValue != newValue:
 				# Use "converted" values in the updatedFields dict, and apply on the object.
@@ -1902,7 +1931,7 @@ class IndexedRedisSave(IndexedRedisHelper):
 					for foreignObject in foreignObjects:
 						doSaveForeign = False
 						if getattr(foreignObject, '_id', None):
-							if foreignObject.hasUnsavedChanges():
+							if foreignObject.hasUnsavedChanges(cascadeObjects=True):
 								doSaveForeign = True
 						else:
 							doSaveForeign = True

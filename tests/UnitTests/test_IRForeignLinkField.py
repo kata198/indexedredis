@@ -391,6 +391,58 @@ class TestIRForeignLinkField(object):
         assert obj.main.other.name == 'rone' , 'Failed to save values two levels down'
 
 
+    def test_reload(self):
+        MainModel = self.models['MainModel']
+        RefedModel = self.models['RefedModel']
+
+        refObj1 = RefedModel(name='rone', strVal='hello', intVal=1)
+
+        mainObj = MainModel(name='one', value='cheese')
+
+        mainObj.other = refObj1
+
+        ids = mainObj.save(cascadeSave=True)
+
+        assert ids and ids[0] , 'Failed to save object'
+
+#        mainObj = MainModel.objects.first()
+
+        robj = RefedModel.objects.filter(name='rone').first()
+
+        robj.intVal = 5
+        ids = robj.save()
+        assert ids and ids[0] , 'Failed to save object'
+
+        mainObj.reload()
+        
+        assert mainObj.other.intVal == 5 , 'Expected reload() to reload sub-object'
+
+    def test_suppressFetching(self):
+        MainModel = self.models['MainModel']
+        RefedModel = self.models['RefedModel']
+
+        oga = object.__getattribute__
+
+        refObj1 = RefedModel(name='rone', strVal='hello', intVal=1)
+
+        mainObj = MainModel(name='one', value='cheese')
+
+        mainObj.other = refObj1
+
+        ids = mainObj.save(cascadeSave=True)
+
+        assert ids and ids[0] , 'Failed to save object'
+
+        mainObj = MainModel.objects.first()
+
+        assert oga(mainObj, 'other').isFetched() is False , 'Expected other to not be fetched right away'
+
+        updatedFields = mainObj.getUpdatedFields()
+
+        assert not updatedFields , 'Expected updatedFields to be blank. Got: %s' %(repr(updatedFields), )
+
+        assert oga(mainObj, 'other').isFetched() is False , 'Expected other to not be fetched after calling getUpdatedFields'
+
 
 
 if __name__ == '__main__':

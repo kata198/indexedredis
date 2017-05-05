@@ -390,6 +390,81 @@ class TestIRForeignMultiLinkField(object):
         assert obj.main[0].other[1].name == 'rtwo' , 'Failed to save values two levels down or out of order'
 
 
+    def test_updatingFields(self):
+        MainModel = self.models['MainModel']
+        RefedModel = self.models['RefedModel']
+
+        oga = object.__getattribute__
+
+        refObj1 = RefedModel(name='rone', strVal='hello', intVal=1)
+        refObj2 = RefedModel(name='rone', strVal='hello', intVal=1)
+
+        ids = refObj2.save()
+        assert ids and ids[0]
+
+        mainObj = MainModel(name='one', value='cheese')
+
+        mainObj.other = [refObj1]
+
+        ids = mainObj.save(cascadeSave=True)
+
+        assert ids and ids[0] , 'Failed to save object'
+
+        mainObj = MainModel.objects.first()
+
+        assert oga(mainObj, 'other').isFetched() is False , 'Expected other to not be fetched right away'
+
+        updatedFields = mainObj.getUpdatedFields()
+
+        assert not updatedFields , 'Expected updatedFields to be blank. Got: %s' %(repr(updatedFields), )
+
+        assert oga(mainObj, 'other').isFetched() is False , 'Expected other to not be fetched after calling getUpdatedFields'
+
+        mainObj.other = [refObj2._id]
+
+        updatedFields = mainObj.getUpdatedFields()
+
+        assert 'other' in updatedFields , 'Expected "other" to be updated in updatedFields after changing'
+        assert updatedFields['other'][0].pk == [refObj1._id] and updatedFields['other'][1].pk == [refObj2._id] , 'Expected updatedFields to contain old ( %d ) -> new ( %d ) id. Got: %s' %(refObj1._id, refObj2._id, repr(updatedFields['other']), )
+        assert oga(mainObj, 'other').isFetched() is False , 'Expected other to not be fetched after calling getUpdatedFields'
+
+        mainObj.other = [refObj1, refObj2]
+
+        mainObj.save()
+
+
+        mainObj = MainModel.objects.first()
+
+        mainObj.other = [refObj1._id, refObj2._id]
+
+        updatedFields = mainObj.getUpdatedFields(cascadeObjects=True)
+
+        assert not updatedFields , 'Expected updatedFields to be blank assigning to same ids (But unfetched objects). Got: %s' %(repr(updatedFields), )
+        assert oga(mainObj, 'other').isFetched() is False , 'Expected other to not be fetched after calling getUpdatedFields'
+
+        mainObj.other = [refObj1, refObj2._id]
+        updatedFields = mainObj.getUpdatedFields(cascadeObjects=True)
+
+        assert not updatedFields , 'Expected updatedFields to be blank assigning to same ids (But first fetched, second still unfetched ). Got: %s' %(repr(updatedFields), )
+        assert oga(mainObj, 'other').isFetched() is False , 'Expected other to not be fetched after calling getUpdatedFields'
+
+
+        mainObj.other
+        updatedFields = mainObj.getUpdatedFields(cascadeObjects=True)
+
+        assert not updatedFields , 'Expected updatedFields to be blank after fetching from ids. Got: %s' %(repr(updatedFields), )
+
+        mainObj.other[0].intVal = 42
+
+
+        updatedFields = mainObj.getUpdatedFields(cascadeObjects=True)
+        assert 'other' in updatedFields , 'Expected updatedFields to be updated after changing sub object.'
+
+        # TODO: Need to implement a different hasUnsavedFields for cascadeSave and non-cascadeSave, as we shouldn't try to
+        #   change anything if cascadeSave=False and the pk has not been changed, but should if cascadeSave=True
+
+        
+
 
 
 
