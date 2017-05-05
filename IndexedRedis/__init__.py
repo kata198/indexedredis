@@ -530,27 +530,6 @@ class IndexedRedisModel(object):
 		return updatedFields
 
 
-	def _getUpdatedFieldsForStorage(self):
-		'''
-			_getUpdatedFieldsForStorage - Gets any changed fields, taking into account the storage representation
-
-			@return - A dictionary of the fieldName : tuple(oldStorage, newStorage)
-
-			fieldName may be a string or may implement IRField (which implements string, and can be used just like a string)
-		'''
-
-		updatedFields = {}
-		for thisField in self.FIELDS:
-			thisVal = getattr(self, thisField, thisField.getDefaultValue())
-
-			thisVal = thisField.toStorage( thisVal )
-			origVal = thisField.toStorage( self._origData.get(thisField, thisField.getDefaultValue()) )
-
-			if thisVal != origVal:
-				updatedFields[thisField] = (origVal, thisVal)
-		return updatedFields
-
-
 	@classproperty
 	def objects(cls):
 		'''
