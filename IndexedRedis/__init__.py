@@ -388,13 +388,17 @@ class IndexedRedisModel(object):
 		object.__setattr__(self, keyName, value)
 	
 	def __getattribute__(self, keyName):
+		# If something on the class, just return it right away.
+		oga = object.__getattribute__
+		if hasattr( oga(self, '__class__'), keyName):
+			return oga(self, keyName)
+
 		if keyName.endswith('__id'):
 			isIdKey = True
 			keyName = keyName[:-4]
 		else:
 			isIdKey = False
 
-		oga = object.__getattribute__
 
 		val = oga(self, keyName)
 
