@@ -71,9 +71,9 @@ class ForeignLinkData(ForeignLinkDataBase):
 			raise ValueError('Indexes must be string. %s is not supported' %( hasattr(name, '__name__') and name.__name__ or name.__class__.__name__, ) )
 
 		if name == 'pk':
-			return self.pk
+			return self.getPk()
 		elif name == 'obj':
-			return self.obj
+			return self.getObj()
 
 		raise KeyError('No such item: "%s". Possible keys are:  [ "pk", "obj" ]' %(name, ) )
 
@@ -83,11 +83,17 @@ class ForeignLinkData(ForeignLinkDataBase):
 
 	def getObj(self):
 		if self.obj is None:
+			if not self.pk:
+				return None
 			self.obj = self.foreignModel.objects.get(self.pk)
 
 		return self.obj
 	
 	def getPk(self):
+		if not self.pk and self.obj:
+			if self.obj._id:
+				self.pk = self.obj._id
+
 		return self.pk
 
 	def isFetched(self):
@@ -157,6 +163,20 @@ class ForeignLinkMultiData(ForeignLinkData):
 						self.pk.append(thisObj._id)
 					else:
 						raise ValueError('unset id')
+
+
+	def getPk(self):
+		if not self.pk or None in self.pk:
+			for i in range( len(self.pk) ):
+				if self.pk[i]:
+					continue
+
+				if self.obj[i] and self.obj[i]._id:
+					self.pk[i] = self.obj[i]._id
+
+		return self.pk
+
+
 	def getObj(self):
 		if self.obj:
 			needPks = [ (i, self.pk[i]) for i in range(len(self.obj)) if self.obj[i] is None]
@@ -245,13 +265,15 @@ class IRForeignLinkField(IRForeignLinkFieldBase):
 			return ForeignLinkData(int(value), self.foreignModel)
 		elif value in (None, irNull):
 			return irNull
+		elif issubclass(value.__class__, ForeignLinkData):
+			return value
 
 		# TODO: Temp exception
 		raise ValueError('Unknown input: <%s>   %s' %(value.__class__.__name__, repr(value)) )
 	
 	def _toStorage(self, value):
 		if isinstance(value, ForeignLinkData):
-			return str(value.pk)
+			return str(value.getPk())
 
 		elif isinstance(value, int):
 			return str(value)
@@ -266,7 +288,7 @@ class IRForeignLinkField(IRForeignLinkFieldBase):
 	def _toIndex(self, value):
 		# Support passing either an integer or the model itself
 		if issubclass(value.__class__, IRForeignLinkField):
-			return value.pk
+			return value.getPk()
 
 		return super(IRForeignLinkField, self)._toIndex(value)
 
@@ -322,13 +344,15 @@ class IRForeignMultiLinkField(IRForeignLinkField):
 			return ForeignLinkMultiData( pk=pks, foreignModel=self.foreignModel, obj=objs)
 		elif values in (None, irNull):
 			return irNull
+		elif issubclass(values.__class__, ForeignLinkMultiData):
+			return values
 
 		# TODO: Temp exception
 		raise ValueError('Unknown input: <%s>   %s' %(values.__class__.__name__, repr(values)) )
 	
 	def _toStorage(self, value):
 		if isinstance(value, ForeignLinkMultiData):
-			return ','.join([str(eachPk) for eachPk in value.pk])
+			return ','.join([str(eachPk) for eachPk in value.getPk()])
 
 		elif issubclass(value.__class__, (list, tuple, set)):
 			ret = []

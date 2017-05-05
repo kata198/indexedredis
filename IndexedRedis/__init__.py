@@ -357,6 +357,7 @@ class IndexedRedisModel(object):
 				val = kwargs[thisField]
 				val = getattr(thisField, convertFunctionName)(val)
 
+
 			object.__setattr__(self, thisField, val)
 			# Generally, we want to copy the value incase it is used by reference (like a list)
 			#   we will miss the update (an append will affect both).
@@ -426,7 +427,6 @@ class IndexedRedisModel(object):
 			return val.getObj()
 
 	
-	# TODO: This function will cause foreign fields to be fetched. Refactor that part.
 	def asDict(self, includeMeta=False, forStorage=False, strKeys=False):
 		'''
 			toDict / asDict - Get a dictionary representation of this model.
@@ -443,7 +443,10 @@ class IndexedRedisModel(object):
 		'''
 		ret = {}
 		for thisField in self.FIELDS:
-			val = getattr(self, thisField, thisField.getDefaultValue())
+			if not hasattr(self, str(thisField)):
+				val = thisField.getDefaultValue()
+			else:
+				val = object.__getattribute__(self, thisField)
 
 			if forStorage is True:
 				val = thisField.toStorage(val)
@@ -452,7 +455,7 @@ class IndexedRedisModel(object):
 				ret[str(thisField)] = val
 			else:
 				ret[thisField] = val
-				
+
 
 		if includeMeta is True:
 			ret['_id'] = getattr(self, '_id', '')
@@ -525,6 +528,7 @@ class IndexedRedisModel(object):
 					updatedFields[thisField] = (self._origData[thisField], thisVal)
 					
 		return updatedFields
+
 
 	def _getUpdatedFieldsForStorage(self):
 		'''
@@ -861,7 +865,7 @@ class IndexedRedisModel(object):
 			raise KeyError('Object with id=%d is not in database. Cannot reload.' %(_id,))
 
 		newData = newDataObj.asDict(False, forStorage=False)
-		if currentData == newData:
+		if currentData == newData and not self.foreignFields:
 			return []
 
 		updatedFields = {}
@@ -869,7 +873,7 @@ class IndexedRedisModel(object):
 			defaultValue = thisField.getDefaultValue()
 
 			currentValue = currentData.get(thisField, defaultValue)
-			if currentValue != newValue:
+			if currentValue != newValue or (issubclass(thisField.__class__, IRForeignLinkFieldBase) and currentValue.obj != newValue.obj):
 				# Use "converted" values in the updatedFields dict, and apply on the object.
 				updatedFields[thisField] = ( currentValue, newValue) 
 				setattr(self, thisField, newValue)
