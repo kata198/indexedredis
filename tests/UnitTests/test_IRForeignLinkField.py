@@ -444,6 +444,42 @@ class TestIRForeignLinkField(object):
         assert oga(mainObj, 'other').isFetched() is False , 'Expected other to not be fetched after calling getUpdatedFields'
 
 
+    def test_unsavedChanges(self):
+        MainModel = self.models['MainModel']
+        RefedModel = self.models['RefedModel']
+
+        refObj1 = RefedModel(name='rone', strVal='hello', intVal=1)
+
+        mainObj = MainModel(name='one', value='cheese')
+
+        mainObj.other = refObj1
+
+        ids = mainObj.save(cascadeSave=True)
+
+        mainObj2 = MainModel(name='one', value='cheese')
+
+        assert mainObj.hasSameValues(mainObj2) is False , 'Expected not to have same values when one has foreign set, other does not.'
+
+
+        mainObj2.other = refObj1._id
+
+        assert mainObj.hasSameValues(mainObj2) , 'Expected to have same values when one has object, other has id'
+
+        mainObj2 = MainModel(name='one', value='cheese')
+        mainObj2.other = refObj1
+
+        assert mainObj.hasSameValues(mainObj2) , 'Expected to have same values with same object on both'
+
+        mainObj = MainModel.objects.first()
+
+        assert mainObj.hasSameValues(mainObj2) , 'Expected to have same values after fetch. one has id, one has object.'
+
+        mainObj.other.intVal = 55
+
+        assert not mainObj.hasSameValues(mainObj2) , 'Expected changing a foreign link field\'s data on one object would cause hasSameValues to be False.'
+
+        assert mainObj.hasSameValues(mainObj2, cascadeObject=False) , 'Expected changing a foreign link field\'s data on one object would leave hasSameValues(... , cascadeObject=False) to be True'
+
 
 if __name__ == '__main__':
     sys.exit(subprocess.Popen('GoodTests.py -n1 "%s" %s' %(sys.argv[0], ' '.join(['"%s"' %(arg.replace('"', '\\"'), ) for arg in sys.argv[1:]]) ), shell=True).wait())

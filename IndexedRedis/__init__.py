@@ -635,7 +635,7 @@ class IndexedRedisModel(object):
 		return list( range( 1, nextID, 1) )
 
 
-	def hasSameValues(self, other):
+	def hasSameValues(self, other, cascadeObject=True):
 		'''
 			hasSameValues - Check if this and another model have the same fields and values.
 
@@ -643,14 +643,62 @@ class IndexedRedisModel(object):
 
 			@param other <IndexedRedisModel> - Another model
 
+			@param cascadeObject <bool> default True - If True, foreign link values with changes will be considered a difference.
+				Otherwise, only the immediate values are checked.
+
 			@return <bool> - True if all fields have the same value, otherwise False
 		'''
 		if self.FIELDS != other.FIELDS:
 			return False
 
+		oga = object.__getattribute__
+
 		for field in self.FIELDS:
-			if getattr(self, field) != getattr(other, field):
+			thisVal = oga(self, field)
+			otherVal = oga(other, field)
+			if thisVal != otherVal:
 				return False
+
+			if cascadeObject is True and issubclass(field.__class__, IRForeignLinkFieldBase):
+				if thisVal.isFetched():
+					if otherVal.isFetched():
+						thisForeign = thisVal.getObj()
+						otherForeign = otherVal.getObj()
+						 
+						if not isinstance(thisForeign, (list, tuple)):
+							theseForeign = [thisForeign]
+							othersForeign = [otherForeign]
+						else:
+							theseForeign = thisForeign
+							othersForeign = otherForeign
+
+						for i in range(len(theseForeign)):
+							if not theseForeign[i].hasSameValues(othersForeign[i]):
+								return False
+					else:
+						thisForeign = thisVal.getObj()
+						if not isinstance(thisForeign, (list, tuple)):
+							theseForeign = [thisForeign]
+						else:
+							theseForeign = thisForeign
+
+						for i in range(len(theseForeign)):
+							if theseForeign[i].hasUnsavedChanges(cascadeObjects=True):
+								return False
+				else:
+					if otherVal.isFetched():
+						otherForeign = otherVal.getObj()
+
+						if not isinstance(otherForeign, (list, tuple)):
+							othersForeign = [otherForeign]
+						else:
+							othersForeign = otherForeign
+						for i in range(len(othersForeign)):
+							if othersForeign[i].hasUnsavedChanges(cascadeObjects=True):
+								return False
+
+							
+				
 
 		return True
 
@@ -2026,7 +2074,7 @@ class IndexedRedisSave(IndexedRedisHelper):
 				if fieldValue == IR_NULL_STR:
 					obj._origData[thisField] = irNull
 				else:
-					obj._origData[thisField] = getattr(obj, str(thisField))
+					obj._origData[thisField] = object.__getattribute__(obj, str(thisField))
 
 			self._add_id_to_keys(obj._id, pipeline)
 
