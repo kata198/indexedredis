@@ -10,6 +10,7 @@ __all__ = ('IRField', 'IRNullType', 'irNull', 'IRPickleField',
 	'IRCompressedField', 'IRUnicodeField', 'IRRawField', 'IRBase64Field', 
 	'IRFixedPointField', 'IRDatetimeValue', 'IRJsonValue', 
 	'IRBytesField', 'IRClassicField',
+	'IRForeignLinkFieldBase', 'IRForeignLinkField', 'IRForeignMultiLinkField',
 	'IR_NULL_STR', 'IR_NULL_BYTES', 'IR_NULL_UNICODE', 'IR_NULL_STRINGS' )
 
 import sys
@@ -232,7 +233,7 @@ class IRField(str):
 	'''
 		_toIndex - Prepare a value for index.
 
-		  Does not need to handle nulls or hasing.
+		  Does not need to handle nulls or hashing.
 
 		  You probably won't need to implement this, but IRFieldChain for example does.
 	'''
