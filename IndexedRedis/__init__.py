@@ -662,37 +662,22 @@ class IndexedRedisModel(object):
 			if cascadeObject is True and issubclass(field.__class__, IRForeignLinkFieldBase):
 				if thisVal.isFetched():
 					if otherVal.isFetched():
-						thisForeign = thisVal.getObj()
-						otherForeign = otherVal.getObj()
+						theseForeign = thisVal.getObjs()
+						othersForeign = otherVal.getObjs()
 						 
-						if not isinstance(thisForeign, (list, tuple)):
-							theseForeign = [thisForeign]
-							othersForeign = [otherForeign]
-						else:
-							theseForeign = thisForeign
-							othersForeign = otherForeign
-
 						for i in range(len(theseForeign)):
 							if not theseForeign[i].hasSameValues(othersForeign[i]):
 								return False
 					else:
-						thisForeign = thisVal.getObj()
-						if not isinstance(thisForeign, (list, tuple)):
-							theseForeign = [thisForeign]
-						else:
-							theseForeign = thisForeign
+						theseForeign = thisVal.getObjs()
 
 						for i in range(len(theseForeign)):
 							if theseForeign[i].hasUnsavedChanges(cascadeObjects=True):
 								return False
 				else:
 					if otherVal.isFetched():
-						otherForeign = otherVal.getObj()
+						othersForeign = otherVal.getObjs()
 
-						if not isinstance(otherForeign, (list, tuple)):
-							othersForeign = [otherForeign]
-						else:
-							othersForeign = otherForeign
 						for i in range(len(othersForeign)):
 							if othersForeign[i].hasUnsavedChanges(cascadeObjects=True):
 								return False
@@ -1646,16 +1631,12 @@ class IndexedRedisQuery(IndexedRedisHelper):
 		  #   IndexedRedisModel.__getattribute__ 
 
 		for foreignField in obj.foreignFields:
-			subObj = getattr(obj, foreignField) # Perform the fetch
-			if issubclass(subObj.__class__, (tuple, list)):
-				subObjs = subObj
-			else:
-				subObjs = [subObj]
+			subObjs = object.__getattribute__(obj, foreignField).getObjs()
 			
-			for _subObj in subObjs:
-				if isIndexedRedisModel(_subObj):
-					_subObj.validateModel() # Ensure sub model is validated so "foreignFields" property is set.
-					IndexedRedisQuery._doCascadeFetch(_subObj)
+			for subObj in subObjs:
+				if isIndexedRedisModel(subObj):
+					subObj.validateModel() # Ensure sub model is validated so "foreignFields" property is set.
+					IndexedRedisQuery._doCascadeFetch(subObj)
 
 	def getMultiple(self, pks, cascadeFetch=False):
 		'''
@@ -1958,11 +1939,8 @@ class IndexedRedisSave(IndexedRedisHelper):
 					if rawObj in (None, irNull) or not rawObj.isFetched():
 						continue
 
-					foreignObject = getattr(thisObj, str(foreignField))
-					if not isinstance(foreignObject, (list, tuple)):
-						foreignObjects = [foreignObject]
-					else:
-						foreignObjects = foreignObject
+					foreignObjects = oga(thisObj, str(foreignField)).getObjs()
+
 					for foreignObject in foreignObjects:
 						doSaveForeign = False
 						if getattr(foreignObject, '_id', None):

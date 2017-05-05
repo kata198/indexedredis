@@ -89,6 +89,9 @@ class ForeignLinkData(ForeignLinkDataBase):
 
 		return self.obj
 	
+	def getObjs(self):
+		return [ self.getObj() ]
+	
 	def getPk(self):
 		if not self.pk and self.obj:
 			if self.obj._id:
@@ -192,6 +195,9 @@ class ForeignLinkMultiData(ForeignLinkData):
 				i += 1
 
 		return self.obj
+
+	def getObjs(self):
+		return self.getObj()
 
 	def isFetched(self):
 		if not self.obj:
