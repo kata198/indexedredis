@@ -1,0 +1,17 @@
+IndexedRedis Optional Patches
+=============================
+
+
+This directory contains some optional patches which you may wish to apply to your deployment of IndexedRedis.
+
+Each patch includes a description at the top of the patch file, and can be applied with the "diff" util.
+
+This document will give a SHORT summary of the patch. You must check the patch itself for full details.
+
+**Legal**
+
+Applything these patches should NOT be considered a modification (in regards to the LGPL's redistribution terms), but should be considered part of the base source code.
+
+Patches
+-------
+
