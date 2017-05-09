@@ -394,8 +394,8 @@ class IndexedRedisModel(object):
 	def __getattribute__(self, keyName):
 		# If something on the class, just return it right away.
 		oga = object.__getattribute__
-		if keyName in dir(oga(self, '__class__')):
-			return oga(self, keyName)
+#		if keyName in dir(oga(self, '__class__')):
+#			return oga(self, keyName)
 
 		if keyName.endswith('__id'):
 			isIdKey = True
@@ -445,10 +445,7 @@ class IndexedRedisModel(object):
 		'''
 		ret = {}
 		for thisField in self.FIELDS:
-			if not str(thisField) in dir(self):
-				val = thisField.getDefaultValue()
-			else:
-				val = object.__getattribute__(self, thisField)
+			val = object.__getattribute__(self, thisField)
 
 			if forStorage is True:
 				val = thisField.toStorage(val)
