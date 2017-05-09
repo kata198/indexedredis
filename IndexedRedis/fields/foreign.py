@@ -16,25 +16,15 @@ from .null import IR_NULL_STR
 from ..compat_str import isStringy, to_unicode, isBaseStringy
 
 
-# NOTE: Current status, works to link objects, cascade save works, cascade fetch works.
-#   Resolution happens on member access, unless it is already fetched or cascadeFetch=True on calling the fetching method.
-
-# Remaining work:
-
-
-# TODO: Provide some sort of "reload child" mechanism
-# TODO: Related, look into the "reload" method and add option to reload foreign links or leave them alone.
-
-# TODO: Better handle deleting fields
-# TODO: Cleanup and reuse code
-
-
 __all__ = ( 
 	'ForeignLinkDataBase', 'ForeignLinkData', 'ForeignLinkMultiData',
 	'IRForeignLinkFieldBase', 'IRForeignLinkFieldBase', 'IRForeignMultiLinkField'
 )
 
 class ForeignLinkDataBase(object):
+	'''
+		ForeignLinkDataBase - Base class for data relating to foreign links
+	'''
 	pass
 
 class ForeignLinkData(ForeignLinkDataBase):
@@ -81,9 +71,15 @@ class ForeignLinkData(ForeignLinkDataBase):
 
 	@property
 	def foreignModel(self):
+		'''
+			foreignModel - Resolve and return the weakref to the associated foreign model
+		'''
 		return self._foreignModel()
 
 	def getObj(self):
+		'''
+			getObj - Fetch (if not fetched) and return the obj associated with this data.
+		'''
 		if self.obj is None:
 			if not self.pk:
 				return None
@@ -92,9 +88,17 @@ class ForeignLinkData(ForeignLinkDataBase):
 		return self.obj
 	
 	def getObjs(self):
+		'''
+			getObjs - Fetch (if not fetched) and return the obj associated with this data.
+
+				Output is iterable.
+		'''
 		return [ self.getObj() ]
 	
 	def getPk(self):
+		'''
+			getPk - Resolve any absent pk's off the obj's (like if an obj has been saved), and return the pk.
+		'''
 		if not self.pk and self.obj:
 			if self.obj._id:
 				self.pk = self.obj._id
@@ -102,6 +106,9 @@ class ForeignLinkData(ForeignLinkDataBase):
 		return self.pk
 
 	def isFetched(self):
+		'''
+			isFetched - Check if the associated obj has been fetched or not.
+		'''
 		return not bool(self.obj is None)
 
 
@@ -123,6 +130,9 @@ class ForeignLinkData(ForeignLinkDataBase):
 		return not self.__eq__(other)
 
 	def objHasUnsavedChanges(self):
+		'''
+			objHasUnsavedChanges - Check if any object has unsaved changes, cascading.
+		'''
 		if not self.obj:
 			return False
 
@@ -171,6 +181,9 @@ class ForeignLinkMultiData(ForeignLinkData):
 
 
 	def getPk(self):
+		'''
+			getPk - @see ForeignLinkData.getPk
+		'''
 		if not self.pk or None in self.pk:
 			for i in range( len(self.pk) ):
 				if self.pk[i]:
@@ -183,6 +196,11 @@ class ForeignLinkMultiData(ForeignLinkData):
 
 
 	def getObj(self):
+		'''
+			getObj - @see ForeignLinkData.getObj
+
+				Except this always returns a list
+		'''
 		if self.obj:
 			needPks = [ (i, self.pk[i]) for i in range(len(self.obj)) if self.obj[i] is None]
 
@@ -199,9 +217,15 @@ class ForeignLinkMultiData(ForeignLinkData):
 		return self.obj
 
 	def getObjs(self):
+		'''
+			getObjs - @see ForeignLinkData.getObjs
+		'''
 		return self.getObj()
 
 	def isFetched(self):
+		'''
+			isFetched - @see ForeignLinkData.isFetched
+		'''
 		if not self.obj:
 			return False
 
@@ -211,6 +235,11 @@ class ForeignLinkMultiData(ForeignLinkData):
 
 
 	def objHasUnsavedChanges(self):
+		'''
+			objHasUnsavedChanges - @see ForeignLinkData.objHasUnsavedChanges
+
+			True if ANY object has unsaved changes.
+		'''
 		if not self.obj:
 			return False
 
@@ -224,6 +253,9 @@ class ForeignLinkMultiData(ForeignLinkData):
 
 
 class IRForeignLinkFieldBase(IRField):
+	'''
+		IRForeignLinkFieldBase - Base class for Foreign Link fields
+	'''
 	pass
 
 class IRForeignLinkField(IRForeignLinkFieldBase):
@@ -254,6 +286,9 @@ class IRForeignLinkField(IRForeignLinkFieldBase):
 
 	@property
 	def foreignModel(self):
+		'''
+			foreignModel - Resolve and return the weakref to the associated Foreign Model
+		'''
 		return self._foreignModel()
 
 
@@ -328,6 +363,7 @@ class IRForeignLinkField(IRForeignLinkFieldBase):
 
 	def __new__(self, name='', foreignModel=None):
 		return IRField.__new__(self, name)
+
 
 class IRForeignMultiLinkField(IRForeignLinkField):
 	'''
