@@ -57,7 +57,7 @@ class TestIRForeignMultiLinkField(object):
                 IRForeignMultiLinkField('other', Model_RefedModel),
             ]
 
-            INDEXED_FIELDS = ['name']
+            INDEXED_FIELDS = ['name', 'other']
 
             KEY_NAME='TestIRForeignMultiLinkField__MainModel1'
 
@@ -505,6 +505,43 @@ class TestIRForeignMultiLinkField(object):
         assert mainObj.hasSameValues(mainObj2, cascadeObject=False) , 'Expected changing a foreign link field\'s data on one object would leave hasSameValues(... , cascadeObject=False) to be True'
 
 
+    def test_filterOnModel(self):
+        MainModel = self.models['MainModel']
+        RefedModel = self.models['RefedModel']
+
+        refObj1 = RefedModel(name='rone', strVal='hello', intVal=1)
+        refObj2 = RefedModel(name='rtwo', strVal='world', intVal=2)
+
+        ids1 = refObj1.save(cascadeSave=False)
+        assert ids1 and ids1[0] , 'Failed to save object'
+
+        ids2 = refObj2.save(cascadeSave=False)
+        assert ids2 and ids2[0] , 'Failed to save object'
+
+        mainObj = MainModel(name='one', value='cheese')
+
+        mainObj.other = [ids1[0], ids2[0]]
+
+        assert object.__getattribute__(mainObj, 'other').isFetched() is False , 'Expected object not to be fetched before access'
+
+        assert mainObj.other[0].hasSameValues(refObj1) , 'Expected other with id of refObj1 to link to refObj1'
+
+        assert object.__getattribute__(mainObj, 'other').isFetched() is True, 'Expected object to be fetched after access'
+
+        ids = mainObj.save(cascadeSave=False)
+
+        fetchedObjs = MainModel.objects.filter(other=[ids1[0], ids2[0]]).all()
+
+        assert fetchedObjs and len(fetchedObjs) == 1 , 'Expected to be able to filter on numeric pk'
+
+        fetchedObjs = MainModel.objects.filter(other=[ids1[0]] ).all()
+        assert not fetchedObjs , 'Expected filtering on partial list to not return anything'
+
+        fetchedObjs = MainModel.objects.filter(other=[ids2[0], ids1[0]]).all()
+        assert not fetchedObjs , 'Expected filtering on out-of-order list to not return anything'
+
+        fetchedObjs = MainModel.objects.filter(other=[refObj1, refObj2]).all()
+        assert fetchedObjs and len(fetchedObjs) == 1 , 'Expected to be able to filter on object itself'
 
 
 if __name__ == '__main__':

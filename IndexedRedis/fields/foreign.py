@@ -336,7 +336,8 @@ class IRForeignMultiLinkField(IRForeignLinkField):
 
 	# So... technically we CAN index this. But I feel like most legit scenarios would need a "link contains" operation,
 	#  while direct-redis filtering only supports equals and not equals.. so really they're looking at client-side filtering anyway.
-	CAN_INDEX = False
+	# But... allow it anyway.
+	CAN_INDEX = True
 
 	def _fromStorage(self, value):
 		if not value:
@@ -401,17 +402,20 @@ class IRForeignMultiLinkField(IRForeignLinkField):
 				else:
 					raise ValueError('Unknown element in list:  <%s>  %s' %(value.__class__.__name__, repr(value)) )
 			return ','.join(ret)
+		elif isBaseStringy(value):
+			# For index
+			return value
 
 
 		raise ValueError('Unknown value type headed for storage:   <%s>   %s' %(value.__class__.__name__, repr(value)))
 	
 
-#	def _toIndex(self, value):
-#		# Support passing either an integer or the model itself
-#		if issubclass(value.__class__, IRForeignLinkField):
-#			return value.pk
-#
-#		return super(IRForeignLinkField, self)._toIndex(value)
+	def _toIndex(self, value):
+		# Support passing either an integer or the model itself
+		if issubclass(value.__class__, IRForeignMultiLinkField):
+			return ','.join(value.getPk())
+
+		return super(IRForeignLinkField, self)._toIndex(value)
 
 
 # vim: set ts=8 shiftwidth=8 softtabstop=8 noexpandtab :

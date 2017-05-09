@@ -337,6 +337,11 @@ class TestIRForeignLinkField(object):
 
         assert fetchedObjs and len(fetchedObjs) == 1 , 'Expected to be able to filter on numeric pk'
 
+        fetchedObjs = MainModel.objects.filter(other=refObj2).all()
+
+        assert fetchedObjs and len(fetchedObjs) == 1 , 'Expected to be able to filter on object itself'
+
+
 
     def test_cascadeSave(self):
         MainModel = self.models['MainModel']
