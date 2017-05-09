@@ -378,13 +378,16 @@ class IndexedRedisModel(object):
 
 			  Otherwise, it will just set the attribute on this object.
 		'''
+		oga = object.__getattribute__
+
+		fields = oga(self, 'FIELDS')
 		try:
-			idx = self.FIELDS.index(keyName)
+			idx = fields.index(keyName)
 		except:
 			idx = -1
 
 		if idx != -1:
-			value = self.FIELDS[idx].fromInput(value)
+			value = fields[idx].fromInput(value)
 
 		object.__setattr__(self, keyName, value)
 	
