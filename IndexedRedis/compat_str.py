@@ -179,7 +179,7 @@ else:
 
 			@return <bool> - True if "x" is a "basestring" extending type
 		'''
-		return issubclass(x.__class__, basestring)
+		return issubclass(x.__class__, str)
 	
 
 	def isEmptyString(x):
