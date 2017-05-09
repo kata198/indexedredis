@@ -659,6 +659,9 @@ For save methods ( like .save ) there is a parameter, *cascadeSave*, default Tru
 If you explicitly call myOBj.save(cascadeSave=False), then only "myObj" is saved. If you assigned reference to a foreign object which has been saved (and thus has a primary key), that primary key will be linked. If you assign reference to a foreign object which has NOT been saved, you will NOT have a link. You will need to explicitly save the child first. Also, if a child foreign object has changed values, they will not be saved along with "myOBj" when cascadeSave=False.
 
 
+For the reload function, there is a parameter, *cascadeObjects*, default True. This will control whether any foreign models which have local changes will be reloaded. If True, any foreign model at any level with local changes will be reloaded (and reflected in the return vlaue). If False, only the pk field is checked.
+
+
 For comparison functions ( hasSameValues, hasUnsavedChanges, getUpdatedFields ) there is a parameter, *cascadeObjects*, default False, which will cause any foreign link objects  ( and any links those objects may contain, etc. ) to be included in the results.
 
 For example, consider the following:
