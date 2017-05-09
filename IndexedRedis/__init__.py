@@ -524,7 +524,6 @@ class IndexedRedisModel(object):
 		'''
 			objects - Start filtering
 		'''
-		cls.validateModel()
 		return IndexedRedisQuery(cls)
 
 	@classproperty
@@ -532,7 +531,6 @@ class IndexedRedisModel(object):
 		'''
 			saver - Get an IndexedRedisSave associated with this model
 		'''
-		cls.validateModel()
 		return IndexedRedisSave(cls)
 
 	@classproperty
@@ -542,7 +540,6 @@ class IndexedRedisModel(object):
 			@see IndexedRedisDelete.
 			Usually you'll probably just do Model.objects.filter(...).delete()
 		'''
-		cls.validateModel()
 		return IndexedRedisDelete(cls)
 
 	def save(self, cascadeSave=True):
@@ -892,7 +889,6 @@ class IndexedRedisModel(object):
 			   
 			   e.x.    MyModel.objects.filter(...).all(cascadeFetch=True)
 		'''
-		self.validateModel()
 		IndexedRedisQuery._doCascadeFetch(self)
 
 
@@ -1085,12 +1081,15 @@ class IndexedRedisHelper(object):
 
 			@param mdl - IndexedRedisModel implementer
 		'''
+		mdl.validateModel()
+
 		self.mdl = mdl
-		self.keyName = self.mdl.KEY_NAME
+		self.keyName = mdl.KEY_NAME
 
-		self.fields = self.mdl.FIELDS
+		fields = mdl.FIELDS
+		self.fields = mdl.FIELDS
 
-		self.indexedFields = [self.fields[fieldName] for fieldName in self.mdl.INDEXED_FIELDS]
+		self.indexedFields = [fields[fieldName] for fieldName in mdl.INDEXED_FIELDS]
 			
 		self._connection = None
 
@@ -1613,6 +1612,8 @@ class IndexedRedisQuery(IndexedRedisHelper):
 
 			@param obj <IndexedRedisModel> - A fetched model
 		'''
+		obj.validateModel()
+
 		if not obj.foreignFields:
 			return
 
@@ -1624,7 +1625,6 @@ class IndexedRedisQuery(IndexedRedisHelper):
 			
 			for subObj in subObjs:
 				if isIndexedRedisModel(subObj):
-					subObj.validateModel() # Ensure sub model is validated so "foreignFields" property is set.
 					IndexedRedisQuery._doCascadeFetch(subObj)
 
 	def getMultiple(self, pks, cascadeFetch=False):
