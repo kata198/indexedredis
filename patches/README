@@ -15,3 +15,9 @@ Applything these patches should NOT be considered a modification (in regards to 
 Patches
 -------
 
+factory.patch - This patch causes IndexedRedisSave and IndexedRedisDelete objects to become singletons per model via the Factory design paradigm.
+
+  Normally, every call to ".save" or ".delete" ( and several other places ) will create a new IndexedRedisSave / IndexedRedisDelete object, referencing the model. This has some overhead associated with it, that this patch aims to remove.
+
+  There are, however, usage patterns ( albeit uncommon ) that require a slightly different pattern than the core IndexedRedis (See patch for details).
+

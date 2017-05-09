@@ -1,0 +1,231 @@
+diff --git a/IndexedRedis/__init__.py b/IndexedRedis/__init__.py
+
+This patch implements the "Factory" design paradigm to ensure that only one IndexedRedisSave and IndexedRedisDelete exist for a given model.
+
+The alternative, prior to this patch, is that every time an object is saved or deleted, or in several other scenarios, a fresh IndexedRedisSave / IndexedRedisDelete object is created.
+Creating those objects every time adds some minor overhead in setup of IndexedRedisHelper parent, minor overhead in identifying the connection pool to use for each of those requests, and some minor memory overhead.
+
+My issue with this patch, and the reason it is not committed is the following scenario. Unlikely, but still possible.
+
+
+class MyModel(IndexedRedisModel):
+    ...
+
+
+blah = MyModel( ... )
+
+# So the IndexedRedisSave object is cached here.
+blah.save()
+
+
+MyModel.REDIS_CONNECTION_PARAMS['db'] = 2
+
+# HERE is the issue. With the factory impl, we would reuse the IndexedRedisSave object created earlier,
+#   which has a connection_pool cached. It would save in db=0 even though REDIS_CONNECTION_PARAMS['db'] has been updated to 2.
+#
+# A notification mechanism such that modifying REDIS_CONNECTION_PARAMS fires an event I think is too hackish and complex for
+#   the potential gains of this patch, for common situations.
+#
+# The user could trigger by calling removeModelFromFactories(MyModel) , but I don't like the idea that a framework requires
+#   the user to know when to do specific things that it should be handling itself...
+blah.save()
+
+
+If, however, you do NOT modify REDIS_CONNECTION_PARAMS randomly in your code, OR you are willing to call IndexedRedis.removeModelFromFactories(MyModel)
+  after your changes, feel free to apply this patch.
+
+
+Performance gains:
+
+  I measured performance by wrapping the "main" portion of example.py in a 'for i in range(100):' loop, and kept the TIME: print after the loop had completed.
+This simulates some adds, removes, filters, and results in 14400 operations in Redis.
+
+With this dataset, using the median of multiple runs, the factory implementation executed 2% faster than the base implementation.
+
+
+You may find that your usage gives a higher gain, in which case feel free to apply this patch.
+
+
+index 772c509..3d38a40 100644
+--- a/IndexedRedis/__init__.py
++++ b/IndexedRedis/__init__.py
+@@ -34,6 +34,8 @@ __all__ = ('INDEXED_REDIS_PREFIX', 'INDEXED_REDIS_VERSION', 'INDEXED_REDIS_VERSI
+ 	'fields', 'IRField', 'IRFieldChain', 'IRForeignLinkFieldBase', 'irNull',
+ 	'setDefaultIREncoding', 'getDefaultIREncoding',
+ 	'setDefaultRedisConnectionParams', 'getDefaultRedisConnectionParams',
++	'IndexedRedisSaveFactory', 'IndexedRedisDeleteFactory',
++	'clearFactories', 'clearRedisPools', 'getRedisPool'
+ 	'toggleDeprecatedMessages',
+ 	 )
+ 
+@@ -143,6 +145,7 @@ def clearRedisPools():
+ 				del params['connection_pool']
+ 	
+ 	RedisPools.clear()
++	clearFactories()
+ 	_redisManagedConnectionParams.clear()
+ 		
+ 
+@@ -534,7 +537,7 @@ class IndexedRedisModel(object):
+ 		'''
+ 			saver - Get an IndexedRedisSave associated with this model
+ 		'''
+-		return IndexedRedisSave(cls)
++		return IndexedRedisSaveFactory.getIndexedRedisSave(cls)
+ 
+ 	@classproperty
+ 	def deleter(cls):
+@@ -543,7 +546,7 @@ class IndexedRedisModel(object):
+ 			@see IndexedRedisDelete.
+ 			Usually you'll probably just do Model.objects.filter(...).delete()
+ 		'''
+-		return IndexedRedisDelete(cls)
++		return IndexedRedisDeleteFactory.getIndexedRedisDelete(cls)
+ 
+ 	def save(self, cascadeSave=True):
+ 		'''
+@@ -567,14 +570,14 @@ class IndexedRedisModel(object):
+ 
+ 			@return <list> - Single element list, id of saved object (if successful)
+ 		'''
+-		saver = IndexedRedisSave(self.__class__)
++		saver = IndexedRedisSaveFactory.getIndexedRedisSave(self.__class__)
+ 		return saver.save(self, cascadeSave=cascadeSave)
+ 	
+ 	def delete(self):
+ 		'''
+ 			delete - Delete this object
+ 		'''
+-		deleter = IndexedRedisDelete(self.__class__)
++		deleter = IndexedRedisDeleteFactory.getIndexedRedisDelete(self.__class__)
+ 		return deleter.deleteOne(self)
+ 
+ 	def getPk(self):
+@@ -613,7 +616,7 @@ class IndexedRedisModel(object):
+ 			redis.call('DEL', key)
+ 		end
+ 		""" %( ''.join([INDEXED_REDIS_PREFIX, cls.KEY_NAME, ':']), ), 0)
+-		saver = IndexedRedisSave(cls)
++		saver = IndexedRedisSaveFactory.getIndexedRedisSave(cls)
+ 		nextID = 1
+ 		for newObj in newObjs:
+ 			saver.save(newObj, False, forceID=nextID, conn=transaction)
+@@ -1815,7 +1818,7 @@ class IndexedRedisQuery(IndexedRedisHelper):
+ 			If you change the value of "hashIndex" on a field, you need to call #compat_convertHashedIndexes instead.
+ 		'''
+ 		objs = self.all()
+-		saver = IndexedRedisSave(self.mdl)
++		saver = IndexedRedisSaveFactory.getIndexedRedisSave(self.mdl)
+ 		saver.reindex(objs)
+ 
+ 	def compat_convertHashedIndexes(self, fetchAll=True):
+@@ -1838,7 +1841,7 @@ class IndexedRedisQuery(IndexedRedisHelper):
+ 
+ 		'''
+ 
+-		saver = IndexedRedisSave(self.mdl)
++		saver = IndexedRedisSaveFactory.getIndexedRedisSave(self.mdl)
+ 
+ 		if fetchAll is True:
+ 			objs = self.all()
+@@ -1950,7 +1953,7 @@ class IndexedRedisSave(IndexedRedisHelper):
+ 						if doSaveForeign is True:
+ 							if foreignField not in foreignSavers:
+ #								foreignPipelines[foreignField] = self._get_new_connection().pipeline()
+-								foreignSavers[foreignField] = IndexedRedisSave(foreignObject.__class__)
++								foreignSavers[foreignField] = IndexedRedisSaveFactory.getIndexedRedisSave(foreignObject.__class__)
+ 
+ 							#foreignSavers[foreignField].save(foreignObject, usePipeline=False, cascadeSave=True, conn=foreignPipelines[foreignField])
+ 							foreignSavers[foreignField].save(foreignObject, usePipeline=False, cascadeSave=True, conn=pipeline)
+@@ -2154,6 +2157,44 @@ class IndexedRedisSave(IndexedRedisHelper):
+ 			pipeline.execute()
+ 
+ 
++class IndexedRedisSaveFactoryClass(object):
++	'''
++		IndexedRedisSaveFactoryClass - Class which serves for the IndexedRedisSaveFactory singleton.
++
++		   Used to re-use IndexedRedisSave models, to prevent an object being created every save, and save setup time (like in obtaining link to connection pool).
++	'''
++	
++	def __init__(self):
++		'''
++			__init__ - Create the IndexedRedisSave singleton
++		'''
++		self.indexedRedisSaveFactories = {}
++	
++	def clear(self):
++		'''
++			clear - Clear any cached references to factories. Useful if like global connection params are changed.
++		'''
++		self.indexedRedisSaveFactories.clear()
++
++	def remove(self, mdl):
++		try:
++			del self.indexedRedisSaveFactories[mdl]
++		except:
++			pass
++
++	def getIndexedRedisSave(self, mdl):
++
++		try:
++			return self.indexedRedisSaveFactories[mdl]
++		except KeyError:
++			pass
++
++		ret = self.indexedRedisSaveFactories[mdl] = IndexedRedisSave(mdl)
++		return ret
++
++global IndexedRedisSaveFactory
++IndexedRedisSaveFactory = IndexedRedisSaveFactoryClass()
++
+ 
+ class IndexedRedisDelete(IndexedRedisHelper):
+ 	'''
+@@ -2263,5 +2304,46 @@ class IndexedRedisDelete(IndexedRedisHelper):
+ 		return pipeline.execute()[0]
+ 		
+ 	
++class IndexedRedisDeleteFactoryClass(object):
++	
++	def __init__(self):
++		self.indexedRedisDeleteFactories = {}
++
++	def clear(self):
++		self.indexedRedisDeleteFactories.clear()
++	
++	def remove(self, mdl):
++		try:
++			del self.indexedRedisDeleteFactories[mdl]
++		except:
++			pass
++
++	def getIndexedRedisDelete(self, mdl):
++		try:
++			return self.indexedRedisDeleteFactories[mdl]
++		except KeyError:
++			pass
++
++		ret = self.indexedRedisDeleteFactories[mdl] = IndexedRedisDelete(mdl)
++		return ret
++
++global IndexedRedisDeleteFactory
++IndexedRedisDeleteFactory = IndexedRedisDeleteFactoryClass()
++
++
++def clearFactories():
++	global IndexedRedisDeleteFactory
++	global IndexedRedisSaveFactory
++
++	IndexedRedisDeleteFactory.clear()
++	IndexedRedisSaveFactory.clear()
++
++def removeModelFromFactories(mdl):
++	global IndexedRedisDeleteFactory
++	global IndexedRedisSaveFactory
++
++	IndexedRedisDeleteFactory.remove(mdl)
++	IndexedRedisSaveFactory.remove(mdl)
++	
+ 
+ # vim:set ts=8 shiftwidth=8 softtabstop=8 noexpandtab :
