@@ -77,7 +77,7 @@ class TestIRForeignLinkField(object):
 
             self.models['MainModel'] = Model_MainModelIndexed
 
-        if testMethod in (self.test_cascadeSave, self.test_cascadeFetch):
+        if testMethod in (self.test_cascadeSave, self.test_cascadeFetch, self.test_reload):
             class Model_PreMainModel(IndexedRedisModel):
                 FIELDS = [
                     IRField('name'),
@@ -399,8 +399,14 @@ class TestIRForeignLinkField(object):
     def test_reload(self):
         MainModel = self.models['MainModel']
         RefedModel = self.models['RefedModel']
+        PreMainModel = self.models['PreMainModel']
+
+        oga = object.__getattribute__
 
         refObj1 = RefedModel(name='rone', strVal='hello', intVal=1)
+        refObj2 = RefedModel(name='rtwo', strVal='hello', intVal=2)
+
+        refObj2.save()
 
         mainObj = MainModel(name='one', value='cheese')
 
@@ -418,9 +424,106 @@ class TestIRForeignLinkField(object):
         ids = robj.save()
         assert ids and ids[0] , 'Failed to save object'
 
-        mainObj.reload()
+        mainObj.reload(cascadeObjects=False)
+
+        assert mainObj.other.intVal != 5 , 'Expected reload(cascadeObjects=False) to NOT reload sub-object'
+
+        mainObj.reload(cascadeObjects=True)
         
-        assert mainObj.other.intVal == 5 , 'Expected reload() to reload sub-object'
+        assert mainObj.other.intVal == 5 , 'Expected reload(cascadeObjects=True) to reload sub-object'
+
+        mainObj = MainModel.objects.first()
+
+        assert oga(mainObj, 'other').isFetched() is False , 'Expected sub-obj to not be fetched automatically'
+
+        z = mainObj.asDict(forStorage=False)
+
+        assert oga(mainObj, 'other').isFetched() is False , 'Expected calling "asDict" to not fetch foreign object'
+
+        reloadedData = mainObj.reload(cascadeObjects=False)
+
+        assert oga(mainObj, 'other').isFetched() is False , 'Expected reload(cascadeObjects=False) to not fetch sub-object'
+
+        assert not reloadedData , 'Expected no data to be reloaded'
+
+        reloadedData = mainObj.reload(cascadeObjects=True)
+
+        assert oga(mainObj, 'other').isFetched() is False , 'Expected reload(cascadeObjects=True) to not fetch sub-object'
+
+        assert not reloadedData , 'Expected no data to be reloaded'
+
+        mainObj.other
+
+        assert oga(mainObj, 'other').isFetched() is True , 'Expected access to fetch sub object'
+
+        reloadedData = mainObj.reload(cascadeObjects=False)
+
+        assert not reloadedData , 'Expected no data to be reloaded with local resolved but unchanged.'
+
+        mainObj.other.intVal = 99
+
+        reloadedData = mainObj.reload(cascadeObjects=False)
+
+        assert not reloadedData , 'Expected to not see "other" in reloaded data, as pk did not change but values did.'
+
+        reloadedData = mainObj.reload(cascadeObjects=True)
+
+        assert 'other' in reloadedData , 'Expected "other" to  be reloaded with reload(cascadeObjects=True)'
+
+        assert reloadedData['other'][0].getObj().intVal == 99 , 'Expected old value to be present in reload'
+
+        assert reloadedData['other'][1].getObj().intVal == 5 , 'Expected new value to be present in reload'
+
+
+        mainObj = MainModel.objects.first()
+
+        mainObj.other = refObj2._id
+
+        reloadedData = mainObj.reload(cascadeObjects=False)
+        
+        assert 'other' in reloadedData , 'Expected to see "other" in reloaded data when cascadeObjects=False when pk changes. Using pk assignment.'
+
+        mainObj = MainModel.objects.first()
+
+        mainObj.other = refObj2._id
+        reloadedData = mainObj.reload(cascadeObjects=True)
+        
+        assert 'other' in reloadedData , 'Expected to see "other" in reloaded data when cascadeObjects=True when pk changes. Using pk assignment.'
+
+
+        mainObj = MainModel.objects.first()
+
+        mainObj.other = refObj2
+
+        reloadedData = mainObj.reload(cascadeObjects=False)
+        assert 'other' in reloadedData , 'Expected to see "other" in reloaded data when cascadeObjects=False when pk changes. Using obj assignment.'
+
+        mainObj = MainModel.objects.first()
+
+        mainObj.other = refObj2
+
+        reloadedData = mainObj.reload(cascadeObjects=True)
+        assert 'other' in reloadedData , 'Expected to see "other" in reloaded data when cascadeObjects=True when pk changes. Using obj assignment.'
+
+        preMainObj = PreMainModel(name='pone', value='zzz')
+
+        preMainObj.main = mainObj._id
+
+        preMainObj.save()
+
+
+        preMainObj = PreMainModel.objects.filter(name='pone').first()
+
+        assert preMainObj , 'Failed to fetch object'
+
+        preMainObj.main.other.intVal = 33
+        reloadedData = preMainObj.reload(cascadeObjects=False)
+        assert not reloadedData , 'Expected to not see any reloaded data for cascadeObjects=False when object two-levels-down has changed values.'
+
+        reloadedData = preMainObj.reload(cascadeObjects=True)
+        assert 'main' in reloadedData , 'Expected to see "main" (one-level-down) object show up in reloaded data for cascadeObjects=True when object two-levels-down has changed values.'
+
+
 
     def test_suppressFetching(self):
         MainModel = self.models['MainModel']
@@ -452,6 +555,8 @@ class TestIRForeignLinkField(object):
     def test_unsavedChanges(self):
         MainModel = self.models['MainModel']
         RefedModel = self.models['RefedModel']
+
+        oga = object.__getattribute__
 
         refObj1 = RefedModel(name='rone', strVal='hello', intVal=1)
 
