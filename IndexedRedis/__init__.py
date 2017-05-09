@@ -17,7 +17,7 @@ import uuid
 from collections import defaultdict, OrderedDict
 
 from . import fields
-from .fields import IRField, IRFieldChain, IRClassicField, IRNullType, irNull, IR_NULL_STR, IRForeignLinkFieldBase
+from .fields import IRField, IRFieldChain, IRClassicField, IRNullType, irNull, IR_NULL_STR, IR_NULL_BYTES, IRForeignLinkFieldBase
 from .compat_str import to_unicode, tobytes, setDefaultIREncoding, getDefaultIREncoding
 from .utils import hashDictOneLevel, KeyList
 
@@ -265,6 +265,10 @@ _modelCopyMap = defaultdict(lambda : int(1))
 
 # Changing redis encoding into requested encoding
 decodeDict = lambda origDict : {to_unicode(key) : origDict[key] for key in origDict}
+
+
+def hgetListToDict(hgetLst):
+	return { hgetLst[i] : hgetLst[i+1] for i in range(0, len(hgetLst), 2) }
 
 global validatedModels
 validatedModels = set()
@@ -1240,6 +1244,10 @@ class IndexedRedisHelper(object):
 		'''
 		return ''.join([INDEXED_REDIS_PREFIX, self.keyName, ':data:', to_unicode(pk)])
 
+	@staticmethod
+	def _get_key_for_id_for_model(mdl, pk):
+		return ''.join([INDEXED_REDIS_PREFIX, mdl.KEY_NAME, ':data:', to_unicode(pk)])
+
 	def _get_next_id_key(self):
 		'''
 			_get_next_id_key - Returns the key name that holds the generator for primary key values
@@ -1667,7 +1675,7 @@ class IndexedRedisQuery(IndexedRedisHelper):
 		if type(pks) == set:
 			pks = list(pks)
 
-		if len(pks) == 1:  # TODO: Hack for cascadeFetch. Remove when get implements cascadeFetch
+		if not cascadeFetch and len(pks) == 1:  # TODO: Hack for cascadeFetch. Remove when get implements cascadeFetch
 			# Optimization to not pipeline on 1 id
 			return IRQueryableList([self.get(pks[0], cascadeFetch=cascadeFetch)], mdl=self.mdl)
 
@@ -1677,22 +1685,179 @@ class IndexedRedisQuery(IndexedRedisHelper):
 			key = self._get_key_for_id(pk)
 			pipeline.hgetall(key)
 
+		if cascadeFetch and self.mdl.foreignFields:
+			
+			splitFunction = """
+			function mysplit(inputstr, sep)
+				if sep == nil then
+					sep = "%s"
+				end
+				local t={} ; i=1
+				for str in string.gmatch(inputstr, "([^"..sep.."]+)") do
+					t[i] = str
+					i = i + 1
+				end
+				return t
+			end
+"""
+			def _addLinesForForeign(_lines, _idKey, parentModel, foreignFields):
+				for foreignField in foreignFields:
+					foreignModel = foreignField.foreignModel
+
+					fieldName = 'fk_%s_%s' %( to_unicode(_idKey), str(hash(str(foreignField))).replace('-', 'N') )
+
+					x = "local " + fieldName + " = redis.call('HGET', '" + self._get_key_for_id_for_model(parentModel, '') + "' .. " + _idKey + ", '" + str(foreignField) + "')"
+					_lines.append(x)
+
+					iterFieldName = "splt_" + fieldName
+
+					x = "local ret_" + iterFieldName + " = {}"
+					_lines.append(x)
+					x = "for " + iterFieldName + " in string.gmatch(" + fieldName + ", '([^,]+)' ) do "
+					_lines.append(x)
+
+					x = "if " + iterFieldName + " == '" + IR_NULL_STR + "' then\n    table.insert(ret_" + iterFieldName + ", '" + IR_NULL_STR + "')\nelse"
+					_lines.append(x)
+
+					x = "    local " + iterFieldName + "_res = redis.call('HGETALL', '" + self._get_key_for_id_for_model(foreignModel, '') + "' .. " + iterFieldName + ")"
+					_lines.append(x)
+					x = 'table.insert( ' + iterFieldName + '_res, "_id")'
+					_lines.append(x)
+					x = 'table.insert( ' + iterFieldName + '_res, ' +  iterFieldName + ')'
+					_lines.append(x)
+
+					x = "\n    table.insert(ret_" + iterFieldName + ", " + iterFieldName + "_res" + ")\nend"
+					_lines.append(x)
+
+					nextModel = foreignField.foreignModel
+					nextModel.validateModel()
+
+					if nextModel.foreignFields:
+						_addLinesForForeign( _lines, iterFieldName, foreignModel, nextModel)
+
+					_lines.append('end')
+					_lines.append('table.insert(ret, ret_' + iterFieldName + ')')
+				
+
+
+			splitFunction = ''
+			for pk in pks:
+				lines = []
+				lines.append('local ret = {}')
+				key = self._get_key_for_id(pk)
+
+
+				for foreignField in self.mdl.foreignFields:
+					fieldName = 'fk_%s_%s' %( to_unicode(pk), str(hash(str(foreignField))).replace('-', 'N') )
+
+					x = "local " + fieldName + " = redis.call('HGET', '" + key + "', '" + str(foreignField) + "')"
+					lines.append(x)
+
+					iterFieldName = "splt_" + fieldName
+
+					lines.append( "local ret_" + iterFieldName + " = {}" )
+					x = "for " + iterFieldName + " in string.gmatch(" + fieldName + ", '([^,]+)' ) do "
+					lines.append(x)
+
+					x = "if " + iterFieldName + " == '" + IR_NULL_STR + "' then\n    table.insert( ret_" + iterFieldName + ", '" + IR_NULL_STR + "')\nelse"
+					lines.append(x)
+					x = "    local " + iterFieldName + "_res = redis.call('HGETALL', '" + self._get_key_for_id_for_model(foreignField.foreignModel, '') + "' .. " + iterFieldName + ")"
+					lines.append(x)
+					lines.append(x)
+
+					x = 'table.insert( ' + iterFieldName + '_res, "_id")'
+					lines.append(x)
+
+					x = 'table.insert( ' + iterFieldName + '_res, ' +  iterFieldName + ')'
+					lines.append(x)
+					x = "table.insert(ret_" + iterFieldName + ", " + iterFieldName + "_res" + ")"
+					lines.append(x)
+					lines.append("end")
+
+					foreignModel = foreignField.foreignModel
+					foreignModel.validateModel()
+
+					if foreignModel.foreignFields:
+						_addLinesForForeign(lines, iterFieldName, foreignModel, foreignModel.foreignFields)
+					lines.append('end')
+					lines.append('table.insert(ret, ret_' + iterFieldName + ')')
+
+
+
+				lines.append('return ret')
+				import pdb; pdb.set_trace()
+				pipeline.eval(splitFunction + '\n' + '\n'.join(lines) + '\n', 0)
+
+#			import pdb; pdb.set_trace()
+				
+
 		res = pipeline.execute()
 		
 		ret = IRQueryableList(mdl=self.mdl)
-		i = 0
-		pksLen = len(pks)
-		while i < pksLen:
-			if res[i] is None:
-				ret.append(None)
-				i += 1
-				continue
-			res[i]['_id'] = pks[i]
-			obj = self._redisResultToObj(res[i])
-			ret.append(obj)
-			i += 1
+		retIdx = 0
 
-		if cascadeFetch is True:
+		resIdx = 0
+		numRes = len(res)
+
+
+		def setObjData(res, resIdx, obj, foreignFields, thisSetIdx=0):
+			for foreignField in foreignFields:
+				if res[resIdx] == IR_NULL_BYTES or res[resIdx][thisSetIdx] == [IR_NULL_BYTES]:
+					isNull = True
+
+					setattr(obj, foreignField, irNull)
+				else:
+					isNull = False
+					print ( "X: " + repr ( res[resIdx][thisSetIdx] ) )
+					items = []
+
+					for hgetResult in res[resIdx][thisSetIdx]:
+						foreignDict = hgetListToDict( hgetResult )
+						val = IndexedRedisQuery( foreignField.foreignModel )._redisResultToObj( foreignDict )
+						val._id = int(foreignDict[b'_id'])
+
+						items.append(val)
+
+					if foreignField.isMulti():
+						item = items
+					else:
+						item = items[0]
+
+					setattr(obj, foreignField, item)
+
+
+				thisSetIdx += 1
+
+
+				if isNull is False:
+					foreignModel = foreignField.foreignModel
+					foreignModel.validateModel()
+					if foreignModel.foreignFields:
+						thisSetIdx = setObjData(res, resIdx, val, foreignModel.foreignFields, thisSetIdx)
+
+			return thisSetIdx
+			
+
+		pksLen = len(pks)
+		# TODO: when missing obj
+		while resIdx < numRes:
+			if res[resIdx] is None:
+				ret.append(None)
+				retIdx += 1
+				resIdx += 1
+				continue
+			res[resIdx]['_id'] = pks[retIdx]
+			obj = self._redisResultToObj(res[retIdx])
+			ret.append(obj)
+			retIdx += 1
+			resIdx += 1
+
+			if self.mdl.foreignFields:
+				setObjData(res, resIdx, obj, self.mdl.foreignFields)
+				resIdx += 1
+
+		import pdb; pdb.set_trace()
+		if False and cascadeFetch is True:
 			for obj in ret:
 				if not obj:
 					continue
