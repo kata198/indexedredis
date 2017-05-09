@@ -352,6 +352,10 @@ class TestIRForeignMultiLinkField(object):
 
         assert mainObj.other[0]._id , 'Failed to set _id on other'
 
+        assert ids[0] == mainObj._id , 'Expected returned ID to match mainObj'
+
+        assert len(ids) == 1 , 'Expected only one id to be returned.'
+
         obj = MainModel.objects.filter(name='one').first()
 
         assert obj , 'Failed to fetch object by name'
