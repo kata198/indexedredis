@@ -409,10 +409,7 @@ class IndexedRedisModel(object):
 		fields = oga(self, 'FIELDS')
 
 		if keyName not in fields:
-			return oga(self, keyName)
-
-		if val in (None, irNull):
-			return irNull
+			return val
 
 		if not isinstance( fields, KeyList):
 			fields = KeyList(fields)
@@ -423,6 +420,8 @@ class IndexedRedisModel(object):
 		if not issubclass(thisField.__class__, IRForeignLinkFieldBase):
 			return val
 
+		if val in (None, irNull):
+			return irNull
 
 		if isIdKey:
 			return val.getPk()
