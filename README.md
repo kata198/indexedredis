@@ -255,7 +255,7 @@ Takes the linked model as the "foreignKey" argument.
 
 see "Foreign Links" section for more info.
 
-Not Indexable
+Indexable. Note, filter must contain the full list (either pks, objs, or combination thereof). A "contains item"-style filter must be performed client-side.
 
 
 **IRFieldChain** - Chains multiple field types together. Use this, for example, to compress the base64-representation of a value, or to compress utf-16 data. See section below for more details.
