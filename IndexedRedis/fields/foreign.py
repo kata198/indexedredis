@@ -11,7 +11,9 @@ import weakref
 
 from . import IRField, irNull
 
-from ..compat_str import isStringy, to_unicode
+from .null import IR_NULL_STR
+
+from ..compat_str import isStringy, to_unicode, isBaseStringy
 
 
 # NOTE: Current status, works to link objects, cascade save works, cascade fetch works.
@@ -264,33 +266,51 @@ class IRForeignLinkField(IRForeignLinkFieldBase):
 		return ForeignLinkData(value, self.foreignModel)
 
 	def _fromInput(self, value):
+
 		if hasattr(value, '_is_ir_model'):
 			return ForeignLinkData(value._id, self.foreignModel, value)
 
 		elif isinstance(value, int):
+
 			return ForeignLinkData(int(value), self.foreignModel)
+
+		elif isBaseStringy(value) and value.isdigit():
+
+			return ForeignLinkData(int(value), self.foreignModel)
+
 		elif value in (None, irNull):
+
 			return irNull
+
 		elif issubclass(value.__class__, ForeignLinkData):
+
 			return value
 
-		# TODO: Temp exception
-		raise ValueError('Unknown input: <%s>   %s' %(value.__class__.__name__, repr(value)) )
+		raise ValueError('Unknown input (expected either irNull, int (pk), or %s. Got: <%s>   %s' %(self.foreignModel.__name__, value.__class__.__name__, repr(value)) )
 	
 	def _toStorage(self, value):
-		if isinstance(value, ForeignLinkData):
-			return str(value.getPk())
 
-		elif isinstance(value, int):
+		if isinstance(value, int):
 			return str(value)
-		elif hasattr(value, '_is_ir_model'):
-			return str(value._id)
 
-		# TODO: Temp print
-		sys.stderr.write('XXX: Unknown type to storage.... %s     %s\n' %(value.__class__.__name__, repr(value)))
-		 
-		return value
-	
+		elif isinstance(value, ForeignLinkData):
+			pk = value.getPk()
+			if pk:
+				return str(pk)
+			else:
+				return IR_NULL_STR
+
+		elif hasattr(value, '_is_ir_model'):
+			if value._id:
+				return str(value._id)
+			else:
+				# Linked to an unsaved object, and cascadeSave must be False... hope they know what they're doing! :)
+				return IR_NULL_STR
+
+
+		raise ValueError('Unknown value type headed for storage:   <%s>   %s' %(value.__class__.__name__, repr(value)))
+
+
 	def _toIndex(self, value):
 		# Support passing either an integer or the model itself
 		if issubclass(value.__class__, IRForeignLinkField):
@@ -314,6 +334,8 @@ class IRForeignMultiLinkField(IRForeignLinkField):
 		IRForeignMultiLinkField - A field which links to a list of foreign objects
 	'''
 
+	# So... technically we CAN index this. But I feel like most legit scenarios would need a "link contains" operation,
+	#  while direct-redis filtering only supports equals and not equals.. so really they're looking at client-side filtering anyway.
 	CAN_INDEX = False
 
 	def _fromStorage(self, value):
@@ -325,9 +347,7 @@ class IRForeignMultiLinkField(IRForeignLinkField):
 		try:
 			pks = [int(x) for x in value.split(',')]
 		except Exception as e:
-			sys.stderr.write('Got exception pulling multi link field from storage:  %s:   %s\n' %(e.__class__.__name__, str(e)))
-			pass
-			# TODO:
+			raise ValueError('Got exception pulling multi link field from storage:  %s:   %s\n' %(e.__class__.__name__, str(e)))
 
 		return ForeignLinkMultiData(pk=pks, foreignModel=self.foreignModel)
 
@@ -337,23 +357,32 @@ class IRForeignMultiLinkField(IRForeignLinkField):
 			objs = []
 			for value in values:
 				if hasattr(value, '_is_ir_model'):
+
 					pks.append(value._id)
 					objs.append(value)
+
 				elif isinstance(value, int):
+
 					pks.append(value)
 					objs.append(None)
+
+				elif isBaseStringy(value) and value.isdigit():
+
+					pks.append( int(value) )
+					objs.append( None )
+
 				elif value in (irNull, None):
 					continue
 				else:
 					raise ValueError('Unknown element in list:  <%s>  %s' %(value.__class__.__name__, repr(value)) )
 
 			return ForeignLinkMultiData( pk=pks, foreignModel=self.foreignModel, obj=objs)
+
 		elif values in (None, irNull):
 			return irNull
 		elif issubclass(values.__class__, ForeignLinkMultiData):
 			return values
 
-		# TODO: Temp exception
 		raise ValueError('Unknown input: <%s>   %s' %(values.__class__.__name__, repr(values)) )
 	
 	def _toStorage(self, value):
@@ -373,11 +402,10 @@ class IRForeignMultiLinkField(IRForeignLinkField):
 					raise ValueError('Unknown element in list:  <%s>  %s' %(value.__class__.__name__, repr(value)) )
 			return ','.join(ret)
 
-		# TODO: Temp print
-		sys.stderr.write('XXX: Unknown type to storage.... %s     %s\n' %(value.__class__.__name__, repr(value)))
-		 
-		return value
+
+		raise ValueError('Unknown value type headed for storage:   <%s>   %s' %(value.__class__.__name__, repr(value)))
 	
+
 #	def _toIndex(self, value):
 #		# Support passing either an integer or the model itself
 #		if issubclass(value.__class__, IRForeignLinkField):
