@@ -8,6 +8,9 @@ You can store and fetch native python types (lists, objects, strings, integers, 
 IndexedRedis supports both "equals" and "not-equals" operators for comparison. It also provides full atomic support for replacing entire datasets (based on model), which is useful for providing a fast frontend for SQL. In that use-case, a task that runs on an interval would fetch/calculate datasets from the SQL backend, and do an atomic replace on the datasets the front-end would query.
 
 
+IndexedRedis since 6.0.0 also provides support for Foreign references ( like a foreign key one-to-many, many-to-one, or many-to-many relationship in SQL ) which allow you to directly convert your SQL models into Redis models for vastly improved performance.
+
+
 Further client-side filtering (like greater-than, contains, etc) is available after the data has been fetched (see "Filter Results" below)
 
 My tests have shown that for using equivalent models between flask/mysql and IndexedRedis, a 600% - 1200% performance increase occurs, yet if you design your storage directly as IndexedRedis models, you are able to achieve much higher gains.
@@ -235,6 +238,24 @@ Indexable
 **IRRawField** - Field that is not converted in any, to or from Redis. On fetch this will always be "bytes" type (or str in python2). On python3 this is very similar to IRField(...valueType=None), but python2 needs this to store binary data without running into encoding issues.
 
 Not indexable - No decoding
+
+
+**IRForeignLinkField** - Field that provides reference to a different model ( think "foreign key" in SQL ). Use this to reference other models from your model. This field links to a single foreign object, or irNull.
+
+Takes the linked model as the "foreignKey" argument.
+
+see "Foreign Links" section for more info.
+
+Indexable
+
+
+**IRForeignMultiLinkField** - Field that provides reference to a different model ( think "foreign key" in SQL) ). Use this to reference multiple other models from your model. This model links to one or more foreign objects, or irNull.
+
+Takes the linked model as the "foreignKey" argument.
+
+see "Foreign Links" section for more info.
+
+Not Indexable
 
 
 **IRFieldChain** - Chains multiple field types together. Use this, for example, to compress the base64-representation of a value, or to compress utf-16 data. See section below for more details.
@@ -523,6 +544,125 @@ Some other methods on an IRQueryableList are:
 		The return of this function will be a list with the same indexes as the IRQueryableList. The items will be either a KeyError exception (if the item was deleted on the Redis-side), or a dict of fields that were updated, key as the field name, and value as a tuple of (old value, new value)
 
 	* **refetch** - Fetch again all the objects in this list, and return as a new IRQueryableList. Note, this does NOT perform the filter again, but fetches each of the items based on its internal primary key
+
+
+Foreign Links
+-------------
+
+Since IndexedRedis 6.0.0, you can reference instances of models from another model. These are similar to "foreign keys" in SQL world.
+
+Two field types provide this functionality:
+
+IRForeignLinkField - Links to a single instance of another model. This takes as a value irNull (for no linked object), a primary key of an object, or an object itself. Resolution is always to the object itself.
+
+IRForeignMultiLinkField - Links to multiple instances of another model. Unlike in SQL, IndexedRedis can directly do this with a field without the need for an intermediate table. This takes a value irNull (for no linked objects), or a list containing a mixture of primary keys and/or objects. Resolution is a list of referenced objects.
+
+
+**Assigning Reference**
+
+You can assign either an object which matches the provided foreignModel type associated with the field, or a pk.
+
+So, if you have an entry in FIELDS like:
+
+	IRForeignLinkField( 'other', foreignModel=OtherModel)
+
+
+then you can assign a reference like:
+
+	myOtherModel = OtherModel( ... )
+
+	myObj.other = myOtherModel   # If using an IRForeignMultiLinkField, this should be a list instead.
+
+OR
+
+	myOtherModel = OtherModel.objects.filter ( ... ).first()
+
+	myObj.other = myOtherModel.getPk()
+
+
+**Fetching Reference**
+
+By default, when fetching your model, the primary key(s) of any foreign relation's are fetched along with it.
+
+The foreign objects themselves are fetched on-access, so if you do:
+
+	myObj = MyModel.objects.filter ( ... ).all()[0] # myObj fetches ONLY the primary key of OtherModel
+
+	otherModel = myObj.other  # At this point (on-access), the entire OtherModel is fetched (using the primary key)
+
+
+This is the recommended behaviour, as you'll save some time and memory on every objected fetched that you may not need to use.
+
+Also, if your application doesn't use locking and multiple things could be touching the referenced model, there's much less chance of accidently overwriting or using a stale instance if you fetch on-access instead of at fetch time.
+
+If, however, you'd like to fetch the foreign link's in the same transaction as your model (and any foreign links on the link, etc. i.e. fetch everything associated) you can pass *cascadeFetch=True* to any of the fetch functions ( like all, first, last, allOnlyFields, etc. ). This will result in complete resolution at fetch time, instead of access-time.
+
+**Removing Reference**
+
+A reference to an IRForeignLinkField can be removed by setting the field value to "irNull". So, for example,
+
+	myObj.other = irNull
+
+will remove the reference.
+
+For an IRForeignMultiLinkField, you can remove ALL references by setting the field to "irNull". You can remove individual references by assinging the field value to a list minus the objects/pks you do not want to include.
+
+NOTE: You MUST assign it this list. You cannot fetch the list, remove an entry, and save an object. You must do it like:
+
+	myRefs = myObj.others
+
+	myRefs.remove( objToRemove ) # or splice, or del
+
+	myObj.others = myRefs  # you MUST assign the property. Just changing the list result from earlier will have no effect.
+
+	myObj.save()
+
+
+**Cascading**
+
+For several operations ( related to fetching, saving, checking if changes, comparing values ) there are two modes to consider.
+
+The first is non-cascading. This will cause the operations to ONLY deal with the object-at-hand, including references to foreign objects, but not on the objects themselves.
+
+The second is cascading. This will cause the operations to cascade, in that they will deal with the object-at-hand, any foreign objects, any of their foreign objects, etc.
+
+
+For fetch methods ( like .all ) there is a parameter, *cascadeFetch*, default False, which will cause all objects to be resolved at once in a single transaction, instead of the default on-access.
+
+
+For save methods ( like .save ) there is a parameter, *cascadeSave*, default True, which will cause any unsaved foreign objects to also be saved. This means if you attach an unsaved object via an IRForeignLinkField, and call .save(cascadeSave=True) on the parent, BOTH will be inserted. Also, if you have any changes on a referenced object, and call .save(cascadeSave=True), those changes will be saved.
+
+If you explicitly call myOBj.save(cascadeSave=False), then only "myObj" is saved. If you assigned reference to a foreign object which has been saved (and thus has a primary key), that primary key will be linked. If you assign reference to a foreign object which has NOT been saved, you will NOT have a link. You will need to explicitly save the child first. Also, if a child foreign object has changed values, they will not be saved along with "myOBj" when cascadeSave=False.
+
+
+For comparison functions ( hasSameValues, hasUnsavedChanges, getUpdatedFields ) there is a parameter, *cascadeObjects*, default False, which will cause any foreign link objects  ( and any links those objects may contain, etc. ) to be included in the results.
+
+For example, consider the following:
+
+	myObj = MyModel.objects.first()
+
+	myObj2 = myObj
+
+	myObj.other.someKey = 'someValue'
+
+
+Calling hasSameValues with cascadeObjects=False will return True, as both objects have the same values on the directly referenced object. cascadeObjects=True will, however, return False.
+
+Same with hasUnsavedChanges.
+
+getUpdatedFields with cascadeObjects=False will return an empty dict, because the pk to "other" has not changed. However, with cascadeObjects=True, you will have the key "other" in the results, mapped to the value of   ( myObj.other before change, myObj.other after change).
+
+
+Keep in mind though, changing the foreign object reference itself IS considered a change on the main object. So, for example:
+
+	myObj = MyModel.objects.first()
+
+	myObj2 = myObj
+
+	myObj.other = OtherModel.objects.filter( ... ).first()  # Changing where "other" points
+
+In the above example, hasSameValues, hasUnsavedChanges, and getUpdatedFields with cascadeObjects=False will all show a change in "other" because the pk associated with "myObj" has changed.
+
 
 
 Sorting
