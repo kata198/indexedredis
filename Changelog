@@ -6,7 +6,12 @@ access if not already fetched the parent model will fetch the foreign object
 and return it.
 
 - Add IRForeignMultiLinkField which links one object to a list of other
-objects
+objects.
+
+^ Now that foreign fields are enabled, you can do a 1:1 conversion of your SQL
+models into IndexedRedis and use them the same way. You CAN get better by
+designing it for IR, but you WILL get about 5 to 15 times the performance at
+least just by switching the engine.
 
 - Add "cascadeSave" option to saving functions. This flag (default True) will
 cause all foreign link objects to be saved (inserted or updated), recursively.
@@ -14,6 +19,29 @@ cause all foreign link objects to be saved (inserted or updated), recursively.
 - Add "cascadeFetch" option to fetching functions. This flag (default False)
 will cause all foreign link objects to be fetched right away, recursively. By
 default, they are fetched on first-access.
+
+- Add "cascadeObjects" to comparison functions. This controls whether the
+values on the foreign objects are considered, or if just the pk relationship
+is considered.
+
+- Add "cascadeObjects" to reload function. This controls whether if any
+foreign objects have changed values, we reload them, or only if the pk was
+changed.
+
+^ See "Foreign Links" section in README for details now.
+
+- Some performance improvements
+
+
+- Introduce "optional patches", as root-dir "patches" folder. These are
+optional patches which may match your situation, but won't be included in
+mainline for some reason.
+
+There's a README in that dir which will list a brief explanation of
+each optional patch, with a more descript in the comment field of the unified
+diff in the same directory.
+
+For now, just one optional patch has been added.
 
 
 5.0.1 - Mon May 1 2017
