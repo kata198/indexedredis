@@ -1809,7 +1809,6 @@ class IndexedRedisQuery(IndexedRedisHelper):
 						thisSetIdx -= 1
 					else:
 						isNull = False
-						print ( "X: " + repr ( res[resIdx][thisSetIdx] ) )
 						items = []
 
 						for hgetResult in res[resIdx][thisSetIdx]:
