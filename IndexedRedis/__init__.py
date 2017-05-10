@@ -1655,7 +1655,11 @@ class IndexedRedisQuery(IndexedRedisHelper):
 		  #   IndexedRedisModel.__getattribute__ 
 
 		for foreignField in obj.foreignFields:
-			subObjs = object.__getattribute__(obj, foreignField).getObjs()
+			subObjsData = object.__getattribute__(obj, foreignField)
+			if not subObjsData:
+				setattr(obj, str(foreignField), irNull)
+				continue
+			subObjs = subObjsData.getObjs()
 			
 			for subObj in subObjs:
 				if isIndexedRedisModel(subObj):
