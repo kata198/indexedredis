@@ -225,7 +225,6 @@ class TestIRForeignMultiLinkField(object):
 
         assert oga(obj, 'main').obj and isinstance(oga(obj, 'main').obj[0], MainModel) , 'Expected cascadeFetch to fetch sub object. Failed one level down (object not present)'
 
-
         fetchedIds = [ main.getPk() for main in obj.main ]
         expectedIds = [ mainObj.getPk(), mainObj2.getPk() ]
 
