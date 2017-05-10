@@ -32,6 +32,10 @@ changed.
 
 - Some performance improvements
 
+- Add "diff" method to IndexedRedisModel, to compare the values on two
+objects, and return a dict of "changedField" : ( valueOnFirstObj,
+valueOnSecondObj )
+
 
 - Introduce "optional patches", as root-dir "patches" folder. These are
 optional patches which may match your situation, but won't be included in
