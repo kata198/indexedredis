@@ -705,8 +705,8 @@ class IndexedRedisModel(object):
 				return False
 
 			if cascadeObject is True and issubclass(field.__class__, IRForeignLinkFieldBase):
-				if thisVal.isFetched():
-					if otherVal.isFetched():
+				if thisVal and thisVal.isFetched():
+					if otherVal and otherVal.isFetched():
 						theseForeign = thisVal.getObjs()
 						othersForeign = otherVal.getObjs()
 						 
@@ -720,7 +720,7 @@ class IndexedRedisModel(object):
 							if theseForeign[i].hasUnsavedChanges(cascadeObjects=True):
 								return False
 				else:
-					if otherVal.isFetched():
+					if otherVal and otherVal.isFetched():
 						othersForeign = otherVal.getObjs()
 
 						for i in range(len(othersForeign)):
