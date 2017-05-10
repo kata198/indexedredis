@@ -210,6 +210,8 @@ class TestIRForeignMultiLinkField(object):
         preMainObj = PreMainModel(name='pone', value='bologna')
         preMainObj.main = [mainObj, mainObj2]
 
+        preMainSubIds = [ mainObj.getPk(), mainObj2.getPk() ]
+
         ids = preMainObj.save(cascadeSave=False)
         assert ids and ids[0], 'Failed to save object'
 
@@ -225,12 +227,25 @@ class TestIRForeignMultiLinkField(object):
 
         assert oga(obj, 'main').obj and isinstance(oga(obj, 'main').obj[0], MainModel) , 'Expected cascadeFetch to fetch sub object. Failed one level down (object not present)'
 
-        mainObj = oga(obj, 'main').obj[1]
+        # mainObj with "other" link defined
+        mainObj = oga(obj, 'main').obj[0]
 
         assert oga(mainObj, 'other').isFetched() is True , 'Expected cascadeFetch to fetch sub object. Failed two levels down (not marked isFetched)'
         assert oga(mainObj, 'other').obj and isinstance(oga(mainObj, 'other').obj[0], RefedModel) , 'Expected cascadeFetch to fetch sub object. Failed to levels down (object not present)'
 
         assert oga(mainObj, 'other').obj[0].name == 'rone' , 'Missing values on two-level-down fetched object.'
+
+        # mainObj with "other" link irNull
+        mainObj = oga(obj, 'main').obj[1]
+
+        assert oga(mainObj, 'other') == irNull , 'Expected raw attribute "other" to be irNull when never defined before saving'
+
+        assert getattr(mainObj, 'other') == irNull , 'Expected processed attribute "other" to be irNull when never defined before saving'
+
+        fetchedMainSubIds = [ obj.main[0].getPk(), obj.main[1].getPk() ]
+
+        assert fetchedMainSubIds == preMainSubIds , 'Expected fetch to be in same order as saved.'
+
 
         MainModel.deleter.destroyModel()
         RefedModel.deleter.destroyModel()

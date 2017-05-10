@@ -1647,7 +1647,11 @@ class IndexedRedisQuery(IndexedRedisHelper):
 		  #   IndexedRedisModel.__getattribute__ 
 
 		for foreignField in obj.foreignFields:
-			subObjs = object.__getattribute__(obj, foreignField).getObjs()
+			subObjsData = object.__getattribute__(obj, foreignField)
+			if not subObjsData:
+				setattr(obj, str(foreignField), irNull)
+				continue
+			subObjs = subObjsData.getObjs()
 			
 			for subObj in subObjs:
 				if isIndexedRedisModel(subObj):
@@ -1667,7 +1671,7 @@ class IndexedRedisQuery(IndexedRedisHelper):
 		if type(pks) == set:
 			pks = list(pks)
 
-		if len(pks) == 1:  # TODO: Hack for cascadeFetch. Remove when get implements cascadeFetch
+		if len(pks) == 1:
 			# Optimization to not pipeline on 1 id
 			return IRQueryableList([self.get(pks[0], cascadeFetch=cascadeFetch)], mdl=self.mdl)
 
