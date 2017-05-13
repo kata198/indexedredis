@@ -25,6 +25,41 @@ def hashDictOneLevel(myDict):
 	return '+_[,'.join(lst).__hash__()
 
 
+
+def _hashList(lst):
+	ret = []
+
+	for i in range(len(lst)):
+
+		item = lst[i]
+
+		if issubclass(item.__class__, dict):
+			item = [ (k, v) for k, v in item.items() ]
+
+		if issubclass(item.__class__, (list, tuple, set)):
+			ret += _hashList(item)
+		else:
+			try:
+				thisHash = hash(item)
+			except TypeError as e:
+				# Hmm.. 
+				import sys
+				sys.stderr.write('Got TypeError: %s\n\n' %(str(e), ))
+				thisHash = hash( '<%s> %s' %( item.__class__.__name__, repr(item) ) )
+
+			ret.append( str(thisHash) )
+	
+	return ret
+
+
+
+def hashList(lst):
+	hashStrs = [ str(hash('[]')) ] + _hashList(lst)
+
+	return hash( '____FS____'.join(hashStrs) )
+
+
+
 class KeyList(list):
 	'''
 		KeyList - A list which is indexable by both values and integer indexes.
