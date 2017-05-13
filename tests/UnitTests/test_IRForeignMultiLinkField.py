@@ -206,6 +206,7 @@ class TestIRForeignMultiLinkField(object):
         mainObj2 = MainModel(name='two', value='please')
         mainObj3 = MainModel(name='three', value='weeee', other=[refObj2])
 
+        mainObj2.save()
 
         ids = mainObj.save(cascadeSave=False)
         
