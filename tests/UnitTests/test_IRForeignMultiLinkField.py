@@ -225,12 +225,22 @@ class TestIRForeignMultiLinkField(object):
 
         assert oga(obj, 'main').obj and isinstance(oga(obj, 'main').obj[0], MainModel) , 'Expected cascadeFetch to fetch sub object. Failed one level down (object not present)'
 
+
+        fetchedIds = [ main.getPk() for main in obj.main ]
+        expectedIds = [ mainObj.getPk(), mainObj2.getPk() ]
+
+        assert fetchedIds == expectedIds , 'Got objects out of order.\n\nExpected: %s\n\nGot: %s\n' %( repr(fetchedIds), repr(expectedIds) )
+
+        assert obj.main[0] == mainObj , 'Got wrong values on first MainModel obj.\n\nExpected: %s\n\nGot: %s\n' %(repr(mainObj), repr(obj.main[0]))
+        assert obj.main[1] == mainObj2 , 'Got wrong values on second MainModel obj\n\nExpected: %s\n\nGot: %s\n' %(repr(mainObj2), repr(obj.main[1]))
+
         mainObj = oga(obj, 'main').obj[1]
 
         assert oga(mainObj, 'other').isFetched() is True , 'Expected cascadeFetch to fetch sub object. Failed two levels down (not marked isFetched)'
-        assert oga(mainObj, 'other').obj and isinstance(oga(mainObj, 'other').obj[0], RefedModel) , 'Expected cascadeFetch to fetch sub object. Failed to levels down (object not present)'
+        assert oga(mainObj, 'other').obj and isinstance(oga(mainObj, 'other').obj[0], RefedModel) , 'Expected cascadeFetch to fetch sub object. Failed two levels down (object not present)'
 
         assert oga(mainObj, 'other').obj[0].name == 'rone' , 'Missing values on two-level-down fetched object.'
+
 
         MainModel.deleter.destroyModel()
         RefedModel.deleter.destroyModel()

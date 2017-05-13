@@ -200,12 +200,14 @@ class TestIRForeignLinkField(object):
 
         assert oga(obj, 'main').obj , 'Expected cascadeFetch to fetch sub object. Failed one level down (object not present)'
 
-        mainObj = oga(obj, 'main').obj
+        fetchedMainObj = oga(obj, 'main').obj
 
-        assert oga(mainObj, 'other').isFetched() is True , 'Expected cascadeFetch to fetch sub object. Failed two levels down (not marked isFetched)'
-        assert oga(mainObj, 'other').obj , 'Expected cascadeFetch to fetch sub object. Failed to levels down (object not present)'
+        assert fetchedMainObj == mainObj , 'Fetched MainModel object has wrong values.\n\nExpected: %s\n\nGot:     %s\n' %(repr(mainObj), repr(fetchedMainObj))
 
-        assert oga(mainObj, 'other').obj.name == 'rone' , 'Missing values on two-level-down fetched object.'
+        assert oga(fetchedMainObj, 'other').isFetched() is True , 'Expected cascadeFetch to fetch sub object. Failed two levels down (not marked isFetched)'
+        assert oga(fetchedMainObj, 'other').obj , 'Expected cascadeFetch to fetch sub object. Failed to levels down (object not present)'
+
+        assert oga(fetchedMainObj, 'other').obj.name == 'rone' , 'Missing values on two-level-down fetched object.'
 
         MainModel.deleter.destroyModel()
         RefedModel.deleter.destroyModel()
