@@ -202,10 +202,14 @@ class TestIRForeignMultiLinkField(object):
         mainObj = MainModel(name='one', value='cheese', other=[ids[0]])
         mainObj2 = MainModel(name='two', value='please')
 
-        mainObj2.save()
 
         ids = mainObj.save(cascadeSave=False)
+        
         assert ids and ids[0] , 'Failed to save object'
+
+        ids = mainObj2.save(cascadeSave=False)
+       
+        assert ids and ids[0] , 'Failed to save obj'
 
         preMainObj = PreMainModel(name='pone', value='bologna')
         preMainObj.main = [mainObj, mainObj2]
@@ -215,6 +219,7 @@ class TestIRForeignMultiLinkField(object):
         ids = preMainObj.save(cascadeSave=False)
         assert ids and ids[0], 'Failed to save object'
 
+#        import pdb; pdb.set_trace()
         objs = PreMainModel.objects.filter(name='pone').all(cascadeFetch=True)
 
         assert objs and len(objs) == 1 , 'Failed to fetch single PreMainModel object'

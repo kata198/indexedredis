@@ -1867,11 +1867,12 @@ class IndexedRedisQuery(IndexedRedisHelper):
 
 
 		def setObjData(res, resIdx, objs, foreignFields, thisSetIdx=0):
-			for obj in objs:
+			for obj in objs :
 				for foreignField in foreignFields:
 					if res[resIdx] == IR_NULL_BYTES or res[resIdx][thisSetIdx] == [IR_NULL_BYTES]:
 						isNull = True
 
+#						print ( "linking to %s : irNull" %(obj.name, ))
 						setattr(obj, foreignField, irNull)
 						thisSetIdx -= 1
 					else:
@@ -1889,7 +1890,8 @@ class IndexedRedisQuery(IndexedRedisHelper):
 							item = items
 						else:
 							item = items[0]
-
+						
+						#print ( "linking to %s : %s" %(obj.name, repr(item)) )
 						setattr(obj, foreignField, item)
 						thisSetIdx -= 1
 
@@ -1897,7 +1899,7 @@ class IndexedRedisQuery(IndexedRedisHelper):
 						foreignModel = foreignField.foreignModel
 						foreignModel.validateModel()
 						if foreignModel.foreignFields:
-							thisSetIdx = setObjData(res, resIdx, items, foreignModel.foreignFields, thisSetIdx)
+							thisSetIdx = setObjData(res, resIdx, reversed ( items ), foreignModel.foreignFields, thisSetIdx)
 
 			return thisSetIdx
 			
