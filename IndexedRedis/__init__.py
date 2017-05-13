@@ -1538,7 +1538,7 @@ class IndexedRedisQuery(IndexedRedisHelper):
 		matchedKeys = [ int(_key) for _key in matchedKeys ]
 
 		if sortByAge is False:
-			return matchedKeys
+			return list(matchedKeys)
 		else:
 			matchedKeys = list(matchedKeys)
 			matchedKeys.sort()
