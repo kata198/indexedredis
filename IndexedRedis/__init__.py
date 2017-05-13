@@ -1347,7 +1347,7 @@ class IndexedRedisQuery(IndexedRedisHelper):
 				matchedKeys = pipeline.execute()[1] # sdiff
 
 		if sortByAge is False:
-			return matchedKeys
+			return list(matchedKeys)
 		else:
 			matchedKeys = list(matchedKeys)
 			matchedKeys.sort()
