@@ -1763,7 +1763,6 @@ class IndexedRedisQuery(IndexedRedisHelper):
 					lines.append(x)
 					x = "    local " + iterFieldName + "_res = redis.call('HGETALL', '" + self._get_key_for_id_for_model(foreignField.foreignModel, '') + "' .. " + iterFieldName + ")"
 					lines.append(x)
-					lines.append(x)
 
 					x = 'table.insert( ' + iterFieldName + '_res, "_id")'
 					lines.append(x)
@@ -1785,7 +1784,7 @@ class IndexedRedisQuery(IndexedRedisHelper):
 
 
 				lines.append('return ret')
-				import pdb; pdb.set_trace()
+				#import pdb; pdb.set_trace()
 				pipeline.eval(splitFunction + '\n' + '\n'.join(lines) + '\n', 0)
 
 #			import pdb; pdb.set_trace()
@@ -1800,40 +1799,39 @@ class IndexedRedisQuery(IndexedRedisHelper):
 		numRes = len(res)
 
 
-		def setObjData(res, resIdx, obj, foreignFields, thisSetIdx=0):
-			for foreignField in foreignFields:
-				if res[resIdx] == IR_NULL_BYTES or res[resIdx][thisSetIdx] == [IR_NULL_BYTES]:
-					isNull = True
+		def setObjData(res, resIdx, objs, foreignFields, thisSetIdx=0):
+			for obj in objs:
+				for foreignField in foreignFields:
+					if res[resIdx] == IR_NULL_BYTES or res[resIdx][thisSetIdx] == [IR_NULL_BYTES]:
+						isNull = True
 
-					setattr(obj, foreignField, irNull)
-				else:
-					isNull = False
-					print ( "X: " + repr ( res[resIdx][thisSetIdx] ) )
-					items = []
-
-					for hgetResult in res[resIdx][thisSetIdx]:
-						foreignDict = hgetListToDict( hgetResult )
-						val = IndexedRedisQuery( foreignField.foreignModel )._redisResultToObj( foreignDict )
-						val._id = int(foreignDict[b'_id'])
-
-						items.append(val)
-
-					if foreignField.isMulti():
-						item = items
+						setattr(obj, foreignField, irNull)
+						thisSetIdx -= 1
 					else:
-						item = items[0]
+						isNull = False
+						print ( "X: " + repr ( res[resIdx][thisSetIdx] ) )
+						items = []
 
-					setattr(obj, foreignField, item)
+						for hgetResult in res[resIdx][thisSetIdx]:
+							foreignDict = hgetListToDict( hgetResult )
+							val = IndexedRedisQuery( foreignField.foreignModel )._redisResultToObj( foreignDict )
+							val._id = int(foreignDict[b'_id'])
+
+							items.append(val)
+
+						if foreignField.isMulti():
+							item = items
+						else:
+							item = items[0]
+
+						setattr(obj, foreignField, item)
+						thisSetIdx -= 1
 
 
-				thisSetIdx += 1
-
-
-				if isNull is False:
-					foreignModel = foreignField.foreignModel
-					foreignModel.validateModel()
-					if foreignModel.foreignFields:
-						thisSetIdx = setObjData(res, resIdx, val, foreignModel.foreignFields, thisSetIdx)
+						foreignModel = foreignField.foreignModel
+						foreignModel.validateModel()
+						if foreignModel.foreignFields:
+							thisSetIdx = setObjData(res, resIdx, items, foreignModel.foreignFields, thisSetIdx)
 
 			return thisSetIdx
 			
@@ -1853,10 +1851,11 @@ class IndexedRedisQuery(IndexedRedisHelper):
 			resIdx += 1
 
 			if self.mdl.foreignFields:
-				setObjData(res, resIdx, obj, self.mdl.foreignFields)
+				#import pdb; pdb.set_trace()
+				setObjData(res, resIdx, [obj], self.mdl.foreignFields, len(res[resIdx])-1)
 				resIdx += 1
 
-		import pdb; pdb.set_trace()
+#		import pdb; pdb.set_trace()
 		if False and cascadeFetch is True:
 			for obj in ret:
 				if not obj:
