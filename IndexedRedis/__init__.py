@@ -1038,6 +1038,9 @@ class IndexedRedisModel(object):
 			@raises - InvalidModelException if there is a problem with the model, and the message contains relevant information.
 		'''
 		if model == IndexedRedisModel:
+			import re
+			if re.match('.*pydoc(|[\d]|[\d][\.][\d])([\.]py(|[co])){0,1}$', sys.argv[0]):
+				return
 			raise ValueError('Cannot use IndexedRedisModel directly. You must implement this class for your model.')
 
 		global validatedModels
