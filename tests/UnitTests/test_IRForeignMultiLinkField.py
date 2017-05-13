@@ -199,8 +199,12 @@ class TestIRForeignMultiLinkField(object):
         ids = refObj.save(cascadeSave=False)
         assert ids and ids[0]
 
+        refObj2 = RefedModel(name='rtwo', strVal='zz', intVal=99)
+        refObj2.save()
+
         mainObj = MainModel(name='one', value='cheese', other=[ids[0]])
         mainObj2 = MainModel(name='two', value='please')
+        mainObj3 = MainModel(name='three', value='weeee', other=[refObj2])
 
 
         ids = mainObj.save(cascadeSave=False)
@@ -211,10 +215,12 @@ class TestIRForeignMultiLinkField(object):
        
         assert ids and ids[0] , 'Failed to save obj'
 
-        preMainObj = PreMainModel(name='pone', value='bologna')
-        preMainObj.main = [mainObj, mainObj2]
+        mainObj3.save() # TODO: If don't save this, get a strange error. Figure out how to trap.
 
-        preMainSubIds = [ mainObj.getPk(), mainObj2.getPk() ]
+        preMainObj = PreMainModel(name='pone', value='bologna')
+        preMainObj.main = [mainObj, mainObj3, mainObj2]
+
+        preMainSubIds = [ mainObj.getPk(), mainObj3.getPk(), mainObj2.getPk() ]
 
         ids = preMainObj.save(cascadeSave=False)
         assert ids and ids[0], 'Failed to save object'
@@ -233,12 +239,13 @@ class TestIRForeignMultiLinkField(object):
         assert oga(obj, 'main').obj and isinstance(oga(obj, 'main').obj[0], MainModel) , 'Expected cascadeFetch to fetch sub object. Failed one level down (object not present)'
 
         fetchedIds = [ main.getPk() for main in obj.main ]
-        expectedIds = [ mainObj.getPk(), mainObj2.getPk() ]
+        expectedIds = [ mainObj.getPk(), mainObj3.getPk(), mainObj2.getPk() ]
 
-        assert fetchedIds == expectedIds , 'Got objects out of order.\n\nExpected: %s\n\nGot: %s\n' %( repr(fetchedIds), repr(expectedIds) )
+        assert fetchedIds == expectedIds , 'Got objects out of order.\n\nExpected: %s\n\nGot: %s\n' %( repr(expectedIds), repr(fetchedIds) )
 
         assert obj.main[0] == mainObj , 'Got wrong values on first MainModel obj.\n\nExpected: %s\n\nGot: %s\n' %(repr(mainObj), repr(obj.main[0]))
-        assert obj.main[1] == mainObj2 , 'Got wrong values on second MainModel obj\n\nExpected: %s\n\nGot: %s\n' %(repr(mainObj2), repr(obj.main[1]))
+        assert obj.main[1] == mainObj3 , 'Got wrong values on second MainModel obj\n\nExpected: %s\n\nGot: %s\n' %(repr(mainObj3), repr(obj.main[1]))
+        assert obj.main[2] == mainObj2 , 'Got wrong values on third MainModel obj\n\nExpected: %s\n\nGot: %s\n' %(repr(mainObj2), repr(obj.main[2]))
 
         # mainObj with "other" link defined
         mainObj = oga(obj, 'main').obj[0]
@@ -249,13 +256,13 @@ class TestIRForeignMultiLinkField(object):
         assert oga(mainObj, 'other').obj[0].name == 'rone' , 'Missing values on two-level-down fetched object.'
 
         # mainObj with "other" link irNull
-        mainObj = oga(obj, 'main').obj[1]
+        mainObj = oga(obj, 'main').obj[2]
 
         assert oga(mainObj, 'other') == irNull , 'Expected raw attribute "other" to be irNull when never defined before saving'
 
         assert getattr(mainObj, 'other') == irNull , 'Expected processed attribute "other" to be irNull when never defined before saving'
 
-        fetchedMainSubIds = [ obj.main[0].getPk(), obj.main[1].getPk() ]
+        fetchedMainSubIds = [ obj.main[0].getPk(), obj.main[1].getPk(), obj.main[2].getPk() ]
 
         assert fetchedMainSubIds == preMainSubIds , 'Expected fetch to be in same order as saved.'
 
