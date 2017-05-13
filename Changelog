@@ -48,6 +48,13 @@ diff in the same directory.
 For now, just one optional patch has been added.
 
 
+5.0.2 - Sat May 13 2017
+- Fix where PyDoc could fail to create docs for projects importing
+IndexedRedis in some circumstances
+- Ensure that getPrimaryKeys function always returns a list and not sometimes
+a set (because of upstream Redis package)
+
+
 5.0.1 - Mon May 1 2017
 
 A conversion document has been created, CONVERTING_TO_5.0.0 in the main

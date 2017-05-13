@@ -1562,8 +1562,23 @@ If&nbsp;you&nbsp;need&nbsp;a&nbsp;copy&nbsp;that&nbsp;IS&nbsp;linked,&nbsp;@see&
 
 <dl ><dt ><a name="IndexedRedisModel-delete" ><strong >delete</strong></a>(self)</dt><dd ><tt >delete&nbsp;-&nbsp;Delete&nbsp;this&nbsp;<a href="builtins.html#object" >object</a></tt></dd></dl>
 
-<dl ><dt ><strong >deleter</strong></dt>
-</dl>
+<dl ><dt ><a name="IndexedRedisModel-diff" ><strong >diff</strong></a>(firstObj, otherObj, includeMeta=False)</dt><dd ><tt >diff&nbsp;-&nbsp;Compare&nbsp;the&nbsp;field&nbsp;values&nbsp;on&nbsp;two&nbsp;IndexedRedisModels.<br />
+&nbsp;<br />
+@param&nbsp;firstObj&nbsp;&lt;<a href="#IndexedRedisModel" >IndexedRedisModel</a>&nbsp;instance&gt;&nbsp;-&nbsp;First&nbsp;<a href="builtins.html#object" >object</a>&nbsp;(or&nbsp;self)<br />
+&nbsp;<br />
+@param&nbsp;otherObj&nbsp;&lt;<a href="#IndexedRedisModel" >IndexedRedisModel</a>&nbsp;instance&gt;&nbsp;-&nbsp;Second&nbsp;<a href="builtins.html#object" >object</a><br />
+&nbsp;<br />
+@param&nbsp;includeMeta&nbsp;&lt;bool&gt;&nbsp;-&nbsp;If&nbsp;meta&nbsp;information&nbsp;(like&nbsp;pk)&nbsp;should&nbsp;be&nbsp;in&nbsp;the&nbsp;diff&nbsp;results.<br />
+&nbsp;<br />
+&nbsp;<br />
+@return&nbsp;&lt;dict&gt;&nbsp;-&nbsp;Dict&nbsp;of&nbsp;&nbsp;'field'&nbsp;:&nbsp;(&nbsp;value_firstObjForField,&nbsp;value_otherObjForField&nbsp;).<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Keys&nbsp;are&nbsp;names&nbsp;of&nbsp;fields&nbsp;with&nbsp;different&nbsp;values.<br />
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Value&nbsp;is&nbsp;a&nbsp;tuple&nbsp;of&nbsp;(&nbsp;value_firstObjForField,&nbsp;value_otherObjForField&nbsp;)<br />
+&nbsp;<br />
+Can&nbsp;be&nbsp;called&nbsp;statically,&nbsp;like:&nbsp;<a href="#IndexedRedisModel" >IndexedRedisModel</a>.diff&nbsp;(&nbsp;obj1,&nbsp;obj2&nbsp;)<br />
+&nbsp;<br />
+&nbsp;&nbsp;or&nbsp;in&nbsp;reference&nbsp;to&nbsp;an&nbsp;obj&nbsp;&nbsp;&nbsp;:&nbsp;obj1.<a href="#IndexedRedisModel-diff" >diff</a>(obj2)</tt></dd></dl>
 
 <dl ><dt ><a name="IndexedRedisModel-getPk" ><strong >getPk</strong></a>(self)</dt><dd ><tt >getPk&nbsp;-&nbsp;Gets&nbsp;the&nbsp;internal&nbsp;primary&nbsp;key&nbsp;associated&nbsp;with&nbsp;this&nbsp;<a href="builtins.html#object" >object</a></tt></dd></dl>
 
@@ -1593,9 +1608,6 @@ This&nbsp;does&nbsp;NOT&nbsp;include&nbsp;id,&nbsp;so&nbsp;the&nbsp;models&nbsp;
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Otherwise,&nbsp;will&nbsp;just&nbsp;check&nbsp;if&nbsp;the&nbsp;pk&nbsp;has&nbsp;changed.<br />
 &nbsp;<br />
 @return&nbsp;&lt;bool&gt;&nbsp;-&nbsp;True&nbsp;if&nbsp;any&nbsp;fields&nbsp;have&nbsp;changed&nbsp;since&nbsp;last&nbsp;fetch,&nbsp;or&nbsp;if&nbsp;never&nbsp;saved.&nbsp;Otherwise,&nbsp;False</tt></dd></dl>
-
-<dl ><dt ><strong >objects</strong></dt>
-</dl>
 
 <dl ><dt ><a name="IndexedRedisModel-pprint" ><strong >pprint</strong></a>(self, stream=None)</dt><dd ><tt >pprint&nbsp;-&nbsp;Pretty-print&nbsp;a&nbsp;dict&nbsp;representation&nbsp;of&nbsp;this&nbsp;<a href="builtins.html#object" >object</a>.<br />
 &nbsp;<br />
@@ -1642,9 +1654,6 @@ and&nbsp;you&nbsp;have&nbsp;those&nbsp;objects&nbsp;in&nbsp;a&nbsp;list,&nbsp;my
 &nbsp;<br />
 @note&nbsp;-&nbsp;You&nbsp;will&nbsp;generate&nbsp;a&nbsp;new&nbsp;primary&nbsp;key&nbsp;relative&nbsp;to&nbsp;the&nbsp;external&nbsp;Redis&nbsp;environment.&nbsp;If&nbsp;you&nbsp;need&nbsp;to&nbsp;reference&nbsp;a&nbsp;"shared"&nbsp;primary&nbsp;key,&nbsp;it&nbsp;is&nbsp;better<br />
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;to&nbsp;use&nbsp;an&nbsp;indexed&nbsp;field&nbsp;than&nbsp;the&nbsp;internal&nbsp;pk.</tt></dd></dl>
-
-<dl ><dt ><strong >saver</strong></dt>
-</dl>
 
 <dl ><dt ><a name="IndexedRedisModel-toDict" ><strong >toDict</strong></a> = <a href="#IndexedRedisModel-asDict" >asDict</a>(self, includeMeta=False, forStorage=False, strKeys=False)</dt></dl>
 
@@ -1710,6 +1719,12 @@ Data and other attributes defined here:<br />
 <dl ><dt ><strong >REDIS_CONNECTION_PARAMS</strong> = {}</dt></dl>
 
 <dl ><dt ><strong >__hash__</strong> = None</dt></dl>
+
+<dl ><dt ><strong >deleter</strong> = &lt;IndexedRedis.IndexedRedisDelete object&gt;</dt></dl>
+
+<dl ><dt ><strong >objects</strong> = &lt;IndexedRedis.IndexedRedisQuery object&gt;</dt></dl>
+
+<dl ><dt ><strong >saver</strong> = &lt;IndexedRedis.IndexedRedisSave object&gt;</dt></dl>
 
 </td></tr></table> <p >
 <table width="100%" cellspacing="0" cellpadding="2" border="0" summary="section" >
