@@ -371,7 +371,10 @@ class IndexedRedisModel(object):
 				self._origData[thisField] = val
 				
 
-		object.__setattr__(self, '_id', kwargs.get('_id', None))
+		_id = kwargs.get('_id', None)
+		if _id:
+			_id = int(_id)
+		object.__setattr__(self, '_id', _id)
 
 
 	def __setattr__(self, keyName, value):
@@ -461,7 +464,7 @@ class IndexedRedisModel(object):
 
 
 		if includeMeta is True:
-			ret['_id'] = getattr(self, '_id', '')
+			ret['_id'] = getattr(self, '_id', None)
 		return ret
 
 	toDict = asDict
@@ -1527,6 +1530,9 @@ class IndexedRedisQuery(IndexedRedisHelper):
 				pipeline.sdiff(tempKey, *notIndexKeys)
 				pipeline.delete(tempKey)
 				matchedKeys = pipeline.execute()[1] # sdiff
+
+
+		matchedKeys = [ int(_key) for _key in matchedKeys ]
 
 		if sortByAge is False:
 			return matchedKeys
