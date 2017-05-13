@@ -6,7 +6,7 @@
 <table width="100%" cellspacing="0" cellpadding="2" border="0" summary="heading" >
 <tr bgcolor="#7799ee" >
 <td valign="bottom" >&nbsp;<br />
-<font color="#ffffff" face="helvetica, arial" >&nbsp;<br /><big ><big ><strong >IndexedRedis</strong></big></big> (version 5.0.1)</font></td><td align="right" valign="bottom" ><font color="#ffffff" face="helvetica, arial" ><a href="IndexedRedis.html" >index</a></font></td></tr></table>
+<font color="#ffffff" face="helvetica, arial" >&nbsp;<br /><big ><big ><strong >IndexedRedis</strong></big></big> (version 5.0.2)</font></td><td align="right" valign="bottom" ><font color="#ffffff" face="helvetica, arial" ><a href="IndexedRedis.html" >index</a></font></td></tr></table>
     <p ><tt >#&nbsp;Copyright&nbsp;(c)&nbsp;2014,&nbsp;2015,&nbsp;2016,&nbsp;2017&nbsp;Timothy&nbsp;Savannah&nbsp;under&nbsp;LGPL&nbsp;version&nbsp;2.1.&nbsp;See&nbsp;LICENSE&nbsp;for&nbsp;more&nbsp;information.<br />
 #&nbsp;&nbsp;IndexedRedis&nbsp;A&nbsp;redis-backed&nbsp;very&nbsp;very&nbsp;fast&nbsp;ORM-style&nbsp;framework&nbsp;that&nbsp;supports&nbsp;indexes,&nbsp;and&nbsp;searches&nbsp;with&nbsp;O(1)&nbsp;efficency.<br />
 #&nbsp;&nbsp;&nbsp;&nbsp;It&nbsp;has&nbsp;syntax&nbsp;similar&nbsp;to&nbsp;Django&nbsp;and&nbsp;Flask&nbsp;and&nbsp;other&nbsp;ORMs,&nbsp;but&nbsp;is&nbsp;itself&nbsp;unique&nbsp;in&nbsp;many&nbsp;ways.</tt></p>
@@ -1130,9 +1130,6 @@ If&nbsp;you&nbsp;need&nbsp;a&nbsp;copy&nbsp;that&nbsp;IS&nbsp;linked,&nbsp;@see&
 
 <dl ><dt ><a name="IndexedRedisModel-delete" ><strong >delete</strong></a>(self)</dt><dd ><tt >delete&nbsp;-&nbsp;Delete&nbsp;this&nbsp;<a href="builtins.html#object" >object</a></tt></dd></dl>
 
-<dl ><dt ><strong >deleter</strong></dt>
-</dl>
-
 <dl ><dt ><a name="IndexedRedisModel-getPk" ><strong >getPk</strong></a>(self)</dt><dd ><tt >getPk&nbsp;-&nbsp;Gets&nbsp;the&nbsp;internal&nbsp;primary&nbsp;key&nbsp;associated&nbsp;with&nbsp;this&nbsp;<a href="builtins.html#object" >object</a></tt></dd></dl>
 
 <dl ><dt ><a name="IndexedRedisModel-getUpdatedFields" ><strong >getUpdatedFields</strong></a>(self)</dt><dd ><tt >getUpdatedFields&nbsp;-&nbsp;See&nbsp;changed&nbsp;fields.<br />
@@ -1152,9 +1149,6 @@ This&nbsp;does&nbsp;NOT&nbsp;include&nbsp;id,&nbsp;so&nbsp;the&nbsp;models&nbsp;
 <dl ><dt ><a name="IndexedRedisModel-hasUnsavedChanges" ><strong >hasUnsavedChanges</strong></a>(self)</dt><dd ><tt >hasUnsavedChanges&nbsp;-&nbsp;Check&nbsp;if&nbsp;any&nbsp;unsaved&nbsp;changes&nbsp;are&nbsp;present&nbsp;in&nbsp;this&nbsp;model,&nbsp;or&nbsp;if&nbsp;it&nbsp;has&nbsp;never&nbsp;been&nbsp;saved.<br />
 &nbsp;<br />
 @return&nbsp;&lt;bool&gt;&nbsp;-&nbsp;True&nbsp;if&nbsp;any&nbsp;fields&nbsp;have&nbsp;changed&nbsp;since&nbsp;last&nbsp;fetch,&nbsp;or&nbsp;if&nbsp;never&nbsp;saved.&nbsp;Otherwise,&nbsp;False</tt></dd></dl>
-
-<dl ><dt ><strong >objects</strong></dt>
-</dl>
 
 <dl ><dt ><a name="IndexedRedisModel-pprint" ><strong >pprint</strong></a>(self, stream=None)</dt><dd ><tt >pprint&nbsp;-&nbsp;Pretty-print&nbsp;a&nbsp;dict&nbsp;representation&nbsp;of&nbsp;this&nbsp;<a href="builtins.html#object" >object</a>.<br />
 &nbsp;<br />
@@ -1192,9 +1186,6 @@ and&nbsp;you&nbsp;have&nbsp;those&nbsp;objects&nbsp;in&nbsp;a&nbsp;list,&nbsp;my
 &nbsp;<br />
 @note&nbsp;-&nbsp;You&nbsp;will&nbsp;generate&nbsp;a&nbsp;new&nbsp;primary&nbsp;key&nbsp;relative&nbsp;to&nbsp;the&nbsp;external&nbsp;Redis&nbsp;environment.&nbsp;If&nbsp;you&nbsp;need&nbsp;to&nbsp;reference&nbsp;a&nbsp;"shared"&nbsp;primary&nbsp;key,&nbsp;it&nbsp;is&nbsp;better<br />
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;to&nbsp;use&nbsp;an&nbsp;indexed&nbsp;field&nbsp;than&nbsp;the&nbsp;internal&nbsp;pk.</tt></dd></dl>
-
-<dl ><dt ><strong >saver</strong></dt>
-</dl>
 
 <dl ><dt ><a name="IndexedRedisModel-toDict" ><strong >toDict</strong></a> = <a href="#IndexedRedisModel-asDict" >asDict</a>(self, includeMeta=False, forStorage=False, strKeys=False)</dt></dl>
 
@@ -1260,6 +1251,12 @@ Data and other attributes defined here:<br />
 <dl ><dt ><strong >REDIS_CONNECTION_PARAMS</strong> = {}</dt></dl>
 
 <dl ><dt ><strong >__hash__</strong> = None</dt></dl>
+
+<dl ><dt ><strong >deleter</strong> = &lt;IndexedRedis.IndexedRedisDelete object&gt;</dt></dl>
+
+<dl ><dt ><strong >objects</strong> = &lt;IndexedRedis.IndexedRedisQuery object&gt;</dt></dl>
+
+<dl ><dt ><strong >saver</strong> = &lt;IndexedRedis.IndexedRedisSave object&gt;</dt></dl>
 
 </td></tr></table> <p >
 <table width="100%" cellspacing="0" cellpadding="2" border="0" summary="section" >
@@ -1624,8 +1621,8 @@ Data descriptors inherited from <a href="builtins.html#BaseException" >builtins.
     
 <tr ><td bgcolor="#55aa55" ><tt >&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</tt></td><td >&nbsp;</td>
 <td width="100%" ><strong >INDEXED_REDIS_PREFIX</strong> = '_ir_|'<br />
-<strong >INDEXED_REDIS_VERSION</strong> = (5, 0, 1)<br />
-<strong >INDEXED_REDIS_VERSION_STR</strong> = '5.0.1'<br />
+<strong >INDEXED_REDIS_VERSION</strong> = (5, 0, 2)<br />
+<strong >INDEXED_REDIS_VERSION_STR</strong> = '5.0.2'<br />
 <strong >__all__</strong> = ('INDEXED_REDIS_PREFIX', 'INDEXED_REDIS_VERSION', 'INDEXED_REDIS_VERSION_STR', 'IndexedRedisDelete', 'IndexedRedisHelper', 'IndexedRedisModel', 'IndexedRedisQuery', 'IndexedRedisSave', 'isIndexedRedisModel', 'setIndexedRedisEncoding', 'getIndexedRedisEncoding', 'InvalidModelException', 'fields', 'IRField', 'IRFieldChain', 'irNull', 'setDefaultIREncoding', 'getDefaultIREncoding', 'setDefaultRedisConnectionParams', 'getDefaultRedisConnectionParams', ...)<br />
 <strong >irNull</strong> = irNull</td></tr></table>
 </p></p></p></p></body></html>
