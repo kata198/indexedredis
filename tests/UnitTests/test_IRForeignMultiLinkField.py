@@ -200,12 +200,15 @@ class TestIRForeignMultiLinkField(object):
         assert ids and ids[0]
 
         mainObj = MainModel(name='one', value='cheese', other=[ids[0]])
+        mainObj2 = MainModel(name='two', value='please')
+
+        mainObj2.save()
 
         ids = mainObj.save(cascadeSave=False)
         assert ids and ids[0] , 'Failed to save object'
 
         preMainObj = PreMainModel(name='pone', value='bologna')
-        preMainObj.main = [mainObj]
+        preMainObj.main = [mainObj, mainObj2]
 
         ids = preMainObj.save(cascadeSave=False)
         assert ids and ids[0], 'Failed to save object'
