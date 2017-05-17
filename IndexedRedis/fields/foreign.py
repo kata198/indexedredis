@@ -104,6 +104,9 @@ class ForeignLinkData(ForeignLinkDataBase):
 				self.pk = self.obj._id
 
 		return self.pk
+	
+	def getPks(self):
+		return [ self.getPk() ]
 
 	def isFetched(self):
 		'''
@@ -193,6 +196,9 @@ class ForeignLinkMultiData(ForeignLinkData):
 					self.pk[i] = self.obj[i]._id
 
 		return self.pk
+
+	def getPks(self):
+		return self.getPk()
 
 
 	def getObj(self):
@@ -361,6 +367,9 @@ class IRForeignLinkField(IRForeignLinkFieldBase):
 	def copy(self):
 		return self.__class__(name=self.name, foreignModel=self.foreignModel)
 
+	def isMulti(self):
+		return False
+
 	def __new__(self, name='', foreignModel=None):
 		return IRField.__new__(self, name)
 
@@ -445,6 +454,9 @@ class IRForeignMultiLinkField(IRForeignLinkField):
 
 		raise ValueError('Unknown value type headed for storage:   <%s>   %s' %(value.__class__.__name__, repr(value)))
 	
+
+	def isMulti(self):
+		return True
 
 	def _toIndex(self, value):
 		# Support passing either an integer or the model itself
