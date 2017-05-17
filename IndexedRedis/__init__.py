@@ -318,19 +318,29 @@ class IndexedRedisModel(object):
 
 	'''
 	
-	# FIELDS - A list of field names, as strings.
+	'''
+		FIELDS - A list of field names, IRField objects or subclasses thereof
+	'''
 	FIELDS = []
 
-	# INDEXED_FIELDS - A list of field names that will be indexed, as strings. Must also be present in FIELDS.
-	#  You can only search on indexed fields, but they add time to insertion/deletion
+	''' INDEXED_FIELDS - A list of field names that will be indexed, as strings.
+		Names used here must also be present in FIELDS.
+		You can only search on indexed fields, but they add time to insertion/deletion.
+	'''
 	INDEXED_FIELDS = []
 
-	# KEY_NAME - A string of a unique name which corrosponds to objects of this type.
+	'''
+		KEY_NAME - A string of a unique name which corrosponds to objects of this type (used in storage)
+	'''
 	KEY_NAME = None
 
-	# REDIS_CONNECTION_PARAMS - A dictionary of parameters to redis.Redis such as host or port. Unless "connection_pool" is specified,
-	#   each unique server will be assigned a pool to prevent leaking private ports, and on first connection of this model
-	#   that pool will be accessable via REDIS_CONNECTION_PARAMS['connection_pool']
+	'''
+		REDIS_CONNECTION_PARAMS - 
+			A dictionary of params to redis.Redis which will be used to override the
+			 default connection for this object. If 'connection_pool' is used, connections
+			 involving this object will not be managed or inherited. Otherwise, fields present
+			 here will be applied overriding the default connection params (@see setDefaultRedisConnectionParams)
+	'''
 	REDIS_CONNECTION_PARAMS = {}
 
 	# Internal property to check inheritance

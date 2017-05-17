@@ -44,19 +44,26 @@ class IRField(str):
 		
 	'''
 
-	# CAN_INDEX - Set this to True if this type can be indexed. Otherwise, set it to False to disallow indexing on this field.
-        #    The object itself is checked, so if a field is generally indexable except under certain conditions, the class can have
-        #      True while the specific object that should be disallowed can be False.
-        #
-        # If IRField base class is used, the following types are CAN_INDEX=True: str, unicode, int, bool.  Otherwise, if CAN_INDEX is defined
-        #   on the type, that value will be used.
+	'''
+	   CAN_INDEX - Set this to True if this type can be indexed. Otherwise, set it to False to disallow indexing on this field.
+            The object itself is checked, so if a field is generally indexable except under certain conditions, the class can have
+              True while the specific object that should be disallowed can be False.
+        
+         If IRField base class is used, the following types are CAN_INDEX=True: str, unicode, int, bool.  Otherwise, if CAN_INDEX is defined
+           on the type, that value will be used.
+	'''
 	CAN_INDEX = False
 
 
-	# Start as a class variable, so "toIndex" works even if IRField constructor is not called (which really shouldn't be called on extending classes)
+	'''
+		hashIndex - Whether the index field is hashed before storage / query.
+			Some fields may force this value to True, others may provide the option in the constructor.
+	'''
 	hashIndex = False
 
-	# The default value of this class
+	'''
+		defaultValue - The default value used by this field.
+	'''
 	defaultValue = irNull
 
 
@@ -258,6 +265,13 @@ class IRField(str):
 		return md5(tobytes(ret)).hexdigest()
 
 	def getDefaultValue(self):
+		'''
+			getDefaultValue - Gets the default value associated with this field.
+
+			  This is the value used when no value has been explicitly set.
+
+			  @return - The default value
+		'''
 		return self.defaultValue
 
 	@property
