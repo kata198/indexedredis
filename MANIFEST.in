@@ -7,6 +7,9 @@ include example.py
 include setup.py
 include requirements.txt
 include CONVERTING_TO_5.0.0
+include patches/apply_patch.sh
+include patches/README
+recursive-include patches *.patch
 recursive-include IndexedRedis *.py
 recursive-include tests *.py
 recursive-include tests/simple *.py
