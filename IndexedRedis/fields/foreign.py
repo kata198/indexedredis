@@ -361,11 +361,12 @@ class IRForeignLinkField(IRForeignLinkFieldBase):
 
 	def _getReprProperties(self):
 		return [
+			'valueType=%s' %(str(self.valueType), ),
 			'foreignModel=%s' %(self.foreignModel.__name__, )
 		]
 
 	def copy(self):
-		return self.__class__(name=self.name, foreignModel=self.foreignModel)
+		return self.__class__(name=self.name, valueType=self.valueType, foreignModel=self.foreignModel)
 
 	def isMulti(self):
 		'''
