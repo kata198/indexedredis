@@ -1,4 +1,4 @@
-6.0.0 - ??? ??? ? ????
+6.0.0 - Tue May 16 2017
 
 - Add an IRForeignLinkField which allows linking another object by primary
 key. You can assign it an instance of another model or a primary key, and upon
@@ -44,8 +44,6 @@ mainline for some reason.
 There's a README in that dir which will list a brief explanation of
 each optional patch, with a more descript in the comment field of the unified
 diff in the same directory.
-
-For now, just one optional patch has been added.
 
 
 5.0.2 - Sat May 13 2017
