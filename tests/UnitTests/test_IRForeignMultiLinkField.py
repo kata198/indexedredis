@@ -40,6 +40,7 @@ class TestIRForeignMultiLinkField(object):
             FIELDS = [
                 IRField('name'),
                 IRField('strVal'),
+                IRField('modelName', defaultValue='RefedModel'),
                 IRField('intVal', valueType=int)
             ]
 
@@ -53,7 +54,8 @@ class TestIRForeignMultiLinkField(object):
             
             FIELDS = [
                 IRField('name'),
-                IRField('value'),
+                IRField('strVal'),
+                IRField('modelName', defaultValue='MainModel'),
                 IRForeignMultiLinkField('other', Model_RefedModel),
             ]
 
@@ -63,19 +65,19 @@ class TestIRForeignMultiLinkField(object):
 
         self.models['MainModel'] = Model_MainModel
 
-        if testMethod in (self.test_cascadeSave, self.test_cascadeFetch, self.test_reload):
-            class Model_PreMainModel(IndexedRedisModel):
-                FIELDS = [
-                    IRField('name'),
-                    IRField('value'),
-                    IRForeignMultiLinkField('main', Model_MainModel),
-                ]
+        class Model_PreMainModel(IndexedRedisModel):
+            FIELDS = [
+                IRField('name'),
+                IRField('strVal'),
+                IRField('modelName', defaultValue='PremainModel'),
+                IRForeignMultiLinkField('main', Model_MainModel),
+            ]
 
-                INDEXED_FIELDS = ['name']
+            INDEXED_FIELDS = ['name']
 
-                KEY_NAME = 'TestIRForeignMultiLinkField__PreMainModel1'
+            KEY_NAME = 'TestIRForeignMultiLinkField__PreMainModel1'
 
-            self.models['PreMainModel'] = Model_PreMainModel
+        self.models['PreMainModel'] = Model_PreMainModel
 
         # If KEEP_DATA is False (debug flag), then delete all objects before so prior test doesn't interfere
         if self.KEEP_DATA is False and self.models:
@@ -199,22 +201,34 @@ class TestIRForeignMultiLinkField(object):
         ids = refObj.save(cascadeSave=False)
         assert ids and ids[0]
 
+        refObj2 = RefedModel(name='rtwo', strVal='zz', intVal=99)
+        refObj2.save()
+
         mainObj = MainModel(name='one', value='cheese', other=[ids[0]])
         mainObj2 = MainModel(name='two', value='please')
+        mainObj3 = MainModel(name='three', value='weeee', other=[refObj2])
 
         mainObj2.save()
 
         ids = mainObj.save(cascadeSave=False)
+        
         assert ids and ids[0] , 'Failed to save object'
 
-        preMainObj = PreMainModel(name='pone', value='bologna')
-        preMainObj.main = [mainObj, mainObj2]
+        ids = mainObj2.save(cascadeSave=False)
+       
+        assert ids and ids[0] , 'Failed to save obj'
 
-        preMainSubIds = [ mainObj.getPk(), mainObj2.getPk() ]
+        mainObj3.save() # TODO: If don't save this, get a strange error. Figure out how to trap.
+
+        preMainObj = PreMainModel(name='pone', value='bologna')
+        preMainObj.main = [mainObj, mainObj3, mainObj2]
+
+        preMainSubIds = [ mainObj.getPk(), mainObj3.getPk(), mainObj2.getPk() ]
 
         ids = preMainObj.save(cascadeSave=False)
         assert ids and ids[0], 'Failed to save object'
 
+#        import pdb; pdb.set_trace()
         objs = PreMainModel.objects.filter(name='pone').all(cascadeFetch=True)
 
         assert objs and len(objs) == 1 , 'Failed to fetch single PreMainModel object'
@@ -227,22 +241,31 @@ class TestIRForeignMultiLinkField(object):
 
         assert oga(obj, 'main').obj and isinstance(oga(obj, 'main').obj[0], MainModel) , 'Expected cascadeFetch to fetch sub object. Failed one level down (object not present)'
 
+        fetchedIds = [ main.getPk() for main in obj.main ]
+        expectedIds = [ mainObj.getPk(), mainObj3.getPk(), mainObj2.getPk() ]
+
+        assert fetchedIds == expectedIds , 'Got objects out of order.\n\nExpected: %s\n\nGot: %s\n' %( repr(expectedIds), repr(fetchedIds) )
+
+        assert obj.main[0] == mainObj , 'Got wrong values on first MainModel obj.\n\nExpected: %s\n\nGot: %s\n' %(repr(mainObj), repr(obj.main[0]))
+        assert obj.main[1] == mainObj3 , 'Got wrong values on second MainModel obj\n\nExpected: %s\n\nGot: %s\n' %(repr(mainObj3), repr(obj.main[1]))
+        assert obj.main[2] == mainObj2 , 'Got wrong values on third MainModel obj\n\nExpected: %s\n\nGot: %s\n' %(repr(mainObj2), repr(obj.main[2]))
+
         # mainObj with "other" link defined
         mainObj = oga(obj, 'main').obj[0]
 
         assert oga(mainObj, 'other').isFetched() is True , 'Expected cascadeFetch to fetch sub object. Failed two levels down (not marked isFetched)'
-        assert oga(mainObj, 'other').obj and isinstance(oga(mainObj, 'other').obj[0], RefedModel) , 'Expected cascadeFetch to fetch sub object. Failed to levels down (object not present)'
+        assert oga(mainObj, 'other').obj and isinstance(oga(mainObj, 'other').obj[0], RefedModel) , 'Expected cascadeFetch to fetch sub object. Failed two levels down (object not present)'
 
         assert oga(mainObj, 'other').obj[0].name == 'rone' , 'Missing values on two-level-down fetched object.'
 
         # mainObj with "other" link irNull
-        mainObj = oga(obj, 'main').obj[1]
+        mainObj = oga(obj, 'main').obj[2]
 
         assert oga(mainObj, 'other') == irNull , 'Expected raw attribute "other" to be irNull when never defined before saving'
 
         assert getattr(mainObj, 'other') == irNull , 'Expected processed attribute "other" to be irNull when never defined before saving'
 
-        fetchedMainSubIds = [ obj.main[0].getPk(), obj.main[1].getPk() ]
+        fetchedMainSubIds = [ obj.main[0].getPk(), obj.main[1].getPk(), obj.main[2].getPk() ]
 
         assert fetchedMainSubIds == preMainSubIds , 'Expected fetch to be in same order as saved.'
 
@@ -613,6 +636,211 @@ class TestIRForeignMultiLinkField(object):
         assert 'main' in reloadedData , 'Expected to see "main" (one-level-down) object show up in reloaded data for cascadeObjects=True when object two-levels-down has changed values.'
 
 
+    def test_bunchaObjects(self):
+        PreMainModel = self.models['PreMainModel']
+        MainModel = self.models['MainModel']
+        RefedModel = self.models['RefedModel']
+
+        NUM_PRE_MAIN = 10
+        NUM_MAIN_PER_PRE = 5
+        NUM_REFED_PER_MAIN = 7
+
+        preMainModels = []
+        mainModels = []
+        refedModels = []
+
+        for i in range(NUM_PRE_MAIN):
+            name = 'p' + str(i)
+            preMainModel = PreMainModel(name=name, strVal='x', intVal=i)
+
+            main = []
+            for j in range(NUM_MAIN_PER_PRE):
+                name = 'm' + str(j)
+                mainModel = MainModel(name=name, strVal=preMainModel.name, intVal=i * j)
+                main.append(mainModel)
+
+                others = []
+                for k in range(NUM_REFED_PER_MAIN):
+                    name = 'r' + str(k)
+                    refedModel = RefedModel(name=name, strVal=mainModel.name, intVal=i * j * k)
+
+                    others.append(refedModel)
+
+                refedModels += others
+                mainModel.other = others
+
+
+            preMainModel.main = main
+            preMainModels.append(preMainModel)
+
+        for preMainModel in preMainModels:
+            preMainModel.save(cascadeSave=True)
+
+        # Pre-fetch, assert that we constructed the way we expected
+        for i in range(NUM_PRE_MAIN):
+            
+            preMainModel = preMainModels[i]
+
+            expectedName = 'p' + str(i)
+#            print ( "On: %s" %( expectedName, ))
+            assert preMainModel.name == expectedName , 'Pre-fetch: Got objects out of expected order'
+
+            assert len(preMainModel.main) == NUM_MAIN_PER_PRE , 'Pre-fetch: Expected "main" count to be as set'
+
+            for j in range(NUM_MAIN_PER_PRE):
+                mainModel = preMainModel.main[j]
+
+#                print ( "Expected: %s\nGot:     %s" %(preMainModel.name, mainModel.strVal) )
+                assert mainModel.strVal == preMainModel.name , 'Pre-fetch: Got unexpected name on main[%d]. Expected:  %s  Got:  %s' %(j, repr(preMainModel.name), repr(mainModel.strVal))
+
+                assert len(mainModel.other) == NUM_REFED_PER_MAIN , 'Pre-fetch: Expected "other" count to be as set'
+
+                for k in range(NUM_REFED_PER_MAIN):
+                    refedModel = mainModel.other[k]
+
+                    assert refedModel.strVal == mainModel.name , 'Pre-fetch: Got unexpected name on ref. Expected:  %s  Got:  %s' %(repr(mainModel.name), repr(refedModel.strVal))
+
+
+        # TODO: If these are null, we have problems
+
+        # Now fetch and assert that everything falls into place
+
+        preMainModels = PreMainModel.objects.allByAge(cascadeFetch=True)
+
+        for i in range(NUM_PRE_MAIN):
+            
+            preMainModel = preMainModels[i]
+
+            expectedName = 'p' + str(i)
+#            print ( "On: %s" %( expectedName, ))
+            assert preMainModel.name == expectedName , 'Got objects out of expected order'
+
+            assert len(preMainModel.main) == NUM_MAIN_PER_PRE , 'Expected "main" count to be as set. Expected:  %d got %d' %(len(preMainModel.main), NUM_MAIN_PER_PRE)
+
+            for j in range(NUM_MAIN_PER_PRE):
+                mainModel = preMainModel.main[j]
+
+#                print ( "Expected: %s\nGot:     %s" %(preMainModel.name, mainModel.strVal) )
+                assert mainModel.strVal == preMainModel.name , 'Got unexpected name on pre[%d].main[%d]. Expected:  %s  Got:  %s' %(i, j, repr(preMainModel.name), repr(mainModel.strVal))
+
+                assert len(mainModel.other) == NUM_REFED_PER_MAIN , 'Expected "other" count to be as set'
+
+                for k in range(NUM_REFED_PER_MAIN):
+                    refedModel = mainModel.other[k]
+
+                    assert refedModel.strVal == mainModel.name , 'Got unexpected name on pre[%d].main[%d].ref[%d]. Expected:  %s  Got:  %s' %(i, j, k, repr(mainModel.name), repr(refedModel.strVal))
+
+
+    def test_bunchaObjectsWithNulls(self):
+        PreMainModel = self.models['PreMainModel']
+        MainModel = self.models['MainModel']
+        RefedModel = self.models['RefedModel']
+
+        NUM_PRE_MAIN = 10
+        NUM_MAIN_PER_PRE = 5
+        NUM_REFED_PER_MAIN = 7
+
+        preMainModels = []
+        mainModels = []
+        refedModels = []
+
+        for i in range(NUM_PRE_MAIN):
+            name = 'p' + str(i)
+            preMainModel = PreMainModel(name=name, strVal='x', intVal=i)
+
+            if i == 0 or i % 2 != 0:
+                main = []
+                for j in range(NUM_MAIN_PER_PRE):
+                    name = 'm' + str(j)
+                    mainModel = MainModel(name=name, strVal=preMainModel.name, intVal=i * j)
+                    main.append(mainModel)
+
+                    if j != 3:
+                        others = []
+                        for k in range(NUM_REFED_PER_MAIN):
+                            name = 'r' + str(k)
+                            refedModel = RefedModel(name=name, strVal=mainModel.name, intVal=i * j * k)
+
+                            others.append(refedModel)
+
+                        refedModels += others
+                        mainModel.other = others
+
+
+                preMainModel.main = main
+            preMainModels.append(preMainModel)
+
+        for preMainModel in preMainModels:
+            preMainModel.save(cascadeSave=True)
+
+        # Pre-fetch, assert that we constructed the way we expected
+        for i in range(NUM_PRE_MAIN):
+            
+            preMainModel = preMainModels[i]
+
+            expectedName = 'p' + str(i)
+#            print ( "On: %s" %( expectedName, ))
+            assert preMainModel.name == expectedName , 'Pre-fetch: Got objects out of expected order. Got:  %s  Expected:  %s' %(repr(preMainModel.name), repr(expectedName))
+
+            if i > 0 and i % 2 == 0:
+                assert len(preMainModel.main) == 0 , 'Pre-fetch: Expected on >0 even numbers to have no linked mains'
+                continue
+
+            assert len(preMainModel.main) == NUM_MAIN_PER_PRE , 'Pre-fetch: Expected "main" count to be as set'
+
+            for j in range(NUM_MAIN_PER_PRE):
+                mainModel = preMainModel.main[j]
+
+#                print ( "Expected: %s\nGot:     %s" %(preMainModel.name, mainModel.strVal) )
+                assert mainModel.strVal == preMainModel.name , 'Pre-fetch: Got unexpected name on main[%d]. Expected:  %s  Got:  %s' %(j, repr(preMainModel.name), repr(mainModel.strVal))
+                if j == 3:
+                    assert len(mainModel.other) == 0 , 'Pre-fetch: Expected on 4th set, "other" would be null.'
+                    continue
+
+                assert len(mainModel.other) == NUM_REFED_PER_MAIN , 'Pre-fetch: Expected "other" count to be as set'
+
+                for k in range(NUM_REFED_PER_MAIN):
+                    refedModel = mainModel.other[k]
+
+                    assert refedModel.strVal == mainModel.name , 'Pre-fetch: Got unexpected name on ref. Expected:  %s  Got:  %s' %(repr(mainModel.name), repr(refedModel.strVal))
+
+
+        # TODO: If these are null, we have problems
+
+        # Now fetch and assert that everything falls into place
+
+        preMainModels = PreMainModel.objects.allByAge(cascadeFetch=True)
+
+        for i in range(NUM_PRE_MAIN):
+            
+            preMainModel = preMainModels[i]
+
+            expectedName = 'p' + str(i)
+#            print ( "On: %s" %( expectedName, ))
+            assert preMainModel.name == expectedName , 'Got objects out of expected order'
+
+            if i > 0 and i % 2 == 0:
+                assert len(preMainModel.main) == 0 , 'Pre-fetch: Expected on >0 even numbers to have no linked mains'
+                continue
+
+            assert len(preMainModel.main) == NUM_MAIN_PER_PRE , 'Expected "main" count to be as set. Expected:  %d got %d' %(len(preMainModel.main), NUM_MAIN_PER_PRE)
+
+            for j in range(NUM_MAIN_PER_PRE):
+                mainModel = preMainModel.main[j]
+
+#                print ( "Expected: %s\nGot:     %s" %(preMainModel.name, mainModel.strVal) )
+                assert mainModel.strVal == preMainModel.name , 'Got unexpected name on pre[%d].main[%d]. Expected:  %s  Got:  %s' %(i, j, repr(preMainModel.name), repr(mainModel.strVal))
+
+                if j == 3:
+                    assert len(mainModel.other) == 0 , 'Pre-fetch: Expected on 4th set, "other" would be null.'
+                    continue
+
+                assert len(mainModel.other) == NUM_REFED_PER_MAIN , 'Expected "other" count to be as set'
+
+                for k in range(NUM_REFED_PER_MAIN):
+                    refedModel = mainModel.other[k]
+
+                    assert refedModel.strVal == mainModel.name , 'Got unexpected name on pre[%d].main[%d].ref[%d]. Expected:  %s  Got:  %s' %(i, j, k, repr(mainModel.name), repr(refedModel.strVal))
 
         
     def test_unsavedChanges(self):
