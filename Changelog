@@ -1,4 +1,4 @@
-6.0.1 - Tue May 16 2017
+6.0.1 - Wed May 17 2017
 
 - Fix IRForeignLinkField not showing up in __all__ in fields.foreign, which
 caused that field to not show up in pydoc
