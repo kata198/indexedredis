@@ -368,6 +368,11 @@ class IRForeignLinkField(IRForeignLinkFieldBase):
 		return self.__class__(name=self.name, foreignModel=self.foreignModel)
 
 	def isMulti(self):
+		'''
+			isMulti - Returns True if this is a MultiLink object (expects lists), otherwise False (expects object)
+
+			@return <bool>
+		'''
 		return False
 
 	def __new__(self, name='', foreignModel=None):
@@ -456,6 +461,11 @@ class IRForeignMultiLinkField(IRForeignLinkField):
 	
 
 	def isMulti(self):
+		'''
+			isMulti - Returns True if this is a MultiLink object (expects lists), otherwise False (expects object)
+
+			@return <bool>
+		'''
 		return True
 
 	def _toIndex(self, value):
