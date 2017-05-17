@@ -18,7 +18,7 @@ from ..compat_str import isStringy, to_unicode, isBaseStringy
 
 __all__ = ( 
 	'ForeignLinkDataBase', 'ForeignLinkData', 'ForeignLinkMultiData',
-	'IRForeignLinkFieldBase', 'IRForeignLinkFieldBase', 'IRForeignMultiLinkField'
+	'IRForeignLinkFieldBase', 'IRForeignLinkField', 'IRForeignMultiLinkField'
 )
 
 class ForeignLinkDataBase(object):
