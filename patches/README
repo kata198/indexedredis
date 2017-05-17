@@ -23,3 +23,7 @@ Patches
 
 
 **extra_lua_filters.patch** - This patch adds numeric filters ( lt, le/lte , gt, ge/gte ) to Redis-side filtering, using LUA. It's not super efficent and can be improved, but for some use cases this is better than client-side filtering.
+
+
+**single_pipeline_foreign.patch** - This patch fetches all related models in a single transaction when using cascadeFetch=True, using the builtin redis lua engine. The performance is slightly lower, but cascade fetches are atomic on full datasets.
+
