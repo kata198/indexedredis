@@ -1,4 +1,19 @@
+6.0.1 - Tue May 16 2017
+
+- Fix IRForeignLinkField not showing up in __all__ in fields.foreign, which
+caused that field to not show up in pydoc
+
+
 6.0.0 - Tue May 16 2017
+
+Foreign Link Support! (Link/Fetch/Save objects related to other objects, like
+foreign keys)
+
+Also, if upgrading from <5.0.0, see CONVERTING_TO_5.0.0
+and ChangeLog for possibly backwards-incompatible changes made in 5.0.0.
+
+This release has no backwards incompatible changes.
+
 
 - Add an IRForeignLinkField which allows linking another object by primary
 key. You can assign it an instance of another model or a primary key, and upon
