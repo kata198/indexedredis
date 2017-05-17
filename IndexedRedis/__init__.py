@@ -1776,27 +1776,35 @@ class IndexedRedisQuery(IndexedRedisHelper):
 
 					fieldName = 'fk_%s_%s' %( to_unicode(_idKey), str(hash(str(foreignField))).replace('-', 'N') )
 
-					x = "local " + fieldName + " = redis.call('HGET', '" + self._get_key_for_id_for_model(parentModel, '') + "' .. " + _idKey + ", '" + str(foreignField) + "')"
+					x =     "local " + fieldName + " = redis.call('HGET', '" + self._get_key_for_id_for_model(parentModel, '') + "' .. " + _idKey + ", '" + str(foreignField) + "')"
 					_lines.append(x)
 
 					iterFieldName = "splt_" + fieldName
 
-					x = "local ret_" + iterFieldName + " = {}"
+					x = "    local ret_" + iterFieldName + " = {}"
 					_lines.append(x)
-					x = "for " + iterFieldName + " in string.gmatch(" + fieldName + ", '([^,]+)' ) do "
-					_lines.append(x)
-
-					x = "if " + iterFieldName + " == '" + IR_NULL_STR + "' then\n    table.insert(ret_" + iterFieldName + ", '" + IR_NULL_STR + "')\nelse"
+					x =     "for " + iterFieldName + " in string.gmatch(" + fieldName + ", '([^,]+)' ) do "
 					_lines.append(x)
 
-					x = "    local " + iterFieldName + "_res = redis.call('HGETALL', '" + self._get_key_for_id_for_model(foreignModel, '') + "' .. " + iterFieldName + ")"
+					x = "        if " + iterFieldName + " == '" + IR_NULL_STR + "'"
 					_lines.append(x)
-					x = 'table.insert( ' + iterFieldName + '_res, "_id")'
+					x = "        then"
 					_lines.append(x)
-					x = 'table.insert( ' + iterFieldName + '_res, ' +  iterFieldName + ')'
+					x = "            table.insert(ret_" + iterFieldName + ", '" + IR_NULL_STR + "')"
+					_lines.append(x)
+					x = "        else"
 					_lines.append(x)
 
-					x = "\n    table.insert(ret_" + iterFieldName + ", " + iterFieldName + "_res" + ")\nend"
+					x = "            local " + iterFieldName + "_res = redis.call('HGETALL', '" + self._get_key_for_id_for_model(foreignModel, '') + "' .. " + iterFieldName + ")"
+					_lines.append(x)
+					x = '            table.insert( ' + iterFieldName + '_res, "_id")'
+					_lines.append(x)
+					x = '            table.insert( ' + iterFieldName + '_res, ' +  iterFieldName + ')'
+					_lines.append(x)
+
+					x = "            table.insert(ret_" + iterFieldName + ", " + iterFieldName + "_res" + ")"
+					_lines.append(x)
+					x = "        end"
 					_lines.append(x)
 
 					nextModel = foreignField.foreignModel
@@ -1805,8 +1813,10 @@ class IndexedRedisQuery(IndexedRedisHelper):
 					if nextModel.foreignFields:
 						_addLinesForForeign( _lines, iterFieldName, foreignModel, nextModel)
 
-					_lines.append('end')
-					_lines.append('table.insert(ret, ret_' + iterFieldName + ')')
+					x = "    end"
+					_lines.append(x)
+					x = "    table.insert(ret, ret_" + iterFieldName + ")"
+					_lines.append(x)
 				
 
 
@@ -1829,32 +1839,42 @@ class IndexedRedisQuery(IndexedRedisHelper):
 					x = "for " + iterFieldName + " in string.gmatch(" + fieldName + ", '([^,]+)' ) do "
 					lines.append(x)
 
-					x = "if " + iterFieldName + " == '" + IR_NULL_STR + "' then\n    table.insert( ret_" + iterFieldName + ", '" + IR_NULL_STR + "')\nelse"
+					x = "     if " + iterFieldName + " == '" + IR_NULL_STR + "'"
 					lines.append(x)
-					x = "    local " + iterFieldName + "_res = redis.call('HGETALL', '" + self._get_key_for_id_for_model(foreignField.foreignModel, '') + "' .. " + iterFieldName + ")"
+					x = "     then"
+					lines.append(x)
+					x = "         table.insert( ret_" + iterFieldName + ", '" + IR_NULL_STR + "')"
+					lines.append(x)
+					x = "     else"
+					lines.append(x)
+					x = "         local " + iterFieldName + "_res = redis.call('HGETALL', '" + self._get_key_for_id_for_model(foreignField.foreignModel, '') + "' .. " + iterFieldName + ")"
 					lines.append(x)
 
-					x = 'table.insert( ' + iterFieldName + '_res, "_id")'
+					x = '         table.insert( ' + iterFieldName + '_res, "_id")'
 					lines.append(x)
 
-					x = 'table.insert( ' + iterFieldName + '_res, ' +  iterFieldName + ')'
+					x = '         table.insert( ' + iterFieldName + '_res, ' +  iterFieldName + ')'
 					lines.append(x)
-					x = "table.insert(ret_" + iterFieldName + ", " + iterFieldName + "_res" + ")"
+					x = "         table.insert(ret_" + iterFieldName + ", " + iterFieldName + "_res" + ")"
 					lines.append(x)
-					lines.append("end")
 
 					foreignModel = foreignField.foreignModel
 					foreignModel.validateModel()
 
 					if foreignModel.foreignFields:
 						_addLinesForForeign(lines, iterFieldName, foreignModel, foreignModel.foreignFields)
-					lines.append('end')
-					lines.append('table.insert(ret, ret_' + iterFieldName + ')')
+					x = "    end"
+					lines.append(x)
+					x = "end"
+					lines.append(x)
+					x = '    table.insert(ret, ret_' + iterFieldName + ')'
+					lines.append(x)
 
 
-
-				lines.append('return ret')
+				lines.append('\nreturn ret')
 				#import pdb; pdb.set_trace()
+				#print ( splitFunction + "\n" + "\n".join(lines) + "\n" )
+
 				pipeline.eval(splitFunction + '\n' + '\n'.join(lines) + '\n', 0)
 
 #			import pdb; pdb.set_trace()
@@ -1870,7 +1890,11 @@ class IndexedRedisQuery(IndexedRedisHelper):
 
 
 		def setObjData(res, resIdx, objs, foreignFields, thisSetIdx=0):
+			#import pprint
+			#pprint.pprint(res)
+#			for i in range(len(objs)):
 			for obj in objs:
+				#obj = objs[i]
 				for foreignField in foreignFields:
 					if res[resIdx] == IR_NULL_BYTES or res[resIdx][thisSetIdx] == [IR_NULL_BYTES]:
 						isNull = True
@@ -1893,6 +1917,7 @@ class IndexedRedisQuery(IndexedRedisHelper):
 						else:
 							item = items[0]
 
+						#print ( "Item is: %s\n", repr(item) )
 						setattr(obj, foreignField, item)
 						thisSetIdx -= 1
 
@@ -1901,12 +1926,14 @@ class IndexedRedisQuery(IndexedRedisHelper):
 						foreignModel.validateModel()
 						if foreignModel.foreignFields:
 							thisSetIdx = setObjData(res, resIdx, reversed ( items ), foreignModel.foreignFields, thisSetIdx)
+							#thisSetIdx = setObjData(res, resIdx, items , foreignModel.foreignFields, thisSetIdx)
 
 			return thisSetIdx
 			
 
 		pksLen = len(pks)
 		# TODO: when missing obj
+		doSubModels = False
 		while resIdx < numRes:
 			if res[resIdx] is None:
 				ret.append(None)
@@ -1918,11 +1945,46 @@ class IndexedRedisQuery(IndexedRedisHelper):
 			ret.append(obj)
 			retIdx += 1
 			resIdx += 1
+			if self.mdl.foreignFields and isinstance(res[retIdx], (list, tuple)):
+				doSubModels = True
+				break
 
-			if self.mdl.foreignFields:
-				#import pdb; pdb.set_trace()
-				setObjData(res, resIdx, [obj], self.mdl.foreignFields, len(res[resIdx])-1)
-				resIdx += 1
+		#import pdb; pdb.set_trace()
+
+		if doSubModels:
+			oldResIdx = resIdx
+#			newResIdx = len(res) - 1
+			newResIdx = oldResIdx
+			for i in range(len(ret)):
+				#print ( "newResIdx is %s and res[resIdx] is %s" %( newResIdx, res[newResIdx] ) )
+				obj = ret[i]
+				setIdx = len(res[newResIdx])-1
+				try:
+					setIdx = setObjData(res, newResIdx, [obj], self.mdl.foreignFields, setIdx)
+				except Exception as e:
+					exc = sys.exc_info()
+					import traceback
+					traceback.print_exception(*exc)
+					raise e
+				try:
+					obj.main
+				except:
+					exc = sys.exc_info()
+					traceback.print_exception(*exc)
+				#newResIdx -= 1
+				newResIdx += 1
+
+				
+
+#	if self.mdl.foreignFields:
+#		for i in range(ret):
+#			if res[resIdx] is None:
+#				resIdx += 1
+#				continue
+#			
+#				#import pdb; pdb.set_trace()
+#				setObjData(res, resIdx, [obj], self.mdl.foreignFields, len(res[resIdx])-1)
+#				resIdx += 1
 
 #		import pdb; pdb.set_trace()
 		if False and cascadeFetch is True:
