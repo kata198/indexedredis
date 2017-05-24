@@ -1,3 +1,10 @@
+6.0.3 - Tue May 23 2017
+
+- Try to make deepcopy, if possible, when setting/fetching values to _origData
+(that is used to determine if a field has changed and needs to be updated on a
+save). An example would be a stored json with a inside. If it was updated
+externally, it would not be seen as an update. Now it will.
+
 6.0.2 - Wed May 17 2017
 
 - Update a bunch of docstrings
