@@ -352,29 +352,56 @@ class IndexedRedisModel(object):
 		'''
 		self.validateModel()
 
-		object.__setattr__(self, '_origData', {})
+		osetattr = object.__setattr__
+		ogetattr = object.__getattribute__
 
-		# Figure out if we are convert from the database, or from direct input
+		osetattr(self, '_origData', {})
+
+		# Figure out if we are getting data straight from Redis, or from direct input
+		#  and select the appropriate conversion function
 		if kwargs.get('__fromRedis', False) is True:
 			convertFunctionName = 'fromStorage'
 		else:
 			convertFunctionName = 'fromInput'
 
-		for thisField in self.FIELDS:
+		fields = ogetattr(self, 'FIELDS')
+
+		# Iterate through all FIELDS, and set the "field name" as an attribute on this object
+		#  with convert value (from input or from storage
+		for thisField in fields:
 			if thisField not in kwargs:
 				val = thisField.getDefaultValue()
 			else:
 				val = kwargs[thisField]
-				val = getattr(thisField, convertFunctionName)(val)
+				val = getattr(thisField, convertFunctionName) ( val )
 
 
-			object.__setattr__(self, thisField, val)
+			osetattr(self, thisField, val)
 			# Generally, we want to copy the value incase it is used by reference (like a list)
 			#   we will miss the update (an append will affect both).
 			try:
-				self._origData[thisField] = copy.copy(val)
+				# If we can deepcopy, do it (i.e. a json with a dict and a list
+				#  as a value )
+				self._origData[thisField] = copy.deepcopy(val)
 			except:
-				self._origData[thisField] = val
+				try:
+					# If that fails, try a regular copy
+					self._origData[thisField] = copy.copy(val)
+				except:
+					# Welp, we tried. There's no way to copy this data,
+					#  so it's not json and odds are you can't pickle it..
+					# Should never happen, so let's go ahead and warn them.
+					try:
+						deprecatedMessage("WARNING: Cannot copy value (not a standard type, must implement __copy__ / __deepcopy__ ) on Model=%s  FIELD=%s  TYPE=%s\nVALUE=%s\n" %(self.__class__.__name__, thisField.name, val.__class__.__name__, repr(val)))
+					except Exception as reprErr:
+						# Whaaaat, it has no repr either? What could this magic 
+						#  type be! In error: That's what! Needs to implement
+						#  copy and probably __getstate__ as well!
+						deprecatedMessage("WARNING: Cannot copy value (not a standard type, must implement __copy__ / __deepcopy__ ) on Model=%s  FIELD=%s  TYPE=%s\nVALUE=( Got exception printing value. %s: %s )\n" %(self.__class__.__name__, thisField.name, val.__class__.__name__, reprErr.__class__.__name__, str(reprErr)) )
+
+					# Go ahead and set it for them and hope for the best.
+					#  Probably won't be an issue.. probably.
+					self._origData[thisField] = val
 				
 
 		_id = kwargs.get('_id', None)
@@ -393,22 +420,22 @@ class IndexedRedisModel(object):
 		'''
 		oga = object.__getattribute__
 
-		fields = oga(self, 'FIELDS')
-		try:
-			idx = fields.index(keyName)
-		except:
-			idx = -1
+		if keyName not in ('FIELDS', '_id'):
+			# Don't try to lookup FIELDS or _id
+			fields = oga(self, 'FIELDS')
+			try:
+				idx = fields.index(keyName)
+			except:
+				idx = -1
 
-		if idx != -1:
-			value = fields[idx].fromInput(value)
+			if idx != -1:
+				value = fields[idx].fromInput(value)
 
 		object.__setattr__(self, keyName, value)
 	
 	def __getattribute__(self, keyName):
 		# If something on the class, just return it right away.
 		oga = object.__getattribute__
-#		if keyName in dir(oga(self, '__class__')):
-#			return oga(self, keyName)
 
 		if keyName.endswith('__id'):
 			isIdKey = True
