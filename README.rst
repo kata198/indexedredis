@@ -18,12 +18,12 @@ My tests have shown that for using equivalent models between flask/mysql and Ind
 It is compatible with python 2.7 and python 3. It has been tested with python 2.7, 3.4, 3.5, 3.6.
 
 
-5.0 Status
+5.0 Series
 ----------
 
 Version 5.0.0 will be somewhat **backwards incompatible with previous versions** by removing some old legacy stuff, improving a lot of existing things, and changing some behaviour.
 
-You can get an overview of the steps needed to convert your code with the conversion guide, found at https://github.com/kata198/indexedredis/blob/5.0branch/CONVERTING_TO_5.0.0
+You can get an overview of the steps needed to convert your code with the conversion guide, found at https://github.com/kata198/indexedredis/blob/5.0branch/CONVERTING*TO*5.0.0
 
 Full details of changes, as well as enhancements and bug fixes omitted from the conversion guide can be found in the 5.0.0 Changelog: https://github.com/kata198/indexedredis/blob/5.0branch/Changelog
 
@@ -49,7 +49,8 @@ https://pythonhosted.org/indexedredis/
 
 or
 
-http://htmlpreview.github.io/?https://github.com/kata198/IndexedRedis/blob/master/doc/IndexedRedis.html?_cache_vers=1
+http://htmlpreview.github.io/?https://github.com/kata198/IndexedRedis/blob/master/doc/IndexedRedis.html?*cache*vers=1
+
 
 **Below is a quick highlight/overview:**
 
@@ -64,7 +65,7 @@ This is the type you should extend to define your model.
 
 	class Song(IndexedRedisModel):
 
-		FIELDS = [ \\
+		FIELDS = [ \
 
 			IRField('artist'),
 
@@ -85,16 +86,16 @@ This is the type you should extend to define your model.
 			IRRawField('mp3_data'), # Don't try to encode/decode data
 
 			IRCompressedField('thumbnail', compressMode='gzip'),      # Compress this field in storage using "gzip" compression
-
             IRField('tags', valueType=list),
 
             # "lyrics" will be a utf-8 unicode value on the object, and will be compressed/decompressed to/from storage
+
             IRFieldChain('lyrics', [ IRUnicodeField(encoding='utf-8'), IRCompressedField() ], defaultValue='No lyrics found' ),
 
 		]
 
+		INDEXED_FIELDS = [ \
 
-		INDEXED_FIELDS = [ \\
 					'artist',
 
 					'title',
@@ -109,7 +110,7 @@ This is the type you should extend to define your model.
 **Model Attributes:**
 
 
-*FIELDS* - REQUIRED. A list of string or IRField objects (or their subclasses) which name the fields that can be used for storage. (see "Advanced Fields" section below)
+*FIELDS* - REQUIRED. A list of IRField objects (or their subclasses) which name the fields that can be used for storage. (see "Advanced Fields" section below)
 
 	 Example: [IRField('name'), IRField('description'), IRField('model'), IRFixedPointField('Price', 2), IRField('timestamp', valueType=datetime), IRField('remainingStock', valueType=int)]
 
@@ -124,7 +125,7 @@ This is the type you should extend to define your model.
 	 Example: 'StoreItems'
 
 
-*REDIS_CONNECTION_PARAMS* - OPTIONAL -  provides the arguments to pass into "redis.Redis", to construct a redis object. Here you can define overrides per-model from the default connection params.
+*REDIS*CONNECTION*PARAMS* - OPTIONAL -  provides the arguments to pass into "redis.Redis", to construct a redis object. Here you can define overrides per-model from the default connection params.
 
 Since 5.0.0, define this field ONLY for this model to use an alternate connection than the default. You no longer need to set this on every model.
 
@@ -166,7 +167,16 @@ When using floats, consider using IRFixedPointField, which supports indexing and
 
 floats to work cross-platform. Use a fixed point number as the string type ( like myFixedPoint = '%2.5f' %( 10.12345 ) )
 
+
 IRField supports "valueType", most other field types deal with a specific type and thus don't have such a parameter.
+
+
+**defaultValue**
+
+All fields (except IRClassicField) support a parameter, given when constructing the IRField object, "defaultValue".
+
+For all fields (except IRClassicField), the value of this parameter defaults to "irNull" (see below). For an IRClassicField, the default remains empty string and cannot be changed (to be compatible with plain-string fields pre-5.0.0).
+
 
 **NULL Values**
 
@@ -186,19 +196,14 @@ e.x.
 
 
 	# Can be used directly in the model filtering
+
 	notDangerFive = MyModel.objects.filter(dangerLevel__ne=irNull).filter(dangerLevel__ne=5).all()
 
 	# or in results, through Queryable List. Or direct comparison (not shown)
+
 	myResults = MyModel.objects.filter(something='value').all()
 
 	notDangerFive = myResults.filter(dangerLevel__ne=irNull).filter(dangerLevel__ne=5)
-
-
-**defaultValue**
-
-All fields (except IRClassicField) support a parameter, given when constructing the IRField object, "defaultValue".
-
-For all fields (except IRClassicField), the value of this parameter defaults to "irNull" (see below). For an IRClassicField, the default remains empty string and cannot be changed (to be compatible with plain-string fields pre-5.0.0).
 
 
 **Advanced Types**
@@ -257,7 +262,6 @@ Not indexable - No decoding
 
 Takes the linked model as the "foreignKey" argument.
 
-
 see "Foreign Links" section for more info.
 
 Indexable
@@ -266,7 +270,6 @@ Indexable
 **IRForeignMultiLinkField** - Field that provides reference to a different model ( think "foreign key" in SQL) ). Use this to reference multiple other models from your model. This model links to one or more foreign objects, or irNull.
 
 Takes the linked model as the "foreignKey" argument.
-
 
 see "Foreign Links" section for more info.
 
@@ -280,11 +283,9 @@ Indexable if all chained fields are indexable.
 
 **Chaining Multiple Types**
 
-
 "Chaining" allows you to apply multiple types on a single field. Say, for example, that you have some utf-16 data that you want to be compressed for storage:
 
 Example:
-
 
 	FIELDS = [ \
 
@@ -321,7 +322,7 @@ This increases performance, saves network traffic, and shrinks storage requireme
 
 To do this, set the "hashIndex" attribute of an IRField to True.
 
-	FIELDS = [ \\
+	FIELDS = [ \
 
 	...
 
@@ -342,6 +343,7 @@ To do this, change your IndexedRedisModel accordingly, and then call (for a mode
 	MyModel.objects.compat_convertHashedIndexes()
 
 This will delete both the hashed and non-hashed key-value for any IRField which supports the "hashIndex" property.
+
 If you just call "reindex" and you've changed the property "hashIndex" on any field, you'll be left with lingering key-values.
 
 This function, by default (fetchAll=True) will fetch all records of this paticular model, and operate on them one-by-one. This is more efficient, but if memory constraints are an issue, you can pass fetchAll=False, which will fetch one object, convert indexes, save, then fetch next object. This is slower, but uses less memory.
@@ -388,7 +390,7 @@ All filters are applied on the redis server using hash lookups. All filters of t
 
 **Filter Results / client-side filtering:**
 
-The results from the .all operation is a [QueryableList](https://pypi.python.org/pypi/QueryableList) of all matched objects. The type of each object is the same as the model. You can use a QueryableList same as a normal list, but it can be more powerful than that:
+The results from the .all operation is a `QueryableList <https://pypi.python.org/pypi/QueryableList>`_ of all matched objects. The type of each object is the same as the model. You can use a QueryableList same as a normal list, but it can be more powerful than that:
 
 Once you have fetched the results from Redis, the QueryableList allows you to perform further client-side filtering using any means that QueryableList supports (e.x. gt, contains, in). 
 
@@ -409,6 +411,7 @@ See https://github.com/kata198/QueryableList for more information.
 **Save:**
 
 	obj = SomeModel(field1='value', field2='value')
+
 	obj.save()
 
 **Delete Using Filters:**
@@ -539,7 +542,6 @@ You can chain like:
 
 	#    (Keep in mind to make sure lastUpdated is an IRField(..valueType=int) or float, else you'll be comparing string)
 
-
 	myObjects = MyModel.objects.filter(field1='something').all().filter(csvData__isnull=False, csvData__splitcontains=("," , "someItem")).filterOr(status__in=('pending', 'saved'), lastUpdated__lte(time.time() - 700))
 
 
@@ -664,6 +666,7 @@ For the reload function, there is a parameter, *cascadeObjects*, default True. T
 
 For comparison functions ( hasSameValues, hasUnsavedChanges, getUpdatedFields ) there is a parameter, *cascadeObjects*, default False, which will cause any foreign link objects  ( and any links those objects may contain, etc. ) to be included in the results.
 
+
 For example, consider the following:
 
 	myObj = MyModel.objects.first()
@@ -695,7 +698,7 @@ In the above example, hasSameValues, hasUnsavedChanges, and getUpdatedFields wit
 Sorting
 -------
 
-After fetching results, you can sort them by calling .sort_by on the IRQueryableList.
+After fetching results, you can sort them by calling .sort\_by on the IRQueryableList.
 
 Example:
 
@@ -733,7 +736,9 @@ https://github.com/kata198/indexedredis/tree/master/tests
 
 for various standalone and unit tests which will show various usage patterns
 
+
 Contact Me
 ----------
 
 Please e-mail me with any questions, bugs, or even just to tell me that you're using it! kata198@gmail.com
+
