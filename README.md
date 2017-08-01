@@ -172,22 +172,28 @@ irNull does not equal empty string, or anything except another irNull. This is t
 
 You can check a typed field against the "irNull" variable found in the IndexedRedis or IndexedRedis.fields.
 
-e.x. 
+For Example: 
 
 	from IndexedRedis import irNull
 
 ..
 
 
-*Can be used directly in the model filtering:*
+*Null Values Can be used directly in the model filtering:*
 
 	notDangerFive = MyModel.objects.filter(dangerLevel__ne=irNull).filter(dangerLevel__ne=5).all()
 
-*or in results, through Queryable List. Or direct comparison (not shown):*
+*or in results, through Queryable List, :*
 
 	myResults = MyModel.objects.filter(something='value').all()
 
 	notDangerFive = myResults.filter(dangerLevel__ne=irNull).filter(dangerLevel__ne=5)
+
+*or direct comparison :*
+
+	if someObj.specialFlagX == irNull and formFields.get('waiverForm') != 'checked':
+
+		setError( 'We introduced X on 06/16/15. Customers who signed up prior may not have yet filled out form Y to assign them a category Z.\nIn order to use this feature, you must either fill out form Y in your properties section, call a service represenative, or perform a one-time waiver (checking the box next to the "waiver" signifies your signature of this waiver).
 
 
 **Advanced Types**
