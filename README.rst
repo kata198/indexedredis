@@ -195,11 +195,11 @@ e.x.
 ..
 
 
-	# Can be used directly in the model filtering
+*Can be used directly in the model filtering:*
 
 	notDangerFive = MyModel.objects.filter(dangerLevel__ne=irNull).filter(dangerLevel__ne=5).all()
 
-	# or in results, through Queryable List. Or direct comparison (not shown)
+*or in results, through Queryable List. Or direct comparison (not shown):*
 
 	myResults = MyModel.objects.filter(something='value').all()
 
