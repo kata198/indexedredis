@@ -1,3 +1,8 @@
+6.0.4 - ??? ??? ?? ????
+
+- Update runTests.py from 2.1.0 to 3.0.5. See
+https://github.com/kata198/GoodTests for more details.
+
 6.0.3 - Tue May 23 2017
 
 - Try to make deepcopy, if possible, when setting/fetching values to _origData
